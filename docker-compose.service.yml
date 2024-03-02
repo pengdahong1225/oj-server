@@ -1,0 +1,54 @@
+version: '3'
+
+networks:
+  gvb:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16
+          gateway: 172.19.0.1
+
+services:
+  user-service:
+    container_name: user-service
+    privileged: true
+    build:
+      context: ./user-service # 路径
+      dockerfile: Dockerfile
+    volumes:
+      - /root/server/gvb-server/log:/app/log
+    ports:
+      - "8010"
+    networks:
+      - gvb
+
+  web-service:
+    container_name: web-service
+    privileged: true
+    build:
+      context: ./web-service
+      dockerfile: Dockerfile
+    volumes:
+      - /root/server/gvb-server/log:/app/log
+    ports:
+      - "8000"
+    networks:
+      - gvb
+    depends_on: # 本地服务的依赖，控制启动先后顺序
+      - user-service
+
+  cms-service:
+    container_name: cms-service
+    privileged: true
+    build:
+      context: ./cms-service
+      dockerfile: Dockerfile
+    volumes:
+      - /root/server/gvb-server/log:/app/log
+    ports:
+      - "8020"
+    networks:
+      - gvb
+    depends_on: # 本地服务的依赖，控制启动先后顺序
+      - user-service
+      - web-service
