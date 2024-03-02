@@ -1,0 +1,22 @@
+system:
+  name: web-service
+  port: 8000
+  prefix: "/app/log/web-service"
+
+registry:
+  host: 101.33.196.35
+  port: 8500
+
+redis:
+  ip: 10.0.8.10
+  port: 6379
+
+jwt:
+  key: 'KVAi!%6BRZvT7vwIXZEK3yQsF8FbubkO'
+
+sms:
+  accessKeyId: 'LTAI5tKv69qFhZPXbV6vzFGL'
+  accessKeySecret: 'cVwcLxfehs0dTgbhWgMT42L7j2bOz7'
+  endpoint: 'dysmsapi.aliyuncs.com'
+  signName: 'MessiGVB'
+  templateCode: 'SMS_463639205'
