@@ -1,6 +1,6 @@
 system:
   name: web-service
-  port: 8000
+  port: 9010
   prefix: "../log/web-service"
 
 registry:
