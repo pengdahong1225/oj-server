@@ -15,8 +15,8 @@ RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 COPY . .
 
 RUN go mod tidy
-RUN go build -o cms_service .
+RUN go build -o question_service .
 
 EXPOSE 9010
 
-ENTRYPOINT ["/app/WebService"]
+ENTRYPOINT ["/app/question_service"]

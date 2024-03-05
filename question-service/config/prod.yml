@@ -5,7 +5,7 @@ system:
 
 registry:
   host: 101.33.196.35
-  port: 8500
+  port: 8600
 
 redis:
   ip: 10.0.8.10
