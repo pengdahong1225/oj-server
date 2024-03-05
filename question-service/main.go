@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"question-service/global"
-	"question-service/middlewares"
 	"question-service/routers"
 	"question-service/utils"
 	"time"
@@ -32,10 +30,7 @@ func main() {
 	}
 
 	// gin
-	engine := gin.Default()
-	engine.Use(middlewares.Cors())
-	routers.HealthCheckRouters(engine)
-	routers.QuestionRouters(engine)
+	engine := routers.Router()
 	dsn := fmt.Sprintf(":%d", global.ConfigInstance.System_.Port)
 	_ = engine.Run(dsn)
 }
