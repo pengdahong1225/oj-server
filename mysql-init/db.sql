@@ -48,5 +48,5 @@ create table if not exists user_submit
 
     PRIMARY KEY(id),
     FOREIGN KEY(user_id) REFERENCES user_info(id),
-    FOREIGN KEY(question_id) REFERENCES questions(id)
+    FOREIGN KEY(question_id) REFERENCES question(id)
 )engine = InnoDB charset = utf8mb4;
