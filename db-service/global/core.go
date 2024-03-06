@@ -16,7 +16,7 @@ import (
 var (
 	err               error
 	ConfigInstance    config
-	DB                *gorm.DB
+	DBInstance        *gorm.DB
 	RedisPoolInstance *redis.Pool
 )
 
@@ -86,7 +86,7 @@ func initDB() error {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", ConfigInstance.Sql_.User,
 		ConfigInstance.Sql_.Pwd, ConfigInstance.Sql_.Host, ConfigInstance.Sql_.Port, ConfigInstance.Sql_.Db)
 	var e error
-	DB, e = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	DBInstance, e = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		// SkipDefaultTransaction: true, //全局禁用默认事务
 	})
 	return e
