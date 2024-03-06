@@ -16,6 +16,6 @@ COPY . .
 RUN go mod tidy
 RUN go build -o db_service .
 
-EXPOSE 8020
+EXPOSE 9000
 
 ENTRYPOINT ["/app/db_service"]

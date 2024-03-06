@@ -1,0 +1,89 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+import "google/protobuf/empty.proto";
+import "user.proto";
+import "question.proto";
+
+service DBService{
+  rpc GetUserData(GetUserRequest) returns(GetUserResponse);
+  rpc CreateUserData(CreateUserRequest) returns(CreateUserResponse);
+  rpc UpdateUserData(UpdateUserRequest) returns(google.protobuf.Empty);
+  rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
+  rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
+
+  rpc GetQuestionData(GetQuestionRequest) returns(GetQuestionResponse);
+  rpc CreateQuestionData(CreateQuestionRequest) returns(CreateQuestionResponse);
+  rpc UpdateQuestionData(UpdateQuestionRequest) returns(google.protobuf.Empty);
+  rpc DeleteQuestionData(DeleteQuestionRequest) returns(google.protobuf.Empty);
+  rpc GetQuestionList(GetQuestionListRequest) returns(GetQuestionListResponse);
+}
+
+// 获取用户信息
+message GetUserRequest{
+  int64 phone = 1;
+}
+message GetUserResponse{
+  UserInfo data = 1;
+}
+
+// 创建
+message CreateUserRequest{
+  UserInfo data = 1;
+}
+message CreateUserResponse{
+  int64 id = 1;
+}
+
+// 更新
+message UpdateUserRequest{
+  UserInfo data = 1;
+}
+
+// 删除
+message DeleteUserRequest{
+  int64 id = 1;
+}
+
+// 用户列表分页参数
+message GetUserListRequest{
+  int32 cursor = 1; // next_id
+}
+
+message GetUserListResponse{
+  int32 total = 1;
+  repeated UserInfo data = 2;
+  int32 cursor = 3; // next_id
+}
+
+message GetQuestionRequest{
+  int64 id = 1;
+}
+message GetQuestionResponse{
+  Question data = 1;
+}
+
+message CreateQuestionRequest{
+  Question data = 1;
+}
+message CreateQuestionResponse{
+  int64 id = 1;
+}
+
+message UpdateQuestionRequest{
+  Question data = 1;
+}
+message DeleteQuestionRequest{
+  int64 id = 1;
+}
+
+// 题目列表分页参数
+message GetQuestionListRequest{
+  int32 cursor = 1; // next_id
+}
+
+message GetQuestionListResponse{
+  int32 total = 1;
+  repeated Question data = 2;
+  int32 cursor = 3; // next_id
+}

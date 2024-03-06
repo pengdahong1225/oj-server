@@ -3,3 +3,13 @@ option go_package = "./;pb";
 
 import "google/protobuf/timestamp.proto";
 
+message Question{
+  int64 id = 1;
+  google.protobuf.Timestamp create_at = 2;
+  google.protobuf.Timestamp delete_at = 3;
+
+  string title = 4;
+  string description = 5;
+  int32 level = 6;
+  repeated string tags = 7;
+}

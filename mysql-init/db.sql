@@ -20,7 +20,7 @@ create table if not exists user_info
 )engine = InnoDB charset = utf8mb4;
 
 -- 题目表
-create table if not exists questions
+create table if not exists question
 (
     id BIGINT AUTO_INCREMENT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -28,7 +28,7 @@ create table if not exists questions
     title VARCHAR(64) NOT null comment '题目标题',
     description TEXT NOT null comment '题目描述',
     level tinyint DEFAULT 0 comment '题目难度 0:简单 1:中等 2:困难',
-    tag VARCHAR(64) DEFAULT '' comment '题目标签',
+    tags VARCHAR(64) DEFAULT '' comment '题目标签，用#分隔',
 
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;

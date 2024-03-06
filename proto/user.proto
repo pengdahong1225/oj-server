@@ -2,16 +2,6 @@ syntax = "proto3";
 option go_package = "./;pb";
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
-
-service UserService{
-  rpc GetUserData(GetUserRequest) returns(GetUserResponse);
-  rpc CreateUserData(CreateUserRequest) returns(CreateUserResponse);
-  rpc UpdateUserData(UpdateUserRequest) returns(google.protobuf.Empty);
-  rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
-
-  rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
-}
 
 message UserInfo{
   google.protobuf.Timestamp create_at = 1;
@@ -24,45 +14,4 @@ message UserInfo{
   int32 gender = 7;
   int32 role = 8;
   string head_pic = 9;
-}
-
-// 获取用户信息
-message GetUserRequest{
-  int64 phone = 1;
-}
-message GetUserResponse{
-  UserInfo data = 1;
-}
-
-// 创建
-message CreateUserRequest{
-  UserInfo data = 1;
-}
-message CreateUserResponse{
-  int64 id = 1;
-}
-
-// 更新
-message UpdateUserRequest{
-  UserInfo data = 1;
-}
-
-// 删除
-message DeleteUserRequest{
-  int64 id = 1;
-}
-
-// 用户列表分页参数
-message GetUserListRequest{
-  // 偏移量分页
-  int32 page = 1;
-  int32 pageSize = 2;
-  // 游标分页
-  int32 cursor = 3; // next_id
-}
-
-message GetUserListResponse{
-  int32 total = 1;
-  repeated UserInfo data = 2;
-  int32 cursor = 3; // next_id
 }
