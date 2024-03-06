@@ -1,0 +1,19 @@
+system:
+  name: db-service
+  port: 9000
+  prefix: "/app/log/db-service"
+
+registry:
+  host: 101.33.196.35
+  port: 8600
+
+mysql:
+  host: 10.0.8.10
+  port: 3306
+  db: oj_online_server
+  user: root
+  password: 1225pdhGkl
+
+redis:
+  host: 10.0.8.10
+  port: 6379

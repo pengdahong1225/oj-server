@@ -6,7 +6,7 @@ db_host=127.0.0.1
 db_port=3306
 db_user=root
 db_pwd=1225pdhGkl
-db_name=gvb_server
+db_name=oj_online_server
 
 SOURCE_FILE=db.sql
 

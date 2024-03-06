@@ -5,7 +5,6 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn \
-    GIN_MODE=release \
     LOG_MODE=release
 
 WORKDIR /app
@@ -15,8 +14,8 @@ RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 COPY . .
 
 RUN go mod tidy
-RUN go build -o cms_service .
+RUN go build -o db_service .
 
 EXPOSE 8020
 
-ENTRYPOINT ["/app/cms_service"]
+ENTRYPOINT ["/app/db_service"]

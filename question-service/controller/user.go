@@ -1,10 +1,17 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"question-service/logic"
+)
 
 func UserRegister(ctx *gin.Context) {
-
+	// 表单验证
+	if form, ok := formValidateForRegistry(ctx); ok {
+		logic.RegistryHandler(ctx, form)
+	}
 }
+
 func UserLogin(ctx *gin.Context) {
 
 }

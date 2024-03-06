@@ -1,45 +1,52 @@
-use gvb_server;
+use oj_online_server;
 
 -- 用户信息表
-create table if not exists user_data
+create table if not exists user_info
 (
     id BIGINT AUTO_INCREMENT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
-    phone BIGINT not NULL,
-    pwd VARCHAR(64) NOT null,
+    phone BIGINT not NULL comment '手机号',
+    password VARCHAR(64) NOT null comment '密码',
     nickname VARCHAR(64) DEFAULT '新用户',
     email VARCHAR(64) DEFAULT '',
     gender tinyint DEFAULT 0 comment '0:woman 1:man',
     role tinyint DEFAULT 0 comment '0:user 1:admin',
-    head_pic VARCHAR(256) DEFAULT '' comment '头像url',
+    head_url VARCHAR(256) DEFAULT '' comment '头像url',
 
     PRIMARY KEY(id),
     UNIQUE INDEX idx_phone(phone)
 )engine = InnoDB charset = utf8mb4;
 
--- 文章类别表
-create table if not exists article_cate
-(
-    cate_id BIGINT AUTO_INCREMENT,
-    description VARCHAR(64) NOT null,
-
-    PRIMARY KEY(cate_id)
-)engine = InnoDB charset = utf8mb4;
-
--- 文章表
-create table if not exists article
+-- 题目表
+create table if not exists questions
 (
     id BIGINT AUTO_INCREMENT,
-    title VARCHAR(64) NOT null,
-    state tinyint DEFAULT 1,    -- 0:关 1:开
-    cate_id BIGINT,
-    text TEXT,      -- 正文
-    abstract TEXT,  -- 摘要
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delete_at TIMESTAMP,
+    title VARCHAR(64) NOT null comment '题目标题',
+    description TEXT NOT null comment '题目描述',
+    level tinyint DEFAULT 0 comment '题目难度 0:简单 1:中等 2:困难',
+    tag VARCHAR(64) DEFAULT '' comment '题目标签',
 
-    PRIMARY KEY(id),
-    FOREIGN KEY (cate_id) REFERENCES article_cate(cate_id)
+    PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;
 
+-- 用户提交记录表
+create table if not exists user_submit
+(
+    id BIGINT AUTO_INCREMENT,
+    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delete_at TIMESTAMP,
+
+    user_id BIGINT not null,
+    question_id BIGINT not null,
+    code TEXT NOT null comment '提交代码',
+    result TEXT NOT null comment '运行结果',
+    lang VARCHAR(64) DEFAULT '' comment '语言',
+
+    PRIMARY KEY(id),
+    FOREIGN KEY(user_id) REFERENCES user_info(id),
+    FOREIGN KEY(question_id) REFERENCES questions(id)
+)engine = InnoDB charset = utf8mb4;

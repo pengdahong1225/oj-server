@@ -35,7 +35,7 @@ func AuthLogin() gin.HandlerFunc {
 				return
 			}
 		}
-		// 通过
+		// token通过
 		ctx.Set("claims", claims)
 		ctx.Set("userID", claims.ID)
 		ctx.Next()
