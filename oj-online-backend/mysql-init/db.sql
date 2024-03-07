@@ -15,6 +15,9 @@ create table if not exists user_info
     role tinyint DEFAULT 0 comment '0:user 1:admin',
     head_url VARCHAR(256) DEFAULT '' comment '头像url',
 
+    pass_count BIGINT DEFAULT 0 comment '总题目AC数量',
+    submit_count BIGINT DEFAULT 0 comment '总题目提交数量',
+
     PRIMARY KEY(id),
     UNIQUE INDEX idx_phone(phone)
 )engine = InnoDB charset = utf8mb4;

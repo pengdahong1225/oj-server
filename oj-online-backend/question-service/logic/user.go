@@ -2,11 +2,11 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 	"question-service/global"
 	"question-service/middlewares"
@@ -123,7 +123,7 @@ func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 		return
 	}
 	// 序列化
-	data, _ := json.Marshal(response.Data)
+	data, _ := protojson.Marshal(response.Data)
 	ctx.JSON(http.StatusOK, gin.H{
 		"data":   data,
 		"xtoken": xtoken,
@@ -131,13 +131,35 @@ func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 }
 
 func GetUserDetail(ctx *gin.Context) {
+	phone, _ := strconv.ParseInt(ctx.Query("phone"), 10, 64)
+	dbConn, err := global.NewDBConnection()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "db服务连接失败",
+		})
+	}
+	defer dbConn.Close()
 
+	client := pb.NewDBServiceClient(dbConn)
+	response, err := client.GetUserData(context.Background(), &pb.GetUserRequest{
+		Phone: phone,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	data, _ := protojson.Marshal(response.Data)
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": data,
+	})
 }
 
 func GetRankList(ctx *gin.Context) {
-
+	// 获取排行榜
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
-
+	// 获取提交记录
 }

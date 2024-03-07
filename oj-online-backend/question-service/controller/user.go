@@ -11,6 +11,7 @@ import (
 	"question-service/global"
 	"question-service/logic"
 	"question-service/utils"
+	"regexp"
 )
 
 func UserRegister(ctx *gin.Context) {
@@ -28,7 +29,21 @@ func UserLogin(ctx *gin.Context) {
 }
 
 func GetUserDetail(ctx *gin.Context) {
-	logic.GetUserDetail(ctx)
+	// 查询参数
+	if phone, ok := ctx.GetQuery("phone"); !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "参数错误",
+		})
+		ctx.Abort()
+		return
+	} else {
+		ok, _ := regexp.MatchString(`^1([38][0-9]|14[579]|5[^4]|16[6]|7[1-35-8]|9[189])\d{8}$`, phone)
+		if !ok {
+			ctx.Abort()
+			return
+		}
+		logic.GetUserDetail(ctx)
+	}
 }
 
 func GetRankList(ctx *gin.Context) {
