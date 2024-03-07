@@ -7,9 +7,9 @@ import (
 	pb "db-service/proto"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/mervick/aes-everywhere/go/aes256"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log"
 )
 
 var publicKey = "LeoMessi"
@@ -25,7 +25,7 @@ func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.Ge
 		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query user failed")
 	}
 	// 密码反解
@@ -61,7 +61,7 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 
 	result = global.DBInstance.Create(&user)
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "create user failed")
 	}
 	return &pb.CreateUserResponse{Id: user.ID}, nil
@@ -74,7 +74,7 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query user failed")
 	}
 	// 密码反解
@@ -90,7 +90,7 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 
 	result = global.DBInstance.Save(&user) // gorm在事务执行(可重复读)，innodb自动加写锁
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "update user failed")
 	}
 	return &empty.Empty{}, nil
@@ -103,14 +103,14 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query user failed")
 	}
 
 	// 软删除
 	result = global.DBInstance.Delete(&user)
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "delete user failed")
 	}
 	// 永久删除
@@ -129,7 +129,7 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 	var count int64
 	result := global.DBInstance.Model(&models.UserInfo{}).Count(&count)
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query count failed")
 	}
 	rsp.Total = int32(count)
@@ -138,7 +138,7 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 	}
 	result = global.DBInstance.Where("id >= ", request.Cursor).Order("id").Limit(pageSize).Find(&userlist)
 	if result.Error != nil {
-		log.Println(result.Error.Error())
+		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query userlist failed")
 	}
 	for _, user := range userlist {

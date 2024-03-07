@@ -6,12 +6,12 @@ type config struct {
 	Registry_ registryConfig `mapstructure:"registry"`
 	Sql_      mysqlConfig    `mapstructure:"mysql"`
 	Redis_    redisConfig    `mapstructure:"redis"`
+	Log_      logConfig      `mapstructure:"log"`
 }
 
 type systemConfig struct {
-	Name   string `mapstructure:"name"`
-	Port   int    `mapstructure:"port"`
-	Prefix string `mapstructure:"prefix"`
+	Name string `mapstructure:"name"`
+	Port int    `mapstructure:"port"`
 }
 
 type registryConfig struct {
@@ -30,4 +30,9 @@ type mysqlConfig struct {
 type redisConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
+}
+
+type logConfig struct {
+	Path  string `mapstructure:"path"`
+	Level string `mapstructure:"level"`
 }

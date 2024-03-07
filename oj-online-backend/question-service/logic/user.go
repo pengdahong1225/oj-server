@@ -6,7 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"question-service/global"
 	"question-service/middlewares"
@@ -27,7 +27,7 @@ func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 	redisConn := global.RedisPoolInstance.Get()
 	defer redisConn.Close()
 	if c, err := redis.String(redisConn.Do("Get", form.Phone)); err != nil {
-		log.Println(err.Error())
+		logrus.Debugln(err.Error())
 		ctx.JSON(http.StatusNoContent, gin.H{
 			"msg": "验证码不存在",
 		})

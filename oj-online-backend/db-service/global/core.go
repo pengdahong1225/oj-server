@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
-	"time"
 )
 
 // 初始化全局DB连接
@@ -37,19 +36,6 @@ func init() {
 	if err = initRedis(); err != nil {
 		panic(err)
 	}
-}
-
-// 初始化日志信息
-func initLog() error {
-	var path = ConfigInstance.System_.Prefix + ".log." + time.Now().Format("2006-01-02")
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	log.SetOutput(file)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	return nil
 }
 
 func loadConfig() error {

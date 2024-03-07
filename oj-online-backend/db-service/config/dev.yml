@@ -1,7 +1,6 @@
 system:
   name: db-service
   port: 9000
-  prefix: "../log/db-service"
 
 registry:
   host: 127.0.0.1
@@ -17,3 +16,7 @@ mysql:
 redis:
   host: 127.0.0.1
   port: 6379
+
+log:
+  path: "../log"
+  level: debug

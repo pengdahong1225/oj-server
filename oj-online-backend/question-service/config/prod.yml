@@ -1,7 +1,6 @@
 system:
-  name: web-service
-  port: 8000
-  prefix: "/app/log/web-service"
+  name: question-service
+  port: 9010
 
 registry:
   host: 101.33.196.35
@@ -20,3 +19,7 @@ sms:
   endpoint: 'dysmsapi.aliyuncs.com'
   signName: 'MessiGVB'
   templateCode: 'SMS_463639205'
+
+log:
+  path: "/app/log"
+  level: info

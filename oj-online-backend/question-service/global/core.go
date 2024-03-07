@@ -7,11 +7,9 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
-	"time"
 )
 
 var (
-	prefix            = "/app/log/web-service"
 	ConfigInstance    config
 	RedisPoolInstance *redis.Pool
 )
@@ -58,19 +56,6 @@ func loadConfig() error {
 	})
 	// 监听配置文件
 	viper.WatchConfig()
-	return nil
-}
-
-// 初始化日志信息
-func initLog() error {
-	var path = ConfigInstance.System_.Prefix + ".log." + time.Now().Format("2006-01-02")
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	log.SetOutput(file)
-	log.SetFlags(log.LstdFlags | log.Llongfile)
 	return nil
 }
 

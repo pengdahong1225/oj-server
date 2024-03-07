@@ -7,12 +7,12 @@ type config struct {
 	JWTConfig_ jwtConfig      `mapstructure:"jwt"`
 	SMS_       sms            `mapstructure:"sms"`
 	Registry_  registryConfig `mapstructure:"registry"`
+	Log_       logConfig      `mapstructure:"log"`
 }
 
 type systemConfig struct {
-	Name   string `mapstructure:"name"`
-	Port   int    `mapstructure:"port"`
-	Prefix string `mapstructure:"prefix"`
+	Name string `mapstructure:"name"`
+	Port int    `mapstructure:"port"`
 }
 
 type redisConfig struct {
@@ -35,4 +35,8 @@ type sms struct {
 type registryConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
+}
+type logConfig struct {
+	Path  string `mapstructure:"path"`
+	Level string `mapstructure:"level"`
 }

@@ -6,7 +6,7 @@ import (
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"question-service/global"
 	"question-service/logic"
@@ -72,13 +72,13 @@ func SendCmsCode(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errRsp)
 		return
 	}
-	log.Println(tea.StringValue(response.Body.RequestId))
+	logrus.Debugln(tea.StringValue(response.Body.RequestId))
 
 	// 缓存验证码
 	redisConn := global.RedisPoolInstance.Get()
 	defer redisConn.Close()
 	if _, err := redisConn.Do("Set", phone, c, "ex", expire); err != nil {
-		log.Println(err)
+		logrus.Errorln(err)
 		ctx.JSON(http.StatusInternalServerError, errRsp)
 		return
 	}
