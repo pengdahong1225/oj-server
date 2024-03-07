@@ -28,15 +28,15 @@ func UserLogin(ctx *gin.Context) {
 }
 
 func GetUserDetail(ctx *gin.Context) {
-
+	logic.GetUserDetail(ctx)
 }
 
 func GetRankList(ctx *gin.Context) {
-
+	logic.GetRankList(ctx)
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
-
+	logic.GetSubmitRecord(ctx)
 }
 
 func SendCmsCode(ctx *gin.Context) {

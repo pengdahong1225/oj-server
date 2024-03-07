@@ -129,3 +129,15 @@ func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 		"xtoken": xtoken,
 	})
 }
+
+func GetUserDetail(ctx *gin.Context) {
+
+}
+
+func GetRankList(ctx *gin.Context) {
+
+}
+
+func GetSubmitRecord(ctx *gin.Context) {
+
+}
