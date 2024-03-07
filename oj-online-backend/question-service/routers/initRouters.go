@@ -46,3 +46,10 @@ func QuestionRouters(engine *gin.Engine) {
 		userRouter.GET("/submitRecord", middlewares.AuthLogin(), controller.GetSubmitRecord)
 	}
 }
+
+// CmsRouters CMS服务路由
+func CmsRouters(engine *gin.Engine) {
+	cmsRouter := engine.Group("/cms")
+	// 需要管理员权限
+	cmsRouter.Use(middlewares.AuthLogin()).Use(middlewares.Admin())
+}

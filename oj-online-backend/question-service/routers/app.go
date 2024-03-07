@@ -10,5 +10,6 @@ func Router() *gin.Engine {
 	r.Use(middlewares.Cors())
 	HealthCheckRouters(r)
 	QuestionRouters(r)
+	CmsRouters(r)
 	return r
 }

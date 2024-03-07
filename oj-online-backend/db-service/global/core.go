@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gomodule/redigo/redis"
+	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -36,6 +37,7 @@ func init() {
 	if err = initRedis(); err != nil {
 		panic(err)
 	}
+	AntsPoolInstance, _ = ants.NewPool(ants.DefaultAntsPoolSize, ants.WithPanicHandler(AntsPanicHandler))
 }
 
 func loadConfig() error {

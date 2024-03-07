@@ -10,12 +10,34 @@ import (
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"net"
+	"sync"
 )
 
 type Server struct {
 }
 
 func (receiver Server) Start() {
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	err := global.AntsPoolInstance.Submit(func() {
+		defer wg.Done()
+		// 启动后台服务：排行榜维护，加载题目列表到redis
+		handler.StartDaemon()
+	})
+	if err != nil {
+		panic(err)
+	}
+	err = global.AntsPoolInstance.Submit(func() {
+		defer wg.Done()
+		startGRPCServer()
+	})
+	if err != nil {
+		panic(err)
+	}
+	wg.Wait()
+}
+
+func startGRPCServer() {
 	// 获取ip地址
 	ip, err := utils.GetOutboundIP()
 	if err != nil {
