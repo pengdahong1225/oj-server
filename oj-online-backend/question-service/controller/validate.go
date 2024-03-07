@@ -24,6 +24,23 @@ func formValidateForRegistry(ctx *gin.Context) (*models.RegistryForm, bool) {
 	return processOnValidate(ctx, registryForm)
 }
 
+// 表单验证
+func formValidateForLogin(ctx *gin.Context) (*models.LoginFrom, bool) {
+	// 手机号 -- 修改gin框架中的Validator引擎属性，实现自定制
+	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		// 注册自定义字段级别校验方法
+		if err := validate.RegisterValidation("phone", validatePhone); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"msg": err.Error(),
+			})
+			return nil, false
+		}
+	}
+	// 密码
+	passwordLoginForm := models.LoginFrom{}
+	return processOnValidate(ctx, passwordLoginForm)
+}
+
 // 自定义验证函数：手机号格式校验 使用正则表达式
 func validatePhone(fl validator.FieldLevel) bool {
 	phone := fl.Field().String()

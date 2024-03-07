@@ -13,5 +13,5 @@ message UserInfo{
   string email = 6;
   int32 gender = 7;
   int32 role = 8;
-  string head_pic = 9;
+  string head_url = 9;
 }

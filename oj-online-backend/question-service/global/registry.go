@@ -43,17 +43,17 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 	return receiver.client.Agent().ServiceRegister(srv)
 }
 
-// NewUserConnection 用户服务连接
-func NewUserConnection() (*grpc.ClientConn, error) {
+// NewDBConnection db服务连接
+func NewDBConnection() (*grpc.ClientConn, error) {
 	registry, err := NewRegistry()
 	if err != nil {
 		return nil, err
 	}
-	services, _, err := registry.client.Health().Service("user-service", "user-service", true, nil)
+	services, _, err := registry.client.Health().Service("db-service", "db-service", true, nil)
 	if err != nil {
 		return nil, err
 	}
 	// 这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
 	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
-	return grpc.Dial(dsn, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	return grpc.Dial(dsn, grpc.WithTransportCredentials(insecure.NewCredentials())) // 不安全连接
 }
