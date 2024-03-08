@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
@@ -158,6 +159,35 @@ func GetUserDetail(ctx *gin.Context) {
 
 func GetRankList(ctx *gin.Context) {
 	// 获取排行榜
+	conn := global.RedisPoolInstance.Get()
+	defer conn.Close()
+
+	reply, err := redis.Strings(conn.Do("zrange", "rank", 0, -1))
+	if err != nil {
+		logrus.Debugln(err.Error())
+		ctx.JSON(http.StatusNoContent, gin.H{
+			"msg": "排行榜获取失败",
+		})
+		return
+	}
+
+	ranklist := make([]models.RankList, 20)
+	for i := 0; i < len(reply); i += 2 {
+		user := models.UserInfo{}
+		json.Unmarshal([]byte(reply[i]), &user)
+		item := models.RankList{
+			Phone:     user.Phone,
+			NickName:  user.NickName,
+			PassCount: user.PassCount,
+		}
+		ranklist = append(ranklist, item)
+	}
+
+	// 序列化
+	data, _ := json.Marshal(ranklist)
+	ctx.JSON(http.StatusOK, gin.H{
+		"rankList": data,
+	})
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
