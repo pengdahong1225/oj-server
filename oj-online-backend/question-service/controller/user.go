@@ -51,6 +51,13 @@ func GetRankList(ctx *gin.Context) {
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
+	if _, ok := ctx.GetQuery("userId"); !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "参数错误",
+		})
+		ctx.Abort()
+		return
+	}
 	logic.GetSubmitRecord(ctx)
 }
 

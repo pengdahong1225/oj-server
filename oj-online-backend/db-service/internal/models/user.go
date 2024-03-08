@@ -20,3 +20,18 @@ type UserInfo struct {
 func (UserInfo) TableName() string {
 	return "user_info"
 }
+
+type UserSubMit struct {
+	ID         int64     `gorm:"<-:false;primary_key;autoIncrement;column:id" json:"id"`
+	CreateAt   time.Time `gorm:"<-:false;column:create_at" json:"createAt"`
+	DeletedAt  time.Time `gorm:"<-:false;column:delete_at" json:"deleteAt"`
+	UserID     int64     `gorm:"column:user_id" json:"userId"`
+	QuestionID int64     `gorm:"column:question_id" json:"questionId"`
+	Code       string    `gorm:"column:code" json:"code"`
+	Result     string    `gorm:"column:result" json:"result"`
+	Lang       string    `gorm:"column:lang" json:"lang"`
+}
+
+func (UserSubMit) TableName() string {
+	return "user_submit"
+}

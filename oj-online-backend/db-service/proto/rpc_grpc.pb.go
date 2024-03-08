@@ -20,16 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	DBService_GetUserData_FullMethodName        = "/DBService/GetUserData"
-	DBService_CreateUserData_FullMethodName     = "/DBService/CreateUserData"
-	DBService_UpdateUserData_FullMethodName     = "/DBService/UpdateUserData"
-	DBService_DeleteUserData_FullMethodName     = "/DBService/DeleteUserData"
-	DBService_GetUserList_FullMethodName        = "/DBService/GetUserList"
-	DBService_GetQuestionData_FullMethodName    = "/DBService/GetQuestionData"
-	DBService_CreateQuestionData_FullMethodName = "/DBService/CreateQuestionData"
-	DBService_UpdateQuestionData_FullMethodName = "/DBService/UpdateQuestionData"
-	DBService_DeleteQuestionData_FullMethodName = "/DBService/DeleteQuestionData"
-	DBService_GetQuestionList_FullMethodName    = "/DBService/GetQuestionList"
+	DBService_GetUserData_FullMethodName         = "/DBService/GetUserData"
+	DBService_CreateUserData_FullMethodName      = "/DBService/CreateUserData"
+	DBService_UpdateUserData_FullMethodName      = "/DBService/UpdateUserData"
+	DBService_DeleteUserData_FullMethodName      = "/DBService/DeleteUserData"
+	DBService_GetUserList_FullMethodName         = "/DBService/GetUserList"
+	DBService_GetQuestionData_FullMethodName     = "/DBService/GetQuestionData"
+	DBService_CreateQuestionData_FullMethodName  = "/DBService/CreateQuestionData"
+	DBService_UpdateQuestionData_FullMethodName  = "/DBService/UpdateQuestionData"
+	DBService_DeleteQuestionData_FullMethodName  = "/DBService/DeleteQuestionData"
+	DBService_GetQuestionList_FullMethodName     = "/DBService/GetQuestionList"
+	DBService_GetUserSubmitRecord_FullMethodName = "/DBService/GetUserSubmitRecord"
 )
 
 // DBServiceClient is the client API for DBService service.
@@ -46,6 +47,7 @@ type DBServiceClient interface {
 	UpdateQuestionData(ctx context.Context, in *UpdateQuestionRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteQuestionData(ctx context.Context, in *DeleteQuestionRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetQuestionList(ctx context.Context, in *GetQuestionListRequest, opts ...grpc.CallOption) (*GetQuestionListResponse, error)
+	GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error)
 }
 
 type dBServiceClient struct {
@@ -146,6 +148,15 @@ func (c *dBServiceClient) GetQuestionList(ctx context.Context, in *GetQuestionLi
 	return out, nil
 }
 
+func (c *dBServiceClient) GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error) {
+	out := new(GetUserSubmitRecordResponse)
+	err := c.cc.Invoke(ctx, DBService_GetUserSubmitRecord_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DBServiceServer is the server API for DBService service.
 // All implementations must embed UnimplementedDBServiceServer
 // for forward compatibility
@@ -160,6 +171,7 @@ type DBServiceServer interface {
 	UpdateQuestionData(context.Context, *UpdateQuestionRequest) (*empty.Empty, error)
 	DeleteQuestionData(context.Context, *DeleteQuestionRequest) (*empty.Empty, error)
 	GetQuestionList(context.Context, *GetQuestionListRequest) (*GetQuestionListResponse, error)
+	GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error)
 	mustEmbedUnimplementedDBServiceServer()
 }
 
@@ -196,6 +208,9 @@ func (UnimplementedDBServiceServer) DeleteQuestionData(context.Context, *DeleteQ
 }
 func (UnimplementedDBServiceServer) GetQuestionList(context.Context, *GetQuestionListRequest) (*GetQuestionListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQuestionList not implemented")
+}
+func (UnimplementedDBServiceServer) GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubmitRecord not implemented")
 }
 func (UnimplementedDBServiceServer) mustEmbedUnimplementedDBServiceServer() {}
 
@@ -390,6 +405,24 @@ func _DBService_GetQuestionList_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DBService_GetUserSubmitRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserSubmitRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBServiceServer).GetUserSubmitRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBService_GetUserSubmitRecord_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBServiceServer).GetUserSubmitRecord(ctx, req.(*GetUserSubmitRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DBService_ServiceDesc is the grpc.ServiceDesc for DBService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -436,6 +469,10 @@ var DBService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetQuestionList",
 			Handler:    _DBService_GetQuestionList_Handler,
+		},
+		{
+			MethodName: "GetUserSubmitRecord",
+			Handler:    _DBService_GetUserSubmitRecord_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -191,5 +191,30 @@ func GetRankList(ctx *gin.Context) {
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
+	userId, _ := strconv.ParseInt(ctx.Query("userId"), 10, 64)
 	// 获取提交记录
+	dbConn, err := global.NewDBConnection()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "db服务连接失败",
+		})
+	}
+	defer dbConn.Close()
+	client := pb.NewDBServiceClient(dbConn)
+
+	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{
+		UserId: userId,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// 序列化
+	data, _ := json.Marshal(response.Data)
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": data,
+	})
 }

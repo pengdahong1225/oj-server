@@ -2,6 +2,7 @@ package internal
 
 import (
 	"db-service/global"
+	"db-service/internal/daemon"
 	"db-service/internal/handler"
 	pb "db-service/proto"
 	"db-service/utils"
@@ -21,7 +22,7 @@ func (receiver Server) Start() {
 	wg.Add(2)
 	err := global.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
-		handler.StartDaemon()
+		daemon.StartDaemon()
 	})
 	if err != nil {
 		panic(err)

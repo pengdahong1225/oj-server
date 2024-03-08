@@ -17,6 +17,8 @@ service DBService{
   rpc UpdateQuestionData(UpdateQuestionRequest) returns(google.protobuf.Empty);
   rpc DeleteQuestionData(DeleteQuestionRequest) returns(google.protobuf.Empty);
   rpc GetQuestionList(GetQuestionListRequest) returns(GetQuestionListResponse);
+
+  rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
 }
 
 // 获取用户信息
@@ -86,4 +88,11 @@ message GetQuestionListResponse{
   int32 total = 1;
   repeated Question data = 2;
   int32 cursor = 3; // next_id
+}
+
+message GetUserSubmitRecordRequest{
+  int64 user_id = 1;
+}
+message GetUserSubmitRecordResponse{
+  repeated SubmitRecord data = 1;
 }
