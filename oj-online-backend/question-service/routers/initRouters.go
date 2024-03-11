@@ -18,7 +18,7 @@ func HealthCheckRouters(engine *gin.Engine) {
 
 // QuestionRouters 题目服务路由
 func QuestionRouters(engine *gin.Engine) {
-	// 公共方法
+	// 公共api
 	{
 		engine.GET("/questionSet", controller.QuestionSet)
 		engine.POST("/sendCms", controller.SendCmsCode)
@@ -26,7 +26,7 @@ func QuestionRouters(engine *gin.Engine) {
 		engine.GET("/rankList", middlewares.AuthLogin(), controller.GetRankList)
 	}
 
-	// 题目
+	// 题目api
 	questionRouter := engine.Group("/questions")
 	{
 		questionRouter.GET("/detail", controller.QuestionDetail)
@@ -36,7 +36,7 @@ func QuestionRouters(engine *gin.Engine) {
 		questionRouter.POST("/submit", middlewares.AuthLogin(), controller.QuestionSubmit)
 	}
 
-	// 用户
+	// 用户api
 	userRouter := engine.Group("/user")
 	{
 		userRouter.POST("/register", controller.UserRegister)

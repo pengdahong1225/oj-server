@@ -1,54 +1,54 @@
 version: '3'
 
 networks:
-  gvb:
+  oj:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.19.0.0/16
-          gateway: 172.19.0.1
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
 
 services:
-  user-service:
-    container_name: user-service
+  db-service:
+    container_name: db-service
     privileged: true
     build:
-      context: ./user-service # 路径
+      context: ./db-service # 路径
       dockerfile: Dockerfile
     volumes:
-      - /root/server/gvb-server/log:/app/log
+      - /root/server/oj-online-server/oj-online-backend/log:/app/log
     ports:
-      - "8010"
+      - "9000"
     networks:
-      - gvb
+      - oj
 
-  web-service:
-    container_name: web-service
+  question-service:
+    container_name: question-service
     privileged: true
     build:
-      context: ./web-service
+      context: ./question-service
       dockerfile: Dockerfile
     volumes:
-      - /root/server/gvb-server/log:/app/log
+      - /root/server/oj-online-server/oj-online-backend/log:/app/log
     ports:
-      - "8000"
+      - "9010"
     networks:
-      - gvb
+      - oj
     depends_on: # 本地服务的依赖，控制启动先后顺序
-      - user-service
+      - db-service
 
-  cms-service:
-    container_name: cms-service
+  judge-service:
+    container_name: judge-service
     privileged: true
     build:
-      context: ./cms-service
+      context: ./judge-service
       dockerfile: Dockerfile
     volumes:
-      - /root/server/gvb-server/log:/app/log
+      - /root/server/oj-online-server/oj-online-backend/log:/app/log
     ports:
-      - "8020"
+      - "9020"
     networks:
-      - gvb
+      - oj
     depends_on: # 本地服务的依赖，控制启动先后顺序
-      - user-service
-      - web-service
+      - db-service
+      - question-service

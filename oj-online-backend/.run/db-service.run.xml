@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="db-service" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="oj-online-backend" />
+    <working_directory value="$PROJECT_DIR$/db-service" />
+    <kind value="DIRECTORY" />
+    <directory value="$PROJECT_DIR$/db-service" />
+    <filePath value="$PROJECT_DIR$" />
+    <output_directory value="$PROJECT_DIR$/db-service/bin" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>

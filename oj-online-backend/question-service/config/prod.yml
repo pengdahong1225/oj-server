@@ -11,7 +11,7 @@ redis:
   port: 6379
 
 jwt:
-  key: 'KVAi!%6BRZvT7vwIXZEK3yQsF8FbubkO'
+  key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'
 
 sms:
   accessKeyId: 'LTAI5tKv69qFhZPXbV6vzFGL'
