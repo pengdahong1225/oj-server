@@ -131,8 +131,7 @@ func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 	})
 }
 
-func GetUserDetail(ctx *gin.Context) {
-	phone, _ := strconv.ParseInt(ctx.Query("phone"), 10, 64)
+func GetUserDetail(ctx *gin.Context, phone int64) {
 	dbConn, err := global.NewDBConnection()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -190,8 +189,7 @@ func GetRankList(ctx *gin.Context) {
 	})
 }
 
-func GetSubmitRecord(ctx *gin.Context) {
-	userId, _ := strconv.ParseInt(ctx.Query("userId"), 10, 64)
+func GetSubmitRecord(ctx *gin.Context, userId int64) {
 	// 获取提交记录
 	dbConn, err := global.NewDBConnection()
 	if err != nil {

@@ -99,12 +99,12 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
 	var user models.UserInfo
 	result := global.DBInstance.Where("phone=?", request.Id).Find(&user)
-	if result.RowsAffected == 0 {
-		return nil, status.Errorf(codes.NotFound, "user not found")
-	}
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query user failed")
+	}
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 
 	// 软删除

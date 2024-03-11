@@ -12,6 +12,7 @@ import (
 	"question-service/logic"
 	"question-service/utils"
 	"regexp"
+	"strconv"
 )
 
 func UserRegister(ctx *gin.Context) {
@@ -42,7 +43,8 @@ func GetUserDetail(ctx *gin.Context) {
 			ctx.Abort()
 			return
 		}
-		logic.GetUserDetail(ctx)
+		phoneInt, _ := strconv.ParseInt(phone, 10, 64)
+		logic.GetUserDetail(ctx, phoneInt)
 	}
 }
 
@@ -51,14 +53,16 @@ func GetRankList(ctx *gin.Context) {
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
-	if _, ok := ctx.GetQuery("userId"); !ok {
+	if id, ok := ctx.GetQuery("userId"); !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"msg": "参数错误",
 		})
 		ctx.Abort()
 		return
+	} else {
+		userId, _ := strconv.ParseInt(id, 10, 64)
+		logic.GetSubmitRecord(ctx, userId)
 	}
-	logic.GetSubmitRecord(ctx)
 }
 
 func SendCmsCode(ctx *gin.Context) {

@@ -6,6 +6,7 @@
     <directory value="$PROJECT_DIR$/question-service" />
     <filePath value="$PROJECT_DIR$" />
     <output_directory value="$PROJECT_DIR$/question-service/bin" />
+    <option name="run" value="false" />
     <method v="2" />
   </configuration>
 </component>
