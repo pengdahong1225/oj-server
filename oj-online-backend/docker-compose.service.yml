@@ -1,7 +1,7 @@
 version: '3'
 
 networks:
-  oj:
+  net:
     driver: bridge
     ipam:
       config:
@@ -20,7 +20,7 @@ services:
     ports:
       - "9000"
     networks:
-      - oj
+      - net
 
   question-service:
     container_name: question-service
@@ -33,7 +33,7 @@ services:
     ports:
       - "9010"
     networks:
-      - oj
+      - net
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - db-service
 
@@ -48,7 +48,7 @@ services:
     ports:
       - "9020"
     networks:
-      - oj
+      - net
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - db-service
       - question-service
