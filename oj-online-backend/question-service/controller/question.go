@@ -36,7 +36,13 @@ func QuestionDetail(ctx *gin.Context) {
 
 func QuestionQuery(ctx *gin.Context) {
 	// 通过题目名字查询相关题目
-
+	if name, ok := ctx.GetQuery("name"); !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "参数错误",
+		})
+	} else {
+		logic.QuestionQuery(ctx, name)
+	}
 }
 
 func QuestionRun(ctx *gin.Context) {

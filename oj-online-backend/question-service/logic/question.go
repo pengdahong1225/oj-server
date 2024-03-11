@@ -76,3 +76,43 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 		"data": data,
 	})
 }
+
+func QuestionQuery(ctx *gin.Context, name string) {
+	dbConn, err := global.NewDBConnection()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "db服务连接失败",
+		})
+	}
+	defer dbConn.Close()
+
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.QueryQuestionWithNameRequest{Name: name}
+
+	response, err := client.QueryQuestionWithName(context.Background(), request)
+	if err != nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if response == nil {
+		ctx.JSON(http.StatusNotFound, gin.H{})
+		return
+	}
+	var questionList []models.Question
+	for _, v := range response.Data {
+		questionList = append(questionList, models.Question{
+			Id:          v.Id,
+			Title:       v.Title,
+			Description: v.Description,
+			Tags:        v.Tags,
+			Level:       v.Level,
+			CreateAt:    v.CreateAt,
+		})
+	}
+	data, _ := json.Marshal(questionList)
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": data,
+	})
+}

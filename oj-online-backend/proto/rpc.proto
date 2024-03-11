@@ -17,6 +17,7 @@ service DBService{
   rpc UpdateQuestionData(UpdateQuestionRequest) returns(google.protobuf.Empty);
   rpc DeleteQuestionData(DeleteQuestionRequest) returns(google.protobuf.Empty);
   rpc GetQuestionList(GetQuestionListRequest) returns(GetQuestionListResponse);
+  rpc QueryQuestionWithName(QueryQuestionWithNameRequest) returns(QueryQuestionWithNameResponse);
 
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
 }
@@ -95,4 +96,11 @@ message GetUserSubmitRecordRequest{
 }
 message GetUserSubmitRecordResponse{
   repeated SubmitRecord data = 1;
+}
+
+message QueryQuestionWithNameRequest{
+  string name = 1;
+}
+message QueryQuestionWithNameResponse{
+  repeated Question data = 1;
 }

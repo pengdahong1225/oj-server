@@ -139,3 +139,32 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 	rsp.Cursor = request.Cursor + int32(result.RowsAffected) + 1
 	return rsp, nil
 }
+
+func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, request *pb.QueryQuestionWithNameRequest) (*pb.QueryQuestionWithNameResponse, error) {
+	var questionList []models.Question
+	// select * from question
+	// where title like '%name%';
+	names := "%" + request.Name + "%"
+	result := global.DBInstance.Where("name LINK ?", names).Find(&questionList)
+	if result.Error != nil {
+		logrus.Debugln(result.Error.Error())
+		return nil, status.Errorf(codes.Internal, "query question list failed")
+	}
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "method QueryQuestionWithName not found")
+	}
+
+	var data []*pb.Question
+	for _, question := range questionList {
+		data = append(data, &pb.Question{
+			Id:          question.ID,
+			Title:       question.Title,
+			Description: question.Description,
+			Level:       question.Level,
+			Tags:        question.Tags,
+		})
+	}
+	return &pb.QueryQuestionWithNameResponse{
+		Data: data,
+	}, nil
+}
