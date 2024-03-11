@@ -5,6 +5,7 @@ import (
 	"db-service/global"
 	"db-service/internal/models"
 	pb "db-service/proto"
+	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/mervick/aes-everywhere/go/aes256"
 	"github.com/sirupsen/logrus"
@@ -58,6 +59,9 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 	user.Gender = request.Data.Gender
 	user.Role = request.Data.Role
 	user.HeadUrl = request.Data.HeadUrl
+
+	l, _ := json.Marshal(user)
+	logrus.Infof("create user:%s", l)
 
 	result = global.DBInstance.Create(&user)
 	if result.Error != nil {

@@ -24,18 +24,21 @@ var (
 )
 
 func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
+	var cms_phone = "18048155008"
 	// 验证码校验
 	redisConn := global.RedisPoolInstance.Get()
 	defer redisConn.Close()
-	if c, err := redis.String(redisConn.Do("Get", form.Phone)); err != nil {
+	if c, err := redis.String(redisConn.Do("Get", cms_phone)); err != nil {
 		logrus.Debugln(err.Error())
 		ctx.JSON(http.StatusNoContent, gin.H{
 			"msg": "验证码不存在",
 		})
+		return
 	} else if c != form.SmsCode {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"msg": "验证码错误",
 		})
+		return
 	}
 
 	// 注册
@@ -44,6 +47,7 @@ func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
 		})
+		return
 	}
 	defer dbConn.Close()
 

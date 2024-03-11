@@ -11,7 +11,7 @@ import (
 
 func formValidateForRegistry(ctx *gin.Context) (*models.RegistryForm, bool) {
 	// 手机号 -- 修改gin框架中的Validator引擎属性，实现自定制
-	if validate, ok := binding.Validator.Engine().(validator.Validate); ok {
+	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		if err := validate.RegisterValidation("phone", validatePhone); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"msg": err.Error(),
