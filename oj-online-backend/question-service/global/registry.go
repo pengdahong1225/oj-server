@@ -49,6 +49,7 @@ func NewDBConnection() (*grpc.ClientConn, error) {
 	if err != nil {
 		return nil, err
 	}
+	// registry.client.Health().Service返回的是对应服务的节点列表
 	services, _, err := registry.client.Health().Service("db-service", "db-service", true, nil)
 	if err != nil {
 		return nil, err

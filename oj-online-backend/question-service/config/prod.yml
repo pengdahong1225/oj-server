@@ -10,6 +10,15 @@ redis:
   ip: 10.0.8.10
   port: 6379
 
+rabbitmq:
+  host: 10.0.8.10
+  port: 5672
+  user: oj
+  password: 1225
+  vhost: '/oj'
+  exchange: 'amq.direct'
+  queue: 'question'
+
 jwt:
   key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'
 

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"question-service/logic"
+	"question-service/models"
 	"strconv"
 )
 
@@ -46,9 +47,15 @@ func QuestionQuery(ctx *gin.Context) {
 }
 
 func QuestionRun(ctx *gin.Context) {
-
+	// 运行代码
+	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
+		logic.QuestionRun(ctx, form)
+	}
 }
 
 func QuestionSubmit(ctx *gin.Context) {
-
+	// 提交代码
+	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
+		logic.QuestionSubmit(ctx, form)
+	}
 }

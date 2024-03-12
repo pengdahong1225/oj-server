@@ -10,6 +10,13 @@ redis:
   ip: 127.0.0.1
   port: 6379
 
+rabbitmq:
+  host: 101.33.196.35
+  port: 5672
+  user: oj
+  password: 1225
+  vhost: '/oj'
+
 jwt:
   key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'
 

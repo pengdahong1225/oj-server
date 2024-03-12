@@ -5,6 +5,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/gomodule/redigo/redis"
 	"github.com/spf13/viper"
+	"github.com/streadway/amqp"
 	"log"
 	"os"
 )
@@ -12,6 +13,7 @@ import (
 var (
 	ConfigInstance    config
 	RedisPoolInstance *redis.Pool
+	MqConnection      *amqp.Connection
 )
 
 // 1.读取配置
@@ -25,6 +27,9 @@ func init() {
 		panic(err)
 	}
 	if err := initRedis(); err != nil {
+		panic(err)
+	}
+	if err := initMQ(); err != nil {
 		panic(err)
 	}
 }
@@ -74,4 +79,17 @@ func initRedis() error {
 		MaxConnLifetime: 0,
 	}
 	return nil
+}
+
+func initMQ() error {
+	var err error
+	dsn := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
+		ConfigInstance.Mq_.User,
+		ConfigInstance.Mq_.Pass,
+		ConfigInstance.Mq_.Host,
+		ConfigInstance.Mq_.Port,
+		ConfigInstance.Mq_.VHost,
+	)
+	MqConnection, err = amqp.Dial(dsn)
+	return err
 }

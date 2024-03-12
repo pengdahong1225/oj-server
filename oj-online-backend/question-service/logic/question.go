@@ -116,3 +116,19 @@ func QuestionQuery(ctx *gin.Context, name string) {
 		"data": data,
 	})
 }
+
+func QuestionRun(ctx *gin.Context, form *models.QuestionForm) {
+	amqp := &Amqp{
+		MqConnection: global.MqConnection,
+		exchange:     "amqp.direct",
+		queue:        "question",
+		routingKey:   "question",
+	}
+	if amqp.prepare(ctx) {
+		amqp.publish()
+	}
+}
+
+func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm) {
+
+}

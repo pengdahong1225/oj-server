@@ -53,4 +53,7 @@ func CmsRouters(engine *gin.Engine) {
 	// 需要管理员权限
 	cmsRouter.Use(middlewares.AuthLogin()).Use(middlewares.Admin())
 	cmsRouter.GET("/userList", controller.GetUserList)
+	cmsRouter.POST("/addQuestion", controller.AddQuestion)
+	cmsRouter.POST("/deleteQuestion", controller.DeleteQuestion)
+	cmsRouter.POST("/updateQuestion", controller.UpdateQuestion)
 }

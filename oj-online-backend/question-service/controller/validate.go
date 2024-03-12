@@ -53,7 +53,7 @@ func validatePhone(fl validator.FieldLevel) bool {
 
 // 类型集
 type formTyper interface {
-	models.LoginFrom | models.RegistryForm
+	models.LoginFrom | models.RegistryForm | models.QuestionForm
 }
 
 func processOnValidate[T formTyper](ctx *gin.Context, form T) (*T, bool) {

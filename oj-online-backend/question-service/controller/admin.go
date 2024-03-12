@@ -18,3 +18,13 @@ func GetUserList(ctx *gin.Context) {
 	}
 	logic.GetUserList(ctx, int32(cursor))
 }
+
+func AddQuestion(ctx *gin.Context) {
+
+}
+func DeleteQuestion(ctx *gin.Context) {
+
+}
+func UpdateQuestion(ctx *gin.Context) {
+
+}

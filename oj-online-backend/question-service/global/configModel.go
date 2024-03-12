@@ -8,6 +8,7 @@ type config struct {
 	SMS_       sms            `mapstructure:"sms"`
 	Registry_  registryConfig `mapstructure:"registry"`
 	Log_       logConfig      `mapstructure:"log"`
+	Mq_        MqConfig       `mapstructure:"rabbitmq"`
 }
 
 type systemConfig struct {
@@ -39,4 +40,12 @@ type registryConfig struct {
 type logConfig struct {
 	Path  string `mapstructure:"path"`
 	Level string `mapstructure:"level"`
+}
+
+type MqConfig struct {
+	Host  string `mapstructure:"host"`
+	Port  int    `mapstructure:"port"`
+	User  string `mapstructure:"user"`
+	Pass  string `mapstructure:"pass"`
+	VHost string `mapstructure:"vhost"`
 }
