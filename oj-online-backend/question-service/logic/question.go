@@ -3,12 +3,22 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"question-service/global"
 	"question-service/models"
 	pb "question-service/proto"
+	"time"
 )
+
+var ConnectionMap = make(map[string]*websocket.Conn, 10) // sessionID,websocket连接
+// 保存上下文
+func loadContext(conn *websocket.Conn, form *models.QuestionForm) {
+	sessionID := fmt.Sprintf("%d-%d", form.UserId, time.Now().Unix())
+	ConnectionMap[sessionID] = conn
+}
 
 func QuestionSet(ctx *gin.Context, cursor int32) {
 	dbConn, err := global.NewDBConnection()
@@ -117,7 +127,10 @@ func QuestionQuery(ctx *gin.Context, name string) {
 	})
 }
 
-func QuestionRun(ctx *gin.Context, form *models.QuestionForm) {
+func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
+	// 保存上下文
+	loadContext(conn, form)
+	// 发布任务
 	amqp := &Amqp{
 		MqConnection: global.MqConnection,
 		exchange:     "amqp.direct",
@@ -125,10 +138,30 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm) {
 		routingKey:   "question",
 	}
 	if amqp.prepare(ctx) {
-		amqp.publish()
+		// 序列化消息
+		msg, _ := json.Marshal(form)
+		if amqp.publish(msg) {
+			ctx.JSON(http.StatusOK, gin.H{
+				"msg": "运行成功",
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"msg": "运行失败",
+			})
+		}
+		// 关闭通道
+		amqp.channel.Close()
 	}
 }
 
 func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm) {
+
+}
+
+func JudgeCallback(ctx *gin.Context, sessionID string) {
+	// 获取上下文
+	conn, _ := ConnectionMap[sessionID]
+	defer conn.Close()
+	// 返回客户端执行结果
 
 }

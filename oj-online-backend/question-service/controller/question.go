@@ -2,11 +2,18 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"question-service/logic"
 	"question-service/models"
 	"strconv"
 )
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 func QuestionSet(ctx *gin.Context) {
 	// 题库分页
@@ -49,7 +56,14 @@ func QuestionQuery(ctx *gin.Context) {
 func QuestionRun(ctx *gin.Context) {
 	// 运行代码
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
-		logic.QuestionRun(ctx, form)
+		// 升级连接
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"msg": "连接失败",
+			})
+		}
+		logic.QuestionRun(ctx, form, conn)
 	}
 }
 
@@ -58,4 +72,16 @@ func QuestionSubmit(ctx *gin.Context) {
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
 		logic.QuestionSubmit(ctx, form)
 	}
+}
+
+func JudgeCallback(ctx *gin.Context) {
+	sessionID, ok := ctx.GetQuery("sessionId")
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "参数错误",
+		})
+		ctx.Abort()
+		return
+	}
+	logic.JudgeCallback(ctx, sessionID)
 }

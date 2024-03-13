@@ -6,6 +6,7 @@ import (
 	"github.com/streadway/amqp"
 	"net/http"
 	"question-service/global"
+	"time"
 )
 
 type Amqp struct {
@@ -13,6 +14,7 @@ type Amqp struct {
 	exchange     string
 	queue        string
 	routingKey   string
+	channel      *amqp.Channel // 通道
 }
 
 // CheckMqConnection 判断连接是否可用
@@ -33,6 +35,8 @@ func (receiver *Amqp) prepare(ctx *gin.Context) bool {
 		})
 		return false
 	}
+	// 暂存通道
+	receiver.channel = ch
 	// 声明交换机和队列
 	err = ch.ExchangeDeclare(
 		receiver.exchange, // 交换机名称
@@ -83,6 +87,18 @@ func (receiver *Amqp) prepare(ctx *gin.Context) bool {
 	return true
 }
 
-func (receiver *Amqp) publish() {
-
+func (receiver *Amqp) publish(msg []byte) bool {
+	publishing := amqp.Publishing{
+		DeliveryMode: amqp.Persistent,
+		Timestamp:    time.Now(),
+		ContentType:  "text/json",
+		Body:         msg,
+	}
+	err := receiver.channel.Publish(receiver.exchange, receiver.routingKey, false, false, publishing)
+	if err != nil {
+		logrus.Errorf("发送消息失败:%s", err.Error())
+		return false
+	}
+	logrus.Infof("发送消息成功:%s", msg)
+	return true
 }
