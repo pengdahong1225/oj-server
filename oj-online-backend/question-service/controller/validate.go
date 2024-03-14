@@ -9,6 +9,29 @@ import (
 	"regexp"
 )
 
+// 表单类型集
+type formTyper interface {
+	models.LoginFrom | models.RegistryForm | models.QuestionForm | models.JudgeBackForm
+}
+
+// 表单验证
+func processOnValidate[T formTyper](ctx *gin.Context, form T) (*T, bool) {
+	if err := ctx.ShouldBindJSON(&form); err != nil {
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			// 非validator.ValidationErrors类型错误直接返回
+			ctx.JSON(http.StatusForbidden, gin.H{"msg": "表单验证错误"})
+			return nil, false
+		}
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": errs.Error(),
+		})
+		return nil, false
+	}
+	return &form, true
+}
+
+// 注册表单验证
 func formValidateForRegistry(ctx *gin.Context) (*models.RegistryForm, bool) {
 	// 手机号 -- 修改gin框架中的Validator引擎属性，实现自定制
 	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -24,7 +47,7 @@ func formValidateForRegistry(ctx *gin.Context) (*models.RegistryForm, bool) {
 	return processOnValidate(ctx, registryForm)
 }
 
-// 表单验证
+// 登录表单验证
 func formValidateForLogin(ctx *gin.Context) (*models.LoginFrom, bool) {
 	// 手机号 -- 修改gin框架中的Validator引擎属性，实现自定制
 	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -49,25 +72,4 @@ func validatePhone(fl validator.FieldLevel) bool {
 		return false
 	}
 	return true
-}
-
-// 类型集
-type formTyper interface {
-	models.LoginFrom | models.RegistryForm | models.QuestionForm
-}
-
-func processOnValidate[T formTyper](ctx *gin.Context, form T) (*T, bool) {
-	if err := ctx.ShouldBindJSON(&form); err != nil {
-		errs, ok := err.(validator.ValidationErrors)
-		if !ok {
-			// 非validator.ValidationErrors类型错误直接返回
-			ctx.JSON(http.StatusForbidden, gin.H{"msg": "表单验证错误"})
-			return nil, false
-		}
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"msg": errs.Error(),
-		})
-		return nil, false
-	}
-	return &form, true
 }

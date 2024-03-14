@@ -26,3 +26,11 @@ type QuestionForm struct {
 	Code   string `json:"code" form:"code" binding:"required"`
 	Clang  string `json:"clang" form:"clang" binding:"required"`
 }
+
+type JudgeBackForm struct {
+	SessionID string `json:"sessionID" form:"id" binding:"required"`
+	Id        int64  `json:"id" form:"id" binding:"required"`
+	UserId    int64  `json:"userId" form:"userId" binding:"required"`
+	Clang     string `json:"clang" form:"clang" binding:"required"`
+	Result    string `json:"result" form:"result" binding:"required"`
+}

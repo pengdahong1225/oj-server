@@ -36,7 +36,7 @@ create table if not exists question
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;
 
--- 用户提交记录表
+-- 用户提交记录表，在线运行不用记录，提交代码需要记录
 create table if not exists user_submit
 (
     id BIGINT AUTO_INCREMENT,

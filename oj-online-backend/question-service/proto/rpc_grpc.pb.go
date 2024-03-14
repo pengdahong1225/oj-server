@@ -20,18 +20,19 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	DBService_GetUserData_FullMethodName           = "/DBService/GetUserData"
-	DBService_CreateUserData_FullMethodName        = "/DBService/CreateUserData"
-	DBService_UpdateUserData_FullMethodName        = "/DBService/UpdateUserData"
-	DBService_DeleteUserData_FullMethodName        = "/DBService/DeleteUserData"
-	DBService_GetUserList_FullMethodName           = "/DBService/GetUserList"
-	DBService_GetQuestionData_FullMethodName       = "/DBService/GetQuestionData"
-	DBService_CreateQuestionData_FullMethodName    = "/DBService/CreateQuestionData"
-	DBService_UpdateQuestionData_FullMethodName    = "/DBService/UpdateQuestionData"
-	DBService_DeleteQuestionData_FullMethodName    = "/DBService/DeleteQuestionData"
-	DBService_GetQuestionList_FullMethodName       = "/DBService/GetQuestionList"
-	DBService_QueryQuestionWithName_FullMethodName = "/DBService/QueryQuestionWithName"
-	DBService_GetUserSubmitRecord_FullMethodName   = "/DBService/GetUserSubmitRecord"
+	DBService_GetUserData_FullMethodName            = "/DBService/GetUserData"
+	DBService_CreateUserData_FullMethodName         = "/DBService/CreateUserData"
+	DBService_UpdateUserData_FullMethodName         = "/DBService/UpdateUserData"
+	DBService_DeleteUserData_FullMethodName         = "/DBService/DeleteUserData"
+	DBService_GetUserList_FullMethodName            = "/DBService/GetUserList"
+	DBService_GetQuestionData_FullMethodName        = "/DBService/GetQuestionData"
+	DBService_CreateQuestionData_FullMethodName     = "/DBService/CreateQuestionData"
+	DBService_UpdateQuestionData_FullMethodName     = "/DBService/UpdateQuestionData"
+	DBService_DeleteQuestionData_FullMethodName     = "/DBService/DeleteQuestionData"
+	DBService_GetQuestionList_FullMethodName        = "/DBService/GetQuestionList"
+	DBService_QueryQuestionWithName_FullMethodName  = "/DBService/QueryQuestionWithName"
+	DBService_GetUserSubmitRecord_FullMethodName    = "/DBService/GetUserSubmitRecord"
+	DBService_UpdateUserSubmitRecord_FullMethodName = "/DBService/UpdateUserSubmitRecord"
 )
 
 // DBServiceClient is the client API for DBService service.
@@ -50,6 +51,7 @@ type DBServiceClient interface {
 	GetQuestionList(ctx context.Context, in *GetQuestionListRequest, opts ...grpc.CallOption) (*GetQuestionListResponse, error)
 	QueryQuestionWithName(ctx context.Context, in *QueryQuestionWithNameRequest, opts ...grpc.CallOption) (*QueryQuestionWithNameResponse, error)
 	GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error)
+	UpdateUserSubmitRecord(ctx context.Context, in *UpdateUserSubmitRecordRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type dBServiceClient struct {
@@ -168,6 +170,15 @@ func (c *dBServiceClient) GetUserSubmitRecord(ctx context.Context, in *GetUserSu
 	return out, nil
 }
 
+func (c *dBServiceClient) UpdateUserSubmitRecord(ctx context.Context, in *UpdateUserSubmitRecordRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, DBService_UpdateUserSubmitRecord_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DBServiceServer is the server API for DBService service.
 // All implementations must embed UnimplementedDBServiceServer
 // for forward compatibility
@@ -184,6 +195,7 @@ type DBServiceServer interface {
 	GetQuestionList(context.Context, *GetQuestionListRequest) (*GetQuestionListResponse, error)
 	QueryQuestionWithName(context.Context, *QueryQuestionWithNameRequest) (*QueryQuestionWithNameResponse, error)
 	GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error)
+	UpdateUserSubmitRecord(context.Context, *UpdateUserSubmitRecordRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedDBServiceServer()
 }
 
@@ -226,6 +238,9 @@ func (UnimplementedDBServiceServer) QueryQuestionWithName(context.Context, *Quer
 }
 func (UnimplementedDBServiceServer) GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubmitRecord not implemented")
+}
+func (UnimplementedDBServiceServer) UpdateUserSubmitRecord(context.Context, *UpdateUserSubmitRecordRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserSubmitRecord not implemented")
 }
 func (UnimplementedDBServiceServer) mustEmbedUnimplementedDBServiceServer() {}
 
@@ -456,6 +471,24 @@ func _DBService_GetUserSubmitRecord_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DBService_UpdateUserSubmitRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserSubmitRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBServiceServer).UpdateUserSubmitRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBService_UpdateUserSubmitRecord_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBServiceServer).UpdateUserSubmitRecord(ctx, req.(*UpdateUserSubmitRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DBService_ServiceDesc is the grpc.ServiceDesc for DBService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -510,6 +543,10 @@ var DBService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserSubmitRecord",
 			Handler:    _DBService_GetUserSubmitRecord_Handler,
+		},
+		{
+			MethodName: "UpdateUserSubmitRecord",
+			Handler:    _DBService_UpdateUserSubmitRecord_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

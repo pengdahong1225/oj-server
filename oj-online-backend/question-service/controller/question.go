@@ -62,6 +62,8 @@ func QuestionRun(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"msg": "连接失败",
 			})
+			ctx.Abort()
+			return
 		}
 		logic.QuestionRun(ctx, form, conn)
 	}
@@ -70,18 +72,21 @@ func QuestionRun(ctx *gin.Context) {
 func QuestionSubmit(ctx *gin.Context) {
 	// 提交代码
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
-		logic.QuestionSubmit(ctx, form)
+		// 升级连接
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"msg": "连接失败",
+			})
+			ctx.Abort()
+			return
+		}
+		logic.QuestionSubmit(ctx, form, conn)
 	}
 }
 
 func JudgeCallback(ctx *gin.Context) {
-	sessionID, ok := ctx.GetQuery("sessionId")
-	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"msg": "参数错误",
-		})
-		ctx.Abort()
-		return
+	if form, ok := processOnValidate(ctx, models.JudgeBackForm{}); ok {
+		logic.JudgeCallback(ctx, form)
 	}
-	logic.JudgeCallback(ctx, sessionID)
 }

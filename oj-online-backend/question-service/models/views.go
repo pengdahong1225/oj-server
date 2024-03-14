@@ -28,3 +28,10 @@ type Question struct {
 	Level       int32                `json:"level"`
 	Tags        []string             `json:"tags"`
 }
+
+type QuestionResult struct {
+	Id     int64  `json:"id" form:"id" binding:"required"`
+	UserId int64  `json:"userId" form:"userId" binding:"required"`
+	Clang  string `json:"clang" form:"clang" binding:"required"`
+	Result string `json:"result"`
+}
