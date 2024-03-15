@@ -28,13 +28,30 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 		Tags:    []string{serviceName},
 		Port:    port,
 		Address: ip,
+		// 注意：TCP健康检查无需提供CheckFunc，因为它是由Consul Agent发起的TCP连接尝试
 		Check: &consulapi.AgentServiceCheck{
 			CheckID:                        fmt.Sprintf("%s-%s-%d", serviceName, ip, port),
-			GRPC:                           fmt.Sprintf("%s:%d", ip, port),
+			TCP:                            fmt.Sprintf("%s:%d", ip, port),
 			Timeout:                        "10s",
 			Interval:                       "10s",
 			DeregisterCriticalServiceAfter: "1m",
 		},
 	}
 	return receiver.client.Agent().ServiceRegister(srv)
+}
+
+// NewQuestionConnection Question服务连接
+func QuestionDsn() (string, error) {
+	registry, err := NewRegistry()
+	if err != nil {
+		return "", err
+	}
+	// registry.client.Health().Service返回的是对应服务的节点列表
+	services, _, err := registry.client.Health().Service("question-service", "question-service", true, nil)
+	if err != nil {
+		return "", err
+	}
+	// 这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
+	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
+	return dsn, nil
 }
