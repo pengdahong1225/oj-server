@@ -14,7 +14,7 @@ func (receiver Server) Start() {
 	err := global.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
 		consumerSrv := new(ConsumerServer)
-		consumerSrv.startMQConsumer()
+		consumerSrv.start()
 	})
 	if err != nil {
 		panic(err)

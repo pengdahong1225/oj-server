@@ -10,7 +10,7 @@ type ConsumerServer struct {
 }
 
 // MQ消费者
-func (receiver *ConsumerServer) startMQConsumer() {
+func (receiver *ConsumerServer) start() {
 	amqp := &Amqp{
 		MqConnection: global.MqConnection,
 		Exchange:     "amqp.direct",
@@ -54,6 +54,6 @@ func (receiver *ConsumerServer) startMQConsumer() {
 func (receiver *ConsumerServer) handleAsync(msg amqp.Delivery) []byte {
 	return nil
 }
-func (receiver ConsumerServer) callBack(msg []byte) {
+func (receiver *ConsumerServer) callBack(msg []byte) {
 
 }
