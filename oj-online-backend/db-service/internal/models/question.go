@@ -10,6 +10,7 @@ type Question struct {
 	Description string    `gorm:"column:description" json:"description"`
 	Level       int32     `gorm:"column:level" json:"level"`
 	Tags        []string  `gorm:"column:tags" json:"tags"`
+	TestCase    string    `gorm:"column:test_case" json:"test_case"`
 }
 
 func (Question) TableName() string {

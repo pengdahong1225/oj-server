@@ -66,7 +66,7 @@ func (receiver *ConsumerServer) handleSync(msg amqp.Delivery) []byte {
 		return nil
 	}
 	// 处理
-	rspMsg := logic.QuestionRun(msg.Body)
+	rspMsg := logic.QuestionRun(form)
 	return rspMsg
 }
 

@@ -32,6 +32,7 @@ create table if not exists question
     description TEXT NOT null comment '题目描述',
     level tinyint DEFAULT 0 comment '题目难度 0:简单 1:中等 2:困难',
     tags VARCHAR(64) DEFAULT '' comment '题目标签，用#分隔',
+    test_case TEXT NOT null comment '测试用例',
 
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;

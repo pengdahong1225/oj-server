@@ -12,4 +12,5 @@ message Question{
   string description = 5;
   int32 level = 6;
   repeated string tags = 7;
+  string test_case = 8;
 }

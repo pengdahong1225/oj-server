@@ -7,8 +7,6 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"log"
 	"os"
 )
@@ -17,7 +15,6 @@ import (
 var (
 	err               error
 	ConfigInstance    config
-	DBInstance        *gorm.DB
 	RedisPoolInstance *redis.Pool
 	MqConnection      *amqp.Connection // rabbitMQ全局连接
 )
@@ -33,9 +30,6 @@ func init() {
 		panic(err)
 	}
 	if err = initLog(); err != nil {
-		panic(err)
-	}
-	if err = initDB(); err != nil {
 		panic(err)
 	}
 	if err = initRedis(); err != nil {
@@ -75,16 +69,6 @@ func loadConfig() error {
 	// 监听配置文件
 	viper.WatchConfig()
 	return nil
-}
-
-func initDB() error {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", ConfigInstance.Sql_.User,
-		ConfigInstance.Sql_.Pwd, ConfigInstance.Sql_.Host, ConfigInstance.Sql_.Port, ConfigInstance.Sql_.Db)
-	var e error
-	DBInstance, e = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		// SkipDefaultTransaction: true, //全局禁用默认事务
-	})
-	return e
 }
 
 func initRedis() error {

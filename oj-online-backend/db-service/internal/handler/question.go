@@ -59,6 +59,10 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "method CreateQuestionData error: %v", result.Error)
 	}
+
+	// 插入成功 -- 将测试案例插入到redis
+	updateTestCases(request.Data.Id, request.Data.TestCase)
+
 	return &pb.CreateQuestionResponse{
 		Id: question.ID,
 	}, nil
@@ -70,6 +74,7 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 		Description: request.Data.Description,
 		Level:       request.Data.Level,
 		Tags:        request.Data.Tags,
+		TestCase:    request.Data.TestCase,
 	}
 	result := global.DBInstance.Where("id = ?", question.ID)
 	if result.Error != nil {
@@ -84,6 +89,10 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "method UpdateQuestionData error: %v", result.Error)
 	}
+
+	// 更新测试案例
+	updateTestCases(request.Data.Id, request.Data.TestCase)
+
 	return &empty.Empty{}, nil
 }
 
@@ -167,4 +176,16 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 	return &pb.QueryQuestionWithNameResponse{
 		Data: data,
 	}, nil
+}
+
+func updateTestCases(subKey int64, value string) {
+	var key = "QuestionTestCases"
+	conn := global.RedisPoolInstance.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("HSET", key, subKey, value)
+	if err != nil {
+		logrus.Errorf("UpdateTestCases error: %s", err.Error())
+		return
+	}
 }
