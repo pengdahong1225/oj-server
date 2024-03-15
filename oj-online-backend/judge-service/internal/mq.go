@@ -3,8 +3,7 @@ package internal
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"question-service/global"
-	"time"
+	"judge-service/global"
 )
 
 type Amqp struct {
@@ -13,6 +12,7 @@ type Amqp struct {
 	Queue        string
 	RoutingKey   string
 	Channel      *amqp.Channel // 通道
+	Done         chan error
 }
 
 // CheckMqConnection 判断连接是否可用
@@ -82,20 +82,4 @@ func (receiver *Amqp) Prepare() error {
 		return err
 	}
 	return nil
-}
-
-func (receiver *Amqp) Publish(msg []byte) bool {
-	publishing := amqp.Publishing{
-		DeliveryMode: amqp.Persistent,
-		Timestamp:    time.Now(),
-		ContentType:  "text/json",
-		Body:         msg,
-	}
-	err := receiver.Channel.Publish(receiver.Exchange, receiver.RoutingKey, false, false, publishing)
-	if err != nil {
-		logrus.Errorf("发送消息失败:%s", err.Error())
-		return false
-	}
-	logrus.Infof("发送消息成功:%s", msg)
-	return true
 }

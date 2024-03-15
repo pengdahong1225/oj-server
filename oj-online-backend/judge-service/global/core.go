@@ -4,32 +4,45 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gomodule/redigo/redis"
+	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
 	"os"
 )
 
+// 初始化全局DB连接
 var (
+	err               error
 	ConfigInstance    config
+	DBInstance        *gorm.DB
 	RedisPoolInstance *redis.Pool
 	MqConnection      *amqp.Connection // rabbitMQ全局连接
 )
 
 // 1.读取配置
 // 2.初始化日志
-// 3.redis
+// 3.db连接
+// 4.redis
+// 5.协程池
+// 6.mq连接
 func init() {
-	if err := loadConfig(); err != nil {
+	if err = loadConfig(); err != nil {
 		panic(err)
 	}
-	if err := initLog(); err != nil {
+	if err = initLog(); err != nil {
 		panic(err)
 	}
-	if err := initRedis(); err != nil {
+	if err = initDB(); err != nil {
 		panic(err)
 	}
-	if err := initMQ(); err != nil {
+	if err = initRedis(); err != nil {
+		panic(err)
+	}
+	AntsPoolInstance, _ = ants.NewPool(ants.DefaultAntsPoolSize, ants.WithPanicHandler(AntsPanicHandler))
+	if err = initMQ(); err != nil {
 		panic(err)
 	}
 }
@@ -37,7 +50,7 @@ func init() {
 func loadConfig() error {
 	// 读取环境变量
 	logMode := os.Getenv("LOG_MODE")
-	// 读取配置
+	// 读取配置文件
 	viperConfig := viper.New()
 	if logMode == "release" {
 		viperConfig.SetConfigName("prod")
@@ -64,8 +77,18 @@ func loadConfig() error {
 	return nil
 }
 
+func initDB() error {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", ConfigInstance.Sql_.User,
+		ConfigInstance.Sql_.Pwd, ConfigInstance.Sql_.Host, ConfigInstance.Sql_.Port, ConfigInstance.Sql_.Db)
+	var e error
+	DBInstance, e = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		// SkipDefaultTransaction: true, //全局禁用默认事务
+	})
+	return e
+}
+
 func initRedis() error {
-	dsn := fmt.Sprintf("%s:%d", ConfigInstance.Redis_.Ip, ConfigInstance.Redis_.Port)
+	dsn := fmt.Sprintf("%s:%d", ConfigInstance.Redis_.Host, ConfigInstance.Redis_.Port)
 	RedisPoolInstance = &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", dsn)

@@ -16,8 +16,6 @@ rabbitmq:
   user: oj
   password: 1225
   vhost: '/oj'
-  exchange: 'amq.direct'
-  queue: 'question'
 
 jwt:
   key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'

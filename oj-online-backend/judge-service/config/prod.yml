@@ -1,0 +1,29 @@
+system:
+  name: judge-service
+  port: 9020
+
+registry:
+  host: 101.33.196.35
+  port: 8600
+
+mysql:
+  host: 10.0.8.10
+  port: 3306
+  db: oj_online_server
+  user: root
+  password: 1225pdhGkl
+
+redis:
+  host: 10.0.8.10
+  port: 6379
+
+log:
+  path: "/app/log"
+  level: info
+
+rabbitmq:
+  host: 10.0.8.10
+  port: 5672
+  user: oj
+  password: 1225
+  vhost: '/oj'
