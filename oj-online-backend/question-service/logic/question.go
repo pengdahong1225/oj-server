@@ -185,7 +185,15 @@ func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm, conn *websocket
 	}
 	defer amqp.Channel.Close()
 	// 序列化消息
-	msg, _ := json.Marshal(form)
+	req := &models.JudgeRequest{
+		SessionID:  s.Id,
+		QuestionID: form.Id,
+		UserID:     form.UserId,
+		Title:      form.Title,
+		Code:       form.Code,
+		Clang:      form.Clang,
+	}
+	msg, _ := json.Marshal(req)
 	if !amqp.Publish(msg) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "运行失败",
@@ -224,10 +232,12 @@ func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
 	s.Timer.Stop()
 	// 返回客户端执行结果
 	response := models.QuestionResult{
-		Id:     form.Id,
-		UserId: form.UserId,
-		Clang:  form.Clang,
-		Result: form.Result,
+		QuestionID: form.QuestionID,
+		UserID:     form.UserID,
+		Clang:      form.Clang,
+		Status:     form.Status,
+		Tips:       form.Tips,
+		Output:     form.Output,
 	}
 	data, _ := json.Marshal(response)
 	if err := s.WebConnection.WriteMessage(websocket.TextMessage, data); err != nil {
@@ -238,7 +248,7 @@ func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
 	// 关闭连接
 	s.WebConnection.Close()
 	// 保存提交记录
-	updateSubmitRecord(s.Msg, form.Result)
+	updateSubmitRecord(s.Msg, string(data))
 }
 
 // 保存提交记录

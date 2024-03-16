@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"judge-service/global"
@@ -26,7 +26,7 @@ func (receiver Server) Start() {
 	wg.Add(1)
 	err = global.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
-		consumerSrv := new(ConsumerServer)
+		consumerSrv := new(JudgeServer)
 		consumerSrv.start()
 	})
 	if err != nil {

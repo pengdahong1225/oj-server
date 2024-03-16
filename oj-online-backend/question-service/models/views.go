@@ -30,8 +30,10 @@ type Question struct {
 }
 
 type QuestionResult struct {
-	Id     int64  `json:"id" form:"id" binding:"required"`
-	UserId int64  `json:"userId" form:"userId" binding:"required"`
-	Clang  string `json:"clang" form:"clang" binding:"required"`
-	Result string `json:"result"`
+	QuestionID int64  `json:"questionID"`
+	UserID     int64  `json:"userID"`
+	Clang      string `json:"clang"`
+	Status     int32  `json:"status"` // 0: 正常 1: 代码非法 2: 编译错误 3: 运行超时 4: 内存溢出 5: 系统错误
+	Tips       string `json:"tips"`   // 系统提示
+	Output     string `json:"output"` // 系统输出
 }

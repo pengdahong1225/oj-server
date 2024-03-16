@@ -1,8 +1,10 @@
 package main
 
-import "judge-service/internal"
+import (
+	"judge-service/server"
+)
 
 func main() {
-	server := internal.Server{}
+	server := server.Server{}
 	server.Start()
 }

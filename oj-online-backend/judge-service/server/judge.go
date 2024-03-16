@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"encoding/json"
@@ -6,17 +6,16 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"judge-service/global"
-	"judge-service/internal/logic"
-	"judge-service/internal/models"
+	"judge-service/internal"
+	"judge-service/models"
 	"net/http"
 	"strings"
 )
 
-type ConsumerServer struct {
+type JudgeServer struct {
 }
 
-// MQ消费者
-func (receiver *ConsumerServer) start() {
+func (receiver *JudgeServer) start() {
 	amqp := &Amqp{
 		MqConnection: global.MqConnection,
 		Exchange:     "amqp.direct",
@@ -57,20 +56,20 @@ func (receiver *ConsumerServer) start() {
 	}
 }
 
-func (receiver *ConsumerServer) handleSync(msg amqp.Delivery) []byte {
+func (receiver *JudgeServer) handleSync(msg amqp.Delivery) []byte {
 	logrus.Infof("收到消息:%s", string(msg.Body))
 	// 解析
-	var form *models.QuestionForm
+	var form *models.JudgeRequest
 	if err := json.Unmarshal(msg.Body, &form); err != nil {
 		logrus.Errorf("解析消息失败:%s", err.Error())
 		return nil
 	}
 	// 处理
-	rspMsg := logic.QuestionRun(form)
+	rspMsg := internal.Handle(form)
 	return rspMsg
 }
 
-func (receiver *ConsumerServer) callBack(msg []byte) {
+func (receiver *JudgeServer) callBack(msg []byte) {
 	// 获取question服务地址
 	dsn, err := global.QuestionDsn()
 	if err != nil {
