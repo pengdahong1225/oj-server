@@ -97,7 +97,7 @@ func initMQ() error {
 func ConnectToMq() (*amqp.Connection, error) {
 	dsn := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		ConfigInstance.Mq_.User,
-		ConfigInstance.Mq_.Pass,
+		ConfigInstance.Mq_.PassWord,
 		ConfigInstance.Mq_.Host,
 		ConfigInstance.Mq_.Port,
 		ConfigInstance.Mq_.VHost,

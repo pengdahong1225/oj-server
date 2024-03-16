@@ -43,9 +43,9 @@ type logConfig struct {
 }
 
 type MqConfig struct {
-	Host  string `mapstructure:"host"`
-	Port  int    `mapstructure:"port"`
-	User  string `mapstructure:"user"`
-	Pass  string `mapstructure:"pass"`
-	VHost string `mapstructure:"vhost"`
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	PassWord string `mapstructure:"password"`
+	VHost    string `mapstructure:"vhost"`
 }

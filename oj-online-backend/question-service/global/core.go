@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gomodule/redigo/redis"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"log"
@@ -90,11 +91,12 @@ func initMQ() error {
 func ConnectToMq() (*amqp.Connection, error) {
 	dsn := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		ConfigInstance.Mq_.User,
-		ConfigInstance.Mq_.Pass,
+		ConfigInstance.Mq_.PassWord,
 		ConfigInstance.Mq_.Host,
 		ConfigInstance.Mq_.Port,
 		ConfigInstance.Mq_.VHost,
 	)
+	logrus.Debugln(dsn)
 	MqConnection, err := amqp.Dial(dsn)
 	return MqConnection, err
 }
