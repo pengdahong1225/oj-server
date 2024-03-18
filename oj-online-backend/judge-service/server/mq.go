@@ -71,9 +71,9 @@ func (receiver *Amqp) Prepare() error {
 	}
 
 	err = ch.QueueBind(
-		receiver.Exchange,   // 交换机名称
 		queue.Name,          // 队列名称
 		receiver.RoutingKey, // 路由键
+		receiver.Exchange,   // 交换机名称
 		false,               // 是否发送额外的bind headers
 		nil,                 // 可选的额外参数
 	)

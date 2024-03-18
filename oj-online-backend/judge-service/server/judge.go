@@ -76,7 +76,7 @@ func (receiver *JudgeServer) callBack(msg []byte) {
 		logrus.Errorf("获取question服务地址失败:%s", err.Error())
 		return
 	}
-	url := fmt.Sprintf("%s/%s", dsn, "judgeCallback")
+	url := fmt.Sprintf("%s/%s", dsn, "questions/judgeCallback")
 	body := strings.NewReader(string(msg))
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {

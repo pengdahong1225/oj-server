@@ -52,6 +52,6 @@ func QuestionDsn() (string, error) {
 		return "", err
 	}
 	// 这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
-	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
+	dsn := fmt.Sprintf("http://%s:%d", services[0].Service.Address, services[0].Service.Port)
 	return dsn, nil
 }
