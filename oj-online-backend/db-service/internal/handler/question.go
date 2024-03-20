@@ -5,6 +5,7 @@ import (
 	"db-service/global"
 	"db-service/internal/models"
 	pb "db-service/proto"
+	"db-service/utils"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -15,14 +16,14 @@ import (
 // 题库列表，每次修改都更新同步到redis
 
 func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
-	var question *models.Question
+	var question models.Question
 	result := global.DBInstance.Where("id = ?", request.Id).Find(&question)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "GetQuestionData error: %v", result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return nil, status.Errorf(codes.NotFound, "GetQuestionData error: %v", "not found")
+		return nil, status.Errorf(codes.NotFound, "GetQuestionData[%d] error: %v", request.Id, "not found")
 	}
 
 	data := &pb.Question{
@@ -31,7 +32,7 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 		Title:       question.Title,
 		Description: question.Description,
 		Level:       question.Level,
-		Tags:        question.Tags,
+		Tags:        utils.SplitStringWithX(question.Tags, "#"),
 	}
 	return &pb.GetQuestionResponse{
 		Data: data,
@@ -43,7 +44,7 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 		Title:       request.Data.Title,
 		Description: request.Data.Description,
 		Level:       request.Data.Level,
-		Tags:        request.Data.Tags,
+		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
 	}
 	result := global.DBInstance.Where("id = ?", question.ID)
 	if result.Error != nil {
@@ -73,7 +74,7 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 		Title:       request.Data.Title,
 		Description: request.Data.Description,
 		Level:       request.Data.Level,
-		Tags:        request.Data.Tags,
+		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
 		TestCase:    request.Data.TestCase,
 	}
 	result := global.DBInstance.Where("id = ?", question.ID)
@@ -122,8 +123,8 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 	rsp := &pb.GetQuestionListResponse{}
 
 	var questionList []models.Question
-	var count int64
-	result := global.DBInstance.Model(&questionList).Count(&count)
+	var count int64 = 0
+	result := global.DBInstance.Model(questionList).Count(&count)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query count failed")
@@ -134,10 +135,10 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 	// where id>=cursor
 	// order by id
 	// limit 10;
-	result = global.DBInstance.Select("id, title").Where("id >= ", request.Cursor).Order("id").Limit(pageSize).Find(&questionList)
+	result = global.DBInstance.Select("id, title").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&questionList)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
-		return nil, status.Errorf(codes.Internal, "query userlist failed")
+		return nil, status.Errorf(codes.Internal, "query questionList failed")
 	}
 	for _, question := range questionList {
 		rsp.Data = append(rsp.Data, &pb.Question{
@@ -170,7 +171,7 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 			Title:       question.Title,
 			Description: question.Description,
 			Level:       question.Level,
-			Tags:        question.Tags,
+			Tags:        utils.SplitStringWithX(question.Tags, "#"),
 		})
 	}
 	return &pb.QueryQuestionWithNameResponse{
