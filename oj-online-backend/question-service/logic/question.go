@@ -75,6 +75,8 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 		Tags:        response.Data.Tags,
 		Level:       response.Data.Level,
 		CreateAt:    response.Data.CreateAt,
+		TestCase:    response.Data.TestCase,
+		Template:    response.Data.Template,
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": data,
@@ -113,6 +115,8 @@ func QuestionQuery(ctx *gin.Context, name string) {
 			Tags:        v.Tags,
 			Level:       v.Level,
 			CreateAt:    v.CreateAt,
+			TestCase:    v.TestCase,
+			Template:    v.Template,
 		})
 	}
 	data, _ := json.Marshal(questionList)

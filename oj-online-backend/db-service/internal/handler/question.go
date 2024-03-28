@@ -13,8 +13,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// 题库列表，每次修改都更新同步到redis
-
 func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
 	var question models.Question
 	result := global.DBInstance.Where("id = ?", request.Id).Find(&question)
@@ -33,6 +31,8 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 		Description: question.Description,
 		Level:       question.Level,
 		Tags:        utils.SplitStringWithX(question.Tags, "#"),
+		TestCase:    question.TestCase,
+		Template:    question.Template,
 	}
 	return &pb.GetQuestionResponse{
 		Data: data,
@@ -45,6 +45,8 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 		Description: request.Data.Description,
 		Level:       request.Data.Level,
 		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		TestCase:    request.Data.TestCase,
+		Template:    request.Data.Template,
 	}
 	result := global.DBInstance.Where("id = ?", question.ID)
 	if result.Error != nil {
@@ -76,6 +78,7 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 		Level:       request.Data.Level,
 		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
 		TestCase:    request.Data.TestCase,
+		Template:    request.Data.Template,
 	}
 	result := global.DBInstance.Where("id = ?", question.ID)
 	if result.Error != nil {
@@ -172,6 +175,8 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 			Description: question.Description,
 			Level:       question.Level,
 			Tags:        utils.SplitStringWithX(question.Tags, "#"),
+			TestCase:    question.TestCase,
+			Template:    question.Template,
 		})
 	}
 	return &pb.QueryQuestionWithNameResponse{

@@ -27,6 +27,8 @@ type Question struct {
 	Description string               `json:"description"`
 	Level       int32                `json:"level"`
 	Tags        []string             `json:"tags"`
+	TestCase    string               `json:"test_case"`
+	Template    string               `json:"template"`
 }
 
 type QuestionResult struct {

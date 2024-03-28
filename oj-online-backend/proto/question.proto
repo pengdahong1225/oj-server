@@ -13,4 +13,5 @@ message Question{
   int32 level = 6;
   repeated string tags = 7;
   string test_case = 8;
+  string template = 9;
 }
