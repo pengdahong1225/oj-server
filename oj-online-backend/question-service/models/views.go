@@ -21,14 +21,13 @@ type UserInfo struct {
 }
 
 type Question struct {
-	Id          int64                `json:"id"`
-	CreateAt    *timestamp.Timestamp `json:"createAt"`
-	Title       string               `json:"title"`
-	Description string               `json:"description"`
-	Level       int32                `json:"level"`
-	Tags        []string             `json:"tags"`
-	TestCase    string               `json:"test_case"`
-	Template    string               `json:"template"`
+	Id          int64    `json:"id"`
+	Title       string   `json:"title"`
+	Level       int32    `json:"level"`
+	Tags        []string `json:"tags"`
+	Description string   `json:"description"`
+	TestCase    string   `json:"test_case"`
+	Template    string   `json:"template"`
 }
 
 type QuestionResult struct {

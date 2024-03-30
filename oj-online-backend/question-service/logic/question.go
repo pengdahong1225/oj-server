@@ -35,12 +35,10 @@ func QuestionSet(ctx *gin.Context, cursor int32) {
 	var questionList []models.Question
 	for _, v := range response.Data {
 		questionList = append(questionList, models.Question{
-			Id:          v.Id,
-			Title:       v.Title,
-			Description: v.Description,
-			Tags:        v.Tags,
-			Level:       v.Level,
-			CreateAt:    v.CreateAt,
+			Id:    v.Id,
+			Title: v.Title,
+			Level: v.Level,
+			Tags:  v.Tags,
 		})
 	}
 	data, _ := json.Marshal(questionList)
@@ -71,10 +69,9 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 	data := models.Question{
 		Id:          response.Data.Id,
 		Title:       response.Data.Title,
-		Description: response.Data.Description,
-		Tags:        response.Data.Tags,
 		Level:       response.Data.Level,
-		CreateAt:    response.Data.CreateAt,
+		Tags:        response.Data.Tags,
+		Description: response.Data.Description,
 		TestCase:    response.Data.TestCase,
 		Template:    response.Data.Template,
 	}
@@ -111,10 +108,9 @@ func QuestionQuery(ctx *gin.Context, name string) {
 		questionList = append(questionList, models.Question{
 			Id:          v.Id,
 			Title:       v.Title,
-			Description: v.Description,
-			Tags:        v.Tags,
 			Level:       v.Level,
-			CreateAt:    v.CreateAt,
+			Tags:        v.Tags,
+			Description: v.Description,
 			TestCase:    v.TestCase,
 			Template:    v.Template,
 		})

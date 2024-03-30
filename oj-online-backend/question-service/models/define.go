@@ -1,6 +1,6 @@
 package models
 
-// JudgeRequest question-service -->> judge-service
+// JudgeRequest question-service -->> MQ -->> judge-service
 type JudgeRequest struct {
 	SessionID  string `json:"sessionID" form:"sessionID"`
 	QuestionID int64  `json:"questionID" form:"questionID"`

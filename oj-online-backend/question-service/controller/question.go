@@ -16,7 +16,6 @@ var upgrader = websocket.Upgrader{
 }
 
 func QuestionSet(ctx *gin.Context) {
-	// 题库分页
 	cursor, _ := strconv.Atoi(ctx.DefaultQuery("cursor", "0"))
 	if cursor < 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{

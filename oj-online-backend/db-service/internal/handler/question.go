@@ -28,9 +28,9 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 		Id:          question.ID,
 		CreateAt:    timestamppb.New(question.CreateAt),
 		Title:       question.Title,
-		Description: question.Description,
 		Level:       question.Level,
 		Tags:        utils.SplitStringWithX(question.Tags, "#"),
+		Description: question.Description,
 		TestCase:    question.TestCase,
 		Template:    question.Template,
 	}
@@ -42,9 +42,9 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
 	question := &models.Question{
 		Title:       request.Data.Title,
-		Description: request.Data.Description,
 		Level:       request.Data.Level,
 		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description: request.Data.Description,
 		TestCase:    request.Data.TestCase,
 		Template:    request.Data.Template,
 	}
@@ -74,9 +74,9 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request *pb.UpdateQuestionRequest) (*empty.Empty, error) {
 	question := &models.Question{
 		Title:       request.Data.Title,
-		Description: request.Data.Description,
 		Level:       request.Data.Level,
 		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description: request.Data.Description,
 		TestCase:    request.Data.TestCase,
 		Template:    request.Data.Template,
 	}
@@ -121,6 +121,8 @@ func (receiver *DBServiceServer) DeleteQuestionData(ctx context.Context, request
 	return &empty.Empty{}, nil
 }
 
+// GetQuestionList 题库列表
+// 游标分页，查询id，title，level，tags
 func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *pb.GetQuestionListRequest) (*pb.GetQuestionListResponse, error) {
 	var pageSize = 10
 	rsp := &pb.GetQuestionListResponse{}
@@ -134,11 +136,11 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 	}
 	rsp.Total = int32(count)
 
-	// select id,title from question
+	// select id,title,level,tags from question
 	// where id>=cursor
 	// order by id
 	// limit 10;
-	result = global.DBInstance.Select("id, title").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&questionList)
+	result = global.DBInstance.Select("id,title,level,tags").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&questionList)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query questionList failed")
@@ -147,12 +149,16 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 		rsp.Data = append(rsp.Data, &pb.Question{
 			Id:    question.ID,
 			Title: question.Title,
+			Level: question.Level,
+			Tags:  utils.SplitStringWithX(question.Tags, "#"),
 		})
 	}
 	rsp.Cursor = request.Cursor + int32(result.RowsAffected) + 1
 	return rsp, nil
 }
 
+// QueryQuestionWithName 根据题目名查询题目
+// 模糊查询
 func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, request *pb.QueryQuestionWithNameRequest) (*pb.QueryQuestionWithNameResponse, error) {
 	var questionList []models.Question
 	// select * from question
@@ -172,9 +178,9 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 		data = append(data, &pb.Question{
 			Id:          question.ID,
 			Title:       question.Title,
-			Description: question.Description,
 			Level:       question.Level,
 			Tags:        utils.SplitStringWithX(question.Tags, "#"),
+			Description: question.Description,
 			TestCase:    question.TestCase,
 			Template:    question.Template,
 		})
@@ -184,6 +190,7 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 	}, nil
 }
 
+// 测试用例要插入到redis
 func updateTestCases(subKey int64, value string) {
 	var key = "QuestionTestCases"
 	conn := global.RedisPoolInstance.Get()
