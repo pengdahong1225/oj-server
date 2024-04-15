@@ -3,7 +3,7 @@ package middlewares
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"question-service/global"
+	"question-service/settings"
 	"time"
 )
 
@@ -26,7 +26,7 @@ type JWT struct {
 
 func NewJWT() *JWT {
 	return &JWT{
-		SigningKey: []byte(global.ConfigInstance.JWTConfig_.SigningKey),
+		SigningKey: []byte(settings.Conf.JwtConfig.SigningKey),
 	}
 }
 

@@ -7,15 +7,18 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"question-service/global"
 	"question-service/logic/internal"
 	"question-service/models"
 	pb "question-service/proto"
+	"question-service/services/mq"
+	"question-service/services/registry"
+	"question-service/settings"
+	"question-service/views"
 	"time"
 )
 
 func QuestionSet(ctx *gin.Context, cursor int32) {
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -32,9 +35,9 @@ func QuestionSet(ctx *gin.Context, cursor int32) {
 		})
 		return
 	}
-	var questionList []models.Question
+	var questionList []views.Question
 	for _, v := range response.Data {
-		questionList = append(questionList, models.Question{
+		questionList = append(questionList, views.Question{
 			Id:    v.Id,
 			Title: v.Title,
 			Level: v.Level,
@@ -49,7 +52,7 @@ func QuestionSet(ctx *gin.Context, cursor int32) {
 }
 
 func QuestionDetail(ctx *gin.Context, id int64) {
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -66,7 +69,7 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 		})
 		return
 	}
-	data := models.Question{
+	data := views.Question{
 		Id:          response.Data.Id,
 		Title:       response.Data.Title,
 		Level:       response.Data.Level,
@@ -81,7 +84,7 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 }
 
 func QuestionQuery(ctx *gin.Context, name string) {
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -103,9 +106,9 @@ func QuestionQuery(ctx *gin.Context, name string) {
 		ctx.JSON(http.StatusNotFound, gin.H{})
 		return
 	}
-	var questionList []models.Question
+	var questionList []views.Question
 	for _, v := range response.Data {
-		questionList = append(questionList, models.Question{
+		questionList = append(questionList, views.Question{
 			Id:          v.Id,
 			Title:       v.Title,
 			Level:       v.Level,
@@ -127,7 +130,7 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Co
 	s.WebConnection = conn
 	// 发布任务
 	amqp := &internal.Amqp{
-		MqConnection: global.MqConnection,
+		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
 		Queue:        "question",
 		RoutingKey:   "question",
@@ -171,7 +174,7 @@ func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm, conn *websocket
 	s.WebConnection = conn
 	// 发布任务
 	amqp := &internal.Amqp{
-		MqConnection: global.MqConnection,
+		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
 		Queue:        "question",
 		RoutingKey:   "question",
@@ -231,7 +234,7 @@ func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
 	// 停止定时器
 	s.Timer.Stop()
 	// 返回客户端执行结果
-	response := models.QuestionResult{
+	response := views.QuestionResult{
 		QuestionID: form.QuestionID,
 		UserID:     form.UserID,
 		Clang:      form.Clang,
@@ -253,7 +256,7 @@ func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
 
 // 保存提交记录
 func updateSubmitRecord(msg []byte, result string) {
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		logrus.Errorf("db服务连接失败:%s", err.Error())
 		return

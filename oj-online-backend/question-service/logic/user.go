@@ -5,14 +5,17 @@ import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/gomodule/redigo/redis"
+	redigo "github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
-	"question-service/global"
 	"question-service/middlewares"
 	"question-service/models"
 	pb "question-service/proto"
+	"question-service/services/redis"
+	"question-service/services/registry"
+	"question-service/settings"
+	"question-service/views"
 	"strconv"
 	"time"
 )
@@ -26,9 +29,9 @@ var (
 func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 	var cms_phone = "18048155008"
 	// 验证码校验
-	redisConn := global.RedisPoolInstance.Get()
+	redisConn := redis.NewConn()
 	defer redisConn.Close()
-	if c, err := redis.String(redisConn.Do("Get", cms_phone)); err != nil {
+	if c, err := redigo.String(redisConn.Do("Get", cms_phone)); err != nil {
 		logrus.Debugln(err.Error())
 		ctx.JSON(http.StatusNoContent, gin.H{
 			"msg": "验证码不存在",
@@ -42,7 +45,7 @@ func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 	}
 
 	// 注册
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -79,7 +82,7 @@ func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 
 func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 	// 注册
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -136,7 +139,7 @@ func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 }
 
 func GetUserDetail(ctx *gin.Context, phone int64) {
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -162,10 +165,10 @@ func GetUserDetail(ctx *gin.Context, phone int64) {
 
 func GetRankList(ctx *gin.Context) {
 	// 获取排行榜
-	conn := global.RedisPoolInstance.Get()
+	conn := redis.NewConn()
 	defer conn.Close()
 
-	reply, err := redis.Strings(conn.Do("zrange", "rank", 0, -1))
+	reply, err := redigo.Strings(conn.Do("zrange", "rank", 0, -1))
 	if err != nil {
 		logrus.Debugln(err.Error())
 		ctx.JSON(http.StatusNoContent, gin.H{
@@ -174,11 +177,11 @@ func GetRankList(ctx *gin.Context) {
 		return
 	}
 
-	ranklist := make([]models.RankList, 20)
+	ranklist := make([]views.RankList, 20)
 	for i := 0; i < len(reply); i += 2 {
-		user := models.UserInfo{}
+		user := views.UserInfo{}
 		json.Unmarshal([]byte(reply[i]), &user)
-		item := models.RankList{
+		item := views.RankList{
 			Phone:     user.Phone,
 			NickName:  user.NickName,
 			PassCount: user.PassCount,
@@ -195,7 +198,7 @@ func GetRankList(ctx *gin.Context) {
 
 func GetSubmitRecord(ctx *gin.Context, userId int64) {
 	// 获取提交记录
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",

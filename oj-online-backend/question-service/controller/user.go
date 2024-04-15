@@ -8,8 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"question-service/global"
 	"question-service/logic"
+	"question-service/services/redis"
+	"question-service/settings"
 	"question-service/utils"
 	"regexp"
 	"strconv"
@@ -79,17 +80,17 @@ func SendCmsCode(ctx *gin.Context) {
 	// controller
 	config := &openapi.Config{
 		// 您的AccessKey ID
-		AccessKeyId: &global.ConfigInstance.SMS_.AccessKeyId,
+		AccessKeyId: &settings.Conf.SmsConfig.AccessKeyId,
 		// 您的AccessKey Secret
-		AccessKeySecret: &global.ConfigInstance.SMS_.AccessKeySecret,
+		AccessKeySecret: &settings.Conf.SmsConfig.AccessKeySecret,
 	}
 	// 访问的域名
-	config.Endpoint = tea.String(global.ConfigInstance.SMS_.Endpoint)
+	config.Endpoint = tea.String(settings.Conf.SmsConfig.Endpoint)
 	client, _ := dysmsapi.NewClient(config)
 
 	request := &dysmsapi.SendSmsRequest{}
-	request.SetSignName(global.ConfigInstance.SMS_.SignName)
-	request.SetTemplateCode(global.ConfigInstance.SMS_.TemplateCode)
+	request.SetSignName(settings.Conf.SmsConfig.SignName)
+	request.SetTemplateCode(settings.Conf.SmsConfig.TemplateCode)
 	request.SetPhoneNumbers(phone)
 	request.SetTemplateParam(string(data))
 
@@ -101,7 +102,7 @@ func SendCmsCode(ctx *gin.Context) {
 	logrus.Debugln(tea.StringValue(response.Body.RequestId))
 
 	// 缓存验证码
-	redisConn := global.RedisPoolInstance.Get()
+	redisConn := redis.NewConn()
 	defer redisConn.Close()
 	if _, err := redisConn.Do("Set", phone, c, "ex", expire); err != nil {
 		logrus.Errorln(err)

@@ -1,23 +1,24 @@
-package global
+package registry
 
 import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"question-service/settings"
 )
 
 type Registry struct {
 	client *consulapi.Client
 }
 
-func NewRegistry() (*Registry, error) {
+func NewRegistry(cfg *settings.RegistryConfig) (*Registry, error) {
 	// 配置中心地址
-	dsn := fmt.Sprintf("%s:%d", ConfigInstance.Registry_.Host, ConfigInstance.Registry_.Port)
-	cfg := consulapi.DefaultConfig()
-	cfg.Address = dsn
+	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	consulConf := consulapi.DefaultConfig()
+	consulConf.Address = dsn
 	// client
-	c, err := consulapi.NewClient(cfg)
+	c, err := consulapi.NewClient(consulConf)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +45,8 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 }
 
 // NewDBConnection db服务连接
-func NewDBConnection() (*grpc.ClientConn, error) {
-	registry, err := NewRegistry()
+func NewDBConnection(cfg *settings.RegistryConfig) (*grpc.ClientConn, error) {
+	registry, err := NewRegistry(cfg)
 	if err != nil {
 		return nil, err
 	}

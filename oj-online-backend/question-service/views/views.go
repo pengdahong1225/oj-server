@@ -1,4 +1,4 @@
-package models
+package views
 
 import "github.com/golang/protobuf/ptypes/timestamp"
 

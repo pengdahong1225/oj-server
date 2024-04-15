@@ -1,31 +1,31 @@
-package global
+package settings
 
 // 从viper反射到数据模型，需要设置`mapstructure`反射字段
-type config struct {
-	System_    systemConfig   `mapstructure:"system"`
-	Redis_     redisConfig    `mapstructure:"redis"`
-	JWTConfig_ jwtConfig      `mapstructure:"jwt"`
-	SMS_       sms            `mapstructure:"sms"`
-	Registry_  registryConfig `mapstructure:"registry"`
-	Log_       logConfig      `mapstructure:"log"`
-	Mq_        MqConfig       `mapstructure:"rabbitmq"`
+type AppConfig struct {
+	*SystemConfig   `mapstructure:"system"`
+	*RedisConfig    `mapstructure:"redis"`
+	*JwtConfig      `mapstructure:"jwt"`
+	*SmsConfig      `mapstructure:"sms"`
+	*LogConfig      `mapstructure:"log"`
+	*RegistryConfig `mapstructure:"registry"`
+	*MqConfig       `mapstructure:"rabbitmq"`
 }
 
-type systemConfig struct {
+type SystemConfig struct {
 	Name string `mapstructure:"name"`
 	Port int    `mapstructure:"port"`
 }
 
-type redisConfig struct {
-	Ip   string `mapstructure:"ip"`
+type RedisConfig struct {
+	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
-type jwtConfig struct {
+type JwtConfig struct {
 	SigningKey string `mapstructure:"key"`
 }
 
-type sms struct {
+type SmsConfig struct {
 	AccessKeyId     string `mapstructure:"accessKeyId"`
 	AccessKeySecret string `mapstructure:"accessKeySecret"`
 	Endpoint        string `mapstructure:"endpoint"`
@@ -33,11 +33,12 @@ type sms struct {
 	TemplateCode    string `mapstructure:"templateCode"`
 }
 
-type registryConfig struct {
+type RegistryConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
-type logConfig struct {
+
+type LogConfig struct {
 	Path  string `mapstructure:"path"`
 	Level string `mapstructure:"level"`
 }

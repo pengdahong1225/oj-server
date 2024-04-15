@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/global"
-	"question-service/models"
 	pb "question-service/proto"
+	"question-service/services/registry"
+	"question-service/settings"
+	"question-service/views"
 )
 
 func GetUserList(ctx *gin.Context, cursor int32) {
-	dbConn, err := global.NewDBConnection()
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "db服务连接失败",
@@ -28,9 +29,9 @@ func GetUserList(ctx *gin.Context, cursor int32) {
 		})
 		return
 	}
-	var userList []*models.UserInfo
+	var userList []*views.UserInfo
 	for _, u := range response.Data {
-		userList = append(userList, &models.UserInfo{
+		userList = append(userList, &views.UserInfo{
 			Phone:       u.Phone,
 			NickName:    u.Nickname,
 			Email:       u.Email,
