@@ -7,7 +7,7 @@ registry:
   port: 8600
 
 redis:
-  ip: 10.0.8.10
+  host: 10.0.8.10
   port: 6379
 
 rabbitmq:

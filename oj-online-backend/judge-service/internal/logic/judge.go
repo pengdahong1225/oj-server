@@ -1,13 +1,15 @@
-package server
+package logic
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"judge-service/global"
-	"judge-service/internal"
+	"judge-service/internal/logic/judge"
 	"judge-service/models"
+	"judge-service/services/ants"
+	"judge-service/services/mq"
+	"judge-service/services/registry"
 	"net/http"
 	"strings"
 )
@@ -15,9 +17,9 @@ import (
 type JudgeServer struct {
 }
 
-func (receiver *JudgeServer) start() {
+func (receiver *JudgeServer) Loop() {
 	amqp := &Amqp{
-		MqConnection: global.MqConnection,
+		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
 		Queue:        "question",
 		RoutingKey:   "question",
@@ -45,7 +47,7 @@ func (receiver *JudgeServer) start() {
 	// 同步接收，异步处理
 	for msg := range deliveries {
 		// 异步处理
-		global.AntsPoolInstance.Submit(func() {
+		ants.AntsPoolInstance.Submit(func() {
 			// 处理消息
 			out := receiver.handleSync(msg)
 			// 回调
@@ -65,13 +67,13 @@ func (receiver *JudgeServer) handleSync(msg amqp.Delivery) []byte {
 		return nil
 	}
 	// 处理
-	rspMsg := internal.Handle(form)
+	rspMsg := judge.Handle(form)
 	return rspMsg
 }
 
 func (receiver *JudgeServer) callBack(msg []byte) {
 	// 获取question服务地址
-	dsn, err := global.QuestionDsn()
+	dsn, err := registry.QuestionDsn()
 	if err != nil {
 		logrus.Errorf("获取question服务地址失败:%s", err.Error())
 		return

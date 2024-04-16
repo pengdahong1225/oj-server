@@ -27,7 +27,7 @@ func AppInit() {
 	if err := logger.Init(); err != nil {
 		panic(err)
 	}
-	// 初始化第三发服务
+	// 初始化服务组件
 	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
 		panic(err)
 	}
@@ -41,11 +41,11 @@ func Registry() {
 	if err != nil {
 		panic(err)
 	}
-	registry, err := registry.NewRegistry(settings.Conf.RegistryConfig)
+	register, err := registry.NewRegistry(settings.Conf.RegistryConfig)
 	if err != nil {
 		panic(err)
 	}
-	if err = registry.RegisterService(settings.Conf.SystemConfig.Name, ip.String(), settings.Conf.SystemConfig.Port); err != nil {
+	if err = register.RegisterService(settings.Conf.SystemConfig.Name, ip.String(), settings.Conf.SystemConfig.Port); err != nil {
 		panic(err)
 	}
 }

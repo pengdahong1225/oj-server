@@ -1,25 +1,25 @@
-package global
+package settings
 
 // 从viper反射到数据模型，需要设置`mapstructure`反射字段
-type config struct {
-	System_   systemConfig   `mapstructure:"system"`
-	Registry_ registryConfig `mapstructure:"registry"`
-	Sql_      mysqlConfig    `mapstructure:"mysql"`
-	Redis_    redisConfig    `mapstructure:"redis"`
-	Log_      logConfig      `mapstructure:"log"`
+type AppConfig struct {
+	*SystemConfig   `mapstructure:"system"`
+	*MysqlConfig    `mapstructure:"mysql"`
+	*RedisConfig    `mapstructure:"redis"`
+	*RegistryConfig `mapstructure:"registry"`
+	*LogConfig      `mapstructure:"log"`
 }
 
-type systemConfig struct {
+type SystemConfig struct {
 	Name string `mapstructure:"name"`
 	Port int    `mapstructure:"port"`
 }
 
-type registryConfig struct {
+type RegistryConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
-type mysqlConfig struct {
+type MysqlConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 	Db   string `mapstructure:"db"`
@@ -27,12 +27,12 @@ type mysqlConfig struct {
 	Pwd  string `mapstructure:"password"`
 }
 
-type redisConfig struct {
+type RedisConfig struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
-type logConfig struct {
+type LogConfig struct {
 	Path  string `mapstructure:"path"`
 	Level string `mapstructure:"level"`
 }

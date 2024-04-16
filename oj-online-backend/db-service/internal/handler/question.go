@@ -2,9 +2,10 @@ package handler
 
 import (
 	"context"
-	"db-service/global"
 	"db-service/internal/models"
 	pb "db-service/proto"
+	"db-service/services/dao/mysql"
+	"db-service/services/dao/redis"
 	"db-service/utils"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
@@ -14,8 +15,9 @@ import (
 )
 
 func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
+	db := mysql.DB
 	var question models.Question
-	result := global.DBInstance.Where("id = ?", request.Id).Find(&question)
+	result := db.Where("id = ?", request.Id).Find(&question)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "GetQuestionData error: %v", result.Error)
@@ -40,6 +42,7 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 }
 
 func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
+	db := mysql.DB
 	question := &models.Question{
 		Title:       request.Data.Title,
 		Level:       request.Data.Level,
@@ -48,7 +51,7 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 		TestCase:    request.Data.TestCase,
 		Template:    request.Data.Template,
 	}
-	result := global.DBInstance.Where("id = ?", question.ID)
+	result := db.Where("id = ?", question.ID)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "GetQuestionData error: %v", result.Error)
@@ -57,7 +60,7 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 		return nil, status.Errorf(codes.AlreadyExists, "method CreateQuestionData error: %v", "already exists")
 	}
 
-	result = global.DBInstance.Create(question)
+	result = db.Create(question)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "method CreateQuestionData error: %v", result.Error)
@@ -72,6 +75,7 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 }
 
 func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request *pb.UpdateQuestionRequest) (*empty.Empty, error) {
+	db := mysql.DB
 	question := &models.Question{
 		Title:       request.Data.Title,
 		Level:       request.Data.Level,
@@ -80,7 +84,7 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 		TestCase:    request.Data.TestCase,
 		Template:    request.Data.Template,
 	}
-	result := global.DBInstance.Where("id = ?", question.ID)
+	result := db.Where("id = ?", question.ID)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "GetQuestionData error: %v", result.Error)
@@ -88,7 +92,7 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 	if result.RowsAffected == 0 {
 		return nil, status.Errorf(codes.NotFound, "method UpdateQuestionData error: %v", "not found")
 	}
-	result = global.DBInstance.Updates(question)
+	result = db.Updates(question)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "method UpdateQuestionData error: %v", result.Error)
@@ -101,8 +105,9 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 }
 
 func (receiver *DBServiceServer) DeleteQuestionData(ctx context.Context, request *pb.DeleteQuestionRequest) (*empty.Empty, error) {
+	db := mysql.DB
 	var question *models.Question
-	result := global.DBInstance.Where("id = ?", request.Id).Find(&question)
+	result := db.Where("id = ?", request.Id).Find(&question)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "GetQuestionData error: %v", result.Error)
@@ -111,25 +116,26 @@ func (receiver *DBServiceServer) DeleteQuestionData(ctx context.Context, request
 		return nil, status.Errorf(codes.NotFound, "GetQuestionData error: %v", "not found")
 	}
 	// 软删除
-	result = global.DBInstance.Delete(question)
+	result = db.Delete(question)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "method DeleteQuestionData error: %v", result.Error)
 	}
 	// 永久删除
-	// result = global.DBInstance.Unscoped().Delete(&user)
+	// result = db.Unscoped().Delete(&user)
 	return &empty.Empty{}, nil
 }
 
 // GetQuestionList 题库列表
 // 游标分页，查询id，title，level，tags
 func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *pb.GetQuestionListRequest) (*pb.GetQuestionListResponse, error) {
+	db := mysql.DB
 	var pageSize = 10
 	rsp := &pb.GetQuestionListResponse{}
 
 	var questionList []models.Question
 	var count int64 = 0
-	result := global.DBInstance.Model(questionList).Count(&count)
+	result := db.Model(questionList).Count(&count)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query count failed")
@@ -140,7 +146,7 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 	// where id>=cursor
 	// order by id
 	// limit 10;
-	result = global.DBInstance.Select("id,title,level,tags").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&questionList)
+	result = db.Select("id,title,level,tags").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&questionList)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query questionList failed")
@@ -160,11 +166,12 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 // QueryQuestionWithName 根据题目名查询题目
 // 模糊查询
 func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, request *pb.QueryQuestionWithNameRequest) (*pb.QueryQuestionWithNameResponse, error) {
+	db := mysql.DB
 	var questionList []models.Question
 	// select * from question
 	// where title like '%name%';
 	names := "%" + request.Name + "%"
-	result := global.DBInstance.Where("name LINK ?", names).Find(&questionList)
+	result := db.Where("name LINK ?", names).Find(&questionList)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query question list failed")
@@ -193,7 +200,7 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 // 测试用例要插入到redis
 func updateTestCases(subKey int64, value string) {
 	var key = "QuestionTestCases"
-	conn := global.RedisPoolInstance.Get()
+	conn := redis.NewConn()
 	defer conn.Close()
 
 	_, err := conn.Do("HSET", key, subKey, value)

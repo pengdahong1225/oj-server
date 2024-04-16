@@ -1,8 +1,9 @@
-package global
+package logger
 
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"judge-service/settings"
 	"os"
 	"time"
 )
@@ -29,8 +30,8 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 	hook.infoFile.Close()
 	hook.debugFile.Close()
 
-	path := ConfigInstance.Log_.Path
-	app := ConfigInstance.System_.Name
+	path := settings.Conf.LogConfig.Path
+	app := settings.Conf.SystemConfig.Name
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		return err
@@ -60,10 +61,10 @@ func (hook FileHook) write(entry *logrus.Entry) {
 }
 
 // 初始化日志
-func initLog() error {
+func Init() error {
 	// 目录
-	path := ConfigInstance.Log_.Path
-	app := ConfigInstance.System_.Name
+	path := settings.Conf.LogConfig.Path
+	app := settings.Conf.SystemConfig.Name
 	timer := time.Now().Format("2006-01-02")
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
@@ -82,7 +83,7 @@ func initLog() error {
 		fileDate:  timer,
 	}
 	logrus.AddHook(hook)
-	if ConfigInstance.Log_.Level == "info" {
+	if settings.Conf.LogConfig.Level == "info" {
 		logrus.SetLevel(logrus.InfoLevel)
 	} else {
 		logrus.SetLevel(logrus.DebugLevel)

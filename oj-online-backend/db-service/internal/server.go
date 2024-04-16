@@ -1,10 +1,12 @@
 package internal
 
 import (
-	"db-service/global"
 	"db-service/internal/daemon"
 	"db-service/internal/handler"
 	pb "db-service/proto"
+	"db-service/services/ants"
+	"db-service/services/registry"
+	"db-service/settings"
 	"db-service/utils"
 	"fmt"
 	"google.golang.org/grpc"
@@ -20,16 +22,16 @@ type Server struct {
 func (receiver Server) Start() {
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
-	err := global.AntsPoolInstance.Submit(func() {
+	err := ants.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
 		daemon.StartDaemon()
 	})
 	if err != nil {
 		panic(err)
 	}
-	err = global.AntsPoolInstance.Submit(func() {
+	err = ants.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
-		startGRPCServer()
+		StartRPCServer()
 	})
 	if err != nil {
 		panic(err)
@@ -37,14 +39,14 @@ func (receiver Server) Start() {
 	wg.Wait()
 }
 
-func startGRPCServer() {
+func StartRPCServer() {
 	// 获取ip地址
 	ip, err := utils.GetOutboundIP()
 	if err != nil {
 		panic(err)
 	}
 	// 监听端口
-	netAddr := fmt.Sprintf("%s:%d", ip.String(), global.ConfigInstance.System_.Port)
+	netAddr := fmt.Sprintf("%s:%d", ip.String(), settings.Conf.SystemConfig.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
 		panic(err)
@@ -56,8 +58,8 @@ func startGRPCServer() {
 	healthcheck := health.NewServer()
 	healthpb.RegisterHealthServer(grpcServer, healthcheck)
 	// 注册
-	registry, _ := global.NewRegistry()
-	if err := registry.RegisterService(global.ConfigInstance.System_.Name, ip.String(), global.ConfigInstance.System_.Port); err != nil {
+	register, _ := registry.NewRegistry(settings.Conf.RegistryConfig)
+	if err := register.RegisterService(settings.Conf.SystemConfig.Name, ip.String(), settings.Conf.SystemConfig.Port); err != nil {
 		panic(err)
 	}
 

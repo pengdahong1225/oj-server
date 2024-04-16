@@ -6,6 +6,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 	"judge-service/global"
+	"judge-service/internal/logic"
 	"judge-service/models"
 	"os"
 	"sync"
@@ -47,7 +48,7 @@ func (receiver *Handler) JudgeQuestion(form *models.JudgeRequest) *models.JudgeB
 	}
 
 	// 新建沙箱
-	sandBox, err := NewSandBox(form.Clang)
+	sandBox, err := logic.NewSandBox(form.Clang)
 	if err != nil {
 		logrus.Errorf("error: %s", err.Error())
 		rsp.Status = models.EN_Status_Internal

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	"db-service/global"
 	"db-service/internal/models"
 	pb "db-service/proto"
+	"db-service/services/dao/mysql"
 	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/mervick/aes-everywhere/go/aes256"
@@ -20,8 +20,9 @@ type DBServiceServer struct {
 }
 
 func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	db := mysql.DB
 	var user models.UserInfo
-	result := global.DBInstance.Where("phone=?", request.Phone).Find(&user)
+	result := db.Where("phone=?", request.Phone).Find(&user)
 	if result.RowsAffected == 0 {
 		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
@@ -47,8 +48,9 @@ func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.Ge
 }
 
 func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	db := mysql.DB
 	var user models.UserInfo
-	result := global.DBInstance.Where("phone=?", request.Data.Phone)
+	result := db.Where("phone=?", request.Data.Phone)
 	if result.RowsAffected > 0 {
 		return nil, status.Errorf(codes.AlreadyExists, "user already exists")
 	}
@@ -63,7 +65,7 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 	l, _ := json.Marshal(user)
 	logrus.Infof("create user:%s", l)
 
-	result = global.DBInstance.Create(&user)
+	result = db.Create(&user)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "create user failed")
@@ -72,8 +74,9 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
+	db := mysql.DB
 	var user models.UserInfo
-	result := global.DBInstance.Where("phone=?", request.Data.Phone).Find(&user)
+	result := db.Where("phone=?", request.Data.Phone).Find(&user)
 	if result.RowsAffected == 0 {
 		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
@@ -92,7 +95,7 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 	user.Email = request.Data.Email
 	user.HeadUrl = request.Data.HeadUrl
 
-	result = global.DBInstance.Save(&user) // gorm在事务执行(可重复读)，innodb自动加写锁
+	result = db.Save(&user) // gorm在事务执行(可重复读)，innodb自动加写锁
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "update user failed")
@@ -101,8 +104,9 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
+	db := mysql.DB
 	var user models.UserInfo
-	result := global.DBInstance.Where("phone=?", request.Id).Find(&user)
+	result := db.Where("phone=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query user failed")
@@ -112,7 +116,7 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 	}
 
 	// 软删除
-	result = global.DBInstance.Delete(&user)
+	result = db.Delete(&user)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "delete user failed")
@@ -125,13 +129,14 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 
 // GetUserList 采用游标分页
 func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+	db := mysql.DB
 	var pageSize = 10
 	var userlist []models.UserInfo
 	rsp := &pb.GetUserListResponse{}
 
 	// 查询总量
 	var count int64
-	result := global.DBInstance.Model(&models.UserInfo{}).Count(&count)
+	result := db.Model(&models.UserInfo{}).Count(&count)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query count failed")
@@ -140,7 +145,7 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 	if request.Cursor < 0 || int64(request.Cursor) > count {
 		return nil, status.Errorf(codes.InvalidArgument, "cursor out of range")
 	}
-	result = global.DBInstance.Where("id >= ", request.Cursor).Order("id").Limit(pageSize).Find(&userlist)
+	result = db.Where("id >= ", request.Cursor).Order("id").Limit(pageSize).Find(&userlist)
 	if result.Error != nil {
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query userlist failed")

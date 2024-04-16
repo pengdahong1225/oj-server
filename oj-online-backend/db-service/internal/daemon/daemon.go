@@ -1,8 +1,9 @@
 package daemon
 
 import (
-	"db-service/global"
 	"db-service/internal/models"
+	"db-service/services/dao/mysql"
+	"db-service/services/dao/redis"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -26,12 +27,13 @@ type Daemon struct {
 // 维护排行榜
 func (receiver Daemon) loopRank() {
 	var key = "rank"
-	conn := global.RedisPoolInstance.Get()
+	conn := redis.NewConn()
 	defer conn.Close()
 
+	db := mysql.DB
 	// select phone,nickname,pass_count from user_info order by pass_count desc;
 	var users []models.UserInfo
-	result := global.DBInstance.Select("phone", "nickname", "pass_count").Order("pass_count desc").Limit(50).Find(&users)
+	result := db.Select("phone", "nickname", "pass_count").Order("pass_count desc").Limit(50).Find(&users)
 	if result.Error != nil {
 		logrus.Errorln("获取排行榜失败", result.Error.Error())
 		return
