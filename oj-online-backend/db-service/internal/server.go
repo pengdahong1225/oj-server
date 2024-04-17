@@ -3,7 +3,7 @@ package internal
 import (
 	"db-service/internal/daemon"
 	"db-service/internal/handler"
-	pb "db-service/proto"
+	"db-service/internal/proto"
 	"db-service/services/ants"
 	"db-service/services/registry"
 	"db-service/settings"

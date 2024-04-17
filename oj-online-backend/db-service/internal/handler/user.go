@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"db-service/internal/models"
-	pb "db-service/proto"
+	pb2 "db-service/internal/proto"
 	"db-service/services/dao/mysql"
 	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -16,10 +16,10 @@ import (
 var publicKey = "LeoMessi"
 
 type DBServiceServer struct {
-	pb.UnimplementedDBServiceServer
+	pb2.UnimplementedDBServiceServer
 }
 
-func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb2.GetUserRequest) (*pb2.GetUserResponse, error) {
 	db := mysql.DB
 	var user models.UserInfo
 	result := db.Where("phone=?", request.Phone).Find(&user)
@@ -32,7 +32,7 @@ func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.Ge
 	}
 	// 密码反解
 	user.Password = aes256.Decrypt(user.Password, publicKey)
-	userInfo := &pb.UserInfo{
+	userInfo := &pb2.UserInfo{
 		Phone:    user.Phone,
 		Password: user.Password,
 		Nickname: user.NickName,
@@ -42,12 +42,12 @@ func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.Ge
 		HeadUrl:  user.HeadUrl,
 	}
 
-	return &pb.GetUserResponse{
+	return &pb2.GetUserResponse{
 		Data: userInfo,
 	}, nil
 }
 
-func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb2.CreateUserRequest) (*pb2.CreateUserResponse, error) {
 	db := mysql.DB
 	var user models.UserInfo
 	result := db.Where("phone=?", request.Data.Phone)
@@ -70,10 +70,10 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 		logrus.Debugln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "create user failed")
 	}
-	return &pb.CreateUserResponse{Id: user.ID}, nil
+	return &pb2.CreateUserResponse{Id: user.ID}, nil
 }
 
-func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb2.UpdateUserRequest) (*empty.Empty, error) {
 	db := mysql.DB
 	var user models.UserInfo
 	result := db.Where("phone=?", request.Data.Phone).Find(&user)
@@ -103,7 +103,7 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 	return &empty.Empty{}, nil
 }
 
-func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb2.DeleteUserRequest) (*empty.Empty, error) {
 	db := mysql.DB
 	var user models.UserInfo
 	result := db.Where("phone=?", request.Id).Find(&user)
@@ -128,11 +128,11 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 }
 
 // GetUserList 采用游标分页
-func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb2.GetUserListRequest) (*pb2.GetUserListResponse, error) {
 	db := mysql.DB
 	var pageSize = 10
 	var userlist []models.UserInfo
-	rsp := &pb.GetUserListResponse{}
+	rsp := &pb2.GetUserListResponse{}
 
 	// 查询总量
 	var count int64
@@ -151,7 +151,7 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 		return nil, status.Errorf(codes.Internal, "query userlist failed")
 	}
 	for _, user := range userlist {
-		rsp.Data = append(rsp.Data, &pb.UserInfo{
+		rsp.Data = append(rsp.Data, &pb2.UserInfo{
 			Phone:    user.Phone,
 			Nickname: user.NickName,
 			Email:    user.Email,

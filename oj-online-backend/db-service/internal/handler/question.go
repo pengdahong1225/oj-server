@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"db-service/internal/models"
-	pb "db-service/proto"
+	pb2 "db-service/internal/proto"
 	"db-service/services/dao/mysql"
 	"db-service/services/dao/redis"
 	"db-service/utils"
@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
+func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *pb2.GetQuestionRequest) (*pb2.GetQuestionResponse, error) {
 	db := mysql.DB
 	var question models.Question
 	result := db.Where("id = ?", request.Id).Find(&question)
@@ -26,7 +26,7 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 		return nil, status.Errorf(codes.NotFound, "GetQuestionData[%d] error: %v", request.Id, "not found")
 	}
 
-	data := &pb.Question{
+	data := &pb2.Question{
 		Id:          question.ID,
 		CreateAt:    timestamppb.New(question.CreateAt),
 		Title:       question.Title,
@@ -36,12 +36,12 @@ func (receiver *DBServiceServer) GetQuestionData(ctx context.Context, request *p
 		TestCase:    question.TestCase,
 		Template:    question.Template,
 	}
-	return &pb.GetQuestionResponse{
+	return &pb2.GetQuestionResponse{
 		Data: data,
 	}, nil
 }
 
-func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
+func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request *pb2.CreateQuestionRequest) (*pb2.CreateQuestionResponse, error) {
 	db := mysql.DB
 	question := &models.Question{
 		Title:       request.Data.Title,
@@ -69,12 +69,12 @@ func (receiver *DBServiceServer) CreateQuestionData(ctx context.Context, request
 	// 插入成功 -- 将测试案例插入到redis
 	updateTestCases(request.Data.Id, request.Data.TestCase)
 
-	return &pb.CreateQuestionResponse{
+	return &pb2.CreateQuestionResponse{
 		Id: question.ID,
 	}, nil
 }
 
-func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request *pb.UpdateQuestionRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request *pb2.UpdateQuestionRequest) (*empty.Empty, error) {
 	db := mysql.DB
 	question := &models.Question{
 		Title:       request.Data.Title,
@@ -104,7 +104,7 @@ func (receiver *DBServiceServer) UpdateQuestionData(ctx context.Context, request
 	return &empty.Empty{}, nil
 }
 
-func (receiver *DBServiceServer) DeleteQuestionData(ctx context.Context, request *pb.DeleteQuestionRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) DeleteQuestionData(ctx context.Context, request *pb2.DeleteQuestionRequest) (*empty.Empty, error) {
 	db := mysql.DB
 	var question *models.Question
 	result := db.Where("id = ?", request.Id).Find(&question)
@@ -128,10 +128,10 @@ func (receiver *DBServiceServer) DeleteQuestionData(ctx context.Context, request
 
 // GetQuestionList 题库列表
 // 游标分页，查询id，title，level，tags
-func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *pb.GetQuestionListRequest) (*pb.GetQuestionListResponse, error) {
+func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *pb2.GetQuestionListRequest) (*pb2.GetQuestionListResponse, error) {
 	db := mysql.DB
 	var pageSize = 10
-	rsp := &pb.GetQuestionListResponse{}
+	rsp := &pb2.GetQuestionListResponse{}
 
 	var questionList []models.Question
 	var count int64 = 0
@@ -152,7 +152,7 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 		return nil, status.Errorf(codes.Internal, "query questionList failed")
 	}
 	for _, question := range questionList {
-		rsp.Data = append(rsp.Data, &pb.Question{
+		rsp.Data = append(rsp.Data, &pb2.Question{
 			Id:    question.ID,
 			Title: question.Title,
 			Level: question.Level,
@@ -165,7 +165,7 @@ func (receiver *DBServiceServer) GetQuestionList(ctx context.Context, request *p
 
 // QueryQuestionWithName 根据题目名查询题目
 // 模糊查询
-func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, request *pb.QueryQuestionWithNameRequest) (*pb.QueryQuestionWithNameResponse, error) {
+func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, request *pb2.QueryQuestionWithNameRequest) (*pb2.QueryQuestionWithNameResponse, error) {
 	db := mysql.DB
 	var questionList []models.Question
 	// select * from question
@@ -180,9 +180,9 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 		return nil, status.Errorf(codes.NotFound, "method QueryQuestionWithName not found")
 	}
 
-	var data []*pb.Question
+	var data []*pb2.Question
 	for _, question := range questionList {
-		data = append(data, &pb.Question{
+		data = append(data, &pb2.Question{
 			Id:          question.ID,
 			Title:       question.Title,
 			Level:       question.Level,
@@ -192,7 +192,7 @@ func (receiver *DBServiceServer) QueryQuestionWithName(ctx context.Context, requ
 			Template:    question.Template,
 		})
 	}
-	return &pb.QueryQuestionWithNameResponse{
+	return &pb2.QueryQuestionWithNameResponse{
 		Data: data,
 	}, nil
 }
