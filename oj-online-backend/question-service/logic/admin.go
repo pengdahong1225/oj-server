@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	pb "question-service/proto"
+	pb2 "question-service/logic/proto"
 	"question-service/services/registry"
 	"question-service/settings"
 	"question-service/views"
@@ -20,8 +20,8 @@ func GetUserList(ctx *gin.Context, cursor int32) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.GetUserListRequest{Cursor: cursor}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.GetUserListRequest{Cursor: cursor}
 	response, err := client.GetUserList(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{

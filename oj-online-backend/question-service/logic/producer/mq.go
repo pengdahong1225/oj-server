@@ -1,4 +1,4 @@
-package internal
+package producer
 
 import (
 	"github.com/sirupsen/logrus"

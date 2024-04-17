@@ -7,9 +7,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"question-service/logic/internal"
+	"question-service/logic/producer"
+	pb2 "question-service/logic/proto"
 	"question-service/models"
-	pb "question-service/proto"
 	"question-service/services/mq"
 	"question-service/services/registry"
 	"question-service/settings"
@@ -26,8 +26,8 @@ func QuestionSet(ctx *gin.Context, cursor int32) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.GetQuestionListRequest{Cursor: cursor}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.GetQuestionListRequest{Cursor: cursor}
 	response, err := client.GetQuestionList(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -60,8 +60,8 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.GetQuestionRequest{Id: id}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.GetQuestionRequest{Id: id}
 	response, err := client.GetQuestionData(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -92,8 +92,8 @@ func QuestionQuery(ctx *gin.Context, name string) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.QueryQuestionWithNameRequest{Name: name}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.QueryQuestionWithNameRequest{Name: name}
 
 	response, err := client.QueryQuestionWithName(context.Background(), request)
 	if err != nil {
@@ -126,10 +126,10 @@ func QuestionQuery(ctx *gin.Context, name string) {
 
 func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
 	// 新建上下文
-	s := internal.NewSession(form.UserId)
+	s := producer.NewSession(form.UserId)
 	s.WebConnection = conn
 	// 发布任务
-	amqp := &internal.Amqp{
+	amqp := &producer.Amqp{
 		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
 		Queue:        "question",
@@ -170,10 +170,10 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Co
 
 func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
 	// 新建上下文
-	s := internal.NewSession(form.UserId)
+	s := producer.NewSession(form.UserId)
 	s.WebConnection = conn
 	// 发布任务
-	amqp := &internal.Amqp{
+	amqp := &producer.Amqp{
 		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
 		Queue:        "question",
@@ -226,7 +226,7 @@ func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm, conn *websocket
 
 func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
 	// 获取上下文
-	s, ok := internal.SessionMap[form.SessionID]
+	s, ok := producer.SessionMap[form.SessionID]
 	if !ok {
 		ctx.JSON(http.StatusNotFound, gin.H{})
 		return
@@ -247,7 +247,7 @@ func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
 		logrus.Errorln("Failed to write message:", err)
 	}
 	// 删除上下文
-	delete(internal.SessionMap, form.SessionID)
+	delete(producer.SessionMap, form.SessionID)
 	// 关闭连接
 	s.WebConnection.Close()
 	// 保存提交记录
@@ -270,8 +270,8 @@ func updateSubmitRecord(msg []byte, result string) {
 		return
 	}
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.UpdateUserSubmitRecordRequest{
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.UpdateUserSubmitRecordRequest{
 		UserId:     question.UserId,
 		QuestionId: question.Id,
 		Code:       question.Code,
