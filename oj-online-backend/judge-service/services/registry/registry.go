@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"db-service/settings"
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
+	"judge-service/settings"
 )
 
 type Registry struct {
@@ -40,4 +40,19 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 		},
 	}
 	return receiver.client.Agent().ServiceRegister(srv)
+}
+
+func QuestionDsn(cfg *settings.RegistryConfig) (string, error) {
+	register, err := NewRegistry(cfg)
+	if err != nil {
+		return "", err
+	}
+	// registry.client.Health().Service返回的是对应服务的节点列表
+	services, _, err := register.client.Health().Service("question-service", "question-service", true, nil)
+	if err != nil {
+		return "", err
+	}
+	// 这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
+	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
+	return dsn, nil
 }

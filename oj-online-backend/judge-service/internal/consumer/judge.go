@@ -1,23 +1,24 @@
-package logic
+package consumer
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"judge-service/internal/logic/judge"
+	"judge-service/internal/logic"
 	"judge-service/models"
 	"judge-service/services/ants"
 	"judge-service/services/mq"
 	"judge-service/services/registry"
+	"judge-service/settings"
 	"net/http"
 	"strings"
 )
 
-type JudgeServer struct {
+type JudgeConsumer struct {
 }
 
-func (receiver *JudgeServer) Loop() {
+func (receiver *JudgeConsumer) Loop() {
 	amqp := &Amqp{
 		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
@@ -58,7 +59,7 @@ func (receiver *JudgeServer) Loop() {
 	}
 }
 
-func (receiver *JudgeServer) handleSync(msg amqp.Delivery) []byte {
+func (receiver *JudgeConsumer) handleSync(msg amqp.Delivery) []byte {
 	logrus.Infof("收到消息:%s", string(msg.Body))
 	// 解析
 	var form *models.JudgeRequest
@@ -67,13 +68,13 @@ func (receiver *JudgeServer) handleSync(msg amqp.Delivery) []byte {
 		return nil
 	}
 	// 处理
-	rspMsg := judge.Handle(form)
+	rspMsg := logic.Handle(form)
 	return rspMsg
 }
 
-func (receiver *JudgeServer) callBack(msg []byte) {
+func (receiver *JudgeConsumer) callBack(msg []byte) {
 	// 获取question服务地址
-	dsn, err := registry.QuestionDsn()
+	dsn, err := registry.QuestionDsn(settings.Conf.RegistryConfig)
 	if err != nil {
 		logrus.Errorf("获取question服务地址失败:%s", err.Error())
 		return

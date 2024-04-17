@@ -1,4 +1,4 @@
-package judge
+package logic
 
 import (
 	"encoding/json"

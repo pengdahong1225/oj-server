@@ -1,9 +1,10 @@
-package logic
+package consumer
 
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"judge-service/global"
+	"judge-service/services/mq"
+	"judge-service/settings"
 )
 
 type Amqp struct {
@@ -20,7 +21,7 @@ func (receiver *Amqp) checkMqConnection() error {
 	if receiver.MqConnection.IsClosed() {
 		var err error
 		// 重连
-		global.MqConnection, err = global.ConnectToMq()
+		mq.MqConnection, err = mq.ConnectToMq(settings.Conf.MqConfig)
 		if err != nil {
 			return err
 		}
@@ -29,7 +30,7 @@ func (receiver *Amqp) checkMqConnection() error {
 }
 
 func (receiver *Amqp) Prepare() error {
-	conn := global.MqConnection
+	conn := mq.MqConnection
 	// 判断连接是否可用
 	if err := receiver.checkMqConnection(); err != nil {
 		logrus.Errorf("MQ连接不可用:%s", err.Error())

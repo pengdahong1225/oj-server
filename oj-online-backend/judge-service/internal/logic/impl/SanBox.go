@@ -1,8 +1,7 @@
-package logic
+package impl
 
 import (
 	"github.com/pkg/errors"
-	impl2 "judge-service/internal/logic/impl"
 	"judge-service/models"
 )
 
@@ -15,9 +14,9 @@ type SandBox interface {
 func NewSandBox(lang string) (SandBox, error) {
 	switch lang {
 	case "cpp":
-		return new(impl2.CppSandBox), nil
+		return new(CppSandBox), nil
 	case "go":
-		return new(impl2.GoSandBox), nil
+		return new(GoSandBox), nil
 	default:
 		return nil, errors.Errorf("unsupported language: %s", lang)
 	}

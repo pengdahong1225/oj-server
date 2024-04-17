@@ -1,8 +1,8 @@
 package internal
 
 import (
+	"judge-service/internal/consumer"
 	"judge-service/internal/health"
-	"judge-service/internal/logic"
 	"judge-service/services/ants"
 	"sync"
 )
@@ -28,8 +28,8 @@ func (receiver Server) Start() {
 	wg.Add(1)
 	err = ants.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
-		consumerSrv := new(logic.JudgeServer)
-		consumerSrv.Loop()
+		c := new(consumer.JudgeConsumer)
+		c.Loop()
 	})
 	if err != nil {
 		panic(err)

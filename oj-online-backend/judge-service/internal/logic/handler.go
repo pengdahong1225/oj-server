@@ -1,13 +1,14 @@
-package judge
+package logic
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
+	redigo "github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
-	"judge-service/global"
-	"judge-service/internal/logic"
+	"judge-service/internal/logic/impl"
 	"judge-service/models"
+	"judge-service/services/ants"
+	"judge-service/services/redis"
 	"os"
 	"sync"
 	"time"
@@ -48,7 +49,7 @@ func (receiver *Handler) JudgeQuestion(form *models.JudgeRequest) *models.JudgeB
 	}
 
 	// 新建沙箱
-	sandBox, err := logic.NewSandBox(form.Clang)
+	sandBox, err := impl.NewSandBox(form.Clang)
 	if err != nil {
 		logrus.Errorf("error: %s", err.Error())
 		rsp.Status = models.EN_Status_Internal
@@ -80,7 +81,7 @@ func (receiver *Handler) JudgeQuestion(form *models.JudgeRequest) *models.JudgeB
 	var passCount int
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
-	err = global.AntsPoolInstance.Submit(func() {
+	err = ants.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
 		for _, testCase := range cases {
 			// 入口
@@ -119,10 +120,10 @@ func (receiver *Handler) JudgeQuestion(form *models.JudgeRequest) *models.JudgeB
 func getTestCase(subKey int64) (string, error) {
 	var key = "QuestionTestCases"
 	// 获取测试用例
-	conn := global.RedisPoolInstance.Get()
+	conn := redis.NewConn()
 	defer conn.Close()
 
-	reply, err := redis.String(conn.Do("HGET", key, subKey))
+	reply, err := redigo.String(conn.Do("HGET", key, subKey))
 	if err != nil {
 		return "", err
 	}
