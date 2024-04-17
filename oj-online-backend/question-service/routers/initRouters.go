@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"question-service/controller"
 	"question-service/middlewares"
+	"time"
 )
 
 // HealthCheckRouters 健康检查路由
@@ -21,7 +22,7 @@ func QuestionRouters(engine *gin.Engine) {
 	// 公共api
 	{
 		engine.GET("/questionSet", controller.QuestionSet)
-		engine.POST("/sendCms", controller.SendCmsCode)
+		engine.POST("/sendSms", middlewares.RateLimitMiddleware(2*time.Second, 50), controller.SendSmsCode)
 		// 需要登录
 		engine.GET("/rankList", middlewares.AuthLogin(), controller.GetRankList)
 	}

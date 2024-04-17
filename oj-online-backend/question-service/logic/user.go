@@ -14,7 +14,9 @@ import (
 	"question-service/models"
 	"question-service/services/redis"
 	"question-service/services/registry"
+	"question-service/services/sms"
 	"question-service/settings"
+	"question-service/utils"
 	"question-service/views"
 	"strconv"
 	"time"
@@ -222,4 +224,28 @@ func GetSubmitRecord(ctx *gin.Context, userId int64) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": data,
 	})
+}
+
+func SendSmsCode(phone string) error {
+	// 生成随机数
+	c := utils.GenerateSmsCode(6)
+	expire := 180 // 3min过期
+	param := map[string]string{
+		"code": c,
+	}
+	data, _ := json.Marshal(param)
+
+	// 调用第三方服务发送
+	if err := sms.Send(data, phone); err != nil {
+		return err
+	}
+
+	// 缓存验证码
+	redisConn := redis.NewConn()
+	defer redisConn.Close()
+	if _, err := redisConn.Do("Set", phone, c, "ex", expire); err != nil {
+		logrus.Errorln(err)
+		return err
+	}
+	return nil
 }
