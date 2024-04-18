@@ -3,6 +3,7 @@
     <module name="oj-online-backend" />
     <working_directory value="$PROJECT_DIR$/judge-service" />
     <kind value="DIRECTORY" />
+    <package value="judge-service" />
     <directory value="$PROJECT_DIR$/judge-service" />
     <filePath value="$PROJECT_DIR$" />
     <output_directory value="$PROJECT_DIR$/judge-service/bin" />
