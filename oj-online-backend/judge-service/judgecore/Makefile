@@ -27,7 +27,6 @@ $(DYNAMIC_LIB): $(SRCS:.cpp=.o)
 
 $(STATIC_LIB): $(SRCS:.cpp=.o)
 	@ar cr $@ $^
-	cp $(STATIC_LIB) .
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INC) -c -pg -o $@ $<
@@ -37,4 +36,4 @@ $(STATIC_LIB): $(SRCS:.cpp=.o)
 	$(CXX) $(CXXFLAGS) $(INC) -c -pg -o $@ $<
 
 clean:
-	rm -f *.o .po *.so *.d .dep.*  $(SRCS:.cpp=.o) $(SRCS:.cpp=.d) $(DYNAMIC_LIB) $(STATIC_LIB) $(DYNAMIC_NAME) $(STATIC_NAME)
+	rm -f *.o .po *.so *.d $(SRCS:.c=.o) $(SRCS:.c=.d) $(DYNAMIC_LIB) $(STATIC_LIB) $(DYNAMIC_NAME) $(STATIC_NAME)
