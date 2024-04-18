@@ -14,6 +14,14 @@ import (
 	"time"
 )
 
+// Handle 入口
+func Handle(form *models.JudgeRequest) []byte {
+	handler := NewHandler()
+	rsp := handler.JudgeQuestion(form)
+	msg, _ := json.Marshal(rsp)
+	return msg
+}
+
 type Handler struct {
 }
 
