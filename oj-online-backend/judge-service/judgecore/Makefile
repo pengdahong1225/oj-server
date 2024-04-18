@@ -1,11 +1,7 @@
 CC  = gcc
 GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
-OPT     = -pipe -fno-ident -fPIC -shared -z defs
-CFLAGS += $(OPT) -g -pg -Wall -D_GNU_SOURCE -funroll-loops -MMD -D_REENTRANT -Wno-invalid-offsetof
-ifeq ($(MEMCHECK),1)
-CFLAGS += -DMEMCHECK
-endif
+CFLAGS = -g -Wall -Werror -O3 -std=c99
 
 INC	= -I./src -I./src/rules
 SRCS = $(wildcard ./src/*.c) $(wildcard ./src/rules/*.c)
