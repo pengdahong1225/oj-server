@@ -14,7 +14,7 @@ CXXFLAGS += $(CFLAGS)
 INC	= -I./src -I./src/rules
 SRCS = $(wildcard ./src/*.c) $(wildcard ./src/rules/*.c)
 
-COMPILE_LIB_HOME = ./
+COMPILE_LIB_HOME = .
 DYNAMIC_NAME = core.so
 STATIC_NAME = core.a
 DYNAMIC_LIB	= $(COMPILE_LIB_HOME)/$(DYNAMIC_NAME)
