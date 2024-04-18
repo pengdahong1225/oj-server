@@ -12,7 +12,7 @@ CXXFLAGS = -std=c++2a -Wall -g -pipe -rdynamic -fno-strict-aliasing -Wno-unused-
 CXXFLAGS += $(CFLAGS)
 
 INC	= -I./src -I./src/rules
-SRCS = $(wildcard ./src/*.cpp) $(wildcard ./src/rules/*.cpp)
+SRCS = $(wildcard ./src/*.c) $(wildcard ./src/rules/*.c)
 
 COMPILE_LIB_HOME = ./
 DYNAMIC_NAME = core.so
