@@ -1,1 +1,1 @@
-sudo docker run -v /root/server/oj-online-server/oj-online-backend/judge-service/judgecore:/app -it -u root judge-core:1.0.1 /bin/bash
+sudo docker run -v /root/server/oj-online-server/oj-online-backend/judge-service/judgecore:/app -it -u root judge-core /bin/bash

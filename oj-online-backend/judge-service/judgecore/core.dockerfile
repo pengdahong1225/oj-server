@@ -13,6 +13,6 @@ EOF
 
 # 定义工作区目录
 WORKDIR /app
-VOLUME["/app"]
+VOLUME["."]
 
 CMD ["/bin/bash"]
