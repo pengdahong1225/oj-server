@@ -13,12 +13,13 @@ EOF
 
 # 定义工作区目录
 WORKDIR /app
+VOLUME["/app"]
 
-FROM builder AS compiler
-
-COPY . ./app
-
-VOLUME["/app/lib"]
-
-# 编译Makefile
-ENTRYPOINT["make clean;make"]
+#FROM builder AS compiler
+#
+#COPY . ./app
+#
+#VOLUME["/app/lib"]
+#
+## 编译Makefile
+#ENTRYPOINT["make clean;make"]
