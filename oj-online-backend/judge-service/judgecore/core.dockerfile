@@ -1,15 +1,19 @@
-FROM debian:trixie-slim AS builder
+FROM debian:trixie-slim AS builder-env
 
 # 添加gcc编译环境
 RUN apt-get update &&  \
-    apt-get install -y gcc g++ make && \
-    apt-get install -y libseccomp-devel
+    apt-get install -y gcc g++ make
 
 # 输出版本
 RUN <<EOF
 gcc --version
 make --version
 EOF
+
+
+FROM builder AS builder-core
+
+RUN apt-get install -y libseccomp-devel
 
 # 定义工作区目录
 WORKDIR /root/builder
