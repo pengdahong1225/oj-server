@@ -15,11 +15,4 @@ EOF
 WORKDIR /app
 VOLUME["/app"]
 
-#FROM builder AS compiler
-#
-#COPY . ./app
-#
-#VOLUME["/app/lib"]
-#
-## 编译Makefile
-#ENTRYPOINT["make clean;make"]
+CMD ["/bin/bash"]
