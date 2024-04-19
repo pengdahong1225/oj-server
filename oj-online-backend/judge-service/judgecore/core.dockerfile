@@ -13,7 +13,7 @@ EOF
 
 FROM builder-env AS builder-core
 
-RUN apt-get install -y libseccomp-devel
+RUN apt-get install -y libseccomp-dev
 
 # 定义工作区目录
 WORKDIR /root/builder
