@@ -11,7 +11,7 @@ make --version
 EOF
 
 
-FROM builder AS builder-core
+FROM builder-env AS builder-core
 
 RUN apt-get install -y libseccomp-devel
 
