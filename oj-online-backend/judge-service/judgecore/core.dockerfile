@@ -14,6 +14,4 @@ EOF
 # 定义工作区目录
 WORKDIR /root/builder
 
-VOLUME["/root/builder"]
-
 CMD ["/bin/bash"]
