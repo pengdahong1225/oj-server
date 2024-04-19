@@ -1,7 +1,7 @@
 CC  = gcc
 GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
-CFLAGS = -g -Wall -Werror -O3 -std=c99 -lseccomp
+CFLAGS = -g -Wall -Werror -O3 -std=c99 -lseccomp # libseccomp是一个用于 Linux 系统的 syscall 过滤器库
 
 INC	= -I./src -I./src/rules
 SRCS = $(wildcard ./src/*.c) $(wildcard ./src/rules/*.c)
