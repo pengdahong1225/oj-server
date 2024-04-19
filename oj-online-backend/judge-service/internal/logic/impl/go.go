@@ -63,7 +63,7 @@ func (receiver *GoSandBox) CheckCodeValid(data []byte) error {
 
 // Run 运行代码
 func (receiver *GoSandBox) Run(path string, rsp *models.JudgeBack, testCase models.TestCase) bool {
-	cmd := exec.Command("go", "run", path)
+	cmd := exec.Command("go run", path)
 	var out, stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	cmd.Stdout = &out
