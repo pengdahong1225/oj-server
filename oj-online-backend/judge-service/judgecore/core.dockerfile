@@ -12,7 +12,8 @@ make --version
 EOF
 
 # 定义工作区目录
-WORKDIR /app
-VOLUME["."]
+WORKDIR /root/builder
+
+VOLUME["/root/builder"]
 
 CMD ["/bin/bash"]
