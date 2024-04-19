@@ -7,8 +7,8 @@ INC	= -I./src -I./src/rules
 SRCS = $(wildcard ./src/*.c) $(wildcard ./src/rules/*.c)
 
 COMPILE_LIB_HOME = .
-DYNAMIC_NAME = core.so
-STATIC_NAME = core.a
+DYNAMIC_NAME = libjudger.so
+STATIC_NAME = libjudger.a
 DYNAMIC_LIB	= $(COMPILE_LIB_HOME)/$(DYNAMIC_NAME)
 STATIC_LIB = $(COMPILE_LIB_HOME)/$(STATIC_NAME)
 
