@@ -1,7 +1,7 @@
 CC  = gcc
 GCCVER := $(shell $(CC) -dumpversion | awk -F. '{ print $$1"."$$2}' )
 
-CFLAGS = -g -Wall -Werror -O3 -std=c99
+CFLAGS = -g -Wall -Werror -O3 -std=c99 -lseccomp
 
 INC	= -I./src -I./src/rules
 SRCS = $(wildcard ./src/*.c) $(wildcard ./src/rules/*.c)
