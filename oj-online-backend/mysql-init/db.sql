@@ -34,8 +34,8 @@ create table if not exists question
     tags VARCHAR(64) DEFAULT '' comment '题目标签，#做前缀', -- '#数组 #双指针 #哈希表'
 
     description TEXT NOT null comment '题目描述', -- markdown
-    test_case TEXT NOT null comment '测试用例', -- json{input,output}
-    template TEXT NOT null comment '模板代码', -- json{lang,code}
+    test_case TEXT NOT null comment '测试用例', -- json
+#     template TEXT NOT null comment '模板代码', -- json{lang,code}
 
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;
