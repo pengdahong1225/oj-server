@@ -1,4 +1,4 @@
-package impl
+package box
 
 import "judge-service/models"
 
