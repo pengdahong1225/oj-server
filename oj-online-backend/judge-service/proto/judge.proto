@@ -1,0 +1,28 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+service JudgeService {
+  rpc Judge(JudgeRequest) returns (JudgeResponse);
+}
+
+message JudgeRequest {
+  string code = 1;
+  int32 session_id = 2;
+  string language = 3;
+  string test_case_json = 4;
+}
+
+message JudgeResponse {
+  repeated JudgeResult result_list = 1;
+}
+
+message JudgeResult {
+  int32 result = 1;
+  int32 cpu_time = 2;
+  int32 real_time = 3;
+  int32 memory = 4;
+  int32 signal = 5;
+  int32 exit_code = 6;
+  int32 error = 7;
+  string content = 8;
+}

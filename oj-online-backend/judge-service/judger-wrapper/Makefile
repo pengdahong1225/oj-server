@@ -17,7 +17,7 @@ CPP_OBJ = $(patsubst %.cpp,%.o,$(CPP_SRC))
 
 OBJ = $(C_OBJ) $(CPP_OBJ)
 
-COMPILE_LIB_HOME = .
+COMPILE_LIB_HOME = ../lib
 DYNAMIC_NAME = libjudger.so
 STATIC_NAME = libjudger.a
 DYNAMIC_LIB	= $(COMPILE_LIB_HOME)/$(DYNAMIC_NAME)
