@@ -7,4 +7,4 @@ fi
 
 path = $*
 
-sudo docker run -v $(path):/root/builder -it -u root builder-core /bin/bash
+sudo docker run -v $(path):/root/builder -it -u root build-env /bin/bash
