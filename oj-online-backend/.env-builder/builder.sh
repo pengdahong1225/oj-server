@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t build-env -f builenv.dockerfile .
+docker build -t build-env -f buildenv.dockerfile .
