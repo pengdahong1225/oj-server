@@ -9,11 +9,12 @@ endif ()
 
 project(${TARGET})
 
+include_directories(./proto)
 include_directories(src)
 include_directories(src/app)
 include_directories(src/processer)
-include_directories(../../proto)
 
+aux_source_directory(./proto SRCS)
 aux_source_directory(./src SRCS)
 aux_source_directory(./src/app SRCS)
 aux_source_directory(./src/processer SRCS)

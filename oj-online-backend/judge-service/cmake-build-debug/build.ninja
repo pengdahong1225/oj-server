@@ -52,7 +52,7 @@ build cmake_object_order_depends_target_judge-service: phony || CMakeFiles/judge
 build CMakeFiles/judge-service.dir/src/app/main.cpp.o: CXX_COMPILER__judge-service_unscanned_Debug /cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src/app/main.cpp || cmake_object_order_depends_target_judge-service
   DEP_FILE = CMakeFiles/judge-service.dir/src/app/main.cpp.o.d
   FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  INCLUDES = -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src/app -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src/processer -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/../../proto
+  INCLUDES = -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/./proto -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src/app -I/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/src/processer
   OBJECT_DIR = CMakeFiles/judge-service.dir
   OBJECT_FILE_DIR = CMakeFiles/judge-service.dir/src/app
 
