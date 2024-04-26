@@ -5,6 +5,6 @@ if [ $# -ne 1 ]; then
     exit
 fi
 
-path = $*
+path=$*
 
 sudo docker run -v $(path):/root/builder -it -u root builder /bin/bash
