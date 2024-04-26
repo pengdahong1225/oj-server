@@ -1,0 +1,4 @@
+C:\Users\Messi\AppData\Local\JetBrains\CLion2024.1\cygwin_cmake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=/cygdrive/d/Program Files/JetBrains/CLion 2022.3.2/bin/ninja/cygwin/x64/ninja.exe" -G Ninja -S /cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service -B /cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/cmake-build-debug
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/cmake-build-debug

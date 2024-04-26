@@ -1,0 +1,3 @@
+/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/cmake-build-debug/CMakeFiles/judge-service.dir
+/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/cmake-build-debug/CMakeFiles/edit_cache.dir
+/cygdrive/d/Codes/Oj-Online-Server/oj-online-backend/judge-service/cmake-build-debug/CMakeFiles/rebuild_cache.dir
