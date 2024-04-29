@@ -9,20 +9,12 @@ endif ()
 
 project(${TARGET})
 
-include_directories(
-        ../library
-        ../judger-wrapper
-)
-
+include_directories(../library)
 include_directories(../proto)
 
-include_directories(.)
 include_directories(./app)
-include_directories(./processer)
-aux_source_directory(./ SRCS)
+include_directories(./handler)
 aux_source_directory(./app SRCS)
-aux_source_directory(./processer SRCS)
-
+aux_source_directory(./handler SRCS)
 
 add_executable(${TARGET} ${SRCS})
-target_link_libraries(${TARGET} PRIVATE MUDUO_LIBRARY)

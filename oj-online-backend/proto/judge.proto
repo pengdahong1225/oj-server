@@ -1,10 +1,6 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-service JudgeService {
-  rpc Judge(JudgeRequest) returns (JudgeResponse);
-}
-
 message JudgeRequest {
   string code = 1;
   int32 session_id = 2;
