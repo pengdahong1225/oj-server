@@ -12,7 +12,7 @@ class LengthHeaderCodec {
     const static size_t kHeaderLen = sizeof(int32_t); // 4字节包头
 public:
     static int decode(const muduo::string& data, JudgeRequest& msg);
-    static int encode(muduo::string& data, const JudgeRequest& msg);
+    static int encode(muduo::net::Buffer& buffer, const JudgeResponse& msg);
 };
 
 

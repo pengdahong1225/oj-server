@@ -9,7 +9,7 @@
 
 class HandlerProxy {
 public:
-    static JudgeResponse handle(JudgeRequest& request);
+    static SSJudgeResponse handle(SSJudgeRequest& request);
 };
 
 

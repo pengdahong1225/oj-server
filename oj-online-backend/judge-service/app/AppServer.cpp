@@ -47,14 +47,17 @@ void AppServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::
     LOG_INFO << conn->name() << " echo " << data.size() << " bytes, "
              << "data received at " << time.toString();
     // 协议解析
-    JudgeRequest request;
+    SSJudgeRequest request;
     if (LengthHeaderCodec::decode(data, request) != 0) {
-        LOG_INFO << "decode error";
+        return;
     }
 
     // 处理
-    JudgeResponse response = HandlerProxy::handle(request);
-    // 返回
-    muduo::string msg;
+    SSJudgeResponse response = HandlerProxy::handle(request);
 
+    // 返回
+    muduo::net::Buffer buffer;
+    if (LengthHeaderCodec::encode(buffer, response) == 0) {
+        conn->send(&buffer);
+    }
 }

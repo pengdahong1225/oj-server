@@ -54,40 +54,40 @@ struct TableStruct_judge_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::uint32 offsets[];
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_judge_2eproto;
-class JudgeRequest;
-class JudgeRequestDefaultTypeInternal;
-extern JudgeRequestDefaultTypeInternal _JudgeRequest_default_instance_;
-class JudgeResponse;
-class JudgeResponseDefaultTypeInternal;
-extern JudgeResponseDefaultTypeInternal _JudgeResponse_default_instance_;
-class JudgeResult;
-class JudgeResultDefaultTypeInternal;
-extern JudgeResultDefaultTypeInternal _JudgeResult_default_instance_;
+class SSJudgeRequest;
+class SSJudgeRequestDefaultTypeInternal;
+extern SSJudgeRequestDefaultTypeInternal _SSJudgeRequest_default_instance_;
+class SSJudgeResponse;
+class SSJudgeResponseDefaultTypeInternal;
+extern SSJudgeResponseDefaultTypeInternal _SSJudgeResponse_default_instance_;
+class SSJudgeResult;
+class SSJudgeResultDefaultTypeInternal;
+extern SSJudgeResultDefaultTypeInternal _SSJudgeResult_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
-template<> ::JudgeRequest* Arena::CreateMaybeMessage<::JudgeRequest>(Arena*);
-template<> ::JudgeResponse* Arena::CreateMaybeMessage<::JudgeResponse>(Arena*);
-template<> ::JudgeResult* Arena::CreateMaybeMessage<::JudgeResult>(Arena*);
+template<> ::SSJudgeRequest* Arena::CreateMaybeMessage<::SSJudgeRequest>(Arena*);
+template<> ::SSJudgeResponse* Arena::CreateMaybeMessage<::SSJudgeResponse>(Arena*);
+template<> ::SSJudgeResult* Arena::CreateMaybeMessage<::SSJudgeResult>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 
 // ===================================================================
 
-class JudgeRequest :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:JudgeRequest) */ {
+class SSJudgeRequest :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:SSJudgeRequest) */ {
  public:
-  JudgeRequest();
-  virtual ~JudgeRequest();
+  SSJudgeRequest();
+  virtual ~SSJudgeRequest();
 
-  JudgeRequest(const JudgeRequest& from);
-  JudgeRequest(JudgeRequest&& from) noexcept
-    : JudgeRequest() {
+  SSJudgeRequest(const SSJudgeRequest& from);
+  SSJudgeRequest(SSJudgeRequest&& from) noexcept
+    : SSJudgeRequest() {
     *this = ::std::move(from);
   }
 
-  inline JudgeRequest& operator=(const JudgeRequest& from) {
+  inline SSJudgeRequest& operator=(const SSJudgeRequest& from) {
     CopyFrom(from);
     return *this;
   }
-  inline JudgeRequest& operator=(JudgeRequest&& from) noexcept {
+  inline SSJudgeRequest& operator=(SSJudgeRequest&& from) noexcept {
     if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -105,37 +105,37 @@ class JudgeRequest :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const JudgeRequest& default_instance();
+  static const SSJudgeRequest& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const JudgeRequest* internal_default_instance() {
-    return reinterpret_cast<const JudgeRequest*>(
-               &_JudgeRequest_default_instance_);
+  static inline const SSJudgeRequest* internal_default_instance() {
+    return reinterpret_cast<const SSJudgeRequest*>(
+               &_SSJudgeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     0;
 
-  friend void swap(JudgeRequest& a, JudgeRequest& b) {
+  friend void swap(SSJudgeRequest& a, SSJudgeRequest& b) {
     a.Swap(&b);
   }
-  inline void Swap(JudgeRequest* other) {
+  inline void Swap(SSJudgeRequest* other) {
     if (other == this) return;
     InternalSwap(other);
   }
 
   // implements Message ----------------------------------------------
 
-  inline JudgeRequest* New() const final {
-    return CreateMaybeMessage<JudgeRequest>(nullptr);
+  inline SSJudgeRequest* New() const final {
+    return CreateMaybeMessage<SSJudgeRequest>(nullptr);
   }
 
-  JudgeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<JudgeRequest>(arena);
+  SSJudgeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SSJudgeRequest>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const JudgeRequest& from);
-  void MergeFrom(const JudgeRequest& from);
+  void CopyFrom(const SSJudgeRequest& from);
+  void MergeFrom(const SSJudgeRequest& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -149,10 +149,10 @@ class JudgeRequest :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(JudgeRequest* other);
+  void InternalSwap(SSJudgeRequest* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "JudgeRequest";
+    return "SSJudgeRequest";
   }
   private:
   inline ::PROTOBUF_NAMESPACE_ID::Arena* GetArenaNoVirtual() const {
@@ -239,7 +239,7 @@ class JudgeRequest :
   void _internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:JudgeRequest)
+  // @@protoc_insertion_point(class_scope:SSJudgeRequest)
  private:
   class _Internal;
 
@@ -253,23 +253,23 @@ class JudgeRequest :
 };
 // -------------------------------------------------------------------
 
-class JudgeResponse :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:JudgeResponse) */ {
+class SSJudgeResponse :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:SSJudgeResponse) */ {
  public:
-  JudgeResponse();
-  virtual ~JudgeResponse();
+  SSJudgeResponse();
+  virtual ~SSJudgeResponse();
 
-  JudgeResponse(const JudgeResponse& from);
-  JudgeResponse(JudgeResponse&& from) noexcept
-    : JudgeResponse() {
+  SSJudgeResponse(const SSJudgeResponse& from);
+  SSJudgeResponse(SSJudgeResponse&& from) noexcept
+    : SSJudgeResponse() {
     *this = ::std::move(from);
   }
 
-  inline JudgeResponse& operator=(const JudgeResponse& from) {
+  inline SSJudgeResponse& operator=(const SSJudgeResponse& from) {
     CopyFrom(from);
     return *this;
   }
-  inline JudgeResponse& operator=(JudgeResponse&& from) noexcept {
+  inline SSJudgeResponse& operator=(SSJudgeResponse&& from) noexcept {
     if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -287,37 +287,37 @@ class JudgeResponse :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const JudgeResponse& default_instance();
+  static const SSJudgeResponse& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const JudgeResponse* internal_default_instance() {
-    return reinterpret_cast<const JudgeResponse*>(
-               &_JudgeResponse_default_instance_);
+  static inline const SSJudgeResponse* internal_default_instance() {
+    return reinterpret_cast<const SSJudgeResponse*>(
+               &_SSJudgeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     1;
 
-  friend void swap(JudgeResponse& a, JudgeResponse& b) {
+  friend void swap(SSJudgeResponse& a, SSJudgeResponse& b) {
     a.Swap(&b);
   }
-  inline void Swap(JudgeResponse* other) {
+  inline void Swap(SSJudgeResponse* other) {
     if (other == this) return;
     InternalSwap(other);
   }
 
   // implements Message ----------------------------------------------
 
-  inline JudgeResponse* New() const final {
-    return CreateMaybeMessage<JudgeResponse>(nullptr);
+  inline SSJudgeResponse* New() const final {
+    return CreateMaybeMessage<SSJudgeResponse>(nullptr);
   }
 
-  JudgeResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<JudgeResponse>(arena);
+  SSJudgeResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SSJudgeResponse>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const JudgeResponse& from);
-  void MergeFrom(const JudgeResponse& from);
+  void CopyFrom(const SSJudgeResponse& from);
+  void MergeFrom(const SSJudgeResponse& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -331,10 +331,10 @@ class JudgeResponse :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(JudgeResponse* other);
+  void InternalSwap(SSJudgeResponse* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "JudgeResponse";
+    return "SSJudgeResponse";
   }
   private:
   inline ::PROTOBUF_NAMESPACE_ID::Arena* GetArenaNoVirtual() const {
@@ -359,54 +359,65 @@ class JudgeResponse :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kResultListFieldNumber = 1,
+    kResultListFieldNumber = 2,
+    kSessionIdFieldNumber = 1,
   };
-  // repeated .JudgeResult result_list = 1;
+  // repeated .SSJudgeResult result_list = 2;
   int result_list_size() const;
   private:
   int _internal_result_list_size() const;
   public:
   void clear_result_list();
-  ::JudgeResult* mutable_result_list(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::JudgeResult >*
+  ::SSJudgeResult* mutable_result_list(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult >*
       mutable_result_list();
   private:
-  const ::JudgeResult& _internal_result_list(int index) const;
-  ::JudgeResult* _internal_add_result_list();
+  const ::SSJudgeResult& _internal_result_list(int index) const;
+  ::SSJudgeResult* _internal_add_result_list();
   public:
-  const ::JudgeResult& result_list(int index) const;
-  ::JudgeResult* add_result_list();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::JudgeResult >&
+  const ::SSJudgeResult& result_list(int index) const;
+  ::SSJudgeResult* add_result_list();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult >&
       result_list() const;
 
-  // @@protoc_insertion_point(class_scope:JudgeResponse)
+  // int32 session_id = 1;
+  void clear_session_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 session_id() const;
+  void set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_session_id() const;
+  void _internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:SSJudgeResponse)
  private:
   class _Internal;
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::JudgeResult > result_list_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult > result_list_;
+  ::PROTOBUF_NAMESPACE_ID::int32 session_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_judge_2eproto;
 };
 // -------------------------------------------------------------------
 
-class JudgeResult :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:JudgeResult) */ {
+class SSJudgeResult :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:SSJudgeResult) */ {
  public:
-  JudgeResult();
-  virtual ~JudgeResult();
+  SSJudgeResult();
+  virtual ~SSJudgeResult();
 
-  JudgeResult(const JudgeResult& from);
-  JudgeResult(JudgeResult&& from) noexcept
-    : JudgeResult() {
+  SSJudgeResult(const SSJudgeResult& from);
+  SSJudgeResult(SSJudgeResult&& from) noexcept
+    : SSJudgeResult() {
     *this = ::std::move(from);
   }
 
-  inline JudgeResult& operator=(const JudgeResult& from) {
+  inline SSJudgeResult& operator=(const SSJudgeResult& from) {
     CopyFrom(from);
     return *this;
   }
-  inline JudgeResult& operator=(JudgeResult&& from) noexcept {
+  inline SSJudgeResult& operator=(SSJudgeResult&& from) noexcept {
     if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -424,37 +435,37 @@ class JudgeResult :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const JudgeResult& default_instance();
+  static const SSJudgeResult& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const JudgeResult* internal_default_instance() {
-    return reinterpret_cast<const JudgeResult*>(
-               &_JudgeResult_default_instance_);
+  static inline const SSJudgeResult* internal_default_instance() {
+    return reinterpret_cast<const SSJudgeResult*>(
+               &_SSJudgeResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     2;
 
-  friend void swap(JudgeResult& a, JudgeResult& b) {
+  friend void swap(SSJudgeResult& a, SSJudgeResult& b) {
     a.Swap(&b);
   }
-  inline void Swap(JudgeResult* other) {
+  inline void Swap(SSJudgeResult* other) {
     if (other == this) return;
     InternalSwap(other);
   }
 
   // implements Message ----------------------------------------------
 
-  inline JudgeResult* New() const final {
-    return CreateMaybeMessage<JudgeResult>(nullptr);
+  inline SSJudgeResult* New() const final {
+    return CreateMaybeMessage<SSJudgeResult>(nullptr);
   }
 
-  JudgeResult* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<JudgeResult>(arena);
+  SSJudgeResult* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SSJudgeResult>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const JudgeResult& from);
-  void MergeFrom(const JudgeResult& from);
+  void CopyFrom(const SSJudgeResult& from);
+  void MergeFrom(const SSJudgeResult& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -468,10 +479,10 @@ class JudgeResult :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(JudgeResult* other);
+  void InternalSwap(SSJudgeResult* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "JudgeResult";
+    return "SSJudgeResult";
   }
   private:
   inline ::PROTOBUF_NAMESPACE_ID::Arena* GetArenaNoVirtual() const {
@@ -584,7 +595,7 @@ class JudgeResult :
   void _internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:JudgeResult)
+  // @@protoc_insertion_point(class_scope:SSJudgeResult)
  private:
   class _Internal;
 
@@ -609,453 +620,473 @@ class JudgeResult :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// JudgeRequest
+// SSJudgeRequest
 
 // string code = 1;
-inline void JudgeRequest::clear_code() {
+inline void SSJudgeRequest::clear_code() {
   code_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline const std::string& JudgeRequest::code() const {
-  // @@protoc_insertion_point(field_get:JudgeRequest.code)
+inline const std::string& SSJudgeRequest::code() const {
+  // @@protoc_insertion_point(field_get:SSJudgeRequest.code)
   return _internal_code();
 }
-inline void JudgeRequest::set_code(const std::string& value) {
+inline void SSJudgeRequest::set_code(const std::string& value) {
   _internal_set_code(value);
-  // @@protoc_insertion_point(field_set:JudgeRequest.code)
+  // @@protoc_insertion_point(field_set:SSJudgeRequest.code)
 }
-inline std::string* JudgeRequest::mutable_code() {
-  // @@protoc_insertion_point(field_mutable:JudgeRequest.code)
+inline std::string* SSJudgeRequest::mutable_code() {
+  // @@protoc_insertion_point(field_mutable:SSJudgeRequest.code)
   return _internal_mutable_code();
 }
-inline const std::string& JudgeRequest::_internal_code() const {
+inline const std::string& SSJudgeRequest::_internal_code() const {
   return code_.GetNoArena();
 }
-inline void JudgeRequest::_internal_set_code(const std::string& value) {
+inline void SSJudgeRequest::_internal_set_code(const std::string& value) {
   
   code_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
 }
-inline void JudgeRequest::set_code(std::string&& value) {
+inline void SSJudgeRequest::set_code(std::string&& value) {
   
   code_.SetNoArena(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:JudgeRequest.code)
+  // @@protoc_insertion_point(field_set_rvalue:SSJudgeRequest.code)
 }
-inline void JudgeRequest::set_code(const char* value) {
+inline void SSJudgeRequest::set_code(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   code_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:JudgeRequest.code)
+  // @@protoc_insertion_point(field_set_char:SSJudgeRequest.code)
 }
-inline void JudgeRequest::set_code(const char* value, size_t size) {
+inline void SSJudgeRequest::set_code(const char* value, size_t size) {
   
   code_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:JudgeRequest.code)
+  // @@protoc_insertion_point(field_set_pointer:SSJudgeRequest.code)
 }
-inline std::string* JudgeRequest::_internal_mutable_code() {
+inline std::string* SSJudgeRequest::_internal_mutable_code() {
   
   return code_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline std::string* JudgeRequest::release_code() {
-  // @@protoc_insertion_point(field_release:JudgeRequest.code)
+inline std::string* SSJudgeRequest::release_code() {
+  // @@protoc_insertion_point(field_release:SSJudgeRequest.code)
   
   return code_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline void JudgeRequest::set_allocated_code(std::string* code) {
+inline void SSJudgeRequest::set_allocated_code(std::string* code) {
   if (code != nullptr) {
     
   } else {
     
   }
   code_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), code);
-  // @@protoc_insertion_point(field_set_allocated:JudgeRequest.code)
+  // @@protoc_insertion_point(field_set_allocated:SSJudgeRequest.code)
 }
 
 // int32 session_id = 2;
-inline void JudgeRequest::clear_session_id() {
+inline void SSJudgeRequest::clear_session_id() {
   session_id_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeRequest::_internal_session_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeRequest::_internal_session_id() const {
   return session_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeRequest::session_id() const {
-  // @@protoc_insertion_point(field_get:JudgeRequest.session_id)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeRequest::session_id() const {
+  // @@protoc_insertion_point(field_get:SSJudgeRequest.session_id)
   return _internal_session_id();
 }
-inline void JudgeRequest::_internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeRequest::_internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   session_id_ = value;
 }
-inline void JudgeRequest::set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeRequest::set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_session_id(value);
-  // @@protoc_insertion_point(field_set:JudgeRequest.session_id)
+  // @@protoc_insertion_point(field_set:SSJudgeRequest.session_id)
 }
 
 // string language = 3;
-inline void JudgeRequest::clear_language() {
+inline void SSJudgeRequest::clear_language() {
   language_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline const std::string& JudgeRequest::language() const {
-  // @@protoc_insertion_point(field_get:JudgeRequest.language)
+inline const std::string& SSJudgeRequest::language() const {
+  // @@protoc_insertion_point(field_get:SSJudgeRequest.language)
   return _internal_language();
 }
-inline void JudgeRequest::set_language(const std::string& value) {
+inline void SSJudgeRequest::set_language(const std::string& value) {
   _internal_set_language(value);
-  // @@protoc_insertion_point(field_set:JudgeRequest.language)
+  // @@protoc_insertion_point(field_set:SSJudgeRequest.language)
 }
-inline std::string* JudgeRequest::mutable_language() {
-  // @@protoc_insertion_point(field_mutable:JudgeRequest.language)
+inline std::string* SSJudgeRequest::mutable_language() {
+  // @@protoc_insertion_point(field_mutable:SSJudgeRequest.language)
   return _internal_mutable_language();
 }
-inline const std::string& JudgeRequest::_internal_language() const {
+inline const std::string& SSJudgeRequest::_internal_language() const {
   return language_.GetNoArena();
 }
-inline void JudgeRequest::_internal_set_language(const std::string& value) {
+inline void SSJudgeRequest::_internal_set_language(const std::string& value) {
   
   language_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
 }
-inline void JudgeRequest::set_language(std::string&& value) {
+inline void SSJudgeRequest::set_language(std::string&& value) {
   
   language_.SetNoArena(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:JudgeRequest.language)
+  // @@protoc_insertion_point(field_set_rvalue:SSJudgeRequest.language)
 }
-inline void JudgeRequest::set_language(const char* value) {
+inline void SSJudgeRequest::set_language(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   language_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:JudgeRequest.language)
+  // @@protoc_insertion_point(field_set_char:SSJudgeRequest.language)
 }
-inline void JudgeRequest::set_language(const char* value, size_t size) {
+inline void SSJudgeRequest::set_language(const char* value, size_t size) {
   
   language_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:JudgeRequest.language)
+  // @@protoc_insertion_point(field_set_pointer:SSJudgeRequest.language)
 }
-inline std::string* JudgeRequest::_internal_mutable_language() {
+inline std::string* SSJudgeRequest::_internal_mutable_language() {
   
   return language_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline std::string* JudgeRequest::release_language() {
-  // @@protoc_insertion_point(field_release:JudgeRequest.language)
+inline std::string* SSJudgeRequest::release_language() {
+  // @@protoc_insertion_point(field_release:SSJudgeRequest.language)
   
   return language_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline void JudgeRequest::set_allocated_language(std::string* language) {
+inline void SSJudgeRequest::set_allocated_language(std::string* language) {
   if (language != nullptr) {
     
   } else {
     
   }
   language_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), language);
-  // @@protoc_insertion_point(field_set_allocated:JudgeRequest.language)
+  // @@protoc_insertion_point(field_set_allocated:SSJudgeRequest.language)
 }
 
 // string test_case_json = 4;
-inline void JudgeRequest::clear_test_case_json() {
+inline void SSJudgeRequest::clear_test_case_json() {
   test_case_json_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline const std::string& JudgeRequest::test_case_json() const {
-  // @@protoc_insertion_point(field_get:JudgeRequest.test_case_json)
+inline const std::string& SSJudgeRequest::test_case_json() const {
+  // @@protoc_insertion_point(field_get:SSJudgeRequest.test_case_json)
   return _internal_test_case_json();
 }
-inline void JudgeRequest::set_test_case_json(const std::string& value) {
+inline void SSJudgeRequest::set_test_case_json(const std::string& value) {
   _internal_set_test_case_json(value);
-  // @@protoc_insertion_point(field_set:JudgeRequest.test_case_json)
+  // @@protoc_insertion_point(field_set:SSJudgeRequest.test_case_json)
 }
-inline std::string* JudgeRequest::mutable_test_case_json() {
-  // @@protoc_insertion_point(field_mutable:JudgeRequest.test_case_json)
+inline std::string* SSJudgeRequest::mutable_test_case_json() {
+  // @@protoc_insertion_point(field_mutable:SSJudgeRequest.test_case_json)
   return _internal_mutable_test_case_json();
 }
-inline const std::string& JudgeRequest::_internal_test_case_json() const {
+inline const std::string& SSJudgeRequest::_internal_test_case_json() const {
   return test_case_json_.GetNoArena();
 }
-inline void JudgeRequest::_internal_set_test_case_json(const std::string& value) {
+inline void SSJudgeRequest::_internal_set_test_case_json(const std::string& value) {
   
   test_case_json_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
 }
-inline void JudgeRequest::set_test_case_json(std::string&& value) {
+inline void SSJudgeRequest::set_test_case_json(std::string&& value) {
   
   test_case_json_.SetNoArena(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:JudgeRequest.test_case_json)
+  // @@protoc_insertion_point(field_set_rvalue:SSJudgeRequest.test_case_json)
 }
-inline void JudgeRequest::set_test_case_json(const char* value) {
+inline void SSJudgeRequest::set_test_case_json(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   test_case_json_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:JudgeRequest.test_case_json)
+  // @@protoc_insertion_point(field_set_char:SSJudgeRequest.test_case_json)
 }
-inline void JudgeRequest::set_test_case_json(const char* value, size_t size) {
+inline void SSJudgeRequest::set_test_case_json(const char* value, size_t size) {
   
   test_case_json_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:JudgeRequest.test_case_json)
+  // @@protoc_insertion_point(field_set_pointer:SSJudgeRequest.test_case_json)
 }
-inline std::string* JudgeRequest::_internal_mutable_test_case_json() {
+inline std::string* SSJudgeRequest::_internal_mutable_test_case_json() {
   
   return test_case_json_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline std::string* JudgeRequest::release_test_case_json() {
-  // @@protoc_insertion_point(field_release:JudgeRequest.test_case_json)
+inline std::string* SSJudgeRequest::release_test_case_json() {
+  // @@protoc_insertion_point(field_release:SSJudgeRequest.test_case_json)
   
   return test_case_json_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline void JudgeRequest::set_allocated_test_case_json(std::string* test_case_json) {
+inline void SSJudgeRequest::set_allocated_test_case_json(std::string* test_case_json) {
   if (test_case_json != nullptr) {
     
   } else {
     
   }
   test_case_json_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), test_case_json);
-  // @@protoc_insertion_point(field_set_allocated:JudgeRequest.test_case_json)
+  // @@protoc_insertion_point(field_set_allocated:SSJudgeRequest.test_case_json)
 }
 
 // -------------------------------------------------------------------
 
-// JudgeResponse
+// SSJudgeResponse
 
-// repeated .JudgeResult result_list = 1;
-inline int JudgeResponse::_internal_result_list_size() const {
+// int32 session_id = 1;
+inline void SSJudgeResponse::clear_session_id() {
+  session_id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResponse::_internal_session_id() const {
+  return session_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResponse::session_id() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResponse.session_id)
+  return _internal_session_id();
+}
+inline void SSJudgeResponse::_internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  session_id_ = value;
+}
+inline void SSJudgeResponse::set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_session_id(value);
+  // @@protoc_insertion_point(field_set:SSJudgeResponse.session_id)
+}
+
+// repeated .SSJudgeResult result_list = 2;
+inline int SSJudgeResponse::_internal_result_list_size() const {
   return result_list_.size();
 }
-inline int JudgeResponse::result_list_size() const {
+inline int SSJudgeResponse::result_list_size() const {
   return _internal_result_list_size();
 }
-inline void JudgeResponse::clear_result_list() {
+inline void SSJudgeResponse::clear_result_list() {
   result_list_.Clear();
 }
-inline ::JudgeResult* JudgeResponse::mutable_result_list(int index) {
-  // @@protoc_insertion_point(field_mutable:JudgeResponse.result_list)
+inline ::SSJudgeResult* SSJudgeResponse::mutable_result_list(int index) {
+  // @@protoc_insertion_point(field_mutable:SSJudgeResponse.result_list)
   return result_list_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::JudgeResult >*
-JudgeResponse::mutable_result_list() {
-  // @@protoc_insertion_point(field_mutable_list:JudgeResponse.result_list)
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult >*
+SSJudgeResponse::mutable_result_list() {
+  // @@protoc_insertion_point(field_mutable_list:SSJudgeResponse.result_list)
   return &result_list_;
 }
-inline const ::JudgeResult& JudgeResponse::_internal_result_list(int index) const {
+inline const ::SSJudgeResult& SSJudgeResponse::_internal_result_list(int index) const {
   return result_list_.Get(index);
 }
-inline const ::JudgeResult& JudgeResponse::result_list(int index) const {
-  // @@protoc_insertion_point(field_get:JudgeResponse.result_list)
+inline const ::SSJudgeResult& SSJudgeResponse::result_list(int index) const {
+  // @@protoc_insertion_point(field_get:SSJudgeResponse.result_list)
   return _internal_result_list(index);
 }
-inline ::JudgeResult* JudgeResponse::_internal_add_result_list() {
+inline ::SSJudgeResult* SSJudgeResponse::_internal_add_result_list() {
   return result_list_.Add();
 }
-inline ::JudgeResult* JudgeResponse::add_result_list() {
-  // @@protoc_insertion_point(field_add:JudgeResponse.result_list)
+inline ::SSJudgeResult* SSJudgeResponse::add_result_list() {
+  // @@protoc_insertion_point(field_add:SSJudgeResponse.result_list)
   return _internal_add_result_list();
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::JudgeResult >&
-JudgeResponse::result_list() const {
-  // @@protoc_insertion_point(field_list:JudgeResponse.result_list)
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult >&
+SSJudgeResponse::result_list() const {
+  // @@protoc_insertion_point(field_list:SSJudgeResponse.result_list)
   return result_list_;
 }
 
 // -------------------------------------------------------------------
 
-// JudgeResult
+// SSJudgeResult
 
 // int32 result = 1;
-inline void JudgeResult::clear_result() {
+inline void SSJudgeResult::clear_result() {
   result_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_result() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_result() const {
   return result_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::result() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.result)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::result() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.result)
   return _internal_result();
 }
-inline void JudgeResult::_internal_set_result(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_result(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   result_ = value;
 }
-inline void JudgeResult::set_result(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_result(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.result)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.result)
 }
 
 // int32 cpu_time = 2;
-inline void JudgeResult::clear_cpu_time() {
+inline void SSJudgeResult::clear_cpu_time() {
   cpu_time_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_cpu_time() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_cpu_time() const {
   return cpu_time_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::cpu_time() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.cpu_time)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::cpu_time() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.cpu_time)
   return _internal_cpu_time();
 }
-inline void JudgeResult::_internal_set_cpu_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_cpu_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   cpu_time_ = value;
 }
-inline void JudgeResult::set_cpu_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_cpu_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_cpu_time(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.cpu_time)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.cpu_time)
 }
 
 // int32 real_time = 3;
-inline void JudgeResult::clear_real_time() {
+inline void SSJudgeResult::clear_real_time() {
   real_time_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_real_time() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_real_time() const {
   return real_time_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::real_time() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.real_time)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::real_time() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.real_time)
   return _internal_real_time();
 }
-inline void JudgeResult::_internal_set_real_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_real_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   real_time_ = value;
 }
-inline void JudgeResult::set_real_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_real_time(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_real_time(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.real_time)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.real_time)
 }
 
 // int32 memory = 4;
-inline void JudgeResult::clear_memory() {
+inline void SSJudgeResult::clear_memory() {
   memory_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_memory() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_memory() const {
   return memory_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::memory() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.memory)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::memory() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.memory)
   return _internal_memory();
 }
-inline void JudgeResult::_internal_set_memory(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_memory(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   memory_ = value;
 }
-inline void JudgeResult::set_memory(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_memory(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_memory(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.memory)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.memory)
 }
 
 // int32 signal = 5;
-inline void JudgeResult::clear_signal() {
+inline void SSJudgeResult::clear_signal() {
   signal_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_signal() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_signal() const {
   return signal_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::signal() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.signal)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::signal() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.signal)
   return _internal_signal();
 }
-inline void JudgeResult::_internal_set_signal(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_signal(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   signal_ = value;
 }
-inline void JudgeResult::set_signal(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_signal(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_signal(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.signal)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.signal)
 }
 
 // int32 exit_code = 6;
-inline void JudgeResult::clear_exit_code() {
+inline void SSJudgeResult::clear_exit_code() {
   exit_code_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_exit_code() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_exit_code() const {
   return exit_code_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::exit_code() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.exit_code)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::exit_code() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.exit_code)
   return _internal_exit_code();
 }
-inline void JudgeResult::_internal_set_exit_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_exit_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   exit_code_ = value;
 }
-inline void JudgeResult::set_exit_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_exit_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_exit_code(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.exit_code)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.exit_code)
 }
 
 // int32 error = 7;
-inline void JudgeResult::clear_error() {
+inline void SSJudgeResult::clear_error() {
   error_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::_internal_error() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::_internal_error() const {
   return error_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 JudgeResult::error() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.error)
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResult::error() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.error)
   return _internal_error();
 }
-inline void JudgeResult::_internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::_internal_set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   error_ = value;
 }
-inline void JudgeResult::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResult::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_error(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.error)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.error)
 }
 
 // string content = 8;
-inline void JudgeResult::clear_content() {
+inline void SSJudgeResult::clear_content() {
   content_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline const std::string& JudgeResult::content() const {
-  // @@protoc_insertion_point(field_get:JudgeResult.content)
+inline const std::string& SSJudgeResult::content() const {
+  // @@protoc_insertion_point(field_get:SSJudgeResult.content)
   return _internal_content();
 }
-inline void JudgeResult::set_content(const std::string& value) {
+inline void SSJudgeResult::set_content(const std::string& value) {
   _internal_set_content(value);
-  // @@protoc_insertion_point(field_set:JudgeResult.content)
+  // @@protoc_insertion_point(field_set:SSJudgeResult.content)
 }
-inline std::string* JudgeResult::mutable_content() {
-  // @@protoc_insertion_point(field_mutable:JudgeResult.content)
+inline std::string* SSJudgeResult::mutable_content() {
+  // @@protoc_insertion_point(field_mutable:SSJudgeResult.content)
   return _internal_mutable_content();
 }
-inline const std::string& JudgeResult::_internal_content() const {
+inline const std::string& SSJudgeResult::_internal_content() const {
   return content_.GetNoArena();
 }
-inline void JudgeResult::_internal_set_content(const std::string& value) {
+inline void SSJudgeResult::_internal_set_content(const std::string& value) {
   
   content_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
 }
-inline void JudgeResult::set_content(std::string&& value) {
+inline void SSJudgeResult::set_content(std::string&& value) {
   
   content_.SetNoArena(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:JudgeResult.content)
+  // @@protoc_insertion_point(field_set_rvalue:SSJudgeResult.content)
 }
-inline void JudgeResult::set_content(const char* value) {
+inline void SSJudgeResult::set_content(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   content_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:JudgeResult.content)
+  // @@protoc_insertion_point(field_set_char:SSJudgeResult.content)
 }
-inline void JudgeResult::set_content(const char* value, size_t size) {
+inline void SSJudgeResult::set_content(const char* value, size_t size) {
   
   content_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:JudgeResult.content)
+  // @@protoc_insertion_point(field_set_pointer:SSJudgeResult.content)
 }
-inline std::string* JudgeResult::_internal_mutable_content() {
+inline std::string* SSJudgeResult::_internal_mutable_content() {
   
   return content_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline std::string* JudgeResult::release_content() {
-  // @@protoc_insertion_point(field_release:JudgeResult.content)
+inline std::string* SSJudgeResult::release_content() {
+  // @@protoc_insertion_point(field_release:SSJudgeResult.content)
   
   return content_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline void JudgeResult::set_allocated_content(std::string* content) {
+inline void SSJudgeResult::set_allocated_content(std::string* content) {
   if (content != nullptr) {
     
   } else {
     
   }
   content_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), content);
-  // @@protoc_insertion_point(field_set_allocated:JudgeResult.content)
+  // @@protoc_insertion_point(field_set_allocated:SSJudgeResult.content)
 }
 
 #ifdef __GNUC__

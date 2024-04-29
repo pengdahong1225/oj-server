@@ -1,18 +1,19 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-message JudgeRequest {
+message SSJudgeRequest {
   string code = 1;
-  int32 session_id = 2;
+  int32 session_id = 2; // 直接返回给调用端
   string language = 3;
   string test_case_json = 4;
 }
 
-message JudgeResponse {
-  repeated JudgeResult result_list = 1;
+message SSJudgeResponse {
+  int32 session_id = 1;
+  repeated SSJudgeResult result_list = 2;
 }
 
-message JudgeResult {
+message SSJudgeResult {
   int32 result = 1;
   int32 cpu_time = 2;
   int32 real_time = 3;
