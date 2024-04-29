@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.26)
 
 set(TARGET judge-service)
 set(CMAKE_CXX_STANDARD 20)
@@ -9,18 +9,20 @@ endif ()
 
 project(${TARGET})
 
-include_directories(./muduo)
-include_directories(./judger-wrapper)
-include_directories(./proto)
+include_directories(
+        ../library
+        ../judger-wrapper
+)
 
-include_directories(src)
-include_directories(src/app)
-include_directories(src/processer)
+include_directories(../proto)
 
-aux_source_directory(./proto SRCS)
+include_directories(.)
+include_directories(./app)
+include_directories(./processer)
+aux_source_directory(./ SRCS)
+aux_source_directory(./app SRCS)
+aux_source_directory(./processer SRCS)
 
-aux_source_directory(./src SRCS)
-aux_source_directory(./src/app SRCS)
-aux_source_directory(./src/processer SRCS)
 
 add_executable(${TARGET} ${SRCS})
+target_link_libraries(${TARGET} PRIVATE MUDUO_LIBRARY)
