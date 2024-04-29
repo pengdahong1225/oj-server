@@ -5,6 +5,8 @@
 #include "AppServer.h"
 #include "LengthHeaderCodec.h"
 #include "muduo/base/Logging.h"
+#include "judge.pb.h"
+#include "HandlerProxy.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -45,6 +47,14 @@ void AppServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::
     LOG_INFO << conn->name() << " echo " << data.size() << " bytes, "
              << "data received at " << time.toString();
     // 协议解析
+    JudgeRequest request;
+    if (LengthHeaderCodec::decode(data, request) != 0) {
+        LOG_INFO << "decode error";
+    }
 
-    LengthHeaderCodec::parse(data);
+    // 处理
+    JudgeResponse response = HandlerProxy::handle(request);
+    // 返回
+    muduo::string msg;
+
 }
