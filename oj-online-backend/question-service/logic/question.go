@@ -10,8 +10,10 @@ import (
 	"question-service/logic/producer"
 	pb "question-service/logic/proto"
 	"question-service/models"
+	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
+	"question-service/utils"
 	"question-service/views"
 	"time"
 )
@@ -125,18 +127,36 @@ func QuestionQuery(ctx *gin.Context, name string) {
 
 func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
 	// todo 获取测试用例
-	
-	// 新建上下文
-	s := producer.NewSession(form.UserId)
-	s.WebConnection = conn
+	test_case_json, err := redis.GetTestCaseJson(form.Id)
+	if err != nil {
+		logrus.Infoln("获取测试用例失败:", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "获取测试用例失败",
+		})
+		return
+	}
+	// 生成提交id
+	submit_id, err := utils.GenerateSubmitID(int(form.UserId), int(form.Id))
+	if err != nil {
+		logrus.Infoln("生成提交id失败:", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "生成提交id失败",
+		})
+		return
+	}
 	// 打包
 	request := &pb.SSJudgeRequest{
 		Code:         form.Code,
 		SessionId:    s.Id,
 		Language:     form.Clang,
-		TestCaseJson: "",
-		SubmitId:     0,
+		TestCaseJson: test_case_json,
+		SubmitId:     submit_id,
 	}
+
+	// 保存上下文
+	s := producer.NewSession(form.UserId)
+	s.WebConnection = conn
+
 	// 发布任务
 
 	amqp := &producer.Amqp{
