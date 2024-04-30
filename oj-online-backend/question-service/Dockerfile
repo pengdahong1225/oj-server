@@ -8,15 +8,16 @@ ENV GO111MODULE=on \
     GIN_MODE=release \
     LOG_MODE=release
 
-WORKDIR /app
+WORKDIR /app/question-service
 
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
 COPY . .
+COPY ../../config /config
 
 RUN go mod tidy
 RUN go build -o question_service .
 
 EXPOSE 9010
 
-ENTRYPOINT ["/app/question_service"]
+ENTRYPOINT ["/app/question-service/question_service"]

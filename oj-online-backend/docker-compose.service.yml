@@ -22,21 +22,6 @@ services:
     networks:
       - net
 
-  question-service:
-    container_name: question-service
-    privileged: true
-    build:
-      context: ./question-service
-      dockerfile: Dockerfile
-    volumes:
-      - /root/server/oj-online-server/oj-online-backend/log:/app/log
-    ports:
-      - "9010"
-    networks:
-      - net
-    depends_on: # 本地服务的依赖，控制启动先后顺序
-      - db-service
-
   judge-service:
     container_name: judge-service
     privileged: true
@@ -51,4 +36,19 @@ services:
       - net
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - db-service
-      - question-service
+  
+  question-service:
+    container_name: question-service
+    privileged: true
+    build:
+      context: ./question-service
+      dockerfile: Dockerfile
+    volumes:
+      - /root/server/oj-online-server/oj-online-backend/log:/app/log
+    ports:
+      - "9010"
+    networks:
+      - net
+    depends_on: # 本地服务的依赖，控制启动先后顺序
+      - db-service
+      - judge-service

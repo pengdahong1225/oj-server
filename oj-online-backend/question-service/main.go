@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"question-service/logger"
 	"question-service/routers"
-	"question-service/services/mq"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
@@ -31,13 +30,23 @@ func AppInit() {
 	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
 		panic(err)
 	}
-	if err := mq.Init(settings.Conf.MqConfig); err != nil {
-		panic(err)
-	}
 }
 
-func Registry() {
+func ServerLoop(port int) {
+	engine := routers.Router()
+	dsn := fmt.Sprintf(":%d", port)
+	_ = engine.Run(dsn)
+}
+
+func main() {
+	// 初始化
+	AppInit()
+	// 注册服务节点
 	ip, err := utils.GetOutboundIP()
+	if err != nil {
+		panic(err)
+	}
+	system, err := settings.GetSystemConf("question-service")
 	if err != nil {
 		panic(err)
 	}
@@ -45,19 +54,9 @@ func Registry() {
 	if err != nil {
 		panic(err)
 	}
-	if err = register.RegisterService(settings.Conf.SystemConfig.Name, ip.String(), settings.Conf.SystemConfig.Port); err != nil {
+	if err = register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
-}
-
-func ServerLoop() {
-	engine := routers.Router()
-	dsn := fmt.Sprintf(":%d", settings.Conf.SystemConfig.Port)
-	_ = engine.Run(dsn)
-}
-
-func main() {
-	AppInit()
-	Registry()
-	ServerLoop()
+	// loop
+	ServerLoop(system.Port)
 }

@@ -1,0 +1,43 @@
+system:
+  - name: db-service
+    port: 9000
+  - name: question-service
+    port: 9010
+  - name: judge-service
+    port: 9020
+
+mysql:
+  host: 10.0.8.10
+  port: 3306
+  db: oj_online_server
+  user: root
+  password: 1225pdhGkl
+
+redis:
+  host: 10.0.8.10
+  port: 6379
+
+log:
+  path: "/app/log"
+  level: info
+
+registry:
+  host: 101.33.196.35
+  port: 8600
+
+rabbitmq:
+  host: 101.33.196.35
+  port: 5672
+  user: oj
+  password: 1225
+  vhost: '/oj'
+
+jwt:
+  key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'
+
+sms:
+  accessKeyId: 'LTAI5tKv69qFhZPXbV6vzFGL'
+  accessKeySecret: 'cVwcLxfehs0dTgbhWgMT42L7j2bOz7'
+  endpoint: 'dysmsapi.aliyuncs.com'
+  signName: 'MessiGVB'
+  templateCode: 'SMS_463639205'

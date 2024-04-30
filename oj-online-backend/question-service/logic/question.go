@@ -8,9 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"question-service/logic/producer"
-	pb2 "question-service/logic/proto"
+	pb "question-service/logic/proto"
 	"question-service/models"
-	"question-service/services/mq"
 	"question-service/services/registry"
 	"question-service/settings"
 	"question-service/views"
@@ -26,8 +25,8 @@ func QuestionSet(ctx *gin.Context, cursor int32) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
-	request := &pb2.GetQuestionListRequest{Cursor: cursor}
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.GetQuestionListRequest{Cursor: cursor}
 	response, err := client.GetQuestionList(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -60,8 +59,8 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
-	request := &pb2.GetQuestionRequest{Id: id}
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.GetQuestionRequest{Id: id}
 	response, err := client.GetQuestionData(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -92,8 +91,8 @@ func QuestionQuery(ctx *gin.Context, name string) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
-	request := &pb2.QueryQuestionWithNameRequest{Name: name}
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.QueryQuestionWithNameRequest{Name: name}
 
 	response, err := client.QueryQuestionWithName(context.Background(), request)
 	if err != nil {
@@ -125,10 +124,21 @@ func QuestionQuery(ctx *gin.Context, name string) {
 }
 
 func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
+	// todo 获取测试用例
+	
 	// 新建上下文
 	s := producer.NewSession(form.UserId)
 	s.WebConnection = conn
+	// 打包
+	request := &pb.SSJudgeRequest{
+		Code:         form.Code,
+		SessionId:    s.Id,
+		Language:     form.Clang,
+		TestCaseJson: "",
+		SubmitId:     0,
+	}
 	// 发布任务
+
 	amqp := &producer.Amqp{
 		MqConnection: mq.MqConnection,
 		Exchange:     "amqp.direct",
@@ -270,8 +280,8 @@ func updateSubmitRecord(msg []byte, result string) {
 		return
 	}
 
-	client := pb2.NewDBServiceClient(dbConn)
-	request := &pb2.UpdateUserSubmitRecordRequest{
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.UpdateUserSubmitRecordRequest{
 		UserId:     question.UserId,
 		QuestionId: question.Id,
 		Code:       question.Code,

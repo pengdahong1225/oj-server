@@ -12,6 +12,7 @@ WORKDIR /app
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
 COPY . .
+COPY ../../config /app/config
 
 RUN go mod tidy
 RUN go build -o db_service .

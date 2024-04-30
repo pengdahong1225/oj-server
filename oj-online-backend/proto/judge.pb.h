@@ -178,9 +178,9 @@ class SSJudgeRequest :
 
   enum : int {
     kCodeFieldNumber = 1,
+    kSessionIdFieldNumber = 2,
     kLanguageFieldNumber = 3,
     kTestCaseJsonFieldNumber = 4,
-    kSessionIdFieldNumber = 2,
     kSubmitIdFieldNumber = 5,
   };
   // string code = 1;
@@ -197,6 +197,22 @@ class SSJudgeRequest :
   const std::string& _internal_code() const;
   void _internal_set_code(const std::string& value);
   std::string* _internal_mutable_code();
+  public:
+
+  // string session_id = 2;
+  void clear_session_id();
+  const std::string& session_id() const;
+  void set_session_id(const std::string& value);
+  void set_session_id(std::string&& value);
+  void set_session_id(const char* value);
+  void set_session_id(const char* value, size_t size);
+  std::string* mutable_session_id();
+  std::string* release_session_id();
+  void set_allocated_session_id(std::string* session_id);
+  private:
+  const std::string& _internal_session_id() const;
+  void _internal_set_session_id(const std::string& value);
+  std::string* _internal_mutable_session_id();
   public:
 
   // string language = 3;
@@ -231,15 +247,6 @@ class SSJudgeRequest :
   std::string* _internal_mutable_test_case_json();
   public:
 
-  // int32 session_id = 2;
-  void clear_session_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 session_id() const;
-  void set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_session_id() const;
-  void _internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // int32 submit_id = 5;
   void clear_submit_id();
   ::PROTOBUF_NAMESPACE_ID::int32 submit_id() const;
@@ -255,9 +262,9 @@ class SSJudgeRequest :
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr code_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr session_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr language_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr test_case_json_;
-  ::PROTOBUF_NAMESPACE_ID::int32 session_id_;
   ::PROTOBUF_NAMESPACE_ID::int32 submit_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_judge_2eproto;
@@ -693,24 +700,64 @@ inline void SSJudgeRequest::set_allocated_code(std::string* code) {
   // @@protoc_insertion_point(field_set_allocated:SSJudgeRequest.code)
 }
 
-// int32 session_id = 2;
+// string session_id = 2;
 inline void SSJudgeRequest::clear_session_id() {
-  session_id_ = 0;
+  session_id_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeRequest::_internal_session_id() const {
-  return session_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeRequest::session_id() const {
+inline const std::string& SSJudgeRequest::session_id() const {
   // @@protoc_insertion_point(field_get:SSJudgeRequest.session_id)
   return _internal_session_id();
 }
-inline void SSJudgeRequest::_internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  session_id_ = value;
-}
-inline void SSJudgeRequest::set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeRequest::set_session_id(const std::string& value) {
   _internal_set_session_id(value);
   // @@protoc_insertion_point(field_set:SSJudgeRequest.session_id)
+}
+inline std::string* SSJudgeRequest::mutable_session_id() {
+  // @@protoc_insertion_point(field_mutable:SSJudgeRequest.session_id)
+  return _internal_mutable_session_id();
+}
+inline const std::string& SSJudgeRequest::_internal_session_id() const {
+  return session_id_.GetNoArena();
+}
+inline void SSJudgeRequest::_internal_set_session_id(const std::string& value) {
+  
+  session_id_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
+}
+inline void SSJudgeRequest::set_session_id(std::string&& value) {
+  
+  session_id_.SetNoArena(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:SSJudgeRequest.session_id)
+}
+inline void SSJudgeRequest::set_session_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  session_id_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:SSJudgeRequest.session_id)
+}
+inline void SSJudgeRequest::set_session_id(const char* value, size_t size) {
+  
+  session_id_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:SSJudgeRequest.session_id)
+}
+inline std::string* SSJudgeRequest::_internal_mutable_session_id() {
+  
+  return session_id_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline std::string* SSJudgeRequest::release_session_id() {
+  // @@protoc_insertion_point(field_release:SSJudgeRequest.session_id)
+  
+  return session_id_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline void SSJudgeRequest::set_allocated_session_id(std::string* session_id) {
+  if (session_id != nullptr) {
+    
+  } else {
+    
+  }
+  session_id_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), session_id);
+  // @@protoc_insertion_point(field_set_allocated:SSJudgeRequest.session_id)
 }
 
 // string language = 3;
