@@ -181,6 +181,7 @@ class SSJudgeRequest :
     kLanguageFieldNumber = 3,
     kTestCaseJsonFieldNumber = 4,
     kSessionIdFieldNumber = 2,
+    kSubmitIdFieldNumber = 5,
   };
   // string code = 1;
   void clear_code();
@@ -239,6 +240,15 @@ class SSJudgeRequest :
   void _internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // int32 submit_id = 5;
+  void clear_submit_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 submit_id() const;
+  void set_submit_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_submit_id() const;
+  void _internal_set_submit_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:SSJudgeRequest)
  private:
   class _Internal;
@@ -248,6 +258,7 @@ class SSJudgeRequest :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr language_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr test_case_json_;
   ::PROTOBUF_NAMESPACE_ID::int32 session_id_;
+  ::PROTOBUF_NAMESPACE_ID::int32 submit_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_judge_2eproto;
 };
@@ -820,6 +831,26 @@ inline void SSJudgeRequest::set_allocated_test_case_json(std::string* test_case_
   }
   test_case_json_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), test_case_json);
   // @@protoc_insertion_point(field_set_allocated:SSJudgeRequest.test_case_json)
+}
+
+// int32 submit_id = 5;
+inline void SSJudgeRequest::clear_submit_id() {
+  submit_id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeRequest::_internal_submit_id() const {
+  return submit_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeRequest::submit_id() const {
+  // @@protoc_insertion_point(field_get:SSJudgeRequest.submit_id)
+  return _internal_submit_id();
+}
+inline void SSJudgeRequest::_internal_set_submit_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  submit_id_ = value;
+}
+inline void SSJudgeRequest::set_submit_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_submit_id(value);
+  // @@protoc_insertion_point(field_set:SSJudgeRequest.submit_id)
 }
 
 // -------------------------------------------------------------------

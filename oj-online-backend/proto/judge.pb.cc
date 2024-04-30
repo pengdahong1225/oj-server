@@ -84,6 +84,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_judge_2eproto::offsets[] PROTO
   PROTOBUF_FIELD_OFFSET(::SSJudgeRequest, session_id_),
   PROTOBUF_FIELD_OFFSET(::SSJudgeRequest, language_),
   PROTOBUF_FIELD_OFFSET(::SSJudgeRequest, test_case_json_),
+  PROTOBUF_FIELD_OFFSET(::SSJudgeRequest, submit_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::SSJudgeResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -107,8 +108,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_judge_2eproto::offsets[] PROTO
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::SSJudgeRequest)},
-  { 9, -1, sizeof(::SSJudgeResponse)},
-  { 16, -1, sizeof(::SSJudgeResult)},
+  { 10, -1, sizeof(::SSJudgeResponse)},
+  { 17, -1, sizeof(::SSJudgeResult)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -118,15 +119,16 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_judge_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\013judge.proto\"\\\n\016SSJudgeRequest\022\014\n\004code\030"
+  "\n\013judge.proto\"o\n\016SSJudgeRequest\022\014\n\004code\030"
   "\001 \001(\t\022\022\n\nsession_id\030\002 \001(\005\022\020\n\010language\030\003 "
-  "\001(\t\022\026\n\016test_case_json\030\004 \001(\t\"J\n\017SSJudgeRe"
-  "sponse\022\022\n\nsession_id\030\001 \001(\005\022#\n\013result_lis"
-  "t\030\002 \003(\0132\016.SSJudgeResult\"\227\001\n\rSSJudgeResul"
-  "t\022\016\n\006result\030\001 \001(\005\022\020\n\010cpu_time\030\002 \001(\005\022\021\n\tr"
-  "eal_time\030\003 \001(\005\022\016\n\006memory\030\004 \001(\005\022\016\n\006signal"
-  "\030\005 \001(\005\022\021\n\texit_code\030\006 \001(\005\022\r\n\005error\030\007 \001(\005"
-  "\022\017\n\007content\030\010 \001(\tB\007Z\005./;pbb\006proto3"
+  "\001(\t\022\026\n\016test_case_json\030\004 \001(\t\022\021\n\tsubmit_id"
+  "\030\005 \001(\005\"J\n\017SSJudgeResponse\022\022\n\nsession_id\030"
+  "\001 \001(\005\022#\n\013result_list\030\002 \003(\0132\016.SSJudgeResu"
+  "lt\"\227\001\n\rSSJudgeResult\022\016\n\006result\030\001 \001(\005\022\020\n\010"
+  "cpu_time\030\002 \001(\005\022\021\n\treal_time\030\003 \001(\005\022\016\n\006mem"
+  "ory\030\004 \001(\005\022\016\n\006signal\030\005 \001(\005\022\021\n\texit_code\030\006"
+  " \001(\005\022\r\n\005error\030\007 \001(\005\022\017\n\007content\030\010 \001(\tB\007Z\005"
+  "./;pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_judge_2eproto_deps[1] = {
 };
@@ -138,7 +140,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_jud
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_judge_2eproto_once;
 static bool descriptor_table_judge_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_judge_2eproto = {
-  &descriptor_table_judge_2eproto_initialized, descriptor_table_protodef_judge_2eproto, "judge.proto", 354,
+  &descriptor_table_judge_2eproto_initialized, descriptor_table_protodef_judge_2eproto, "judge.proto", 373,
   &descriptor_table_judge_2eproto_once, descriptor_table_judge_2eproto_sccs, descriptor_table_judge_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_judge_2eproto::offsets,
   file_level_metadata_judge_2eproto, 3, file_level_enum_descriptors_judge_2eproto, file_level_service_descriptors_judge_2eproto,
@@ -176,7 +178,9 @@ SSJudgeRequest::SSJudgeRequest(const SSJudgeRequest& from)
   if (!from._internal_test_case_json().empty()) {
     test_case_json_.AssignWithDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from.test_case_json_);
   }
-  session_id_ = from.session_id_;
+  ::memcpy(&session_id_, &from.session_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&submit_id_) -
+    reinterpret_cast<char*>(&session_id_)) + sizeof(submit_id_));
   // @@protoc_insertion_point(copy_constructor:SSJudgeRequest)
 }
 
@@ -185,7 +189,9 @@ void SSJudgeRequest::SharedCtor() {
   code_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   language_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   test_case_json_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  session_id_ = 0;
+  ::memset(&session_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&submit_id_) -
+      reinterpret_cast<char*>(&session_id_)) + sizeof(submit_id_));
 }
 
 SSJudgeRequest::~SSJudgeRequest() {
@@ -217,7 +223,9 @@ void SSJudgeRequest::Clear() {
   code_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   language_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   test_case_json_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  session_id_ = 0;
+  ::memset(&session_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&submit_id_) -
+      reinterpret_cast<char*>(&session_id_)) + sizeof(submit_id_));
   _internal_metadata_.Clear();
 }
 
@@ -253,6 +261,13 @@ const char* SSJudgeRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParserUTF8(_internal_mutable_test_case_json(), ptr, ctx, "SSJudgeRequest.test_case_json");
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 submit_id = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          submit_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -318,6 +333,12 @@ failure:
         4, this->_internal_test_case_json(), target);
   }
 
+  // int32 submit_id = 5;
+  if (this->submit_id() != 0) {
+    stream->EnsureSpace(&target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_submit_id(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields(), target, stream);
@@ -360,6 +381,13 @@ size_t SSJudgeRequest::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_session_id());
+  }
+
+  // int32 submit_id = 5;
+  if (this->submit_id() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_submit_id());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -408,6 +436,9 @@ void SSJudgeRequest::MergeFrom(const SSJudgeRequest& from) {
   if (from.session_id() != 0) {
     _internal_set_session_id(from._internal_session_id());
   }
+  if (from.submit_id() != 0) {
+    _internal_set_submit_id(from._internal_submit_id());
+  }
 }
 
 void SSJudgeRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -438,6 +469,7 @@ void SSJudgeRequest::InternalSwap(SSJudgeRequest* other) {
   test_case_json_.Swap(&other->test_case_json_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(session_id_, other->session_id_);
+  swap(submit_id_, other->submit_id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SSJudgeRequest::GetMetadata() const {

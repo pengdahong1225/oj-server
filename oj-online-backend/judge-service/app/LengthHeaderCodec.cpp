@@ -5,7 +5,7 @@
 #include "LengthHeaderCodec.h"
 #include "muduo/base/Logging.h"
 
-int LengthHeaderCodec::decode(const muduo::string &data, JudgeRequest &msg) {
+int LengthHeaderCodec::decode(const muduo::string &data, SSJudgeRequest &msg) {
     int32_t length = std::atoi(data.substr(0, kHeaderLen).c_str());
     muduo::string body = data.substr(kHeaderLen);
     if (length != body.size()) {
@@ -23,7 +23,7 @@ int LengthHeaderCodec::decode(const muduo::string &data, JudgeRequest &msg) {
     return 0;
 }
 
-int LengthHeaderCodec::encode(muduo::net::Buffer &buffer, const JudgeResponse &msg) {
+int LengthHeaderCodec::encode(muduo::net::Buffer &buffer, const SSJudgeResponse &msg) {
     muduo::string body;
     if (!msg.SerializeToString(&body)) {
         LOG_ERROR << "LengthHeaderCodec::onMessage"
