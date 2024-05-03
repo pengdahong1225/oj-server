@@ -2,10 +2,11 @@ package logger
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"question-service/settings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type FileHook struct {
@@ -30,15 +31,19 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 	hook.infoFile.Close()
 	hook.debugFile.Close()
 
-	path := settings.Conf.LogConfig.Path
-	app := settings.Conf.SystemConfig.Name
-	err := os.MkdirAll(path, os.ModePerm)
+	app, err := settings.GetSystemConf("question-service")
 	if err != nil {
 		return err
 	}
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, app, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, app, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, app, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	path := settings.Conf.LogConfig.Path
+	name := app.Name
+	err = os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, name, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, name, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, name, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
 
 	hook.errFile = errFile
 	hook.infoFile = infoFile
@@ -63,18 +68,22 @@ func (hook FileHook) write(entry *logrus.Entry) {
 // 初始化日志
 func Init() error {
 	// 目录
+	app, err := settings.GetSystemConf("question-service")
+	if err != nil {
+		return err
+	}
 	path := settings.Conf.LogConfig.Path
-	app := settings.Conf.SystemConfig.Name
+	name := app.Name
 	timer := time.Now().Format("2006-01-02")
-	err := os.MkdirAll(path, os.ModePerm)
+	err = os.MkdirAll(path, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	// 日志文件
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, app, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, app, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, app, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, name, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, name, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, name, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
 
 	hook := &FileHook{
 		errFile:   errFile,

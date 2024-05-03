@@ -3,7 +3,6 @@ package judgeClient
 import (
 	"errors"
 	"net"
-	"strconv"
 )
 
 // TcpClient 负责包的发送和接受
@@ -11,8 +10,7 @@ type TcpClient struct {
 	conn *net.TCPConn
 }
 
-func (receiver *TcpClient) Connect(host string, port int) error {
-	dsn := host + ":" + strconv.Itoa(port)
+func (receiver *TcpClient) Connect(dsn string) error {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", dsn)
 	if err != nil {
 		return err

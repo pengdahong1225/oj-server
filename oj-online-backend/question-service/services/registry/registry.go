@@ -2,10 +2,11 @@ package registry
 
 import (
 	"fmt"
+	"question-service/settings"
+
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"question-service/settings"
 )
 
 type Registry struct {
@@ -46,16 +47,32 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 
 // NewDBConnection db服务连接
 func NewDBConnection(cfg *settings.RegistryConfig) (*grpc.ClientConn, error) {
-	registry, err := NewRegistry(cfg)
+	register, err := NewRegistry(cfg)
 	if err != nil {
 		return nil, err
 	}
 	// registry.client.Health().Service返回的是对应服务的节点列表
-	services, _, err := registry.client.Health().Service("db-service", "db-service", true, nil)
+	services, _, err := register.client.Health().Service("db-service", "db-service", true, nil)
 	if err != nil {
 		return nil, err
 	}
-	// 这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
+	// 如果是集群的话，这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
 	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
 	return grpc.Dial(dsn, grpc.WithTransportCredentials(insecure.NewCredentials())) // 不安全连接
+}
+
+// NewJudgeConnection judge服务连接
+func GetJudgeServerDsn(cfg *settings.RegistryConfig) (string, error) {
+	register, err := NewRegistry(cfg)
+	if err != nil {
+		return "", err
+	}
+	// registry.client.Health().Service返回的是对应服务的节点列表
+	services, _, err := register.client.Health().Service("judge-service", "judge-service", true, nil)
+	if err != nil {
+		return "", err
+	}
+	// 如果是集群的话，这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
+	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
+	return dsn, nil
 }

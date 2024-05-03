@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"question-service/logic"
 	"question-service/models"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -65,6 +66,7 @@ func QuestionRun(ctx *gin.Context) {
 			return
 		}
 		logic.QuestionRun(ctx, form, conn)
+		conn.Close()
 	}
 }
 

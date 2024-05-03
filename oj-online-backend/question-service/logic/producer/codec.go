@@ -7,6 +7,6 @@ var kHeaderLen = 4
 func Decode(data []byte) pb.SSJudgeResponse {
 
 }
-func Encode(request pb.SSJudgeRequest) []byte {
+func Encode(request *pb.SSJudgeRequest) []byte {
 
 }

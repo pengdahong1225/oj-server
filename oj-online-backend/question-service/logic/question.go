@@ -3,19 +3,21 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"question-service/logic/producer"
 	pb "question-service/logic/proto"
 	"question-service/models"
+	"question-service/services/judgeClient"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
 	"question-service/utils"
 	"question-service/views"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 )
 
 func QuestionSet(ctx *gin.Context, cursor int32) {
@@ -126,12 +128,24 @@ func QuestionQuery(ctx *gin.Context, name string) {
 }
 
 func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
+	// 获取server端dsn
+	dsn, err := registry.GetJudgeServerDsn(settings.Conf.RegistryConfig)
+	if err != nil {
+		logrus.Infoln("获取judge-server端dsn失败:", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "获取judge-server端dsn失败",
+			"err": err.Error(),
+		})
+		return
+	}
+
 	// todo 获取测试用例
 	test_case_json, err := redis.GetTestCaseJson(form.Id)
 	if err != nil {
 		logrus.Infoln("获取测试用例失败:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "获取测试用例失败",
+			"err": err.Error(),
 		})
 		return
 	}
@@ -141,9 +155,14 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Co
 		logrus.Infoln("生成提交id失败:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"msg": "生成提交id失败",
+			"err": err.Error(),
 		})
 		return
 	}
+	// 生成session 保存上下文
+	s := producer.NewSession(form.UserId)
+	s.WebConnection = conn
+
 	// 打包
 	request := &pb.SSJudgeRequest{
 		Code:         form.Code,
@@ -152,41 +171,21 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Co
 		TestCaseJson: test_case_json,
 		SubmitId:     submit_id,
 	}
+	msg := producer.Encode(request)
 
-	// 保存上下文
-	s := producer.NewSession(form.UserId)
-	s.WebConnection = conn
-
-	// 发布任务
-
-	amqp := &producer.Amqp{
-		MqConnection: mq.MqConnection,
-		Exchange:     "amqp.direct",
-		Queue:        "question",
-		RoutingKey:   "question",
-	}
-	if err := amqp.Prepare(); err != nil {
-		logrus.Errorf("amqp预处理失败:%s", err.Error())
+	// 发送
+	client := judgeClient.TcpClient{}
+	err = client.Connect(dsn)
+	if err != nil {
+		logrus.Infoln("连接Judge服务失败:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"msg": "运行失败",
+			"msg": "连接Judge服务失败",
+			"err": err.Error(),
 		})
 		return
 	}
-	defer amqp.Channel.Close()
-	// 序列化消息
-	msg, _ := json.Marshal(form)
-	if !amqp.Publish(msg) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"msg": "运行失败",
-		})
-		// 关闭web连接
-		conn.Close()
-		return
-	}
-	// 先返回状态
-	ctx.JSON(http.StatusOK, gin.H{
-		"msg": "运行成功",
-	})
+	client.Send(msg)
+
 	// 开启定时器
 	timer := time.AfterFunc(5*time.Second, func() {
 		err := conn.WriteMessage(websocket.TextMessage, []byte("执行超时"))
