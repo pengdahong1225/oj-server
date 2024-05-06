@@ -30,11 +30,20 @@ type Question struct {
 	Template    string   `json:"template"`
 }
 
+type QuestionResponse struct {
+	QuestionID int64            `json:"questionID"`
+	UserID     int64            `json:"userID"`
+	Clang      string           `json:"clang"`
+	ResultList []QuestionResult `json:"resultList"`
+}
+
 type QuestionResult struct {
-	QuestionID int64  `json:"questionID"`
-	UserID     int64  `json:"userID"`
-	Clang      string `json:"clang"`
-	Status     int32  `json:"status"` // 0: 正常 1: 代码非法 2: 编译错误 3: 运行超时 4: 内存溢出 5: 系统错误
-	Tips       string `json:"tips"`   // 系统提示
-	Output     string `json:"output"` // 系统输出
+	Result   int32  `json:"result,omitempty"`
+	CpuTime  int32  `json:"cpu_time,omitempty"`
+	RealTime int32  `json:"real_time,omitempty"`
+	Memory   int32  `json:"memory,omitempty"`
+	Signal   int32  `json:"signal,omitempty"`
+	ExitCode int32  `json:"exit_code,omitempty"`
+	Error    int32  `json:"error,omitempty"`
+	Content  string `json:"content,omitempty"`
 }

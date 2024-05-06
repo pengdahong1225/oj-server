@@ -6,7 +6,7 @@ message SSJudgeRequest {
   string session_id = 2; // 直接返回给调用端
   string language = 3;
   string test_case_json = 4;
-  int32 submit_id = 5;
+  int64 submit_id = 5;
 }
 
 message SSJudgeResponse {

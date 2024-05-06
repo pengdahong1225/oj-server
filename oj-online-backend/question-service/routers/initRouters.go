@@ -35,8 +35,6 @@ func QuestionRouters(engine *gin.Engine) {
 		// 需要登录
 		questionRouter.POST("/run", middlewares.AuthLogin(), controller.QuestionRun)
 		questionRouter.POST("/submit", middlewares.AuthLogin(), controller.QuestionSubmit)
-		// judge回调
-		questionRouter.POST("/judgeCallback", controller.JudgeCallback)
 	}
 
 	// 用户api

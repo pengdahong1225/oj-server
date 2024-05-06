@@ -122,7 +122,7 @@ const char descriptor_table_protodef_judge_2eproto[] PROTOBUF_SECTION_VARIABLE(p
   "\n\013judge.proto\"o\n\016SSJudgeRequest\022\014\n\004code\030"
   "\001 \001(\t\022\022\n\nsession_id\030\002 \001(\t\022\020\n\010language\030\003 "
   "\001(\t\022\026\n\016test_case_json\030\004 \001(\t\022\021\n\tsubmit_id"
-  "\030\005 \001(\005\"J\n\017SSJudgeResponse\022\022\n\nsession_id\030"
+  "\030\005 \001(\003\"J\n\017SSJudgeResponse\022\022\n\nsession_id\030"
   "\001 \001(\005\022#\n\013result_list\030\002 \003(\0132\016.SSJudgeResu"
   "lt\"\227\001\n\rSSJudgeResult\022\016\n\006result\030\001 \001(\005\022\020\n\010"
   "cpu_time\030\002 \001(\005\022\021\n\treal_time\030\003 \001(\005\022\016\n\006mem"
@@ -192,7 +192,7 @@ void SSJudgeRequest::SharedCtor() {
   session_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   language_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   test_case_json_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  submit_id_ = 0;
+  submit_id_ = PROTOBUF_LONGLONG(0);
 }
 
 SSJudgeRequest::~SSJudgeRequest() {
@@ -226,7 +226,7 @@ void SSJudgeRequest::Clear() {
   session_id_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   language_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   test_case_json_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  submit_id_ = 0;
+  submit_id_ = PROTOBUF_LONGLONG(0);
   _internal_metadata_.Clear();
 }
 
@@ -265,7 +265,7 @@ const char* SSJudgeRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // int32 submit_id = 5;
+      // int64 submit_id = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           submit_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
@@ -338,10 +338,10 @@ failure:
         4, this->_internal_test_case_json(), target);
   }
 
-  // int32 submit_id = 5;
+  // int64 submit_id = 5;
   if (this->submit_id() != 0) {
     stream->EnsureSpace(&target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_submit_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(5, this->_internal_submit_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -388,10 +388,10 @@ size_t SSJudgeRequest::ByteSizeLong() const {
         this->_internal_test_case_json());
   }
 
-  // int32 submit_id = 5;
+  // int64 submit_id = 5;
   if (this->submit_id() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
         this->_internal_submit_id());
   }
 

@@ -7,14 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
 
 func QuestionSet(ctx *gin.Context) {
 	cursor, _ := strconv.Atoi(ctx.DefaultQuery("cursor", "0"))
@@ -56,38 +49,13 @@ func QuestionQuery(ctx *gin.Context) {
 func QuestionRun(ctx *gin.Context) {
 	// 运行代码
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
-		// 升级连接
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"msg": "连接失败",
-			})
-			ctx.Abort()
-			return
-		}
-		logic.QuestionRun(ctx, form, conn)
-		conn.Close()
+		logic.QuestionRun(ctx, form)
 	}
 }
 
 func QuestionSubmit(ctx *gin.Context) {
 	// 提交代码
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
-		// 升级连接
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"msg": "连接失败",
-			})
-			ctx.Abort()
-			return
-		}
-		logic.QuestionSubmit(ctx, form, conn)
-	}
-}
-
-func JudgeCallback(ctx *gin.Context) {
-	if form, ok := processOnValidate(ctx, models.JudgeBackForm{}); ok {
-		logic.JudgeCallback(ctx, form)
+		logic.QuestionSubmit(ctx, form)
 	}
 }

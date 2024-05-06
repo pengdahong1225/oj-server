@@ -11,7 +11,7 @@ import (
 
 // 表单类型集
 type formTyper interface {
-	models.LoginFrom | models.RegistryForm | models.QuestionForm | models.JudgeBackForm
+	models.LoginFrom | models.RegistryForm | models.QuestionForm
 }
 
 // 表单验证

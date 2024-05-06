@@ -3,8 +3,9 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
-	"question-service/logic/producer"
 	pb "question-service/logic/proto"
 	"question-service/models"
 	"question-service/services/judgeClient"
@@ -13,11 +14,6 @@ import (
 	"question-service/settings"
 	"question-service/utils"
 	"question-service/views"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
 )
 
 func QuestionSet(ctx *gin.Context, cursor int32) {
@@ -127,7 +123,7 @@ func QuestionQuery(ctx *gin.Context, name string) {
 	})
 }
 
-func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
+func QuestionRun(ctx *gin.Context, form *models.QuestionForm) {
 	// 获取server端dsn
 	dsn, err := registry.GetJudgeServerDsn(settings.Conf.RegistryConfig)
 	if err != nil {
@@ -159,21 +155,14 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Co
 		})
 		return
 	}
-	// 生成session 保存上下文
-	s := producer.NewSession(form.UserId)
-	s.WebConnection = conn
 
-	// 打包
+	// todo 请求judge-service
 	request := &pb.SSJudgeRequest{
 		Code:         form.Code,
-		SessionId:    s.Id,
 		Language:     form.Clang,
 		TestCaseJson: test_case_json,
 		SubmitId:     submit_id,
 	}
-	msg := producer.Encode(request)
-
-	// 发送
 	client := judgeClient.TcpClient{}
 	err = client.Connect(dsn)
 	if err != nil {
@@ -184,103 +173,41 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Co
 		})
 		return
 	}
-	client.Send(msg)
-
-	// 开启定时器
-	timer := time.AfterFunc(5*time.Second, func() {
-		err := conn.WriteMessage(websocket.TextMessage, []byte("执行超时"))
-		if err != nil {
-			logrus.Errorln("Failed to write message:", err)
-		}
-		conn.Close()
-	})
-	s.Timer = timer
-}
-
-func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm, conn *websocket.Conn) {
-	// 新建上下文
-	s := producer.NewSession(form.UserId)
-	s.WebConnection = conn
-	// 发布任务
-	amqp := &producer.Amqp{
-		MqConnection: mq.MqConnection,
-		Exchange:     "amqp.direct",
-		Queue:        "question",
-		RoutingKey:   "question",
-	}
-	if err := amqp.Prepare(); err != nil {
-		logrus.Errorf("amqp预处理失败:%s", err.Error())
+	result, err := client.Request(request)
+	if err != nil {
+		logrus.Errorln("发送消息失败:", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"msg": "运行失败",
+			"msg": "发送消息失败",
+			"err": err.Error(),
 		})
 		return
 	}
-	defer amqp.Channel.Close()
-	// 序列化消息
-	req := &models.JudgeRequest{
-		SessionID:  s.Id,
+
+	// TODO 返回结果
+	response := &views.QuestionResponse{
 		QuestionID: form.Id,
 		UserID:     form.UserId,
-		Title:      form.Title,
-		Code:       form.Code,
 		Clang:      form.Clang,
 	}
-	msg, _ := json.Marshal(req)
-	if !amqp.Publish(msg) {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"msg": "运行失败",
+	for _, value := range result.ResultList {
+		response.ResultList = append(response.ResultList, views.QuestionResult{
+			Result:   value.Result,
+			RealTime: value.RealTime,
+			CpuTime:  value.CpuTime,
+			Memory:   value.Memory,
+			Signal:   value.Signal,
+			ExitCode: value.ExitCode,
+			Error:    value.Error,
+			Content:  value.Content,
 		})
-		// 关闭web连接
-		conn.Close()
-		return
 	}
-	// 先返回状态
 	ctx.JSON(http.StatusOK, gin.H{
-		"msg": "运行成功",
+		"msg": response,
 	})
-	// 缓存msg
-	s.Msg = msg
-	// 开启定时器
-	timer := time.AfterFunc(5*time.Second, func() {
-		err := conn.WriteMessage(websocket.TextMessage, []byte("执行超时"))
-		if err != nil {
-			logrus.Errorln("Failed to write message:", err)
-		}
-		// 记录：运行超时
-		updateSubmitRecord(msg, "time out")
-		conn.Close()
-	})
-	s.Timer = timer
 }
 
-func JudgeCallback(ctx *gin.Context, form *models.JudgeBackForm) {
-	// 获取上下文
-	s, ok := producer.SessionMap[form.SessionID]
-	if !ok {
-		ctx.JSON(http.StatusNotFound, gin.H{})
-		return
-	}
-	// 停止定时器
-	s.Timer.Stop()
-	// 返回客户端执行结果
-	response := views.QuestionResult{
-		QuestionID: form.QuestionID,
-		UserID:     form.UserID,
-		Clang:      form.Clang,
-		Status:     form.Status,
-		Tips:       form.Tips,
-		Output:     form.Output,
-	}
-	data, _ := json.Marshal(response)
-	if err := s.WebConnection.WriteMessage(websocket.TextMessage, data); err != nil {
-		logrus.Errorln("Failed to write message:", err)
-	}
-	// 删除上下文
-	delete(producer.SessionMap, form.SessionID)
-	// 关闭连接
-	s.WebConnection.Close()
-	// 保存提交记录
-	updateSubmitRecord(s.Msg, string(data))
+func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm) {
+
 }
 
 // 保存提交记录

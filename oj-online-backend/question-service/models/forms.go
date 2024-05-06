@@ -26,13 +26,3 @@ type QuestionForm struct {
 	Code   string `json:"code" form:"code" binding:"required"`
 	Clang  string `json:"clang" form:"clang" binding:"required"`
 }
-
-type JudgeBackForm struct {
-	SessionID  string `json:"sessionID" form:"sessionID" binding:"required"`
-	QuestionID int64  `json:"questionID" form:"questionID" binding:"required"`
-	UserID     int64  `json:"userID" form:"userID" binding:"required"`
-	Clang      string `json:"clang" form:"clang" binding:"required"`
-	Status     int32  `json:"status" form:"status" binding:"required"` // 0: 正常 1: 代码非法 2: 编译错误 3: 运行超时 4: 内存溢出 5: 系统错误
-	Tips       string `json:"tips" form:"tips" binding:"required"`     // 系统提示
-	Output     string `json:"output" form:"output" binding:"required"` // 系统输出
-}
