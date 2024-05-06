@@ -8,7 +8,7 @@ CXXFLAGS = -std=c++2a -g -O0 -Wall -Wextra \
 
 # muduo
 MUDUO_INCLUDE = ../library
-MUDUO_LIBRARY = ../library/lib
+MUDUO_LIBRARY = ../library/libs
 MUDUO_LIB = -L$(MUDUO_LIBRARY) -lmuduo_net -lmuduo_base -lpthread
 
 # judger-wrapper
