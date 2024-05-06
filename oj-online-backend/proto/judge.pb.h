@@ -398,13 +398,20 @@ class SSJudgeResponse :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult >&
       result_list() const;
 
-  // int32 session_id = 1;
+  // string session_id = 1;
   void clear_session_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 session_id() const;
-  void set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  const std::string& session_id() const;
+  void set_session_id(const std::string& value);
+  void set_session_id(std::string&& value);
+  void set_session_id(const char* value);
+  void set_session_id(const char* value, size_t size);
+  std::string* mutable_session_id();
+  std::string* release_session_id();
+  void set_allocated_session_id(std::string* session_id);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_session_id() const;
-  void _internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  const std::string& _internal_session_id() const;
+  void _internal_set_session_id(const std::string& value);
+  std::string* _internal_mutable_session_id();
   public:
 
   // @@protoc_insertion_point(class_scope:SSJudgeResponse)
@@ -413,7 +420,7 @@ class SSJudgeResponse :
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::SSJudgeResult > result_list_;
-  ::PROTOBUF_NAMESPACE_ID::int32 session_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr session_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_judge_2eproto;
 };
@@ -904,24 +911,64 @@ inline void SSJudgeRequest::set_submit_id(::PROTOBUF_NAMESPACE_ID::int64 value) 
 
 // SSJudgeResponse
 
-// int32 session_id = 1;
+// string session_id = 1;
 inline void SSJudgeResponse::clear_session_id() {
-  session_id_ = 0;
+  session_id_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResponse::_internal_session_id() const {
-  return session_id_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 SSJudgeResponse::session_id() const {
+inline const std::string& SSJudgeResponse::session_id() const {
   // @@protoc_insertion_point(field_get:SSJudgeResponse.session_id)
   return _internal_session_id();
 }
-inline void SSJudgeResponse::_internal_set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  session_id_ = value;
-}
-inline void SSJudgeResponse::set_session_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void SSJudgeResponse::set_session_id(const std::string& value) {
   _internal_set_session_id(value);
   // @@protoc_insertion_point(field_set:SSJudgeResponse.session_id)
+}
+inline std::string* SSJudgeResponse::mutable_session_id() {
+  // @@protoc_insertion_point(field_mutable:SSJudgeResponse.session_id)
+  return _internal_mutable_session_id();
+}
+inline const std::string& SSJudgeResponse::_internal_session_id() const {
+  return session_id_.GetNoArena();
+}
+inline void SSJudgeResponse::_internal_set_session_id(const std::string& value) {
+  
+  session_id_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
+}
+inline void SSJudgeResponse::set_session_id(std::string&& value) {
+  
+  session_id_.SetNoArena(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:SSJudgeResponse.session_id)
+}
+inline void SSJudgeResponse::set_session_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  session_id_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:SSJudgeResponse.session_id)
+}
+inline void SSJudgeResponse::set_session_id(const char* value, size_t size) {
+  
+  session_id_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:SSJudgeResponse.session_id)
+}
+inline std::string* SSJudgeResponse::_internal_mutable_session_id() {
+  
+  return session_id_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline std::string* SSJudgeResponse::release_session_id() {
+  // @@protoc_insertion_point(field_release:SSJudgeResponse.session_id)
+  
+  return session_id_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline void SSJudgeResponse::set_allocated_session_id(std::string* session_id) {
+  if (session_id != nullptr) {
+    
+  } else {
+    
+  }
+  session_id_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), session_id);
+  // @@protoc_insertion_point(field_set_allocated:SSJudgeResponse.session_id)
 }
 
 // repeated .SSJudgeResult result_list = 2;

@@ -16,5 +16,6 @@ include_directories(./app)
 include_directories(./handler)
 aux_source_directory(./app SRCS)
 aux_source_directory(./handler SRCS)
+aux_source_directory(. SRCS)
 
 add_executable(${TARGET} ${SRCS})

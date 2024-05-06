@@ -10,7 +10,7 @@ message SSJudgeRequest {
 }
 
 message SSJudgeResponse {
-  int32 session_id = 1;
+  string session_id = 1;
   repeated SSJudgeResult result_list = 2;
 }
 
