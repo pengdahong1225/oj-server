@@ -5,8 +5,13 @@
 #include "app/AppServer.h"
 #include "muduo/base/Logging.h"
 #include "muduo/net/EventLoop.h"
-
 #include <unistd.h>
+
+void init() {
+    muduo::Logger::setLogLevel(muduo::Logger::DEBUG);
+    muduo::Logger::setLogFileName("app.log"); // 设置日志文件名
+    muduo::Logger::initialize(); // 初始化日志系统
+}
 
 int main(int argc, char *argv[]) {
     LOG_INFO << "pid = " << getpid();

@@ -5,7 +5,7 @@ WORKDIR /app/judge-service
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
 COPY . .
-COPY ../../config /config
+# COPY ../../config /config
 
 # 编译
 RUN make -f Makefile
