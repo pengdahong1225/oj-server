@@ -25,7 +25,7 @@ SRC += $(wildcard *.cpp) $(wildcard ./app/*.cpp) $(wildcard ./handler/*.cpp)
 
 # build
 $(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIB)
+	$(CXX) $(CXXFLAGS) $(INC) -c -o $@ $^ $(LIB)
 
 all: $(TARGET)
 clean:
