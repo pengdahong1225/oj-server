@@ -3,8 +3,8 @@
 //
 
 #include "HandlerProxy.h"
-#include "judger-wrapper/common/define.h"
-#include "judger-wrapper/wrapper/JudgeWrapper.h"
+#include "common/define.h"
+#include "wrapper/JudgeWrapper.h"
 
 SSJudgeResponse HandlerProxy::handle(SSJudgeRequest &request) {
     SSJudgeResponse response;

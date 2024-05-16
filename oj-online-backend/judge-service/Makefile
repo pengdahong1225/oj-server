@@ -1,4 +1,7 @@
+CC  = gcc
 CXX = g++
+
+CFLAGS = -g -Wall -Werror -O3 -std=c99
 CXXFLAGS = -std=c++2a -g -O0 -Wall -Wextra \
 		-Wconversion -Wno-unused-parameter \
 		-Wold-style-cast -Woverloaded-virtual \
@@ -11,21 +14,29 @@ MUDUO_INCLUDE = ../library
 MUDUO_LIBRARY = ../library/libs
 MUDUO_LIB = -L$(MUDUO_LIBRARY) -lmuduo_net -lmuduo_base -lpthread
 
-# judger-wrapper
-JUDGER_INCLUDE = ../library
-JUDGER_LIBRARY = ../library/libs
-JUDGER_LIB = -L$(JUDGER_LIBRARY) -ljudger
-
 # app
 TARGET = JudgeService
-INC	+= -I$(MUDUO_INCLUDE) -I$(JUDGER_INCLUDE) -I./app -I./handler
-LIB += $(MUDUO_LIB) $(JUDGER_LIB)
+INC	+= -I$(MUDUO_INCLUDE) -I.
+LIB += $(MUDUO_LIB) $(JUDGER_LIB) -lseccomp
 
+C_SRC += $(wildcard ./judger/core/*.c) $(wildcard ./judger/core/rules/*.c)
 SRC += $(wildcard *.cpp) $(wildcard ./app/*.cpp) $(wildcard ./handler/*.cpp)
+SRC += $(wildcard ./common/*.cpp) $(wildcard ./judger/judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
+
+C_OBJ = $(patsubst %.c,%.o,$(C_SRC))
+CPP_OBJ = $(patsubst %.cpp,%.o,$(CPP_SRC))
+
+OBJ = $(C_OBJ) $(CPP_OBJ)
 
 # build
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) $(INC) -c -o $@ $^ $(LIB)
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIB)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INC) -c -o $@ $<
 
 all: $(TARGET)
 clean:

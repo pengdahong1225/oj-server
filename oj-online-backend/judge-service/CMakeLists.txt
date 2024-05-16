@@ -11,11 +11,12 @@ project(${TARGET})
 
 include_directories(../library)
 include_directories(../proto)
+include_directories(.)
 
-include_directories(./app)
-include_directories(./handler)
+aux_source_directory(./common SRCS)
+aux_source_directory(./wrapper SRCS)
 aux_source_directory(./app SRCS)
 aux_source_directory(./handler SRCS)
+aux_source_directory(./judger SRCS)
 aux_source_directory(. SRCS)
-
 add_executable(${TARGET} ${SRCS})

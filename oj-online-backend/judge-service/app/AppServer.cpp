@@ -6,7 +6,7 @@
 #include "LengthHeaderCodec.h"
 #include "muduo/base/Logging.h"
 #include "judge.pb.h"
-#include "HandlerProxy.h"
+#include "handler/HandlerProxy.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
