@@ -5,7 +5,7 @@
 #ifndef JUDGE_SERVICE_LENGTHHEADERCODEC_H
 #define JUDGE_SERVICE_LENGTHHEADERCODEC_H
 
-#include "proto/judge.pb.h"
+#include "judge.pb.h"
 #include "muduo/net/Buffer.h"
 
 class LengthHeaderCodec {
