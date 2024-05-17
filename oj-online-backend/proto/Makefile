@@ -9,11 +9,11 @@ PB_OBJ = judge.o
 INC_FLAGS =  -I.
 
 $(LIB) :  $(PB_OBJ)
-        ar rcs $@ $^
+	ar rcs $@ $^
         
 $(PB_OBJ) :%.o : %.proto
-        $(TOOL_PROTOC) $< --cpp_out=./
-        g++ $(CXXFLAGS) $(INC_FLAGS) -c -o $@ $(patsubst %.proto, %.pb.cc, $<)
+	$(TOOL_PROTOC) $< --cpp_out=./
+		g++ $(CXXFLAGS) $(INC_FLAGS) -c -o $@ $(patsubst %.proto, %.pb.cc, $<)
 
 clean:
         $(RM) $(LIB) $(DEP_DIR) -rf 
