@@ -16,7 +16,7 @@ $(PB_OBJ) :%.o : %.proto
 	g++ $(CXXFLAGS) $(INC_FLAGS) -c -o $@ $(patsubst %.proto, %.pb.cc, $<)
 
 clean:
-	$(RM) $(LIB) $(DEP_DIR) -rf 
+	$(RM) $(LIB) $(PB_OBJ) -rf 
 
 .PHONY: protbuf
 
