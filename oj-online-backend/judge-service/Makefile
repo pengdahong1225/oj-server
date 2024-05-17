@@ -14,10 +14,15 @@ MUDUO_INCLUDE = ../library
 MUDUO_LIBRARY = ../library/libs
 MUDUO_LIB = -L$(MUDUO_LIBRARY) -lmuduo_net -lmuduo_base -lpthread
 
+# proto
+PROTO_DIR = ../proto
+PROTO_INCLUDE = -I$(PROTO_DIR)
+PROTO_LIB = $(PROTO_DIR)/libproto.a
+
 # app
 TARGET = JudgeService
-INC	+= -I$(MUDUO_INCLUDE) -I.
-LIB += $(MUDUO_LIB) $(JUDGER_LIB) -lseccomp
+INC     += -I$(MUDUO_INCLUDE) -I. -I./judger/core $(PROTO_INCLUDE)
+LIB += $(MUDUO_LIB) $(JUDGER_LIB) -lseccomp $(PROTO_LIB)
 
 C_SRC += $(wildcard ./judger/core/*.c) $(wildcard ./judger/core/rules/*.c)
 CPP_SRC += $(wildcard *.cpp) $(wildcard ./app/*.cpp) $(wildcard ./handler/*.cpp)
@@ -40,6 +45,6 @@ $(TARGET): $(OBJ)
 
 all: $(TARGET)
 clean:
-	rm -rf $(TARGET)
+	rm -rf $(TARGET) $(OBJ)
 
 .PHONY: all clean
