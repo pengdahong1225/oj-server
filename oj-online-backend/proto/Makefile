@@ -13,10 +13,10 @@ $(LIB) :  $(PB_OBJ)
         
 $(PB_OBJ) :%.o : %.proto
 	$(TOOL_PROTOC) $< --cpp_out=./
-		g++ $(CXXFLAGS) $(INC_FLAGS) -c -o $@ $(patsubst %.proto, %.pb.cc, $<)
+	g++ $(CXXFLAGS) $(INC_FLAGS) -c -o $@ $(patsubst %.proto, %.pb.cc, $<)
 
 clean:
-        $(RM) $(LIB) $(DEP_DIR) -rf 
+	$(RM) $(LIB) $(DEP_DIR) -rf 
 
 .PHONY: protbuf
 
