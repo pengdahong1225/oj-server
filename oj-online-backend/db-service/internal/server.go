@@ -40,13 +40,17 @@ func (receiver Server) Start() {
 }
 
 func StartRPCServer() {
+	system, err := settings.GetSystemConf("db-service")
+	if err != nil {
+		panic(err)
+	}
 	// 获取ip地址
 	ip, err := utils.GetOutboundIP()
 	if err != nil {
 		panic(err)
 	}
 	// 监听端口
-	netAddr := fmt.Sprintf("%s:%d", ip.String(), settings.Conf.SystemConfig.Port)
+	netAddr := fmt.Sprintf("%s:%d", ip.String(), system.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
 		panic(err)
@@ -59,7 +63,7 @@ func StartRPCServer() {
 	healthpb.RegisterHealthServer(grpcServer, healthcheck)
 	// 注册
 	register, _ := registry.NewRegistry(settings.Conf.RegistryConfig)
-	if err := register.RegisterService(settings.Conf.SystemConfig.Name, ip.String(), settings.Conf.SystemConfig.Port); err != nil {
+	if err := register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
 

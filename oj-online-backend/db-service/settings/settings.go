@@ -1,9 +1,10 @@
 package settings
 
 import (
+	"errors"
 	"github.com/fsnotify/fsnotify"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 )
 
@@ -29,12 +30,21 @@ func Init() error {
 	}
 	// 配置热重载
 	viper.OnConfigChange(func(event fsnotify.Event) {
-		log.Println("config file changed:", event.Name)
+		logrus.Infoln("config file changed:", event.Name)
 		if e := viperConfig.Unmarshal(Conf); e != nil {
-			log.Println("config file update failed:", event.Name)
+			logrus.Infoln("config file update failed:", event.Name)
 		}
 	})
 	// 监听配置文件
 	viper.WatchConfig()
 	return nil
+}
+
+func GetSystemConf(name string) (*SystemConfig, error) {
+	for _, v := range Conf.SystemConfigs {
+		if v.Name == name {
+			return &v, nil
+		}
+	}
+	return nil, errors.New("system config not found")
 }

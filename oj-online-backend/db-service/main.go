@@ -47,7 +47,11 @@ func Registry() {
 	if err != nil {
 		panic(err)
 	}
-	if err = register.RegisterService(settings.Conf.SystemConfig.Name, ip.String(), settings.Conf.SystemConfig.Port); err != nil {
+	system, err := settings.GetSystemConf("db-service")
+	if err != nil {
+		panic(err)
+	}
+	if err = register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
 }
