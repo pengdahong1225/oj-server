@@ -3,6 +3,7 @@
     <module name="question-service" />
     <working_directory value="$PROJECT_DIR$/" />
     <kind value="DIRECTORY" />
+    <package value="question-service" />
     <directory value="$PROJECT_DIR$/" />
     <filePath value="$PROJECT_DIR$" />
     <output_directory value="$PROJECT_DIR$/bin" />

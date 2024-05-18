@@ -7,19 +7,19 @@ import (
 
 var kHeaderLen = 4
 
-func decode(data []byte) *pb.SSJudgeResponse {
+func decode(data []byte) (*pb.SSJudgeResponse, error) {
 	response := &pb.SSJudgeResponse{}
 	err := proto.Unmarshal(data, response)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return response
+	return response, nil
 }
 
-func encode(request *pb.SSJudgeRequest) []byte {
+func encode(request *pb.SSJudgeRequest) ([]byte, error) {
 	ret, err := proto.Marshal(request)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return ret
+	return ret, nil
 }

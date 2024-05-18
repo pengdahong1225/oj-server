@@ -35,10 +35,12 @@ func (receiver *TcpClient) Request(req *pb.SSJudgeRequest) (*pb.SSJudgeResponse,
 	defer receiver.conn.Close() // 用完后关闭连接
 
 	// 编码
-	msg := encode(req)
-
+	msg, err := encode(req)
+	if err != nil {
+		return nil, err
+	}
 	// 发送
-	_, err := receiver.conn.Write(msg)
+	_, err = receiver.conn.Write(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +58,13 @@ func (receiver *TcpClient) Request(req *pb.SSJudgeRequest) (*pb.SSJudgeResponse,
 			logrus.Infoln("read error:", err)
 			errChan <- err
 		} else {
-			rspChan <- decode(buffer[:n]) // 操作读取的数据必须带上实际n，读多少用多少
+			rep, err := decode(buffer[:n]) // 操作读取的数据必须带上实际n，读多少用多少
+			if err != nil {
+				logrus.Infoln("decode error:", err)
+				errChan <- err
+			} else {
+				rspChan <- rep
+			}
 		}
 	}(ctx)
 
