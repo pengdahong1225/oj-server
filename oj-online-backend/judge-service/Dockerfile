@@ -4,7 +4,7 @@ WORKDIR /app/judge-service
 
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
-COPY . .
+COPY ./JudgeService ./JudgeService
 
 EXPOSE 9020
 
