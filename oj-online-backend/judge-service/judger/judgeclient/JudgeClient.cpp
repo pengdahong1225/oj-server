@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-
+#include "common/logger/rlog.h"
 #include "JudgeClient.h"
 
 extern "C" {
@@ -41,7 +41,7 @@ void JudgeClient::_load_test_case_info() {
     std::string line;
 
     if (!info_file) {
-        std::cerr << "Error: Unable to open info file " << std::endl;
+        LOG_INFO("Error: Failed to open info.json");
         return;
     }
     file_contents_stream << info_file.rdbuf(); // 使用rdbuf()直接读取文件内容
@@ -57,7 +57,7 @@ void JudgeClient::_load_test_case_info() {
                                            &errors);
     delete reader;
     if (!parsingSuccessful) {
-        std::cerr << "Failed to parse JSON: " << errors << std::endl;
+        LOG_INFO("Error: Failed to parse JSON: %s",errors.c_str());
         return;
     }
 

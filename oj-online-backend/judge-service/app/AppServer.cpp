@@ -4,9 +4,9 @@
 
 #include "AppServer.h"
 #include "LengthHeaderCodec.h"
-#include "muduo/base/Logging.h"
 #include "judge.pb.h"
 #include "handler/HandlerProxy.h"
+#include "common/logger/rlog.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -28,9 +28,8 @@ void AppServer::start() {
 }
 
 void AppServer::onConnection(const muduo::net::TcpConnectionPtr &conn) {
-    LOG_INFO << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
-             << conn->localAddress().toIpPort() << " is "
-             << (conn->connected() ? "UP" : "DOWN");
+    LOG_INFO("[%s] -> [%s] is %s", conn->peerAddress().toIpPort().c_str(), conn->localAddress().toIpPort().c_str(),
+             conn->connected() ? "UP" : "DOWN");
 }
 
 /*
@@ -44,8 +43,7 @@ void AppServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::
 //        data.append(buf->retrieveAllAsString());
 //    buf->retrieveAll();
     muduo::string data(buf->retrieveAllAsString());
-    LOG_INFO << conn->name() << " echo " << data.size() << " bytes, "
-             << "data received at " << time.toString();
+    LOG_INFO("data received: %s", data.c_str());
     // 协议解析
     SSJudgeRequest request;
     if (LengthHeaderCodec::decode(data, request) != 0) {

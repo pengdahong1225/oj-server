@@ -3,21 +3,17 @@
 //
 
 #include "LengthHeaderCodec.h"
-#include "muduo/base/Logging.h"
+#include "common/logger/rlog.h"
 
 int LengthHeaderCodec::decode(const muduo::string &data, SSJudgeRequest &msg) {
     int32_t length = std::atoi(data.substr(0, kHeaderLen).c_str());
     muduo::string body = data.substr(kHeaderLen);
     if (length != body.size()) {
-        LOG_ERROR << "LengthHeaderCodec::onMessage"
-                  << " -> "
-                  << "the length of package is error";
+        LOG_ERROR("LengthHeaderCodec::onMessage -> the length of package is error");
         return -1;
     }
     if (!msg.ParseFromString(body)) {
-        LOG_ERROR << "LengthHeaderCodec::onMessage"
-                  << " -> "
-                  << "decode from string error";
+        LOG_ERROR("LengthHeaderCodec::onMessage -> decode from string error");
         return -1;
     }
     return 0;
@@ -26,9 +22,7 @@ int LengthHeaderCodec::decode(const muduo::string &data, SSJudgeRequest &msg) {
 int LengthHeaderCodec::encode(muduo::net::Buffer &buffer, const SSJudgeResponse &msg) {
     muduo::string body;
     if (!msg.SerializeToString(&body)) {
-        LOG_ERROR << "LengthHeaderCodec::onMessage"
-                  << " -> "
-                  << "encode to string error";
+        LOG_ERROR("LengthHeaderCodec::onMessage -> encode from string error");
         return -1;
     }
     buffer.append(body.data(), body.size());
