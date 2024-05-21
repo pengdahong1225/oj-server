@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS budiler
+FROM golang:1.21-alpine AS budiler
 
 ENV GO111MODULE=on \
     CGO_ENABLE=0 \
