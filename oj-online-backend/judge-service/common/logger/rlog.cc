@@ -13,10 +13,10 @@
 #define RELOG_THRESOLD 5
 #define BUFF_WAIT_TIME 1
 
-pid_t gettid()
-{
-    return syscall(__NR_gettid);
-}
+// pid_t gettid()
+// {
+//     return syscall(__NR_gettid);
+// }
 
 pthread_mutex_t ring_log::_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ring_log::_cond = PTHREAD_COND_INITIALIZER;

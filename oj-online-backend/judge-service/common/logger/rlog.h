@@ -9,6 +9,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>//getpid, gettid
+#include <unistd.h>
 
 enum LOG_LEVEL
 {
@@ -20,7 +21,7 @@ enum LOG_LEVEL
     TRACE,
 };
 
-extern pid_t gettid();
+// extern pid_t gettid();
 
 struct utc_timer
 {
