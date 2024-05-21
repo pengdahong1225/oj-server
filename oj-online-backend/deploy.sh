@@ -17,16 +17,16 @@ do
       echo "Copying config to $service_name..."
       
       # 创建目标config文件夹（如果不存在）
-      mkdir -p "$service_dir/$source_config"
+      mkdir -p "$service_name/$source_config"
       
       # 将../config下的所有内容复制到每个服务目录的config文件夹中
-      cp -r "$config_dir/$source_config/"* "$service_dir/$source_config/"
+      cp -r "$config_dir/$source_config/"* "$service_name/$source_config/"
       
-      echo "Copied config to $service_dir/$source_config/"
+      echo "Copied config to $service_name/$source_config/"
     fi
   fi
 done
 
 # 起服务
 echo "Starting services with docker-compose..."
-docker-compose -f $compose_file up -d
+docker compose -f $compose_file up -d

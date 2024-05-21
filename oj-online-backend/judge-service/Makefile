@@ -26,11 +26,12 @@ LIB += $(MUDUO_LIB) $(JUDGER_LIB) -lseccomp $(PROTO_LIB)
 
 C_SRC += $(wildcard ./judger/core/*.c) $(wildcard ./judger/core/rules/*.c)
 CPP_SRC += $(wildcard *.cpp) $(wildcard ./app/*.cpp) $(wildcard ./handler/*.cpp)
-CPP_SRC += $(wildcard ./common/*.cpp) $(wildcard ./common/logger/*.cc) $(wildcard ./judger/judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
+CPP_SRC += $(wildcard ./common/*.cpp) $(wildcard ./judger/judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
+CC_SRC += $(wildcard ./common/logger/*.cc)
 
 C_OBJ = $(patsubst %.c,%.o,$(C_SRC))
 CPP_OBJ = $(patsubst %.cpp,%.o,$(CPP_SRC))
-CC_OBJ = $(patsubst %.cc,%.o,$(CPP_SRC))
+CC_OBJ = $(patsubst %.cc,%.o,$(CC_SRC))
 
 OBJ = $(C_OBJ) $(CPP_OBJ) $(CC_OBJ)
 
@@ -42,6 +43,9 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
 %.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INC) -c -o $@ $<
+
+%.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INC) -c -o $@ $<
 
 all: $(TARGET)
