@@ -22,11 +22,11 @@ log:
   level: info
 
 registry:
-  host: 101.33.196.35
+  host: 10.0.8.10
   port: 8500
 
 rabbitmq:
-  host: 101.33.196.35
+  host: 10.0.8.10
   port: 5672
   user: oj
   password: 1225
