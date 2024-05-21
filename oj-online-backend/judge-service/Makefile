@@ -26,10 +26,11 @@ LIB += $(MUDUO_LIB) $(JUDGER_LIB) -lseccomp $(PROTO_LIB)
 
 C_SRC += $(wildcard ./judger/core/*.c) $(wildcard ./judger/core/rules/*.c)
 CPP_SRC += $(wildcard *.cpp) $(wildcard ./app/*.cpp) $(wildcard ./handler/*.cpp)
-CPP_SRC += $(wildcard ./common/*.cpp) $(wildcard ./judger/judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
+CPP_SRC += $(wildcard ./common/*.cpp) $(wildcard ./common/logger/*.cc) $(wildcard ./judger/judgeclient/*.cpp) $(wildcard ./wrapper/*.cpp)
 
 C_OBJ = $(patsubst %.c,%.o,$(C_SRC))
 CPP_OBJ = $(patsubst %.cpp,%.o,$(CPP_SRC))
+CPP_OBJ += $(patsubst %.cc,%.o,$(CPP_SRC))
 
 OBJ = $(C_OBJ) $(CPP_OBJ)
 
