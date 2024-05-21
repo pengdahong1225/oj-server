@@ -30,9 +30,9 @@ CPP_SRC += $(wildcard ./common/*.cpp) $(wildcard ./common/logger/*.cc) $(wildcar
 
 C_OBJ = $(patsubst %.c,%.o,$(C_SRC))
 CPP_OBJ = $(patsubst %.cpp,%.o,$(CPP_SRC))
-CPP_OBJ += $(patsubst %.cc,%.o,$(CPP_SRC))
+CC_OBJ = $(patsubst %.cc,%.o,$(CPP_SRC))
 
-OBJ = $(C_OBJ) $(CPP_OBJ)
+OBJ = $(C_OBJ) $(CPP_OBJ) $(CC_OBJ)
 
 # build
 $(TARGET): $(OBJ)
