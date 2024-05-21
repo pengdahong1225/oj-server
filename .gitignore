@@ -7,3 +7,4 @@ cmake-build-*
 *.pb.h
 *.pb.cc
 *.log
+*.o
