@@ -3,6 +3,7 @@ package registry
 import (
 	"db-service/settings"
 	"fmt"
+
 	consulapi "github.com/hashicorp/consul/api"
 )
 
@@ -33,7 +34,7 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 		Address: ip,
 		Check: &consulapi.AgentServiceCheck{
 			CheckID:                        fmt.Sprintf("%s-%s-%d", serviceName, ip, port),
-			HTTP:                           fmt.Sprintf("http://%s:%d%s", ip, port, "/health"),
+			GRPC:                           fmt.Sprintf("%s:%d", ip, port),
 			Timeout:                        "10s",
 			Interval:                       "10s",
 			DeregisterCriticalServiceAfter: "1m",
