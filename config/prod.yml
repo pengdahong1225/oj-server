@@ -23,7 +23,7 @@ log:
 
 registry:
   host: 101.33.196.35
-  port: 8600
+  port: 8500
 
 rabbitmq:
   host: 101.33.196.35
