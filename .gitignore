@@ -8,3 +8,4 @@ cmake-build-*
 *.pb.cc
 *.log
 *.o
+config/
