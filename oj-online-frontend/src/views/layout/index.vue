@@ -24,6 +24,8 @@
       <el-menu-item index="4" route="/login">登录/注册</el-menu-item>
     </el-menu>
 
+    <el-divider></el-divider>
+
     <!-- 二级路由出口：二级组件展示的位置 -->
     <router-view></router-view>
   </div>
