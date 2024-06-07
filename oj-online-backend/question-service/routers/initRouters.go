@@ -3,7 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/controller"
+	"question-service/api"
 	"question-service/middlewares"
 	"time"
 )
@@ -21,30 +21,29 @@ func HealthCheckRouters(engine *gin.Engine) {
 func QuestionRouters(engine *gin.Engine) {
 	// 公共api
 	{
-		engine.GET("/questionSet", controller.QuestionSet)
-		engine.POST("/sendSms", middlewares.RateLimitMiddleware(2*time.Second, 50), controller.SendSmsCode)
+		engine.GET("/questionSet", api.QuestionSet)
+		engine.POST("/sendSms", middlewares.RateLimitMiddleware(2*time.Second, 50), api.SendSmsCode)
 		// 需要登录
-		engine.GET("/rankList", middlewares.AuthLogin(), controller.GetRankList)
+		engine.GET("/rankList", middlewares.AuthLogin(), api.GetRankList)
 	}
 
 	// 题目api
 	questionRouter := engine.Group("/questions")
 	{
-		questionRouter.GET("/detail", controller.QuestionDetail)
-		questionRouter.GET("/query", controller.QuestionQuery)
+		questionRouter.GET("/detail", api.QuestionDetail)
+		questionRouter.GET("/query", api.QuestionQuery)
 		// 需要登录
-		questionRouter.POST("/run", middlewares.AuthLogin(), controller.QuestionRun)
-		questionRouter.POST("/submit", middlewares.AuthLogin(), controller.QuestionSubmit)
+		questionRouter.POST("/run", middlewares.AuthLogin(), api.QuestionRun)
+		questionRouter.POST("/submit", middlewares.AuthLogin(), api.QuestionSubmit)
 	}
 
 	// 用户api
 	userRouter := engine.Group("/user")
 	{
-		userRouter.POST("/register", controller.UserRegister)
-		userRouter.POST("/login", controller.UserLogin)
+		userRouter.POST("/login", api.UserLogin)
 		// 需要登录
-		userRouter.GET("/detail", middlewares.AuthLogin(), controller.GetUserDetail)
-		userRouter.GET("/submitRecord", middlewares.AuthLogin(), controller.GetSubmitRecord)
+		userRouter.GET("/detail", middlewares.AuthLogin(), api.GetUserDetail)
+		userRouter.GET("/submitRecord", middlewares.AuthLogin(), api.GetSubmitRecord)
 	}
 }
 
@@ -53,8 +52,8 @@ func CmsRouters(engine *gin.Engine) {
 	cmsRouter := engine.Group("/cms")
 	// 需要管理员权限
 	cmsRouter.Use(middlewares.AuthLogin()).Use(middlewares.Admin())
-	cmsRouter.GET("/userList", controller.GetUserList)
-	cmsRouter.POST("/addQuestion", controller.AddQuestion)
-	cmsRouter.POST("/deleteQuestion", controller.DeleteQuestion)
-	cmsRouter.POST("/updateQuestion", controller.UpdateQuestion)
+	cmsRouter.GET("/userList", api.GetUserList)
+	cmsRouter.POST("/addQuestion", api.AddQuestion)
+	cmsRouter.POST("/deleteQuestion", api.DeleteQuestion)
+	cmsRouter.POST("/updateQuestion", api.UpdateQuestion)
 }

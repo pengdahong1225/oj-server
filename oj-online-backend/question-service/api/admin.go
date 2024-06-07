@@ -1,9 +1,9 @@
-package controller
+package api
 
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/logic"
+	"question-service/api/internal"
 	"strconv"
 )
 
@@ -16,7 +16,7 @@ func GetUserList(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	logic.GetUserList(ctx, int32(cursor))
+	internal.GetUserList(ctx, int32(cursor))
 }
 
 func AddQuestion(ctx *gin.Context) {

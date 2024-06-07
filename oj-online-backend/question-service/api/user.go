@@ -1,9 +1,9 @@
-package controller
+package api
 
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/logic"
+	"question-service/api/internal"
 	"regexp"
 	"strconv"
 )
@@ -11,14 +11,14 @@ import (
 func UserRegister(ctx *gin.Context) {
 	// 表单验证
 	if form, ok := formValidateForRegistry(ctx); ok {
-		logic.RegistryHandler(ctx, form)
+		internal.RegistryHandler(ctx, form)
 	}
 }
 
 func UserLogin(ctx *gin.Context) {
 	// 表单验证
 	if form, ok := formValidateForLogin(ctx); ok {
-		logic.LoginHandler(ctx, form)
+		internal.LoginHandler(ctx, form)
 	}
 }
 
@@ -37,12 +37,12 @@ func GetUserDetail(ctx *gin.Context) {
 			return
 		}
 		phoneInt, _ := strconv.ParseInt(phone, 10, 64)
-		logic.GetUserDetail(ctx, phoneInt)
+		internal.GetUserDetail(ctx, phoneInt)
 	}
 }
 
 func GetRankList(ctx *gin.Context) {
-	logic.GetRankList(ctx)
+	internal.GetRankList(ctx)
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
@@ -54,7 +54,7 @@ func GetSubmitRecord(ctx *gin.Context) {
 		return
 	} else {
 		userId, _ := strconv.ParseInt(id, 10, 64)
-		logic.GetSubmitRecord(ctx, userId)
+		internal.GetSubmitRecord(ctx, userId)
 	}
 }
 
@@ -74,7 +74,7 @@ func SendSmsCode(ctx *gin.Context) {
 			})
 			ctx.Abort()
 		}
-		if err := logic.SendSmsCode(phone); err != nil {
+		if err := internal.SendSmsCode(phone); err != nil {
 			ctx.JSON(http.StatusInternalServerError, err)
 		} else {
 			ctx.JSON(http.StatusOK, gin.H{

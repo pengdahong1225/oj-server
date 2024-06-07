@@ -2,7 +2,7 @@ package judgeClient
 
 import (
 	"google.golang.org/protobuf/proto"
-	pb "question-service/logic/proto"
+	"question-service/api/proto"
 )
 
 var kHeaderLen = 4

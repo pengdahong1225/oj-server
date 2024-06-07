@@ -1,11 +1,11 @@
-package logic
+package internal
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	pb2 "question-service/logic/proto"
+	"question-service/api/proto"
 	"question-service/services/registry"
 	"question-service/settings"
 	"question-service/views"
@@ -20,8 +20,8 @@ func GetUserList(ctx *gin.Context, cursor int32) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
-	request := &pb2.GetUserListRequest{Cursor: cursor}
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.GetUserListRequest{Cursor: cursor}
 	response, err := client.GetUserList(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{

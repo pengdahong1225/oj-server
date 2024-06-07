@@ -1,4 +1,4 @@
-package logic
+package internal
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
-	pb2 "question-service/logic/proto"
+	"question-service/api/proto"
 	"question-service/middlewares"
 	"question-service/models"
 	"question-service/services/redis"
@@ -56,9 +56,9 @@ func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
+	client := pb.NewDBServiceClient(dbConn)
 	phone, _ := strconv.ParseInt(form.Phone, 10, 64)
-	data := &pb2.UserInfo{
+	data := &pb.UserInfo{
 		Phone:    phone,
 		Password: form.PassWord,
 		Nickname: form.NickName,
@@ -67,7 +67,7 @@ func RegistryHandler(ctx *gin.Context, form *models.RegistryForm) {
 		Role:     int32(form.Role),
 		HeadUrl:  form.HeadUrl,
 	}
-	request := &pb2.CreateUserRequest{Data: data}
+	request := &pb.CreateUserRequest{Data: data}
 
 	response, err := client.CreateUserData(context.Background(), request)
 	if err != nil {
@@ -92,10 +92,10 @@ func LoginHandler(ctx *gin.Context, form *models.LoginFrom) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
+	client := pb.NewDBServiceClient(dbConn)
 
 	phone, _ := strconv.ParseInt(form.Phone, 10, 64)
-	request := &pb2.GetUserRequest{
+	request := &pb.GetUserRequest{
 		Phone: phone,
 	}
 	response, err := client.GetUserData(context.Background(), request)
@@ -149,8 +149,8 @@ func GetUserDetail(ctx *gin.Context, phone int64) {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
-	response, err := client.GetUserData(context.Background(), &pb2.GetUserRequest{
+	client := pb.NewDBServiceClient(dbConn)
+	response, err := client.GetUserData(context.Background(), &pb.GetUserRequest{
 		Phone: phone,
 	})
 	if err != nil {
@@ -207,9 +207,9 @@ func GetSubmitRecord(ctx *gin.Context, userId int64) {
 		})
 	}
 	defer dbConn.Close()
-	client := pb2.NewDBServiceClient(dbConn)
+	client := pb.NewDBServiceClient(dbConn)
 
-	response, err := client.GetUserSubmitRecord(context.Background(), &pb2.GetUserSubmitRecordRequest{
+	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{
 		UserId: userId,
 	})
 	if err != nil {

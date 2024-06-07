@@ -1,4 +1,4 @@
-package logic
+package internal
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	pb "question-service/logic/proto"
+	pb2 "question-service/api/proto"
 	"question-service/models"
 	"question-service/services/judgeClient"
 	"question-service/services/redis"
@@ -25,8 +25,8 @@ func QuestionSet(ctx *gin.Context, cursor int32) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.GetQuestionListRequest{Cursor: cursor}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.GetQuestionListRequest{Cursor: cursor}
 	response, err := client.GetQuestionList(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -59,8 +59,8 @@ func QuestionDetail(ctx *gin.Context, id int64) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.GetQuestionRequest{Id: id}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.GetQuestionRequest{Id: id}
 	response, err := client.GetQuestionData(context.Background(), request)
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -91,8 +91,8 @@ func QuestionQuery(ctx *gin.Context, name string) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.QueryQuestionWithNameRequest{Name: name}
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.QueryQuestionWithNameRequest{Name: name}
 
 	response, err := client.QueryQuestionWithName(context.Background(), request)
 	if err != nil {
@@ -157,7 +157,7 @@ func QuestionRun(ctx *gin.Context, form *models.QuestionForm) {
 	}
 
 	// todo 请求judge-service
-	request := &pb.SSJudgeRequest{
+	request := &pb2.SSJudgeRequest{
 		Code:         form.Code,
 		Language:     form.Clang,
 		TestCaseJson: test_case_json,
@@ -226,8 +226,8 @@ func updateSubmitRecord(msg []byte, result string) {
 		return
 	}
 
-	client := pb.NewDBServiceClient(dbConn)
-	request := &pb.UpdateUserSubmitRecordRequest{
+	client := pb2.NewDBServiceClient(dbConn)
+	request := &pb2.UpdateUserSubmitRecordRequest{
 		UserId:     question.UserId,
 		QuestionId: question.Id,
 		Code:       question.Code,

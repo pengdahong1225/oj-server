@@ -1,8 +1,8 @@
-package controller
+package api
 
 import (
 	"net/http"
-	"question-service/logic"
+	"question-service/api/internal"
 	"question-service/models"
 	"strconv"
 
@@ -18,7 +18,7 @@ func QuestionSet(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	logic.QuestionSet(ctx, int32(cursor))
+	internal.QuestionSet(ctx, int32(cursor))
 }
 
 func QuestionDetail(ctx *gin.Context) {
@@ -31,7 +31,7 @@ func QuestionDetail(ctx *gin.Context) {
 		return
 	} else {
 		idInt, _ := strconv.ParseInt(id, 10, 64)
-		logic.QuestionDetail(ctx, idInt)
+		internal.QuestionDetail(ctx, idInt)
 	}
 }
 
@@ -42,20 +42,20 @@ func QuestionQuery(ctx *gin.Context) {
 			"msg": "参数错误",
 		})
 	} else {
-		logic.QuestionQuery(ctx, name)
+		internal.QuestionQuery(ctx, name)
 	}
 }
 
 func QuestionRun(ctx *gin.Context) {
 	// 运行代码
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
-		logic.QuestionRun(ctx, form)
+		internal.QuestionRun(ctx, form)
 	}
 }
 
 func QuestionSubmit(ctx *gin.Context) {
 	// 提交代码
 	if form, ok := processOnValidate(ctx, models.QuestionForm{}); ok {
-		logic.QuestionSubmit(ctx, form)
+		internal.QuestionSubmit(ctx, form)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/sirupsen/logrus"
 	"net"
-	pb "question-service/logic/proto"
+	"question-service/api/proto"
 	"time"
 )
 

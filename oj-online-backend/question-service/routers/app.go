@@ -10,6 +10,7 @@ func Router() *gin.Engine {
 	r := gin.Default()
 	gin.SetMode(os.Getenv("GIN_MODE"))
 	r.Use(middlewares.Cors())
+	// 初始化路由
 	HealthCheckRouters(r)
 	QuestionRouters(r)
 	CmsRouters(r)
