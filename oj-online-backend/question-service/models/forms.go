@@ -14,8 +14,8 @@ type RegistryForm struct {
 }
 
 type LoginFrom struct {
-	Phone    string `form:"phone" json:"phone" binding:"required,phone"` // 需要自定义validator
-	PassWord string `form:"password" json:"password" binding:"required,min=4,max=20"`
+	Mobile  string `form:"mobile" json:"mobile" binding:"required,phone"` // 需要自定义validator
+	SmsCode string `form:"smsCode" json:"smsCode" binding:"required"`
 }
 
 // QuestionForm 代码运行和提交表单

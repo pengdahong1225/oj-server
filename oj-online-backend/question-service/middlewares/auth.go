@@ -9,10 +9,11 @@ import (
 func AuthLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// jwt鉴权头部信息 x-token 登录时返回token信息
-		token := ctx.Request.Header.Get("x-token")
+		token := ctx.Request.Header.Get("token")
 		if token == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"msg": "未登录",
+				"code":    http.StatusUnauthorized,
+				"message": "未登录",
 			})
 			ctx.Abort()
 			return
@@ -23,13 +24,15 @@ func AuthLogin() gin.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, TokenExpired) {
 				ctx.JSON(http.StatusUnauthorized, gin.H{
-					"msg": "授权已过期",
+					"code":    http.StatusUnauthorized,
+					"message": "授权已过期",
 				})
 				ctx.Abort()
 				return
 			} else {
 				ctx.JSON(http.StatusUnauthorized, gin.H{
-					"msg": "token验证错误",
+					"code":    http.StatusUnauthorized,
+					"message": "token验证错误",
 				})
 				ctx.Abort()
 				return

@@ -12,23 +12,38 @@ import (
 func HealthCheckRouters(engine *gin.Engine) {
 	engine.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
-			"msg": "health",
+			"code":    "ok",
+			"message": "health",
 		})
 	})
 }
 
-// QuestionRouters 题目服务路由
+// QuestionRouters 服务路由
 func QuestionRouters(engine *gin.Engine) {
-	// 公共api
+	// api/
 	{
-		engine.GET("/questionSet", api.QuestionSet)
-		engine.POST("/sendSms", middlewares.RateLimitMiddleware(2*time.Second, 50), api.SendSmsCode)
-		// 需要登录
+		engine.GET("/problemSet", api.ProblemSet)
 		engine.GET("/rankList", middlewares.AuthLogin(), api.GetRankList)
+		engine.POST("/login", api.Login)
 	}
 
-	// 题目api
-	questionRouter := engine.Group("/questions")
+	// api/user
+	userRouter := engine.Group("/user")
+	{
+		userRouter.GET("/detail", middlewares.AuthLogin(), api.GetUserDetail)
+		userRouter.GET("/submitRecord", middlewares.AuthLogin(), api.GetSubmitRecord)
+	}
+
+	// api/captcha
+	captchaRouter := engine.Group("/captcha")
+	{
+		captchaRouter.Use(middlewares.RateLimitMiddleware(2*time.Second, 50))
+		captchaRouter.GET("/image", api.GetImageCode)
+		captchaRouter.GET("/sms", api.GetSmsCode)
+	}
+
+	// api/problem
+	questionRouter := engine.Group("/problem")
 	{
 		questionRouter.GET("/detail", api.QuestionDetail)
 		questionRouter.GET("/query", api.QuestionQuery)
@@ -36,18 +51,9 @@ func QuestionRouters(engine *gin.Engine) {
 		questionRouter.POST("/run", middlewares.AuthLogin(), api.QuestionRun)
 		questionRouter.POST("/submit", middlewares.AuthLogin(), api.QuestionSubmit)
 	}
-
-	// 用户api
-	userRouter := engine.Group("/user")
-	{
-		userRouter.POST("/login", api.UserLogin)
-		// 需要登录
-		userRouter.GET("/detail", middlewares.AuthLogin(), api.GetUserDetail)
-		userRouter.GET("/submitRecord", middlewares.AuthLogin(), api.GetSubmitRecord)
-	}
 }
 
-// CmsRouters CMS服务路由
+// CmsRouters cms路由
 func CmsRouters(engine *gin.Engine) {
 	cmsRouter := engine.Group("/cms")
 	// 需要管理员权限

@@ -29,6 +29,15 @@ func Close() {
 	_ = pool.Close()
 }
 
-func NewConn() redis.Conn {
+func newConn() redis.Conn {
 	return pool.Get()
+}
+
+func SetKVByStringWithExpire(key string, value string, expire int) error {
+	redisConn := newConn()
+	defer redisConn.Close()
+	if _, err := redisConn.Do("Set", key, value, "ex", expire); err != nil {
+		return err
+	}
+	return nil
 }

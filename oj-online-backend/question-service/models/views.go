@@ -1,4 +1,4 @@
-package views
+package models
 
 import "github.com/golang/protobuf/ptypes/timestamp"
 
@@ -18,16 +18,6 @@ type UserInfo struct {
 	HeadUrl     string               `json:"head_url"`
 	PassCount   int64                `json:"passCount"`
 	SubmitCount int64                `json:"submitCount"`
-}
-
-type Question struct {
-	Id          int64    `json:"id"`
-	Title       string   `json:"title"`
-	Level       int32    `json:"level"`
-	Tags        []string `json:"tags"`
-	Description string   `json:"description"`
-	TestCase    string   `json:"test_case"`
-	Template    string   `json:"template"`
 }
 
 type QuestionResponse struct {

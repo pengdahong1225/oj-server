@@ -5,19 +5,14 @@ import (
 	"net/http"
 	"question-service/api/internal"
 	"regexp"
-	"strconv"
 )
 
-func Login(ctx *gin.Context) {
-	// 表单验证
-	if form, ok := validateForLogin(ctx); ok {
-		res := internal.ProcessForLogin(form)
-		ctx.JSON(res.Code, res)
-	}
-}
+// 图像验证码
+func GetImageCode(ctx *gin.Context) {}
 
-func GetUserDetail(ctx *gin.Context) {
-	// 查询参数
+// 短信验证码
+func GetSmsCode(ctx *gin.Context) {
+	// 手机号校验
 	if mobile, ok := ctx.GetQuery("mobile"); !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
@@ -33,19 +28,17 @@ func GetUserDetail(ctx *gin.Context) {
 				"message": "参数错误",
 			})
 			ctx.Abort()
-			return
 		}
-		mobileInt, _ := strconv.ParseInt(mobile, 10, 64)
-		res := internal.GetUserDetail(mobileInt)
-		ctx.JSON(res.Code, res)
+		if err := internal.SendSmsCode(mobile); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error(),
+			})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{
+				"code":    http.StatusOK,
+				"message": "发送成功[测试环境的验证码均为123456]",
+			})
+		}
 	}
-}
-
-func GetRankList(ctx *gin.Context) {
-	res := internal.GetRankList()
-	ctx.JSON(res.Code, res)
-}
-
-func GetSubmitRecord(ctx *gin.Context) {
-
 }

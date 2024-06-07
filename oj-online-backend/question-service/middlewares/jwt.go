@@ -8,7 +8,7 @@ import (
 )
 
 type UserClaims struct {
-	Phone     int64
+	Mobile    int64
 	Authority int32
 	jwt.StandardClaims
 }

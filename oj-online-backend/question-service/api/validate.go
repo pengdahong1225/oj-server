@@ -14,62 +14,47 @@ type formTyper interface {
 	models.LoginFrom | models.RegistryForm | models.QuestionForm
 }
 
-// 表单验证
-func processOnValidate[T formTyper](ctx *gin.Context, form T) (*T, bool) {
+// validate 表单验证
+func validate[T formTyper](ctx *gin.Context, form T) (*T, bool) {
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
-			ctx.JSON(http.StatusForbidden, gin.H{"msg": "表单验证错误"})
+			ctx.JSON(http.StatusForbidden, gin.H{
+				"status":  http.StatusForbidden,
+				"message": "表单验证错误",
+			})
 			return nil, false
 		}
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"msg": errs.Error(),
+			"status":  http.StatusBadRequest,
+			"message": errs.Error(),
 		})
 		return nil, false
 	}
 	return &form, true
 }
 
-// 注册表单验证
-func formValidateForRegistry(ctx *gin.Context) (*models.RegistryForm, bool) {
-	// 手机号 -- 修改gin框架中的Validator引擎属性，实现自定制
+// validateForLogin 登录表单验证
+// gin无法校验手机号格式，需要自定制
+// 修改gin中的Validator引擎属性，注册新的校验函数
+func validateForLogin(ctx *gin.Context) (*models.LoginFrom, bool) {
 	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		if err := validate.RegisterValidation("phone", validatePhone); err != nil {
+		if err := validate.RegisterValidation("mobile", func(fl validator.FieldLevel) bool {
+			mobile := fl.Field().String()
+			ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, mobile)
+			if !ok {
+				return false
+			}
+			return true
+		}); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"msg": err.Error(),
+				"status":  http.StatusBadRequest,
+				"message": err.Error(),
 			})
 			return nil, false
 		}
 	}
-	// 密码
-	registryForm := models.RegistryForm{}
-	return processOnValidate(ctx, registryForm)
-}
-
-// 登录表单验证
-func formValidateForLogin(ctx *gin.Context) (*models.LoginFrom, bool) {
-	// 手机号 -- 修改gin框架中的Validator引擎属性，实现自定制
-	if validate, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		// 注册自定义字段级别校验方法
-		if err := validate.RegisterValidation("phone", validatePhone); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"msg": err.Error(),
-			})
-			return nil, false
-		}
-	}
-	// 密码
 	passwordLoginForm := models.LoginFrom{}
-	return processOnValidate(ctx, passwordLoginForm)
-}
-
-// 自定义验证函数：手机号格式校验 使用正则表达式
-func validatePhone(fl validator.FieldLevel) bool {
-	phone := fl.Field().String()
-	ok, _ := regexp.MatchString(`^1([38][0-9]|14[579]|5[^4]|16[6]|7[1-35-8]|9[189])\d{8}$`, phone)
-	if !ok {
-		return false
-	}
-	return true
+	return validate(ctx, passwordLoginForm)
 }
