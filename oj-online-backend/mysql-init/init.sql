@@ -1,7 +1,7 @@
 use oj_online_server;
 
 -- 初始化题目
-INSERT INTO question (title, description, level, tags, test_case)
+INSERT INTO problem (title, description, level, tags, test_case)
 VALUES
     ('两数之和', '给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出和为目标值的那两个整数，并返回它们的数组下标。', 1, '#数组 #双指针 #哈希表', '示例用例若干...'),
     ('有效的括号', '给定一个只包括 "(" ，")" ，"[" ，"]" ， "{" ，"}" 的字符串，判断字符串是否有效。', 1, '#栈 #字符串', '示例用例若干...'),
