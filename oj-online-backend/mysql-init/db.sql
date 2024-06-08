@@ -15,7 +15,7 @@ create table if not exists user_info
     avatar_url VARCHAR(256) DEFAULT '' comment '头像url',
 
     PRIMARY KEY(id),
-    UNIQUE INDEX idx_phone(phone)
+    UNIQUE INDEX idx_mobile(mobile)
 )engine = InnoDB charset = utf8mb4;
 
 -- 做题信息表
