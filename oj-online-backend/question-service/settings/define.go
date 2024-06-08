@@ -9,7 +9,7 @@ type AppConfig struct {
 	*RegistryConfig `mapstructure:"registry"`
 	*MqConfig       `mapstructure:"rabbitmq"`
 	*JwtConfig      `mapstructure:"jwt"`
-	*SmsConfig      `mapstructure:"sms"`
+	*SmsConfig      `mapstructure:"captcha"`
 }
 
 type SystemConfig struct {

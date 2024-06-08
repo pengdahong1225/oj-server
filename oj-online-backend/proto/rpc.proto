@@ -6,12 +6,14 @@ import "user.proto";
 import "problem.proto";
 
 service DBService{
+  // user接口
   rpc GetUserData(GetUserRequest) returns(GetUserResponse);
   rpc CreateUserData(CreateUserRequest) returns(CreateUserResponse);
   rpc UpdateUserData(UpdateUserRequest) returns(google.protobuf.Empty);
   rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
 
+  // problem接口
   rpc GetProblemData(GetProblemRequest) returns(GetProblemResponse);
   rpc CreateProblemData(CreateProblemRequest) returns(CreateProblemResponse);
   rpc UpdateProblemData(UpdateProblemRequest) returns(google.protobuf.Empty);
@@ -96,7 +98,7 @@ message GetUserSubmitRecordRequest{
   int64 user_id = 1;
 }
 message GetUserSubmitRecordResponse{
-  repeated SubmitRecord data = 1;
+  repeated UserSubmitRecord data = 1;
 }
 
 message QueryProblemWithNameRequest{

@@ -3,24 +3,33 @@ option go_package = "./;pb";
 
 import "google/protobuf/timestamp.proto";
 
+// 用户基本数据
 message UserInfo{
-  google.protobuf.Timestamp create_at = 1;
-  google.protobuf.Timestamp delete_at = 2;
+  int64 uid = 1;
+  google.protobuf.Timestamp create_at = 2;
+  google.protobuf.Timestamp delete_at = 3;
 
-  int64 mobile = 3;
-  string password = 4;
+  int64 mobile = 4;
   string nickname = 5;
   string email = 6;
   int32 gender = 7;
   int32 role = 8;
-  string head_url = 9;
-
-  int64 pass_count = 10;
-  int64 submit_count = 11;
+  string avatar_url = 9;
 }
 
-message SubmitRecord{
-  int64 user_id = 1;
+// 用户做题统计信息
+message UserProblemStatistics{
+  int64 uid = 1;
+  int64 submit_count = 2;
+  int64 accomplish_count = 3;
+  int64 easy_problem_count = 4;
+  int64 medium_problem_count = 5;
+  int64 hard_problem_count = 6;
+}
+
+// 用户提交记录
+message UserSubmitRecord{
+  int64 uid = 1;
   int64 problem_id = 2;
   string code = 3;
   string result = 4;

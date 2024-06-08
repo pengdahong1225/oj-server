@@ -39,7 +39,7 @@ func QuestionRouters(engine *gin.Engine) {
 	{
 		captchaRouter.Use(middlewares.RateLimitMiddleware(2*time.Second, 50))
 		captchaRouter.GET("/image", api.GetImageCode)
-		captchaRouter.GET("/sms", api.GetSmsCode)
+		captchaRouter.GET("/captcha", api.GetSmsCode)
 	}
 
 	// api/problem

@@ -39,11 +39,13 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DBServiceClient interface {
+	// user接口
 	GetUserData(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	CreateUserData(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	UpdateUserData(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
+	// problem接口
 	GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
 	CreateProblemData(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error)
 	UpdateProblemData(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -183,11 +185,13 @@ func (c *dBServiceClient) UpdateUserSubmitRecord(ctx context.Context, in *Update
 // All implementations must embed UnimplementedDBServiceServer
 // for forward compatibility
 type DBServiceServer interface {
+	// user接口
 	GetUserData(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	CreateUserData(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	UpdateUserData(context.Context, *UpdateUserRequest) (*empty.Empty, error)
 	DeleteUserData(context.Context, *DeleteUserRequest) (*empty.Empty, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
+	// problem接口
 	GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
 	CreateProblemData(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error)
 	UpdateProblemData(context.Context, *UpdateProblemRequest) (*empty.Empty, error)

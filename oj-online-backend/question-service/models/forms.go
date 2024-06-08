@@ -2,19 +2,15 @@ package models
 
 // binding的逗号之间不能有空格
 
-type RegistryForm struct {
-	Phone    string `form:"phone" json:"phone" binding:"required,phone"` // 需要自定义validator
-	PassWord string `form:"password" json:"password" binding:"required,min=4,max=20"`
-	SmsCode  string `form:"sms_code" json:"sms_code" binding:"required"`
-	NickName string `form:"nickname" json:"nickname"`
-	Email    string `form:"email" json:"email"`
-	Gender   int    `form:"gender" json:"gender"`
-	Role     int    `form:"role" json:"role"`
-	HeadUrl  string `form:"head_url" json:"head_url"`
+// GetSmsCodeForm 获取图像验证码表单
+type GetSmsCodeForm struct {
+	CaptchaID    string `form:"captchaID" json:"captchaID" binding:"required"`
+	CaptchaValue string `form:"captchaValue" json:"captchaValue" binding:"required"`
+	Mobile       string `form:"mobile" json:"mobile" binding:"required"`
 }
 
 type LoginFrom struct {
-	Mobile  string `form:"mobile" json:"mobile" binding:"required,phone"` // 需要自定义validator
+	Mobile  string `form:"mobile" json:"mobile" binding:"required"`
 	SmsCode string `form:"smsCode" json:"smsCode" binding:"required"`
 }
 

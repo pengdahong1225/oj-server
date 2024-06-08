@@ -4,32 +4,50 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"question-service/api/internal"
+	"question-service/models"
+	"question-service/services/captcha"
 	"regexp"
 )
 
-// 图像验证码
-func GetImageCode(ctx *gin.Context) {}
+// GetImageCode 获取图像验证码
+func GetImageCode(ctx *gin.Context) {
+	id, b64s, err := captcha.GenerateImageCaptcha()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error(),
+		})
+	} else {
+		data := make(map[string]any)
+		data["captcha_id"] = id
+		data["b64s"] = b64s
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": http.StatusOK,
+			"data": data,
+		})
+	}
+}
 
-// 短信验证码
+// GetSmsCode 获取短信验证码
 func GetSmsCode(ctx *gin.Context) {
+	// 表单校验
+	form, ret := validate(ctx, models.GetSmsCodeForm{})
+	if !ret {
+		return
+	}
+
 	// 手机号校验
-	if mobile, ok := ctx.GetQuery("mobile"); !ok {
+	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
-			"message": "参数错误",
+			"message": "手机号格式错误",
 		})
-		ctx.Abort()
 		return
-	} else {
-		ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, mobile)
-		if !ok {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"code":    http.StatusBadRequest,
-				"message": "参数错误",
-			})
-			ctx.Abort()
-		}
-		if err := internal.SendSmsCode(mobile); err != nil {
+	}
+	// 图形验证码校验
+	if captcha.VerifyImageCaptcha(form.CaptchaID, form.CaptchaValue) {
+		if err := internal.SendSmsCode(form.Mobile); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": err.Error(),

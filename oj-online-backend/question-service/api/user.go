@@ -4,16 +4,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"question-service/api/internal"
+	"question-service/models"
 	"regexp"
 	"strconv"
 )
 
 func Login(ctx *gin.Context) {
 	// 表单验证
-	if form, ok := validateForLogin(ctx); ok {
-		res := internal.ProcessForLogin(form)
-		ctx.JSON(res.Code, res)
+	form, ret := validate(ctx, models.LoginFrom{})
+	if !ret {
+		return
 	}
+
+	// 手机号校验
+	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "手机号格式错误",
+		})
+		return
+	}
+
+	res := internal.ProcessForLogin(form)
+	ctx.JSON(res.Code, res)
 }
 
 func GetUserDetail(ctx *gin.Context) {

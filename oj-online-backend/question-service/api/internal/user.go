@@ -9,9 +9,9 @@ import (
 	"question-service/api/proto"
 	"question-service/middlewares"
 	"question-service/models"
+	"question-service/services/captcha"
 	"question-service/services/redis"
 	"question-service/services/registry"
-	"question-service/services/sms"
 	"question-service/settings"
 	"question-service/utils"
 	"strconv"
@@ -163,7 +163,7 @@ func SendSmsCode(mobile string) error {
 	data, _ := json.Marshal(param)
 
 	// 调用第三方服务发送
-	if err := sms.Send(data, mobile); err != nil {
+	if err := captcha.Send(data, mobile); err != nil {
 		return err
 	}
 
