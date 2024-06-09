@@ -10,7 +10,8 @@ import { Loading } from 'element-ui' // 引入element-ui的loading组件
 
 // 创建axios实例
 const instance = axios.create({
-  baseURL: 'http://smart-shop.itheima.net/index.php?s=/api',
+  // baseURL: 'http://smart-shop.itheima.net/index.php?s=/api',
+  baseURL: 'http://127.0.0.1:9010',
   timeout: 5000
 })
 
@@ -31,10 +32,10 @@ instance.interceptors.request.use(function (config) {
   // 开启loading 禁止背景点击 以服务的方式调用的全屏 Loading 是单例的
   startLoading()
   // 配置headers，有token就添加token
-  config.headers.platform = 'H5'
+  // config.headers.platform = 'H5'
   const token = store.getters.token
   if (token) {
-    config.headers['Access-Token'] = token
+    config.headers.token = token
   }
 
   return config
@@ -46,19 +47,19 @@ instance.interceptors.request.use(function (config) {
 // 添加响应拦截器
 instance.interceptors.response.use(function (response) {
   // 对响应数据做点什么(默认axios的响应数据结构会多包装一层data)
-  const res = response.data
-  console.log(res)
-  if (res.status !== 200) {
+  console.log(response)
+  if (response.data.code !== 200) {
     endLoading()
-    return Promise.reject(res.message)
+    return Promise.reject(response.data.message)
   } else {
     endLoading()
   }
 
-  return res
+  return response.data
 }, function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
+  // endLoading()
   return Promise.reject(error)
 })
 

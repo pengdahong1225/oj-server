@@ -17,7 +17,7 @@
       :visible.sync="dialogVisible"
       :width="dialogWidth"
     >
-      <Login></Login>
+      <Login @close="dialogVisible = false"></Login>
     </el-dialog>
   </div>
 </template>
@@ -46,7 +46,6 @@ export default {
   },
   methods: {
     handleAvatarClick () {
-      console.log('handleAvatarClick')
       // 判断是否登录
       if (!this.isLogin) {
         this.dialogVisible = true

@@ -10,24 +10,22 @@ export const getPicCode = () => {
 }
 
 // 获取短信验证码
-export const getSmsCode = (mobile, picKey, picCode) => {
-  return request.post('/captcha/sendSmsCaptcha', {
-    form: {
-      mobile: mobile,
-      captchaKey: picKey,
-      captchaCode: picCode
-    }
-  })
+export const getSmsCode = (mobile, captchaID, captchaValue) => {
+  const data = {
+    mobile: mobile,
+    captchaID: captchaID,
+    captchaValue: captchaValue
+  }
+
+  return request.post('/captcha/sms', data)
 }
 
 // 手机号验证码登录
-export const phoneLogin = (mobile, smsCode) => {
-  return request.post('/passport/login', {
-    form: {
-      isParty: false,
-      partyData: {},
-      mobile: mobile,
-      smsCode: smsCode
-    }
-  })
+export const mobileLogin = (mobile, smsCode) => {
+  const data = {
+    mobile: mobile,
+    smsCode: smsCode
+  }
+
+  return request.post('/login', data)
 }

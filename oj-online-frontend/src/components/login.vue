@@ -18,13 +18,13 @@
         </div>
         <div class="form-item">
           <input
-            v-model="picCode"
+            v-model="captchaValue"
             class="inp"
             maxlength="5"
             placeholder="请输入图形验证码"
             type="text"
           />
-          <img v-if="picUrl" :src="picUrl" @click="getPicCode" alt="" />
+          <img v-if="captchaUrl" :src="captchaUrl" @click="getPicCode" alt="" />
         </div>
         <div class="form-item">
           <input
@@ -47,18 +47,20 @@
 </template>
 
 <script>
-import { getPicCode, getSmsCode } from '@/api/login'
+import { getPicCode, getSmsCode, mobileLogin } from '@/api/login'
 export default {
   name: 'LoginPage',
   data () {
     return {
-      picKey: '', // 图形验证码的key
-      picUrl: '', // 存储请求渲染的图片地址
+      captchaID: '', // 图形验证码的key
+      captchaUrl: '', // 存储请求渲染的图片地址
+
       second: 60, // 倒计时秒数
       totalSecond: 60, // 总秒数
       timer: null,
+
       mobile: '', // 手机号
-      picCode: '', // 用户输入的图形验证码
+      captchaValue: '', // 用户输入的图形验证码
       smsCode: ''
     }
   },
@@ -67,11 +69,9 @@ export default {
   },
   methods: {
     async getPicCode () {
-      const {
-        data: { base64, key }
-      } = await getPicCode()
-      this.picUrl = base64
-      this.picKey = key
+      const res = await getPicCode()
+      this.captchaID = res.data.captchaID
+      this.captchaUrl = res.data.captchaUrl
     },
     async getSmsCode () {
       // 获取短信验证码前要简单校验手机号和图形验证码是否合法
@@ -80,7 +80,15 @@ export default {
       }
       // 请求
       if (!this.timer && this.second === this.totalSecond) {
-        await getSmsCode(this.mobile, this.picKey, this.picCode)
+        const res = await getSmsCode(this.mobile, this.captchaID, this.captchaValue)
+        if (res.message !== 'OK') {
+          this.$message({
+            message: res.message,
+            type: 'fail'
+          })
+          return
+        }
+
         this.$message({
           message: '短信验证码发送成功，请注意查收',
           type: 'success'
@@ -97,8 +105,21 @@ export default {
         }, 1000)
       }
     },
-    login () {
+    async login () {
       console.log('login')
+      if (!this.validate()) {
+        return
+      }
+      const res = await mobileLogin(this.mobile, this.smsCode)
+      console.log(res)
+      this.$message({
+        message: '登录成功',
+        type: 'success'
+      })
+      this.$store.commit('user/setUserInfo', res.data)
+
+      // 登录成功后，通知父组件关闭对话框
+      this.$emit('close')
     },
     validate () {
       // 校验 手机号 和 图形验证码 是否合法
@@ -109,7 +130,7 @@ export default {
         })
         return false
       }
-      if (!/^\w{4}$/.test(this.picCode)) {
+      if (!/^\w{4}$/.test(this.captchaValue)) {
         this.$message({
           message: '请输入正确的图形验证码',
           type: 'warning'
@@ -154,8 +175,8 @@ export default {
       flex: 1;
     }
     img {
-      width: 94px;
-      height: 31px;
+      width: 100px;
+      height: 50px;
     }
     button {
       height: 31px;
