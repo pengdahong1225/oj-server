@@ -20,7 +20,7 @@ func Init() error {
 	} else {
 		viperConfig.SetConfigName("dev")
 	}
-	viperConfig.AddConfigPath("../../config")
+	viperConfig.AddConfigPath("config")
 	viperConfig.SetConfigType("yaml")
 	if e := viperConfig.ReadInConfig(); e != nil {
 		return e

@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/api/internal"
 	"question-service/models"
 	"question-service/services/captcha"
 	"regexp"
@@ -19,11 +18,12 @@ func GetImageCode(ctx *gin.Context) {
 		})
 	} else {
 		data := make(map[string]any)
-		data["captcha_id"] = id
-		data["b64s"] = b64s
+		data["captchaID"] = id
+		data["captchaUrl"] = b64s
 		ctx.JSON(http.StatusOK, gin.H{
-			"code": http.StatusOK,
-			"data": data,
+			"code":    http.StatusOK,
+			"message": "OK",
+			"data":    data,
 		})
 	}
 }
@@ -47,7 +47,7 @@ func GetSmsCode(ctx *gin.Context) {
 	}
 	// 图形验证码校验
 	if captcha.VerifyImageCaptcha(form.CaptchaID, form.CaptchaValue) {
-		if err := internal.SendSmsCode(form.Mobile); err != nil {
+		if err := captcha.SendSmsCode(form.Mobile); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": err.Error(),
@@ -58,5 +58,10 @@ func GetSmsCode(ctx *gin.Context) {
 				"message": "发送成功[测试环境的验证码均为123456]",
 			})
 		}
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "图形验证码输入错误",
+		})
 	}
 }

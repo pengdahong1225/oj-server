@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"question-service/api/internal"
 	"question-service/models"
+	"question-service/services/captcha"
 	"regexp"
 	"strconv"
 )
@@ -22,6 +23,15 @@ func Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
 			"message": "手机号格式错误",
+		})
+		return
+	}
+
+	// 短信验证码校验
+	if !captcha.VerifySmsCode(form.Mobile, form.SmsCode) {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "验证码错误",
 		})
 		return
 	}

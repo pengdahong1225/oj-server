@@ -34,10 +34,20 @@ func newConn() redis.Conn {
 }
 
 func SetKVByStringWithExpire(key string, value string, expire int) error {
-	redisConn := newConn()
-	defer redisConn.Close()
-	if _, err := redisConn.Do("Set", key, value, "ex", expire); err != nil {
+	conn := newConn()
+	defer conn.Close()
+	if _, err := conn.Do("Set", key, value, "ex", expire); err != nil {
 		return err
 	}
 	return nil
+}
+
+func GetValueByString(key string) (string, error) {
+	conn := newConn()
+	defer conn.Close()
+	if reply, err := redis.String(conn.Do("Get", key)); err != nil {
+		return "", err
+	} else {
+		return reply, nil
+	}
 }

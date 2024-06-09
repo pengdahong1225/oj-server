@@ -27,6 +27,7 @@ func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.Ge
 	}
 
 	userInfo := &pb.UserInfo{
+		Uid:       user.ID,
 		Mobile:    user.Mobile,
 		Nickname:  user.NickName,
 		Email:     user.Email,

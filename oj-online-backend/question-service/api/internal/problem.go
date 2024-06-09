@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
-	pb2 "question-service/api/proto"
+	pb "question-service/api/proto"
 	"question-service/models"
 	"question-service/services/registry"
 	"question-service/settings"
@@ -27,8 +27,8 @@ func ProblemSet(cursor int) *models.Response {
 	}
 	defer dbConn.Close()
 
-	client := pb2.NewDBServiceClient(dbConn)
-	request := &pb2.GetProblemListRequest{Cursor: int32(cursor)}
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.GetProblemListRequest{Cursor: int32(cursor)}
 	response, err := client.GetProblemList(context.Background(), request)
 	if err != nil {
 		res.Code = http.StatusOK
@@ -39,8 +39,9 @@ func ProblemSet(cursor int) *models.Response {
 
 	// 序列化
 	marshalOptions := protojson.MarshalOptions{
-		UseProtoNames:  true,
-		UseEnumNumbers: true,
+		UseProtoNames:     true,
+		UseEnumNumbers:    true,
+		EmitDefaultValues: true,
 	}
 	bytes, err := marshalOptions.Marshal(response)
 	if err != nil {

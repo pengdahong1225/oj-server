@@ -9,11 +9,9 @@ import (
 	"question-service/api/proto"
 	"question-service/middlewares"
 	"question-service/models"
-	"question-service/services/captcha"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
-	"question-service/utils"
 	"strconv"
 	"time"
 )
@@ -75,9 +73,9 @@ func ProcessForLogin(form *models.LoginFrom) *models.Response {
 	jsonMap := make(map[string]interface{})
 	jsonMap["userinfo"] = response.Data
 	jsonMap["token"] = token
-	bytes, _ := json.Marshal(jsonMap)
 
-	res.Data = string(bytes)
+	res.Data = jsonMap
+	res.Message = "OK"
 	return res
 }
 
@@ -151,26 +149,4 @@ func GetRankList() *models.Response {
 
 func GetSubmitRecord(userId int64) {
 
-}
-
-func SendSmsCode(mobile string) error {
-	// 生成随机数
-	c := utils.GenerateSmsCode(6)
-	expire := 180 // 3min过期
-	param := map[string]string{
-		"code": c,
-	}
-	data, _ := json.Marshal(param)
-
-	// 调用第三方服务发送
-	if err := captcha.Send(data, mobile); err != nil {
-		return err
-	}
-
-	// 缓存验证码
-	if err := redis.SetKVByStringWithExpire(mobile, c, expire); err != nil {
-		return err
-	}
-
-	return nil
 }
