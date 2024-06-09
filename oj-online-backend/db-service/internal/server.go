@@ -20,6 +20,7 @@ type Server struct {
 }
 
 func (receiver Server) Start() {
+	// 后台-排行榜服务
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	err := ants.AntsPoolInstance.Submit(func() {
@@ -29,6 +30,7 @@ func (receiver Server) Start() {
 	if err != nil {
 		panic(err)
 	}
+	// DB服务
 	err = ants.AntsPoolInstance.Submit(func() {
 		defer wg.Done()
 		StartRPCServer()

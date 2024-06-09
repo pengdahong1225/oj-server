@@ -21,27 +21,45 @@ func StartDaemon() {
 	}
 }
 
+// Daemon 后台服务
 type Daemon struct {
 }
 
-// 维护排行榜
+// 排行榜
+/**
+SELECT
+    user_info.*,
+    user_problem_statistics.accomplish_count
+FROM
+    user_problem_statistics
+JOIN
+    user_info ON user_problem_statistics.uid = user_info.id
+ORDER BY
+    user_problem_statistics.accomplish_count DESC
+LIMIT 50;
+*/
 func (receiver Daemon) loopRank() {
 	var key = "rank"
 	conn := redis.NewConn()
 	defer conn.Close()
 
 	db := mysql.DB
-	// select phone,nickname,pass_count from user_info order by pass_count desc;
-	var users []models.UserInfo
-	result := db.Select("phone", "nickname", "pass_count").Order("pass_count desc").Limit(50).Find(&users)
+	var orderList []models.Statistics
+
+	result := db.Select("user_info.*, user_problem_statistics.accomplish_count").
+		Joins("JOIN user_info ON user_problem_statistics.uid = user_info.id").
+		Order("user_problem_statistics.accomplish_count desc").
+		Limit(50).
+		Scan(&orderList)
+
 	if result.Error != nil {
 		logrus.Errorln("获取排行榜失败", result.Error.Error())
 		return
 	}
 
-	for _, user := range users {
-		data, _ := json.Marshal(user) // 序列化
-		_, err := conn.Do("ZADD", key, user.PassCount, data)
+	for _, item := range orderList {
+		data, _ := json.Marshal(item.User) // 序列化
+		_, err := conn.Do("ZADD", key, item.AccomplishCount, data)
 		if err != nil {
 			logrus.Errorln("更新排行榜失败", err.Error())
 			break
