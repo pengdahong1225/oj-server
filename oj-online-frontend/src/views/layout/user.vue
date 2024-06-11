@@ -28,7 +28,7 @@
 
       <el-divider direction="vertical"></el-divider>
       <div class="problem-solve-info">
-        <div>统计信息</div>
+        <div class="echarts-box" id="e-box"></div>
 
         <el-divider></el-divider>
         <div>提交记录</div>
