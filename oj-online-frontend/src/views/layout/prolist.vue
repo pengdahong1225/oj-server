@@ -1,30 +1,37 @@
 <template>
   <div class="prolist">
-    <!-- 搜索框 -->
-    <el-autocomplete
-      v-model="state"
-      :fetch-suggestions="querySearchAsync"
-      placeholder="搜索题目"
-      @select="handleSelect"
-      suffix-icon="el-icon-search"
-      size="medium"
-      class="search-pro"
-    ></el-autocomplete>
+    <div class="search-box">
+      <!-- 搜索框 -->
+      <el-autocomplete
+        v-model="state"
+        :fetch-suggestions="querySearchAsync"
+        placeholder="搜索题目"
+        @select="handleSelect"
+        suffix-icon="el-icon-search"
+        size="medium"
+        class="search-pro"
+      ></el-autocomplete>
 
-    <!-- tag选择器 -->
-    <el-select v-model="value" filterable placeholder="标签" class="select-tag">
-      <el-option
-        v-for="item in options"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value"
+      <!-- tag选择器 -->
+      <el-select
+        v-model="value"
+        filterable
+        placeholder="标签"
+        class="select-tag"
       >
-      </el-option>
-    </el-select>
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        >
+        </el-option>
+      </el-select>
+    </div>
 
     <!-- 题目列表 -->
     <el-table :data="problemList" style="width: 100%">
-      <el-table-column label="#" prop="id" width="180" sortable align="center">
+      <el-table-column label="#" prop="id" width="100" sortable align="center">
       </el-table-column>
       <el-table-column label="题目" prop="title" width="400"> </el-table-column>
       <el-table-column label="难度" prop="level" :formatter="formatterFunc">
@@ -90,13 +97,15 @@ export default {
 }
 </script>
 
-<style>
-.search-pro {
+<style scoped>
+.search-box .search-pro {
   float: left;
   margin-left: 20px;
+  margin-top: 10px;
 }
-.select-tag {
+.search-box .select-tag {
   float: right;
   margin-right: 20px;
+  margin-top: 10px;
 }
 </style>

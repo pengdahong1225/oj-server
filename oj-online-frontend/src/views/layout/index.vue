@@ -26,8 +26,10 @@
 
     <el-divider></el-divider>
 
-    <!-- 二级路由出口：二级组件展示的位置 -->
-    <router-view></router-view>
+    <div class="container">
+      <!-- 二级路由出口：二级组件展示的位置 -->
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -64,5 +66,11 @@ export default {
 }
 .el-menu-vertical {
   flex: 1;
+}
+.container {
+  width: 90%;  /* 根据需要设置宽度 */
+  margin: 0 auto;  /* 上下边距为0，左右边距自动，使得.main盒子居中 */
+  background-color: #fff;  /* 设置背景颜色 */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);  /* 设置阴影效果 */
 }
 </style>
