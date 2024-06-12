@@ -7,11 +7,13 @@ import "problem.proto";
 
 service DBService{
   // user接口
-  rpc GetUserData(GetUserRequest) returns(GetUserResponse);
+  rpc GetUserDataByMobile(GetUserDataByMobileRequest) returns(GetUserResponse);
+  rpc GetUserDataByUid(GetUserDataByUidRequest) returns(GetUserResponse);
   rpc CreateUserData(CreateUserRequest) returns(CreateUserResponse);
   rpc UpdateUserData(UpdateUserRequest) returns(google.protobuf.Empty);
   rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
+  rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
 
   // problem接口
   rpc GetProblemData(GetProblemRequest) returns(GetProblemResponse);
@@ -26,11 +28,21 @@ service DBService{
 }
 
 // 获取用户信息
-message GetUserRequest{
+message GetUserDataByMobileRequest{
   int64 mobile = 1;
+}
+message GetUserDataByUidRequest{
+  int64 id = 1;
 }
 message GetUserResponse{
   UserInfo data = 1;
+}
+
+message GetUserSolvedListRequest {
+  int64 uid = 1;
+}
+message GetUserSolvedListResponse {
+  repeated int64 problem_id_list = 1;
 }
 
 // 创建
