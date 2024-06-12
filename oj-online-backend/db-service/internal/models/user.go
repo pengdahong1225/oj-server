@@ -18,3 +18,19 @@ type UserInfo struct {
 func (UserInfo) TableName() string {
 	return "user_info"
 }
+
+type UserSolution struct {
+	ID        int64     `gorm:"<-:false;primary_key;autoIncrement;column:id" json:"id"`
+	CreateAt  time.Time `gorm:"<-:false;column:create_at" json:"createAt"`
+	DeletedAt time.Time `gorm:"<-:false;column:delete_at" json:"deleteAt"`
+
+	Uid       int64 `gorm:"column:uid" json:"uid"`
+	ProblemID int64 `gorm:"column:problem_id" json:"problem_id"`
+
+	User    UserInfo `gorm:"foreignKey:Uid;references:id" json:"userInfo"`
+	Problem Problem  `gorm:"foreignKey:ProblemID;references:id" json:"problem"`
+}
+
+func (UserSolution) TableName() string {
+	return "user_solution"
+}

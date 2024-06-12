@@ -20,11 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	DBService_GetUserData_FullMethodName            = "/DBService/GetUserData"
+	DBService_GetUserDataByMobile_FullMethodName    = "/DBService/GetUserDataByMobile"
+	DBService_GetUserDataByUid_FullMethodName       = "/DBService/GetUserDataByUid"
 	DBService_CreateUserData_FullMethodName         = "/DBService/CreateUserData"
 	DBService_UpdateUserData_FullMethodName         = "/DBService/UpdateUserData"
 	DBService_DeleteUserData_FullMethodName         = "/DBService/DeleteUserData"
 	DBService_GetUserList_FullMethodName            = "/DBService/GetUserList"
+	DBService_GetUserSolvedList_FullMethodName      = "/DBService/GetUserSolvedList"
 	DBService_GetProblemData_FullMethodName         = "/DBService/GetProblemData"
 	DBService_CreateProblemData_FullMethodName      = "/DBService/CreateProblemData"
 	DBService_UpdateProblemData_FullMethodName      = "/DBService/UpdateProblemData"
@@ -40,11 +42,13 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DBServiceClient interface {
 	// user接口
-	GetUserData(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	GetUserDataByMobile(ctx context.Context, in *GetUserDataByMobileRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	GetUserDataByUid(ctx context.Context, in *GetUserDataByUidRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	CreateUserData(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	UpdateUserData(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
+	GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error)
 	// problem接口
 	GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
 	CreateProblemData(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error)
@@ -64,9 +68,18 @@ func NewDBServiceClient(cc grpc.ClientConnInterface) DBServiceClient {
 	return &dBServiceClient{cc}
 }
 
-func (c *dBServiceClient) GetUserData(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+func (c *dBServiceClient) GetUserDataByMobile(ctx context.Context, in *GetUserDataByMobileRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
-	err := c.cc.Invoke(ctx, DBService_GetUserData_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, DBService_GetUserDataByMobile_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBServiceClient) GetUserDataByUid(ctx context.Context, in *GetUserDataByUidRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	out := new(GetUserResponse)
+	err := c.cc.Invoke(ctx, DBService_GetUserDataByUid_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +116,15 @@ func (c *dBServiceClient) DeleteUserData(ctx context.Context, in *DeleteUserRequ
 func (c *dBServiceClient) GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error) {
 	out := new(GetUserListResponse)
 	err := c.cc.Invoke(ctx, DBService_GetUserList_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBServiceClient) GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error) {
+	out := new(GetUserSolvedListResponse)
+	err := c.cc.Invoke(ctx, DBService_GetUserSolvedList_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -186,11 +208,13 @@ func (c *dBServiceClient) UpdateUserSubmitRecord(ctx context.Context, in *Update
 // for forward compatibility
 type DBServiceServer interface {
 	// user接口
-	GetUserData(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	GetUserDataByMobile(context.Context, *GetUserDataByMobileRequest) (*GetUserResponse, error)
+	GetUserDataByUid(context.Context, *GetUserDataByUidRequest) (*GetUserResponse, error)
 	CreateUserData(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	UpdateUserData(context.Context, *UpdateUserRequest) (*empty.Empty, error)
 	DeleteUserData(context.Context, *DeleteUserRequest) (*empty.Empty, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
+	GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error)
 	// problem接口
 	GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
 	CreateProblemData(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error)
@@ -207,8 +231,11 @@ type DBServiceServer interface {
 type UnimplementedDBServiceServer struct {
 }
 
-func (UnimplementedDBServiceServer) GetUserData(context.Context, *GetUserRequest) (*GetUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserData not implemented")
+func (UnimplementedDBServiceServer) GetUserDataByMobile(context.Context, *GetUserDataByMobileRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserDataByMobile not implemented")
+}
+func (UnimplementedDBServiceServer) GetUserDataByUid(context.Context, *GetUserDataByUidRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserDataByUid not implemented")
 }
 func (UnimplementedDBServiceServer) CreateUserData(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserData not implemented")
@@ -221,6 +248,9 @@ func (UnimplementedDBServiceServer) DeleteUserData(context.Context, *DeleteUserR
 }
 func (UnimplementedDBServiceServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
+}
+func (UnimplementedDBServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSolvedList not implemented")
 }
 func (UnimplementedDBServiceServer) GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemData not implemented")
@@ -259,20 +289,38 @@ func RegisterDBServiceServer(s grpc.ServiceRegistrar, srv DBServiceServer) {
 	s.RegisterService(&DBService_ServiceDesc, srv)
 }
 
-func _DBService_GetUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserRequest)
+func _DBService_GetUserDataByMobile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserDataByMobileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetUserData(ctx, in)
+		return srv.(DBServiceServer).GetUserDataByMobile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetUserData_FullMethodName,
+		FullMethod: DBService_GetUserDataByMobile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetUserData(ctx, req.(*GetUserRequest))
+		return srv.(DBServiceServer).GetUserDataByMobile(ctx, req.(*GetUserDataByMobileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DBService_GetUserDataByUid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserDataByUidRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBServiceServer).GetUserDataByUid(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBService_GetUserDataByUid_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBServiceServer).GetUserDataByUid(ctx, req.(*GetUserDataByUidRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -345,6 +393,24 @@ func _DBService_GetUserList_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DBServiceServer).GetUserList(ctx, req.(*GetUserListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DBService_GetUserSolvedList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserSolvedListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBServiceServer).GetUserSolvedList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBService_GetUserSolvedList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBServiceServer).GetUserSolvedList(ctx, req.(*GetUserSolvedListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -501,8 +567,12 @@ var DBService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DBServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetUserData",
-			Handler:    _DBService_GetUserData_Handler,
+			MethodName: "GetUserDataByMobile",
+			Handler:    _DBService_GetUserDataByMobile_Handler,
+		},
+		{
+			MethodName: "GetUserDataByUid",
+			Handler:    _DBService_GetUserDataByUid_Handler,
 		},
 		{
 			MethodName: "CreateUserData",
@@ -519,6 +589,10 @@ var DBService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserList",
 			Handler:    _DBService_GetUserList_Handler,
+		},
+		{
+			MethodName: "GetUserSolvedList",
+			Handler:    _DBService_GetUserSolvedList_Handler,
 		},
 		{
 			MethodName: "GetProblemData",

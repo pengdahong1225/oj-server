@@ -40,10 +40,10 @@ func ProcessForLogin(form *models.LoginFrom) *models.Response {
 
 	client := pb.NewDBServiceClient(dbConn)
 	mobile, _ := strconv.ParseInt(form.Mobile, 10, 64)
-	request := &pb.GetUserRequest{
+	request := &pb.GetUserDataByMobileRequest{
 		Mobile: mobile,
 	}
-	response, err := client.GetUserData(context.Background(), request)
+	response, err := client.GetUserDataByMobile(context.Background(), request)
 	if err != nil {
 		res.Message = err.Error()
 		logrus.Debugln(err.Error())
@@ -54,6 +54,7 @@ func ProcessForLogin(form *models.LoginFrom) *models.Response {
 	j := middlewares.NewJWT()
 	// 设置 payload有效载荷
 	claims := &middlewares.UserClaims{
+		Uid:       response.Data.Uid,
 		Mobile:    response.Data.Mobile,
 		Authority: response.Data.Role,
 		StandardClaims: jwt.StandardClaims{
@@ -79,7 +80,7 @@ func ProcessForLogin(form *models.LoginFrom) *models.Response {
 	return res
 }
 
-func GetUserDetail(mobile int64) *models.Response {
+func GetUserProfileByUid(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -96,8 +97,8 @@ func GetUserDetail(mobile int64) *models.Response {
 	defer dbConn.Close()
 
 	client := pb.NewDBServiceClient(dbConn)
-	response, err := client.GetUserData(context.Background(), &pb.GetUserRequest{
-		Mobile: mobile,
+	response, err := client.GetUserDataByUid(context.Background(), &pb.GetUserDataByUidRequest{
+		Id: uid,
 	})
 	if err != nil {
 		res.Message = err.Error()
@@ -149,4 +150,33 @@ func GetRankList() *models.Response {
 
 func GetSubmitRecord(userId int64) {
 
+}
+
+// GetUserSolvedList 获取用户已经解决的题目id列表
+func GetUserSolvedList(uid int64) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorf("db服务连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+
+	client := pb.NewDBServiceClient(dbConn)
+	response, err := client.GetUserSolvedList(context.Background(), &pb.GetUserSolvedListRequest{Uid: uid})
+	if err != nil {
+		res.Message = err.Error()
+		return res
+	}
+	res.Message = "OK"
+	res.Data = response.ProblemIdList
+
+	return res
 }

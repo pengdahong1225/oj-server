@@ -30,8 +30,10 @@ func QuestionRouters(engine *gin.Engine) {
 	// api/user
 	userRouter := engine.Group("/user")
 	{
-		userRouter.GET("/detail", middlewares.AuthLogin(), api.GetUserDetail)
-		userRouter.GET("/submitRecord", middlewares.AuthLogin(), api.GetSubmitRecord)
+		userRouter.Use(middlewares.AuthLogin())
+		userRouter.GET("/profile", api.GetUserProfile)
+		userRouter.GET("/submitRecord", api.GetSubmitRecord)
+		userRouter.GET("/solvedList", api.GetUserSolvedList)
 	}
 
 	// api/captcha

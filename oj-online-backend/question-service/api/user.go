@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"question-service/api/internal"
+	"question-service/middlewares"
 	"question-service/models"
 	"question-service/services/captcha"
 	"regexp"
@@ -40,29 +41,19 @@ func Login(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func GetUserDetail(ctx *gin.Context) {
-	// 查询参数
-	if mobile, ok := ctx.GetQuery("mobile"); !ok {
+func GetUserProfile(ctx *gin.Context) {
+	uid, ok := ctx.GetQuery("uid")
+	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
 			"message": "参数错误",
 		})
-		ctx.Abort()
 		return
-	} else {
-		ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, mobile)
-		if !ok {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"code":    http.StatusBadRequest,
-				"message": "参数错误",
-			})
-			ctx.Abort()
-			return
-		}
-		mobileInt, _ := strconv.ParseInt(mobile, 10, 64)
-		res := internal.GetUserDetail(mobileInt)
-		ctx.JSON(res.Code, res)
 	}
+
+	uidInt, _ := strconv.ParseInt(uid, 10, 64)
+	res := internal.GetUserProfileByUid(uidInt)
+	ctx.JSON(res.Code, res)
 }
 
 func GetRankList(ctx *gin.Context) {
@@ -72,4 +63,10 @@ func GetRankList(ctx *gin.Context) {
 
 func GetSubmitRecord(ctx *gin.Context) {
 
+}
+
+func GetUserSolvedList(ctx *gin.Context) {
+	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	res := internal.GetUserSolvedList(claims.Uid)
+	ctx.JSON(res.Code, res)
 }

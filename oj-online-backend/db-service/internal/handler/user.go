@@ -14,10 +14,37 @@ type DBServiceServer struct {
 	pb.UnimplementedDBServiceServer
 }
 
-func (receiver *DBServiceServer) GetUserData(ctx context.Context, request *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
 	db := mysql.DB
 	var user models.UserInfo
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, QueryField
+	}
+	if result.RowsAffected == 0 {
+		return nil, NotFound
+	}
+
+	userInfo := &pb.UserInfo{
+		Uid:       user.ID,
+		Mobile:    user.Mobile,
+		Nickname:  user.NickName,
+		Email:     user.Email,
+		Gender:    user.Gender,
+		Role:      user.Role,
+		AvatarUrl: user.AvatarUrl,
+	}
+
+	return &pb.GetUserResponse{
+		Data: userInfo,
+	}, nil
+}
+
+func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
+	db := mysql.DB
+	var user models.UserInfo
+	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, QueryField
@@ -121,28 +148,28 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 
 // GetUserList 采用游标分页
 func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
-	//db := mysql.DB
-	//var pageSize = 10
-	//var userlist []models.UserInfo
-	//rsp := &pb.GetUserListResponse{}
+	// db := mysql.DB
+	// var pageSize = 10
+	// var userlist []models.UserInfo
+	// rsp := &pb.GetUserListResponse{}
 	//
-	//// 查询总量
-	//var count int64
-	//result := db.Model(&models.UserInfo{}).Count(&count)
-	//if result.Error != nil {
+	// // 查询总量
+	// var count int64
+	// result := db.Model(&models.UserInfo{}).Count(&count)
+	// if result.Error != nil {
 	//	logrus.Debugln(result.Error.Error())
 	//	return nil, status.Errorf(codes.Internal, "query count failed")
-	//}
-	//rsp.Total = int32(count)
-	//if request.Cursor < 0 || int64(request.Cursor) > count {
+	// }
+	// rsp.Total = int32(count)
+	// if request.Cursor < 0 || int64(request.Cursor) > count {
 	//	return nil, status.Errorf(codes.InvalidArgument, "cursor out of range")
-	//}
-	//result = db.Where("id >= ", request.Cursor).Order("id").Limit(pageSize).Find(&userlist)
-	//if result.Error != nil {
+	// }
+	// result = db.Where("id >= ", request.Cursor).Order("id").Limit(pageSize).Find(&userlist)
+	// if result.Error != nil {
 	//	logrus.Debugln(result.Error.Error())
 	//	return nil, status.Errorf(codes.Internal, "query userlist failed")
-	//}
-	//for _, user := range userlist {
+	// }
+	// for _, user := range userlist {
 	//	rsp.Data = append(rsp.Data, &pb.UserInfo{
 	//		Phone:    user.Phone,
 	//		Nickname: user.NickName,
@@ -151,8 +178,30 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 	//		Role:     user.Role,
 	//		HeadUrl:  user.HeadUrl,
 	//	})
-	//}
-	//rsp.Cursor = request.Cursor + int32(result.RowsAffected) + 1
+	// }
+	// rsp.Cursor = request.Cursor + int32(result.RowsAffected) + 1
 
 	return nil, nil
+}
+
+// GetUserSolvedList 查询用户解决了的题目
+func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
+	db := mysql.DB
+	var solutions []models.UserSolution
+	result := db.Where("uid = ?", request.Uid).Find(&solutions)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, QueryField
+	}
+	if result.RowsAffected == 0 {
+		return nil, NotFound
+	}
+
+	var rsp *pb.GetUserSolvedListResponse
+	rsp.ProblemIdList = make([]int64, len(solutions))
+	for i, v := range solutions {
+		rsp.ProblemIdList[i] = v.ProblemID
+	}
+
+	return rsp, nil
 }

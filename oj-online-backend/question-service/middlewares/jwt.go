@@ -8,6 +8,7 @@ import (
 )
 
 type UserClaims struct {
+	Uid       int64
 	Mobile    int64
 	Authority int32
 	jwt.StandardClaims
@@ -35,7 +36,7 @@ func (receiver *JWT) CreateToken(claims *UserClaims) (string, error) {
 	return token.SignedString(receiver.SigningKey)
 }
 
-// 解析签名令牌
+// ParseToken 解析签名令牌
 func (receiver *JWT) ParseToken(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return receiver.SigningKey, nil
