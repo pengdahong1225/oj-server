@@ -72,14 +72,16 @@ create table if not exists user_submit_record
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题表
-create table if not exists user_solution(
+create table if not exists user_solution
+(
     id BIGINT AUTO_INCREMENT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
     uid INT NOT NULL,
     problem_id INT NOT NULL,
-    PRIMARY KEY (uid, problem_id),
+
+    PRIMARY KEY(id),
     FOREIGN KEY(uid) REFERENCES user_info(id),
     FOREIGN KEY(problem_id) REFERENCES problem(id),
     INDEX idx_uid(uid)
