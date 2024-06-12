@@ -78,8 +78,8 @@ create table if not exists user_solution
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
-    uid INT NOT NULL,
-    problem_id INT NOT NULL,
+    uid BIGINT NOT NULL,
+    problem_id BIGINT NOT NULL,
 
     PRIMARY KEY(id),
     FOREIGN KEY(uid) REFERENCES user_info(id),
