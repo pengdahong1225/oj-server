@@ -1,6 +1,6 @@
 import axios from 'axios'
 import store from '@/store'
-import { Loading } from 'element-ui' // 引入element-ui的loading组件
+import { Loading, Message } from 'element-ui' // 引入element-ui的组件
 
 /**
  * 创建axios实例，将来对创建出来的axios实例，进行自定义配置
@@ -44,25 +44,31 @@ instance.interceptors.request.use(function (config) {
   return config
 }, function (error) {
   // 对请求错误做些什么
+  endLoading()
+  Message.error('请求失败')
   return Promise.reject(error)
 })
 
 // 添加响应拦截器
 instance.interceptors.response.use(function (response) {
   // 对响应数据做点什么(默认axios的响应数据结构会多包装一层data)
-  console.log(response)
+  endLoading()
   if (response.data.code !== 200) {
-    endLoading()
+    Message.error(response.data.message)
     return Promise.reject(response.data.message)
-  } else {
-    endLoading()
   }
 
   return response.data
 }, function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
-  // endLoading()
+  endLoading()
+  console.log(error)
+  if (error.response) {
+    Message.error(error.response.data.message)
+  } else {
+    Message.error(error.message)
+  }
   return Promise.reject(error)
 })
 

@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <div class="container">
+    <div class="container" @keyup.enter="login">
       <div class="title">
         <h3>手机号登录</h3>
         <p>未注册的手机号登录后将自动注册</p>
@@ -147,6 +147,7 @@ export default {
 <style lang="less" scoped>
 .container {
   padding: 20px 10px;
+  background-color: #fff;  /* 设置背景颜色 */
 
   .title {
     margin-bottom: 20px;
@@ -172,17 +173,17 @@ export default {
       border: none;
       outline: none;
       height: 32px;
-      font-size: 14px;
+      font-size: 18px;
       flex: 1;
     }
     img {
-      width: 100px;
-      height: 50px;
+      width: 120px;
+      height: 60px;
     }
     button {
       height: 31px;
       border: none;
-      font-size: 13px;
+      font-size: 15px;
       color: #cea26a;
       background-color: transparent;
       padding-right: 9px;

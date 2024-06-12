@@ -5,7 +5,8 @@ export default {
   state () {
     return {
       token: getToken(),
-      userInfo: getUserInfo()
+      userInfo: getUserInfo(),
+      userSolvedList: []
     }
   },
   mutations: {
@@ -17,6 +18,9 @@ export default {
     setToken (state, obj) {
       state.token = obj
       setToken(obj)
+    },
+    setUserSolvedList (state, obj) {
+      state.userSolvedList = obj
     }
   },
   actions: {

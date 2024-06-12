@@ -19,7 +19,7 @@
 
 <script>
 import * as echarts from 'echarts'
-import { getUserProfile } from '@/api/user'
+import { getUserProfile, getUserSolvedList } from '@/api/user'
 export default {
   name: 'UserPage',
   data () {
@@ -88,10 +88,15 @@ export default {
         return
       }
 
-      const res = await getUserProfile(uid)
-      console.log(res)
+      let res = await getUserProfile(uid)
       // 更新到store
       this.$store.commit('user/setUserInfo', res.data)
+
+      // 继续拉取用户解题信息
+      res = await getUserSolvedList()
+      // 更新到store
+      console.log(res)
+      this.$store.commit('user/setUserSolvedList', res.data)
     }
   }
 }
