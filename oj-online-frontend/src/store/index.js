@@ -11,10 +11,13 @@ export default new Vuex.Store({
   },
   getters: {
     token: state => {
-      return state.user.userInfo.token
+      return state.user.token
     },
     problemList: state => {
       return state.problem.problemList
+    },
+    uid: state => {
+      return state.user.userInfo.uid
     }
   },
   mutations: {

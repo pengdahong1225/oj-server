@@ -1,18 +1,22 @@
-import { getInfo, setInfo } from '@/utils/storage'
+import { setUserInfo, setToken, getUserInfo, getToken } from '@/utils/storage'
 
 export default {
   namespaced: true,
   state () {
     return {
-      // 个人权证相关
-      userInfo: getInfo()
+      token: getToken(),
+      userInfo: getUserInfo()
     }
   },
   mutations: {
     // 所有mutations的第一个参数，都是state
     setUserInfo (state, obj) {
       state.userInfo = obj
-      setInfo(obj)
+      setUserInfo(obj)
+    },
+    setToken (state, obj) {
+      state.token = obj
+      setToken(obj)
     }
   },
   actions: {

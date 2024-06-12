@@ -8,7 +8,10 @@ import { Loading } from 'element-ui' // 引入element-ui的loading组件
  * 自定义配置：请求/响应 拦截器
  */
 
-// 创建axios实例
+/**
+ * 创建axios实例
+ * 配置基地址和超时时间
+ */
 const instance = axios.create({
   // baseURL: 'http://smart-shop.itheima.net/index.php?s=/api',
   baseURL: 'http://127.0.0.1:9010',

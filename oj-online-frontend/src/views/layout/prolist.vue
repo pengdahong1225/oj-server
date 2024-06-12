@@ -31,10 +31,11 @@
 
     <!-- 题目列表 -->
     <el-table :data="problemList" style="width: 100%">
+      <el-table-column prop="state" width="40" align="center" :formatter="formatterState"></el-table-column>
       <el-table-column label="#" prop="id" width="100" sortable align="center">
       </el-table-column>
       <el-table-column label="题目" prop="title" width="400"> </el-table-column>
-      <el-table-column label="难度" prop="level" :formatter="formatterFunc">
+      <el-table-column label="难度" prop="level" :formatter="formatterLevel">
       </el-table-column>
       <el-table-column prop="tag" label="标签" width="300">
         <template slot-scope="scope">
@@ -58,7 +59,6 @@ export default {
   name: 'ProListPage',
   data () {
     return {
-      state: ''
     }
   },
   computed: {
@@ -72,7 +72,7 @@ export default {
     this.$store.commit('problem/setProblemInfo', obj) // 缓存
   },
   methods: {
-    formatterFunc (row, column) {
+    formatterLevel (row, column) {
       const level = row.level
       if (level === 0) {
         return '简单'
@@ -82,14 +82,10 @@ export default {
         return '困难'
       }
     },
-    querySearchAsync (queryString, cb) {},
-    createStateFilter (queryString) {
-      return (state) => {
-        return (
-          state.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
-        )
-      }
+    formatterState (row, column) {
+
     },
+    querySearchAsync (queryString, cb) {},
     handleSelect (item) {
       console.log(item)
     }

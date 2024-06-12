@@ -116,7 +116,8 @@ export default {
         message: '登录成功',
         type: 'success'
       })
-      this.$store.commit('user/setUserInfo', res.data)
+      this.$store.commit('user/setUserInfo', res.data.userinfo)
+      this.$store.commit('user/setToken', res.data.token)
 
       // 登录成功后，通知父组件关闭对话框
       this.$emit('close')

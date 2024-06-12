@@ -1,44 +1,25 @@
 <template>
-  <div class="user">
-    <div class="user-header">
-      <el-avatar shape="square" :size="size" :src="squareUrl"></el-avatar>
-      <div class="user-data">
-        <div class="user-name"><strong>用户名</strong></div>
-        <div class="user-info">电话</div>
-      </div>
+  <div class="user-profile">
+    <div class="avatar-container">
+      <img :src="squareUrl" alt="Avatar" class="avatar" />
     </div>
 
-    <el-divider></el-divider>
+    <h3 class="username">{{ nickname }}</h3>
 
-    <div class="user-body">
-      <div class="user-info-detail">
-        <el-descriptions title="个人信息" column=1>
-          <el-descriptions-item label="用户名"
-            >黑手双城</el-descriptions-item
-          >
-          <el-descriptions-item label="手机号"
-            >18000000000</el-descriptions-item
-          >
-          <el-descriptions-item label="居住地">成都市</el-descriptions-item>
-          <el-descriptions-item label="联系地址"
-            >xxxxx大道 1188 号</el-descriptions-item
-          >
-        </el-descriptions>
-      </div>
+    <p class="status-message">The guy is so lazy that has not any profile.</p>
 
-      <el-divider direction="vertical"></el-divider>
-      <div class="problem-solve-info">
-        <div class="echarts-box" id="e-box"></div>
+    <el-divider> </el-divider>
 
-        <el-divider></el-divider>
-        <div>提交记录</div>
-      </div>
+    <div class="statistics-container">
+      <div class="echarts-box" id="e-box"></div>
+      <div class="submit-record">提交记录</div>
     </div>
   </div>
 </template>
 
 <script>
 import * as echarts from 'echarts'
+import { getUserProfile } from '@/api/user'
 export default {
   name: 'UserPage',
   data () {
@@ -47,27 +28,128 @@ export default {
       squareUrl:
         'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
     }
+  },
+  computed: {
+    nickname () {
+      return this.$store.state.user.userInfo.nickname
+    }
+  },
+  created () {
+    // 拉取用户信息
+    this.getUserProfile()
+  },
+  mounted () {
+    // 初始化饼图
+    this.myChart = echarts.init(document.querySelector('#e-box'))
+    this.myChart.setOption({
+      // 提示框
+      tooltip: {
+        trigger: 'item'
+      },
+      // 图例
+      legend: {
+        top: '10%',
+        left: 'center'
+      },
+      // 数据
+      series: [
+        {
+          name: '题目AC 占比',
+          type: 'pie',
+          radius: ['40%', '70%'], // 半径
+          center: ['50%', '60%'],
+          startAngle: 180,
+          endAngle: 360,
+          data: [
+            { value: 1048, name: 'Easy' },
+            { value: 735, name: 'Medium' },
+            { value: 580, name: 'Hard' }
+          ],
+          itemStyle: {
+            // 自定义每个扇区的颜色
+            color: function (params) {
+              // params是每个扇区的相关信息，包括数据、数据索引和名称
+              const colorList = ['#00BFFF', '#FFFF00', '#CD5C5C']
+              return colorList[params.dataIndex]
+            }
+          }
+        }
+      ]
+    })
+  },
+  methods: {
+    async getUserProfile () {
+      const uid = this.$store.getters.uid
+      if (!uid) {
+        this.$message({
+          message: '请先登录',
+          type: 'warning'
+        })
+        return
+      }
+
+      const res = await getUserProfile(uid)
+      console.log(res)
+      // 更新到store
+      this.$store.commit('user/setUserInfo', res.data)
+    }
   }
 }
 </script>
 
-<style>
-.user-header {
-  display: flex; /* 将父元素设置为flex容器 */
-}
-.user-header .user-data {
-  margin-top: 10px;
-  margin-left: 20px;
+<style scoped>
+.user-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.user-body {
+.avatar-container {
+  margin-bottom: 15px;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.username {
+  font-size: 20px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.status-message {
+  color: #99a9bf;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 70px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 16px;
+  color: #409eff;
+}
+
+.statistics-container {
+  /* 弹性盒子 */
   display: flex;
 }
-.user-body .user-info-detail{
-  margin: 30px;
-  width: 250px;
-}
-.user-body .problem-solve-info{
-  margin: 30px;
+
+.statistics-container .echarts-box {
+  width: 400px;
+  height: 300px;
+  /* margin: 0 auto;
+  border: 1px solid #ccc; */
 }
 </style>

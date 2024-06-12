@@ -1,19 +1,36 @@
-// 约定一个通用的键名
-const INFO_KEY = 'oj_user_info'
-
-// 获取个人信息
-export const getInfo = () => {
-  const defaultObj = { token: '', userId: '' }
-  const result = localStorage.getItem(INFO_KEY)
-  return result ? JSON.parse(result) : defaultObj
+function setInLocalStorage (key, value) {
+  localStorage.setItem(key, JSON.stringify(value))
+}
+function getFromLocalStorage (key) {
+  return JSON.parse(localStorage.getItem(key))
 }
 
-// 设置个人信息
-export const setInfo = (obj) => {
-  localStorage.setItem(INFO_KEY, JSON.stringify(obj))
+// keys
+const InfoKey = 'oj_user_info'
+const TokenKey = 'oj_user_token'
+
+// 存储用户信息
+export const setUserInfo = (obj) => {
+  setInLocalStorage(InfoKey, obj)
+}
+
+// 存储token
+export const setToken = (obj) => {
+  setInLocalStorage(TokenKey, obj)
+}
+
+// 读取用户信息
+export const getUserInfo = () => {
+  return getFromLocalStorage(InfoKey)
+}
+
+// 读取token
+export const getToken = () => {
+  return getFromLocalStorage(TokenKey)
 }
 
 // 移除个人信息
 export const removeInfo = () => {
-  localStorage.removeItem(INFO_KEY)
+  localStorage.removeItem(InfoKey)
+  localStorage.removeItem(TokenKey)
 }
