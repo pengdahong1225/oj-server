@@ -197,7 +197,7 @@ func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request 
 		return nil, NotFound
 	}
 
-	var rsp *pb.GetUserSolvedListResponse
+	var rsp = new(pb.GetUserSolvedListResponse)
 	rsp.ProblemIdList = make([]int64, len(solutions))
 	for i, v := range solutions {
 		rsp.ProblemIdList[i] = v.ProblemID
