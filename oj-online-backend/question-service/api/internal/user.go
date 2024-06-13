@@ -176,7 +176,7 @@ func GetUserSolvedList(uid int64) *models.Response {
 		return res
 	}
 	res.Message = "OK"
-	res.Data = response.ProblemIdList
+	res.Data = response.ProblemList
 
 	return res
 }

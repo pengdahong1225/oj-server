@@ -26,18 +26,6 @@ type Daemon struct {
 }
 
 // 排行榜
-/**
-SELECT
-    user_info.*,
-    user_problem_statistics.accomplish_count
-FROM
-    user_problem_statistics
-JOIN
-    user_info ON user_problem_statistics.uid = user_info.id
-ORDER BY
-    user_problem_statistics.accomplish_count DESC
-LIMIT 50;
-*/
 func (receiver Daemon) loopRank() {
 	var key = "rank"
 	conn := redis.NewConn()
@@ -46,11 +34,23 @@ func (receiver Daemon) loopRank() {
 	db := mysql.DB
 	var orderList []models.Statistics
 
+	/**
+	SELECT
+	    user_info.*,
+	    user_problem_statistics.accomplish_count
+	FROM
+	    user_problem_statistics
+	JOIN
+	    user_info ON user_problem_statistics.uid = user_info.id
+	ORDER BY
+	    user_problem_statistics.accomplish_count DESC
+	LIMIT 50;
+	*/
 	result := db.Select("user_info.*, user_problem_statistics.accomplish_count").
 		Joins("JOIN user_info ON user_problem_statistics.uid = user_info.id").
 		Order("user_problem_statistics.accomplish_count desc").
 		Limit(50).
-		Scan(&orderList)
+		Find(&orderList)
 
 	if result.Error != nil {
 		logrus.Errorln("获取排行榜失败", result.Error.Error())

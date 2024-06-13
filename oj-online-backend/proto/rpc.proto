@@ -42,7 +42,7 @@ message GetUserSolvedListRequest {
   int64 uid = 1;
 }
 message GetUserSolvedListResponse {
-  repeated int64 problem_id_list = 1;
+  repeated Problem problem_list = 1;
 }
 
 // 创建
