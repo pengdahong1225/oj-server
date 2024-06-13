@@ -45,7 +45,7 @@ instance.interceptors.request.use(function (config) {
 }, function (error) {
   // 对请求错误做些什么
   endLoading()
-  Message.error('请求失败')
+  Message.error(error.message)
   return Promise.reject(error)
 })
 
