@@ -12,7 +12,6 @@
 
     <div class="statistics-container">
       <div class="echarts-box" id="e-box"></div>
-      <div class="submit-record">提交记录</div>
     </div>
   </div>
 </template>

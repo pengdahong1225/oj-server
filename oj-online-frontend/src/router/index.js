@@ -1,20 +1,22 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+import store from '@/store'
 /**
  * 默认加载
  */
-import Layout from '@/views/layout'
+import Layout from '@/views'
 import Home from '@/views/layout/home'
-import ProblemSet from '@/views/layout/prolist'
+import ProblemList from '@/views/layout/problemlist'
 import Rank from '@/views/layout/rank'
-import User from '@/views/layout/user'
 
-import store from '@/store'
 /**
  * 懒加载 => 异步组件
  */
-const Detail = () => import('@/views/prodetail')
+const User = () => import('@/views/layout/user')
+const Problem = () => import('@/views/layout/problem')
+const Submission = () => import('@/views/layout/submission')
+const Setting = () => import('@/views/layout/setting')
 
 Vue.use(VueRouter)
 
@@ -28,17 +30,26 @@ const routes = [
         path: '/home', component: Home
       },
       {
-        path: '/problemset', component: ProblemSet
+        path: '/problemList', component: ProblemList
       },
       {
         path: '/rank', component: Rank
       },
       {
         path: '/user', component: User
+      },
+      {
+        path: '/problem/:id', component: Problem
+      },
+      {
+        path: '/submission', component: Submission
+      },
+      {
+        path: '/setting', component: Setting
       }
     ]
   },
-  { path: '/detail', component: Detail },
+
   { path: '*', redirect: '/home' }
 ]
 
@@ -68,5 +79,11 @@ router.beforeEach((to, from, next) => {
     }
   }
 })
+
+// 解决push报错
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function (location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 export default router

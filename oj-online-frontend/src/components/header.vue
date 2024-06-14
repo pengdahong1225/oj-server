@@ -1,16 +1,25 @@
 <template>
   <div>
-    <!-- 登录了就显示头像，没登录就显示默认头像点击提示登录 -->
-    <el-avatar
-      :shape="shape"
-      :size="size"
-      :src="avatarUrl"
-      v-on:click.native="handleAvatarClick"
-    >
-      <img
-        src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"
-      />
-    </el-avatar>
+    <div class="header-container">
+      <el-dropdown
+        v-if="isLogin"
+        placement="bottom-end"
+        trigger="click"
+        @command="handleCommand"
+      >
+        <span class="el-dropdown-link">
+          {{ dropdownLabelName
+          }}<i class="el-icon-arrow-down el-icon--right"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="Home">Home</el-dropdown-item>
+          <el-dropdown-item command="Submissions">Submissions</el-dropdown-item>
+          <el-dropdown-item command="Settings">Settings</el-dropdown-item>
+          <el-dropdown-item command="Logout">Logout</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+      <el-button v-else @click="handleBtnClick">Login</el-button>
+    </div>
 
     <el-dialog
       title="Welcome OJ Onine"
@@ -31,10 +40,6 @@ export default {
   },
   data () {
     return {
-      avatarUrl:
-        'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-      shape: 'circle',
-      size: 50,
       dialogVisible: false,
       dialogWidth: '%100'
     }
@@ -42,24 +47,77 @@ export default {
   computed: {
     isLogin () {
       return this.$store.getters.token
+    },
+    dropdownLabelName () {
+      if (this.isLogin) {
+        return this.$store.getters.nickname
+      } else {
+        return 'Login'
+      }
     }
   },
   methods: {
-    handleAvatarClick () {
+    handleBtnClick () {
       // 判断是否登录
       if (!this.isLogin) {
         this.dialogVisible = true
         return
       }
       this.$router.push('/user')
+    },
+    handleCommand (command) {
+      this.$message('click on item ' + command)
+      switch (command) {
+        case 'Home':
+          this.$router.push('/user')
+          break
+        case 'Submissions':
+          this.$router.push('/submission')
+          break
+        case 'Settings':
+          this.$router.push('/setting')
+          break
+        case 'Logout':
+          this.$store.dispatch('logout')
+          this.$router.push('/')
+          break
+        default:
+          break
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.el-avatar {
+.header-container {
+  margin-right: 18px;
   cursor: pointer;
-  margin-right: 20px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+}
+.header-container .el-dropdown-link {
+  color: #fff;
+}
+.header-container .el-icon-arrow-down {
+  font-size: 15px;
+}
+.header-container .el-button {
+  color: #fff;
+  background-color: #158fbf;
+  border: none;
+  font-size: 18px;
+}
+.header-container .el-button:hover {
+  color: #fffc59;
+  background-color: #158fbf;
+  border: none;
+}
+/* 按下样式 */
+.header-container .el-button:active {
+  color: #ffe44e91;
+  background-color: #158fbf;
+  border: none;
 }
 </style>

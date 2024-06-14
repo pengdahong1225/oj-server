@@ -6,7 +6,8 @@ import Vue from 'vue'
 import 'element-ui/lib/theme-chalk/index.css'
 import {
   Button, Select, Menu, MenuItem, Table, TableColumn, Autocomplete, Divider, Option, Avatar, Tag,
-  Dialog, Form, FormItem, Loading, Message, Descriptions, DescriptionsItem, Card, Icon
+  Dialog, Form, FormItem, Loading, Message, Descriptions, DescriptionsItem, Card, Icon,
+  Dropdown, DropdownMenu, DropdownItem, Link
 } from 'element-ui'
 
 Vue.use(Button)
@@ -29,3 +30,7 @@ Vue.use(Descriptions)
 Vue.use(DescriptionsItem)
 Vue.use(Card)
 Vue.use(Icon)
+Vue.use(Dropdown)
+Vue.use(DropdownMenu)
+Vue.use(DropdownItem)
+Vue.use(Link)

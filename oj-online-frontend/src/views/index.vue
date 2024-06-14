@@ -6,7 +6,7 @@
         active-text-color="#dfff7d"
         background-color="#158fbf"
         class="el-menu-vertical"
-        :default-active="activeIndex"
+        :default-active="$route.path"
         text-color="#fff"
         router
         mode="horizontal"
@@ -15,10 +15,9 @@
           <img style="width: 50px" src="@/assets/Cup.png" alt="Oj Online" />
         </el-menu-item>
         <div class="flex-grow" />
-        <el-menu-item index="1" route="/home">主页</el-menu-item>
-        <el-menu-item index="2" route="/problemset">题目列表</el-menu-item>
-        <el-menu-item index="3" route="/rank">排行榜</el-menu-item>
-        <!-- <el-menu-item index="4" route="/login">登录/注册</el-menu-item> -->
+        <el-menu-item index="/home" route="/home">主页</el-menu-item>
+        <el-menu-item index="/problemlist" route="/problemlist">题目列表</el-menu-item>
+        <el-menu-item index="/rank" route="/rank">排行榜</el-menu-item>
       </el-menu>
       <!-- User -->
       <Header class="topHeader"></Header>
@@ -39,17 +38,6 @@ export default {
   name: 'LayoutIndex',
   components: {
     Header
-  },
-  data () {
-    return {
-      activeIndex: '1'
-    }
-  },
-  methods: {
-    handleSelect (key, keyPath) {
-      // index: 选中菜单项的 index, indexPath: 选中菜单项的 index path
-      console.log(key, keyPath)
-    }
   }
 }
 </script>
@@ -68,9 +56,9 @@ export default {
   flex: 1;
 }
 .container {
-  width: 90%;  /* 根据需要设置宽度 */
-  margin: 0 auto;  /* 上下边距为0，左右边距自动，使得.main盒子居中 */
-  background-color: #fff;  /* 设置背景颜色 */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);  /* 设置阴影效果 */
+  width: 90%; /* 根据需要设置宽度 */
+  margin: 0 auto; /* 上下边距为0，左右边距自动，使得.main盒子居中 */
+  background-color: #fff; /* 设置背景颜色 */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 设置阴影效果 */
 }
 </style>

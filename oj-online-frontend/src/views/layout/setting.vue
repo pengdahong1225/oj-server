@@ -1,12 +1,12 @@
 <template>
-  <div class="prodetail">
-    题目详情页
+  <div class="setting">
+    setting
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ProetailPage'
+  name: 'SettingPage'
 }
 </script>
 

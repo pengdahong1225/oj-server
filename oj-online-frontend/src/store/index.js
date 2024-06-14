@@ -18,6 +18,12 @@ export default new Vuex.Store({
     },
     uid: state => {
       return state.user.userInfo.uid
+    },
+    nickname: state => {
+      return state.user.userInfo.nickname
+    },
+    userSolvedList: state => {
+      return state.user.userSolvedList
     }
   },
   mutations: {
