@@ -26,9 +26,6 @@ type UserSolution struct {
 
 	Uid       int64 `gorm:"column:uid" json:"uid"`
 	ProblemID int64 `gorm:"column:problem_id" json:"problem_id"`
-
-	User    UserInfo `gorm:"foreignKey:Uid;references:id" json:"userInfo"`
-	Problem Problem  `gorm:"foreignKey:ProblemID;references:id" json:"problem"`
 }
 
 func (UserSolution) TableName() string {

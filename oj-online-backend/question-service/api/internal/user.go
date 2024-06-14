@@ -152,7 +152,7 @@ func GetSubmitRecord(userId int64) {
 
 }
 
-// GetUserSolvedList 获取用户已经解决的题目id列表
+// GetUserSolvedList 获取用户解决了哪些题目
 func GetUserSolvedList(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
@@ -176,7 +176,7 @@ func GetUserSolvedList(uid int64) *models.Response {
 		return res
 	}
 	res.Message = "OK"
-	res.Data = response.ProblemList
+	res.Data = response.ProblemSolvedList
 
 	return res
 }

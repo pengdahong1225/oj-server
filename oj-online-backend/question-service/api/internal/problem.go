@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 	pb "question-service/api/proto"
 	"question-service/models"
@@ -36,23 +35,10 @@ func ProblemSet(cursor int) *models.Response {
 		logrus.Debugf("获取题目列表失败:%s\n", err.Error())
 		return res
 	}
-
-	// 序列化
-	marshalOptions := protojson.MarshalOptions{
-		UseProtoNames:     true,
-		UseEnumNumbers:    true,
-		EmitDefaultValues: true,
-	}
-	bytes, err := marshalOptions.Marshal(response)
-	if err != nil {
-		res.Code = http.StatusInternalServerError
-		res.Message = err.Error()
-		return res
-	}
-
+	
 	res.Code = http.StatusOK
 	res.Message = "OK"
-	res.Data = string(bytes)
+	res.Data = response
 	return res
 }
 

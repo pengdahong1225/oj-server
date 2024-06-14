@@ -5,12 +5,9 @@ import (
 	"db-service/internal/models"
 	pb "db-service/internal/proto"
 	"db-service/services/dao/mysql"
-	"db-service/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type DBServiceServer struct {
@@ -187,25 +184,11 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 	return nil, nil
 }
 
-// GetUserSolvedList 查询用户解决了的题目
+// GetUserSolvedList 查询用户哪些题目
 func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
 	db := mysql.DB
-	var solutions []models.UserSolution
-	/**
-	SELECT
-	    user_solution.*,
-	    problem.id,problem.title,problem.level,problem.tags
-	FROM
-	    user_solution
-	JOIN
-	    problem ON user_solution.problem_id = problem.id
-	WHERE
-		user_solution.uid = 1;
-	*/
-	result := db.Select("user_solution.*, problem.id, problem.title, problem.level, problem.tags").
-		Joins("JOIN problem ON user_solution.problem_id = problem.id").
-		Where("user_solution.uid = ?", request.Uid).
-		Find(&solutions)
+	var userSolutionList []models.UserSolution
+	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, QueryField
@@ -214,19 +197,9 @@ func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request 
 		return nil, NotFound
 	}
 
-	{
-		fmt.Println(solutions)
-	}
-
 	var rsp = new(pb.GetUserSolvedListResponse)
-	for _, item := range solutions {
-		rsp.ProblemList = append(rsp.ProblemList, &pb.Problem{
-			Id:       item.ProblemID,
-			CreateAt: timestamppb.New(item.CreateAt),
-			Title:    item.Problem.Title,
-			Level:    item.Problem.Level,
-			Tags:     utils.SplitStringWithX(item.Problem.Tags, "#"),
-		})
+	for _, userSolution := range userSolutionList {
+		rsp.ProblemSolvedList = append(rsp.ProblemSolvedList, userSolution.ProblemID)
 	}
 
 	return rsp, nil
