@@ -14,11 +14,10 @@ type LoginFrom struct {
 	SmsCode string `form:"smsCode" json:"smsCode" binding:"required"`
 }
 
-// QuestionForm 代码运行和提交表单
-type QuestionForm struct {
-	Id     int64  `json:"id" form:"id" binding:"required"`
-	UserId int64  `json:"userId" form:"userId" binding:"required"`
-	Title  string `json:"title" form:"title" binding:"required"`
-	Code   string `json:"code" form:"code" binding:"required"`
-	Clang  string `json:"clang" form:"clang" binding:"required"`
+// SubmitForm 代码提交表单
+type SubmitForm struct {
+	ProblemID int64  `json:"problem_id" form:"problem_id" binding:"required"`
+	Title     string `json:"title" form:"title" binding:"required"`
+	Lang      string `json:"lang" form:"lang" binding:"required"`
+	Code      string `json:"code" form:"code" binding:"required"`
 }

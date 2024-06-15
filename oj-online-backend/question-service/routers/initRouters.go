@@ -48,10 +48,9 @@ func QuestionRouters(engine *gin.Engine) {
 	questionRouter := engine.Group("/problem")
 	{
 		questionRouter.GET("/detail", api.QuestionDetail)
-		questionRouter.GET("/query", api.QuestionQuery)
+		questionRouter.GET("/search", api.QuestionQuery)
 		// 需要登录
-		questionRouter.POST("/run", middlewares.AuthLogin(), api.QuestionRun)
-		questionRouter.POST("/submit", middlewares.AuthLogin(), api.QuestionSubmit)
+		questionRouter.POST("/submit", middlewares.AuthLogin(), api.ProblemSubmit)
 	}
 }
 

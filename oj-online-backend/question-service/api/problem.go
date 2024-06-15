@@ -3,6 +3,8 @@ package api
 import (
 	"net/http"
 	"question-service/api/internal"
+	"question-service/middlewares"
+	"question-service/models"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -28,14 +30,16 @@ func QuestionDetail(ctx *gin.Context) {
 
 }
 
-func QuestionQuery(ctx *gin.Context) {
+func QuestionQuery(ctx *gin.Context) {}
 
-}
+func ProblemSubmit(ctx *gin.Context) {
+	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	// 表单验证
+	form, ret := validate(ctx, models.SubmitForm{})
+	if !ret {
+		return
+	}
 
-func QuestionRun(ctx *gin.Context) {
-
-}
-
-func QuestionSubmit(ctx *gin.Context) {
-
+	res := internal.ProblemSubmitHandler(claims.Uid, form)
+	ctx.JSON(res.Code, res)
 }

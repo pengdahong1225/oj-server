@@ -55,12 +55,12 @@ func (receiver *TcpClient) Request(req *pb.SSJudgeRequest) (*pb.SSJudgeResponse,
 		buffer := make([]byte, 2048)
 		n, err := receiver.conn.Read(buffer)
 		if err != nil {
-			logrus.Infoln("read error:", err)
+			logrus.Errorln("read error:", err)
 			errChan <- err
 		} else {
 			rep, err := decode(buffer[:n]) // 操作读取的数据必须带上实际n，读多少用多少
 			if err != nil {
-				logrus.Infoln("decode error:", err)
+				logrus.Errorln("decode error:", err)
 				errChan <- err
 			} else {
 				rspChan <- rep

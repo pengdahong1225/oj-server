@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	pb "question-service/api/proto"
@@ -35,29 +34,19 @@ func ProblemSet(cursor int) *models.Response {
 		logrus.Debugf("获取题目列表失败:%s\n", err.Error())
 		return res
 	}
-	
+
 	res.Code = http.StatusOK
 	res.Message = "OK"
 	res.Data = response
 	return res
 }
 
-func QuestionDetail(id int64) {
+func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
 
-}
-
-func QuestionQuery(name string) {
-
-}
-
-func QuestionRun(form *models.QuestionForm) {
-
-}
-func QuestionSubmit(ctx *gin.Context, form *models.QuestionForm) {
-
-}
-
-// 保存提交记录
-func updateSubmitRecord(msg []byte, result string) {
-
+	return res
 }
