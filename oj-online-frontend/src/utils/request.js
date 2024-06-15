@@ -18,15 +18,19 @@ const instance = axios.create({
   timeout: 5000
 })
 
-let loading
-function startLoading () { // 使用Element loading-start 方法
-  loading = Loading.service({
-    lock: true,
-    text: '加载中……'
+/**
+ * element loading
+ */
+function startLoading () {
+  Loading.service({
+    // lock: true,
+    text: 'Loading',
+    spinner: 'el-icon-loading',
+    background: 'rgba(0, 0, 0, 0.8)'
   })
 }
-function endLoading () { // 使用Element loading-close 方法
-  loading.close()
+function endLoading () {
+  Loading.service().close()
 }
 
 // 添加请求拦截器
@@ -44,7 +48,6 @@ instance.interceptors.request.use(function (config) {
   return config
 }, function (error) {
   // 对请求错误做些什么
-  endLoading()
   Message.error(error.message)
   return Promise.reject(error)
 })
