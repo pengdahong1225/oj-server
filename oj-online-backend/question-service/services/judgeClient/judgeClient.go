@@ -27,7 +27,7 @@ func (receiver *TcpClient) Connect(dsn string) error {
 	return nil
 }
 
-func (receiver *TcpClient) Request(req *pb.SSJudgeRequest) (*pb.SSJudgeResponse, error) {
+func (receiver *TcpClient) RpcJudgeRequest(req *pb.SSJudgeRequest) (*pb.SSJudgeResponse, error) {
 	// 检查连接是否可用
 	if receiver.conn == nil {
 		return nil, errors.New("connection is nil")

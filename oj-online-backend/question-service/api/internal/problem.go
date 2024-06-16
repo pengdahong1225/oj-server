@@ -6,6 +6,8 @@ import (
 	"net/http"
 	pb "question-service/api/proto"
 	"question-service/models"
+	"question-service/services/judgeClient"
+	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
 )
@@ -42,11 +44,41 @@ func ProblemSet(cursor int) *models.Response {
 }
 
 func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
+	dsn := ""
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
 
+	// 从缓存读取test_cast
+	test, err := redis.GetTestCaseJson(uid)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		return res
+	}
+
+	request := &pb.SSJudgeRequest{
+		Code:         form.Code,
+		Language:     form.Lang,
+		TestCaseJson: test,
+	}
+	client := judgeClient.TcpClient{}
+
+	if err := client.Connect(dsn); err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		return res
+	}
+	response, err := client.RpcJudgeRequest(request)
+	if err != nil {
+		res.Code = http.StatusOK
+		res.Message = err.Error()
+		logrus.Errorf("RpcJudgeRequest err:%s", err.Error())
+		return res
+	}
+
+	res.Data = response.ResultList
 	return res
 }
