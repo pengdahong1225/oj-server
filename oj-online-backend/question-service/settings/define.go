@@ -14,6 +14,7 @@ type AppConfig struct {
 
 type SystemConfig struct {
 	Name string `mapstructure:"name"`
+	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 

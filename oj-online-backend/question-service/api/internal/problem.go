@@ -44,11 +44,18 @@ func ProblemSet(cursor int) *models.Response {
 }
 
 func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
-	dsn := ""
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
+	}
+
+	system, err := settings.GetSystemConf("judge-service")
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
 	}
 
 	// 从缓存读取test_cast
@@ -56,6 +63,7 @@ func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
+		logrus.Errorln(err.Error())
 		return res
 	}
 
@@ -66,9 +74,10 @@ func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
 	}
 	client := judgeClient.TcpClient{}
 
-	if err := client.Connect(dsn); err != nil {
+	if err := client.Connect(system.Host); err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
+		logrus.Errorln(err.Error())
 		return res
 	}
 	response, err := client.RpcJudgeRequest(request)
@@ -80,5 +89,38 @@ func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
 	}
 
 	res.Data = response.ResultList
+	return res
+}
+
+func GetProblemDetailHandler(problemID int64) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+
+	client := pb.NewDBServiceClient(dbConn)
+	response, err := client.GetProblemData(context.Background(), &pb.GetProblemRequest{
+		Id: problemID,
+	})
+	if err != nil {
+		res.Code = http.StatusOK
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+
+	res.Code = http.StatusOK
+	res.Message = "OK"
+	res.Data = response.Data
+
 	return res
 }

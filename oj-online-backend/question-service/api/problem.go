@@ -26,11 +26,23 @@ func ProblemSet(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func QuestionDetail(ctx *gin.Context) {
+func GetProblemDetail(ctx *gin.Context) {
+	// 查询参数
+	problemID := ctx.Query("problemID")
+	if problemID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数错误",
+		})
+		return
+	}
 
+	ID, _ := strconv.ParseInt(problemID, 10, 64)
+	res := internal.GetProblemDetailHandler(ID)
+	ctx.JSON(res.Code, res)
 }
 
-func QuestionQuery(ctx *gin.Context) {}
+func QueryProblem(ctx *gin.Context) {}
 
 func ProblemSubmit(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
