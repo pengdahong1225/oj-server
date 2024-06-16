@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[]) {
     // 初始化日志
-    LOG_INIT("app/log", "judge-service", DEBUG);
+    LOG_INIT("/app/log", "judge-service", DEBUG);
     LOG_INFO("master pid = %d", getpid());
 
     // server
