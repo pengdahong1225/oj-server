@@ -13,4 +13,9 @@ message Problem{
   int32 level = 6;
   repeated string tags = 7;
   string test_case = 8;
+
+  int32 time_limit = 9;
+  int32 memory_limit = 10;
+  string io_mode = 11;
+  string create_by = 12;
 }
