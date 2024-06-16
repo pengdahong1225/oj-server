@@ -8,3 +8,11 @@ import request from '@/utils/request'
 export const getProblemList = () => {
   return request.get('problemSet')
 }
+
+// 获取题目详情
+export const getProblemDetail = (id) => {
+  const params = {
+    problemID: id
+  }
+  return request.get('problem/detail', { params: params })
+}

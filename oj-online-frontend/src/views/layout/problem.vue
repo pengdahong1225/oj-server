@@ -1,35 +1,43 @@
 <template>
   <div class="problem">
     <div class="main-container">
-      <div class="panel-title">Simple A + B Problem</div>
+      <div class="panel-title">{{ title }}</div>
 
       <div class="title">Description</div>
-      <div class="content">
-        请计算两个整数的和并输出结果。注意不要有不必要的输出，比如"请输入 a 和 b
-        的值: "，示例代码见隐藏部分。
-      </div>
+      <div class="content">{{ problemInfo.description }}</div>
 
       <div class="title">Input</div>
-      <div class="content">两个用空格分开的整数</div>
+      <div class="content">{{ problemInfo.input }}</div>
       <div class="title">Output</div>
-      <div class="content">两数之和</div>
+      <div class="content">{{ problemInfo.output }}</div>
 
       <div class="test-case">
         <div class="in-box">
           <div class="title">Sample-input</div>
-          <input class="content" type="text" value="1 1" readonly />
+          <input
+            class="content"
+            type="text"
+            :value="problemInfo.test.input"
+            readonly
+          />
         </div>
+        "
         <div class="out-box">
           <div class="title">Sample-output</div>
-          <input class="content" type="text" value="2" readonly />
+          <input
+            class="content"
+            type="text"
+            :value="problemInfo.test.output"
+            readonly
+          />
         </div>
       </div>
 
       <div class="title">Hint</div>
       <div class="content">
-        <el-collapse v-model="activeNames" @change="handleChange">
+        <el-collapse>
           <el-collapse-item title="C" name="C">
-            <CodeBlock :code="code"></CodeBlock>
+            <CodeBlock :code="problemInfo.code"></CodeBlock>
           </el-collapse-item>
         </el-collapse>
       </div>
@@ -49,10 +57,11 @@
         </el-select>
       </div>
 
-      <CodeEditor v-model="code"></CodeEditor>
+      <CodeBlock :code="problemInfo.code"></CodeBlock>
+      <!-- <CodeEditor v-model="code"></CodeEditor> -->
 
-      <div class="submit">
-        <el-button type="primary" @click="submit">submit</el-button>
+      <div class="submit-box">
+        <el-button type="primary" @click="submitHandler">submit</el-button>
       </div>
     </div>
     <div class="information-container">
@@ -67,23 +76,35 @@
 
 <script>
 import CodeBlock from '@/components/codeBlock.vue'
-import CodeEditor from '@/components/codeEditor.vue'
+import { getProblemDetail } from '@/api/problem'
+
 export default {
   name: 'ProblemPage',
   components: {
-    CodeEditor,
     CodeBlock
   },
   data () {
     return {
-      code: `#include <stdio.h>    
+      problemInfo: {
+        id: Number,
+        create_at: '',
+        title: '',
+        description: '',
+        input: '',
+        output: '',
+        test: {
+          input: '',
+          output: ''
+        },
+        code: `#include <stdio.h>    
 int main(){
     int a, b;
     scanf("%d%d", &a, &b);
-    printf("%d\n", a+b);
+    printf("%d\\n", a+b);
     return 0;
 }
-`,
+`
+      },
       activeLang: 'C',
       languages: [
         { value: 'C', label: 'C', disabled: false },
@@ -92,6 +113,34 @@ int main(){
         { value: 'Python', label: 'Python', disabled: true },
         { value: 'Golang', label: 'Golang', disabled: false }
       ]
+    }
+  },
+  created () {
+    // 拉取题目详细数据
+    this.getProblemDetail(this.$route.params.id)
+  },
+  methods: {
+    async getProblemDetail (id) {
+      const { data } = await getProblemDetail(id)
+      this.problemInfo.id = data.id
+      this.problemInfo.create_at = data.create_at
+      this.problemInfo.title = data.title
+
+      const des = JSON.parse(data.description)
+      this.problemInfo.description = des.Description
+      this.problemInfo.input = des.Input
+      this.problemInfo.output = des.Output
+
+      const testCast = JSON.parse(data.test_case)
+      this.problemInfo.test.input = testCast.input[0]
+        ? testCast.input[0].content
+        : ''
+      this.problemInfo.test.output = testCast.output[0]
+        ? testCast.output[0].content
+        : ''
+    },
+    submitHandler () {
+      console.log('submitHandler')
     }
   }
 }
@@ -160,6 +209,15 @@ int main(){
     margin-right: 20px;
     font-size: 17px;
     line-height: 24px;
+  }
+
+  .submit-box {
+    text-align: right; // 靠右
+    margin-top: 10px;
+    margin-bottom: 10px;
+    .el-button {
+      font-size: 20px;
+    }
   }
 }
 </style>

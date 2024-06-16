@@ -60,7 +60,6 @@ instance.interceptors.response.use(function (response) {
     Message.error(response.data.message)
     return Promise.reject(response.data.message)
   }
-
   return response.data
 }, function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
