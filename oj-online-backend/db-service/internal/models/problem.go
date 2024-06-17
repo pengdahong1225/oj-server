@@ -13,8 +13,18 @@ type Problem struct {
 
 	Description string `gorm:"column:description" json:"description"`
 	TestCase    string `gorm:"column:test_case" json:"test_case"`
+
+	TimeLimit   int32  `gorm:"column:time_limit" json:"time_limit"`
+	MemoryLimit int32  `gorm:"column:memory_limit" json:"memory_limit"`
+	IoMode      string `gorm:"column:io_mode" json:"io_mode"`
+	CreateBy    int64  `gorm:"column:create_by" json:"create_by"`
 }
 
 func (Problem) TableName() string {
 	return "problem"
+}
+
+type ProblemDataResult struct {
+	Problem
+	CreateUserNickName string `gorm:"column:nickname"` // 用于Scan(挂载)user_info表中的nickname字段
 }

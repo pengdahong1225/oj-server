@@ -44,7 +44,7 @@ create table if not exists problem
     delete_at TIMESTAMP,
 
     title VARCHAR(64) NOT null comment '题目标题',
-    level tinyint DEFAULT 0 comment '题目难度 0:简单 1:中等 2:困难',
+    level tinyint DEFAULT 0 comment '题目难度 1:简单 2:中等 3:困难',
     tags VARCHAR(64) DEFAULT '' comment '题目标签，#做前缀', -- '#数组 #双指针 #哈希表'
 
     description TEXT NOT null comment '题目描述',

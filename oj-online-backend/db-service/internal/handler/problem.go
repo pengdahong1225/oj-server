@@ -12,10 +12,24 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// GetProblemData
+// 获取题目信息
 func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	db := mysql.DB
-	var Problem models.Problem
-	result := db.Where("id = ?", request.Id).Find(&Problem)
+
+	/**
+	select problem.*, user_info.nickname
+	from problem
+	Left JOIN user_info on problem.create_by=user_info.id
+	where problem.id = 1;
+	*/
+	var problemDataResult models.ProblemDataResult
+	// result := db.Where("id = ?", request.Id).Find(&Problem)
+	result := db.Table("problem").
+		Select("problem.*, user_info.nickname").
+		Joins("Left JOIN user_info on problem.create_by=user_info.id").
+		Where("problem.id = ?", request.Id).
+		Scan(&problemDataResult)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, QueryField
@@ -25,13 +39,17 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 	}
 
 	data := &pb.Problem{
-		Id:          Problem.ID,
-		CreateAt:    timestamppb.New(Problem.CreateAt),
-		Title:       Problem.Title,
-		Description: Problem.Description,
-		Level:       Problem.Level,
-		Tags:        utils.SplitStringWithX(Problem.Tags, "#"),
-		TestCase:    Problem.TestCase,
+		Id:          problemDataResult.ID,
+		CreateAt:    timestamppb.New(problemDataResult.CreateAt),
+		Title:       problemDataResult.Title,
+		Description: problemDataResult.Description,
+		Level:       problemDataResult.Level,
+		Tags:        utils.SplitStringWithX(problemDataResult.Tags, "#"),
+		TestCase:    problemDataResult.TestCase,
+		TimeLimit:   problemDataResult.TimeLimit,
+		MemoryLimit: problemDataResult.MemoryLimit,
+		IoMode:      problemDataResult.IoMode,
+		CreateBy:    problemDataResult.CreateUserNickName,
 	}
 	return &pb.GetProblemResponse{
 		Data: data,
