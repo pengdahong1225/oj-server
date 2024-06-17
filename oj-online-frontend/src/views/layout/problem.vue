@@ -21,7 +21,7 @@
             readonly
           />
         </div>
-        "
+
         <div class="out-box">
           <div class="title-box">Sample-output</div>
           <input
@@ -44,21 +44,7 @@
 
       <el-divider></el-divider>
 
-      <div class="editor-header">
-        <span class="languages">languages: </span>
-        <el-select v-model="activeLang" placeholder="请选择">
-          <el-option
-            v-for="item in languages"
-            :key="item.value"
-            :value="item.value"
-            :disabled="item.disabled"
-          >
-          </el-option>
-        </el-select>
-      </div>
-
-      <CodeBlock :code="problemInfo.code"></CodeBlock>
-      <!-- <CodeEditor v-model="code"></CodeEditor> -->
+      <CodeEditor v-model="code"></CodeEditor>
 
       <div class="submit-box">
         <el-button type="primary" @click="submitHandler">submit</el-button>
@@ -80,12 +66,14 @@
 
 <script>
 import CodeBlock from '@/components/codeBlock.vue'
+import CodeEditor from '@/components/codeEditor.vue'
 import { getProblemDetail } from '@/api/problem'
 
 export default {
   name: 'ProblemPage',
   components: {
-    CodeBlock
+    CodeBlock,
+    CodeEditor
   },
   data () {
     return {
@@ -113,10 +101,9 @@ int main(){
     return 0;
 }`
       },
-      activeLang: 'C',
+      activeLang: 'c_cpp',
       languages: [
-        { value: 'C', label: 'C', disabled: false },
-        { value: 'C++', label: 'C++', disabled: false },
+        { value: 'c_cpp', label: 'c_cpp', disabled: false },
         { value: 'Java', label: 'Java', disabled: true },
         { value: 'Python', label: 'Python', disabled: true },
         { value: 'Golang', label: 'Golang', disabled: false }
@@ -228,19 +215,14 @@ int main(){
     width: @info-width;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1); // 添加阴影
     align-self: flex-start;
-    margin-left: auto;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
     .el-descriptions{
       margin-top: 10px;
       margin-bottom: 10px;
       margin-left: 10px;
     }
-  }
-
-  .editor-header {
-    margin-left: 20px;
-    margin-right: 20px;
-    font-size: 17px;
-    line-height: 24px;
   }
 
   .submit-box {
