@@ -90,9 +90,9 @@ export default {
   methods: {
     formatterLevel (row, column) {
       const level = row.level
-      if (level === 0) {
+      if (level === 1) {
         return '简单'
-      } else if (level === 1) {
+      } else if (level === 2) {
         return '中等'
       } else {
         return '困难'

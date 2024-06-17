@@ -14,5 +14,7 @@ export const getProblemDetail = (id) => {
   const params = {
     problemID: id
   }
-  return request.get('problem/detail', { params: params })
+  return request.get('problem/detail', { params: params }).catch(err => {
+    console.log(err)
+  })
 }

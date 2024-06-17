@@ -39,7 +39,6 @@ instance.interceptors.request.use(function (config) {
   // 开启loading 禁止背景点击 以服务的方式调用的全屏 Loading 是单例的
   startLoading()
   // 配置headers，有token就添加token
-  // config.headers.platform = 'H5'
   const token = store.getters.token
   if (token) {
     config.headers.token = token
@@ -56,16 +55,17 @@ instance.interceptors.request.use(function (config) {
 instance.interceptors.response.use(function (response) {
   // 对响应数据做点什么(默认axios的响应数据结构会多包装一层data)
   endLoading()
+  console.log(response)
   if (response.data.code !== 200) {
     Message.error(response.data.message)
     return Promise.reject(response.data.message)
   }
+
   return response.data
 }, function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么
   endLoading()
-  console.log(error)
   if (error.response) {
     Message.error(error.response.data.message)
   } else {
