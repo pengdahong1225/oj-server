@@ -18,3 +18,14 @@ export const getProblemDetail = (id) => {
     console.log(err)
   })
 }
+
+// 提交代码
+export const submitCode = (obj) => {
+  const data = {
+    problem_id: obj.problem_id,
+    title: obj.title,
+    lang: obj.lang,
+    code: obj.code
+  }
+  return request.post('problem/submit', data)
+}

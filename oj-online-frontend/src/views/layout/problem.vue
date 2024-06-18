@@ -1,7 +1,7 @@
 <template>
   <div class="problem">
     <div class="main-container">
-      <div class="panel-title">{{ title }}</div>
+      <div class="panel-title">{{ problemInfo.problem_title }}</div>
 
       <div class="title-box">Description</div>
       <div class="content-box">{{ problemInfo.description }}</div>
@@ -33,18 +33,23 @@
         </div>
       </div>
 
-      <div class="title-box">Hint</div>
-      <div class="content-box">
+      <div class="Hint-box">
         <el-collapse>
-          <el-collapse-item title="C" name="C">
-            <CodeBlock :code="problemInfo.code"></CodeBlock>
+          <el-collapse-item>
+            <template slot="title">
+              <span class="el-collapse-item-title-box"> Hint </span>
+            </template>
+
+            <CodeBlock
+              :code="problemInfo.code"
+            ></CodeBlock>
           </el-collapse-item>
         </el-collapse>
       </div>
 
       <el-divider></el-divider>
 
-      <CodeEditor v-model="code"></CodeEditor>
+      <CodeEditor :fontSize="20" ref="codeEditor"></CodeEditor>
 
       <div class="submit-box">
         <el-button type="primary" @click="submitHandler">submit</el-button>
@@ -52,28 +57,40 @@
     </div>
 
     <div class="information-container">
-      <el-descriptions title="Information" column=1>
-        <el-descriptions-item label="ID">{{ problemInfo.id }}</el-descriptions-item>
-        <el-descriptions-item label="Time Limit">{{ problemInfo.time_limit }} MS</el-descriptions-item>
-        <el-descriptions-item label="Memory Limit">{{ problemInfo.memory_limit }} MB</el-descriptions-item>
-        <el-descriptions-item label="IO Mode">{{ problemInfo.io_mode }}</el-descriptions-item>
-        <el-descriptions-item label="Create By">{{ problemInfo.create_by }}</el-descriptions-item>
-        <el-descriptions-item label="Level"> {{problemInfo.level}} </el-descriptions-item>
+      <el-descriptions title="Information" :column=1>
+        <el-descriptions-item label="ID">{{
+          problemInfo.id
+        }}</el-descriptions-item>
+        <el-descriptions-item label="Time Limit"
+          >{{ problemInfo.time_limit }} MS</el-descriptions-item
+        >
+        <el-descriptions-item label="Memory Limit"
+          >{{ problemInfo.memory_limit }} MB</el-descriptions-item
+        >
+        <el-descriptions-item label="IO Mode">{{
+          problemInfo.io_mode
+        }}</el-descriptions-item>
+        <el-descriptions-item label="Create By">{{
+          problemInfo.create_by
+        }}</el-descriptions-item>
+        <el-descriptions-item label="Level">
+          {{ problemInfo.level }}
+        </el-descriptions-item>
       </el-descriptions>
     </div>
   </div>
 </template>
 
 <script>
-import CodeBlock from '@/components/codeBlock.vue'
 import CodeEditor from '@/components/codeEditor.vue'
-import { getProblemDetail } from '@/api/problem'
+import CodeBlock from '@/components/codeBlock.vue'
+import { getProblemDetail, submitCode } from '@/api/problem'
 
 export default {
   name: 'ProblemPage',
   components: {
-    CodeBlock,
-    CodeEditor
+    CodeEditor,
+    CodeBlock
   },
   data () {
     return {
@@ -84,7 +101,7 @@ export default {
         io_mode: '',
         memory_limit: Number,
         time_limit: Number,
-        title: '',
+        problem_title: '',
         level: '',
         description: '',
         input: '',
@@ -93,13 +110,7 @@ export default {
           input: '',
           output: ''
         },
-        code: `#include <stdio.h>    
-int main(){
-    int a, b;
-    scanf("%d%d", &a, &b);
-    printf("%d\\n", a+b);
-    return 0;
-}`
+        code: 'printf("%d\\n", a+b);'
       },
       activeLang: 'c_cpp',
       languages: [
@@ -121,7 +132,7 @@ int main(){
       this.problemInfo.id = data.id
       this.problemInfo.create_at = data.create_at
       this.problemInfo.create_by = data.create_by
-      this.problemInfo.title = data.title
+      this.problemInfo.problem_title = data.title
       this.problemInfo.io_mode = data.io_mode
       this.problemInfo.time_limit = data.time_limit
       this.problemInfo.memory_limit = data.memory_limit
@@ -153,8 +164,25 @@ int main(){
         ? testCast.output[0].content
         : ''
     },
-    submitHandler () {
-      console.log('submitHandler')
+    async submitHandler () {
+      const submitData = this.$refs.codeEditor.getValue()
+      if (submitData === '') {
+        this.$message.error('请写入代码')
+        return
+      }
+      console.log(submitData)
+      const lang = this.$refs.codeEditor.getLang()
+
+      const res = await submitCode({
+        problem_id: this.problemInfo.id,
+        title: this.problemInfo.problem_title,
+        lang: lang,
+        code: submitData
+      }).catch(err => {
+        console.log(err)
+      })
+
+      console.log(res)
     }
   }
 }
@@ -192,8 +220,14 @@ int main(){
     .content-box {
       margin-left: 25px;
       margin-right: 20px;
-      font-size: 17px;
-      line-height: 24px;
+    }
+    .Hint-box {
+      padding: 15px 20px;
+    }
+    .el-collapse-item-title-box {
+      color: #3091f2;
+      font-size: 20px;
+      font-weight: 400;
     }
 
     .test-case {
@@ -201,9 +235,17 @@ int main(){
       width: 90%;
       .in-box {
         width: 50%;
+        .content-box{
+          height: 25px;
+          font-size: 15px;
+        }
       }
       .out-box {
         width: 50%;
+        .content-box{
+          height: 25px;
+          font-size: 15px;
+        }
       }
       .content-box {
         width: 80%;
@@ -218,7 +260,7 @@ int main(){
     margin-left: 10px;
     margin-right: 10px;
     margin-top: 10px;
-    .el-descriptions{
+    .el-descriptions {
       margin-top: 10px;
       margin-bottom: 10px;
       margin-left: 10px;

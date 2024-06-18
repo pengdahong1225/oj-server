@@ -10,10 +10,10 @@
         "
       >
         <div class="editor-header">
-          <span class="languages">languages: </span>
-          <el-select v-model="activeLang" placeholder="请选择">
+          <span class="languages">Language: </span>
+          <el-select v-model="activeLang" placeholder="请选择" size="small">
             <el-option
-              v-for="item in languages"
+              v-for="item in language_list"
               :key="item.value"
               :value="item.value"
               :disabled="item.disabled"
@@ -21,21 +21,6 @@
             </el-option>
           </el-select>
         </div>
-
-        <!-- <bk-select
-                    :disabled="false"
-                    placeholder="请选择主题"
-                    search-placeholder="搜索主题"
-                    v-model="valueTheme"
-                    style="width: 150px; margin-right: 20px;"
-                    @change="selectTheme"
-                    searchable>
-                    <bk-option v-for="option in listTheme"
-                        :key="option"
-                        :id="option"
-                        :name="option">
-                    </bk-option>
-                </bk-select>-->
       </div>
 
       <editor
@@ -43,7 +28,7 @@
         v-model="content"
         @init="editorInit"
         width="100%"
-        height="400px"
+        height="300px"
         :lang="lang"
         :theme="theme"
         :options="{
@@ -51,9 +36,9 @@
           enableSnippets: true,
           enableLiveAutocompletion: true,
           tabSize: 4,
-          fontSize: 20,
+          fontSize: fontSize,
           readOnly: readOnly, //设置是否只读
-          showPrintMargin: false, //去除编辑器里的竖线
+          showPrintMargin: true, //去除编辑器里的竖线
         }"
       ></editor>
     </el-card>
@@ -86,41 +71,56 @@ export default {
     valueCodeLang: {
       type: String,
       default: 'c_cpp'
+    },
+    fontSize: {
+      type: Number,
+      default: 15
     }
   },
   data () {
     return {
-      listTheme: ['dracula', 'chrome', 'xcode', 'monokai', 'github'],
-      listCodeLang: ['c_cpp', 'golang', 'java', 'python', 'javascript'],
+      // 下拉框列表数据
+      language_list: [
+        { value: 'C', disabled: false },
+        { value: 'C++', disabled: true },
+        { value: 'java', disabled: true },
+        { value: 'python', disabled: true },
+        { value: 'golang', disabled: false }
+      ],
+      activeLang: 'C',
 
-      content: '',
+      // 主题数据
+      listTheme: ['dracula', 'xcode', 'monokai'],
+      listCodeLang: ['c_cpp', 'golang', 'java', 'python'],
       theme: '',
-      lang: ''
+      lang: '',
+
+      // 编辑器内容
+      content: ''
+    }
+  },
+  watch: {
+    // 下拉框改变选项语言 -> 改变主题语言
+    activeLang (newValue, oldValue) {
+      if (newValue === 'C' || newValue === 'C++') {
+        this.lang = 'c_cpp'
+      } else {
+        this.lang = newValue.toLowerCase()
+      }
     }
   },
   mounted () {
-    // 初始化编辑器
+    // 加载编辑器资源
     this.editorInit()
     // 初始化主题、语言
     this.theme = this.valueTheme
     this.lang = this.valueCodeLang
     // 若传输代码，则展示代码
     if (this.codeData) {
-      console.log(this.codeData)
-      this.$refs.aceEditor.editor.setValue(this.codeData)
+      this.content = this.codeData
     }
   },
   methods: {
-    selectTheme (newValue, oldValue) {
-      if (newValue) {
-        this.theme = newValue
-      }
-    },
-    selectLang (newValue, oldValue) {
-      if (newValue) {
-        this.lang = newValue
-      }
-    },
     editorInit () {
       // 初始化
       require('brace/ext/language_tools')
@@ -129,7 +129,7 @@ export default {
       require('brace/ext/searchbox')
       require('brace/ext/split')
 
-      // 循坏加载语言，通过点击按钮切换
+      // 循坏加载语言
       for (let s = 0; s < this.listCodeLang.length; s++) {
         require('brace/snippets/' + this.listCodeLang[s])
       }
@@ -137,22 +137,9 @@ export default {
         require('brace/mode/' + this.listCodeLang[j])
       }
 
-      // 循坏加载主题，通过点击按钮切换
+      // 循坏加载主题
       for (let i = 0; i < this.listTheme.length; i++) {
         require('brace/theme/' + this.listTheme[i])
-      }
-    },
-
-    copyCode () {
-      const code = this.$refs.aceEditor.editor.getValue()
-
-      // 复制到剪切板
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(code)
-        // 复制成功 给提示 此处省略
-      } else {
-        // 复制失败 给提示 此处省略
-        alert('您的浏览器不支持自动复制，请手动复制')
       }
     },
 
@@ -163,18 +150,20 @@ export default {
         2
       )
       this.$refs.aceEditor.editor.setValue(string)
+    },
+    // 父组件通过调用子组件方法获取数据
+    getValue () {
+      return this.$refs.aceEditor.editor.getValue()
+    },
+    getLang () {
+      return this.activeLang
     }
-
-    // getValue () { // 获取编辑器中的值
-    //     console.log('编辑器中第一个换行符的位置：' + this.$refs.aceEditor.editor.getValue().indexOf('\n'))
-    // }
   }
 }
 </script>
 
 <style>
 .editor-header {
-  margin-left: 15px;
   margin-right: 20px;
   font-size: 17px;
   line-height: 24px;
