@@ -2,12 +2,12 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	pb "question-service/api/proto"
 	"question-service/models"
 	"question-service/services/judgeClient"
-	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
 )
@@ -59,13 +59,14 @@ func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
 	}
 
 	// 从缓存读取test_cast
-	test, err := redis.GetTestCaseJson(uid)
-	if err != nil {
-		res.Code = http.StatusInternalServerError
-		res.Message = err.Error()
-		logrus.Errorln(err.Error())
-		return res
-	}
+	// test, err := redis.GetTestCaseJson(uid)
+	// if err != nil {
+	// 	res.Code = http.StatusInternalServerError
+	// 	res.Message = err.Error()
+	// 	logrus.Errorln(err.Error())
+	// 	return res
+	// }
+	test := "\"test_case\": \"{\\r\\n  \\\"info\\\": {\\r\\n    \\\"test_case_number\\\": 1,\\r\\n    \\\"spj\\\": false,\\r\\n    \\\"test_cases\\\": {\\r\\n      \\\"1\\\": {\\r\\n        \\\"input_name\\\": \\\"1.in\\\",\\r\\n        \\\"output_name\\\": \\\"1.out\\\"\\r\\n      }\\r\\n    }\\r\\n  },\\r\\n  \\\"input\\\": [\\r\\n    {\\r\\n      \\\"name\\\": \\\"1.in\\\",\\r\\n      \\\"content\\\": \\\"1 2\\\"\\r\\n    }\\r\\n  ],\\r\\n  \\\"output\\\": [\\r\\n    {\\r\\n      \\\"name\\\": \\\"1.out\\\",\\r\\n      \\\"content\\\": \\\"3\\\"\\r\\n    }\\r\\n  ]\\r\\n}\",\n"
 
 	request := &pb.SSJudgeRequest{
 		Code:         form.Code,
@@ -74,7 +75,7 @@ func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
 	}
 	client := judgeClient.TcpClient{}
 
-	if err := client.Connect(system.Host); err != nil {
+	if err := client.Connect(fmt.Sprintf("%s:%d", system.Host, system.Port)); err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
