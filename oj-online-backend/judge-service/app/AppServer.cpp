@@ -37,6 +37,11 @@ void AppServer::onConnection(const muduo::net::TcpConnectionPtr &conn) {
  * 每个子线程loop收到消息都会回调这个函数，将消息传递到应用层来
  * 虽然都是同一个函数，但在每个线程空间都有独立调用栈
  */
+
+/**
+ * 循环读取包头，直到读取完一个完成的包头 -> 再去解码包头
+ * 根据包头提供的长度，循环读取body，直到读取完一个完整的body -> 再去解码body
+ */
 void AppServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::Buffer *buf, muduo::Timestamp time) {
 //    muduo::string data = "";
 //    while (buf->readableBytes() > 0)
