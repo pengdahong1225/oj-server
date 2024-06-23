@@ -9,7 +9,7 @@ int LengthHeaderCodec::decode(const muduo::string &data, SSJudgeRequest &msg) {
     int32_t length = std::atoi(data.substr(0, kHeaderLen).c_str());
     muduo::string body = data.substr(kHeaderLen);
     if (length != body.size()) {
-        LOG_ERROR("LengthHeaderCodec::onMessage -> the length of package is error");
+        LOG_ERROR("LengthHeaderCodec::onMessage -> length[%d] not equal body size[%d]", length, body.size());
         return -1;
     }
     if (!msg.ParseFromString(body)) {

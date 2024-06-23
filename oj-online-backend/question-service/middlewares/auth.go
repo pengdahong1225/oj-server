@@ -32,7 +32,7 @@ func AuthLogin() gin.HandlerFunc {
 			} else {
 				ctx.JSON(http.StatusUnauthorized, gin.H{
 					"code":    http.StatusUnauthorized,
-					"message": "token验证错误",
+					"message": "token验证失败",
 				})
 				ctx.Abort()
 				return
