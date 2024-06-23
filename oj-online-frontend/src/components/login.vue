@@ -53,7 +53,7 @@ export default {
   data () {
     return {
       captchaID: '', // 图形验证码的key
-      captchaUrl: '', // 存储请求渲染的图片地址
+      captchaUrl: '', // 存储请求渲染的图片地址s
 
       second: 60, // 倒计时秒数
       totalSecond: 60, // 总秒数
@@ -61,37 +61,41 @@ export default {
 
       mobile: '', // 手机号
       captchaValue: '', // 用户输入的图形验证码
-      smsCode: ''
+      smsCode: '',
     }
   },
-  created () {
+  created() {
     this.getPicCode()
   },
   methods: {
-    async getPicCode () {
+    async getPicCode() {
       const res = await getPicCode()
       this.captchaID = res.data.captchaID
       this.captchaUrl = res.data.captchaUrl
     },
-    async getSmsCode () {
+    async getSmsCode() {
       // 获取短信验证码前要简单校验手机号和图形验证码是否合法
       if (!this.validate()) {
         return
       }
       // 请求
       if (!this.timer && this.second === this.totalSecond) {
-        const res = await getSmsCode(this.mobile, this.captchaID, this.captchaValue)
+        const res = await getSmsCode(
+          this.mobile,
+          this.captchaID,
+          this.captchaValue
+        )
         if (res.message !== 'OK') {
           this.$message({
             message: res.message,
-            type: 'fail'
+            type: 'fail',
           })
           return
         }
 
         this.$message({
           message: '短信验证码发送成功，请注意查收',
-          type: 'success'
+          type: 'success',
         })
 
         // 开启倒计时
@@ -105,7 +109,7 @@ export default {
         }, 1000)
       }
     },
-    async login () {
+    async login() {
       console.log('login')
       if (!this.validate()) {
         return
@@ -114,7 +118,7 @@ export default {
       console.log(res)
       this.$message({
         message: '登录成功',
-        type: 'success'
+        type: 'success',
       })
       this.$store.commit('user/setUserInfo', res.data.userinfo)
       this.$store.commit('user/setToken', res.data.token)
@@ -122,32 +126,32 @@ export default {
       // 登录成功后，通知父组件关闭对话框
       this.$emit('close')
     },
-    validate () {
+    validate() {
       // 校验 手机号 和 图形验证码 是否合法
       if (!/^1[3-9]\d{9}$/.test(this.mobile)) {
         this.$message({
           message: '请输入正确的手机号',
-          type: 'warning'
+          type: 'warning',
         })
         return false
       }
       if (!/^\w{4}$/.test(this.captchaValue)) {
         this.$message({
           message: '请输入正确的图形验证码',
-          type: 'warning'
+          type: 'warning',
         })
         return false
       }
       return true
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="less" scoped>
 .container {
   padding: 20px 10px;
-  background-color: #fff;  /* 设置背景颜色 */
+  background-color: #fff; /* 设置背景颜色 */
 
   .title {
     margin-bottom: 20px;

@@ -1,6 +1,8 @@
 import axios from 'axios'
 import store from '@/store'
 import { Loading, Message } from 'element-ui' // 引入element-ui的组件
+import { checkExpire } from '@/utils/auth'
+
 
 /**
  * 创建axios实例，将来对创建出来的axios实例，进行自定义配置
@@ -21,7 +23,7 @@ const instance = axios.create({
 /**
  * element loading
  */
-function startLoading () {
+function startLoading() {
   Loading.service({
     // lock: true,
     text: 'Loading',
@@ -29,7 +31,7 @@ function startLoading () {
     background: 'rgba(0, 0, 0, 0.8)'
   })
 }
-function endLoading () {
+function endLoading() {
   Loading.service().close()
 }
 
@@ -38,9 +40,9 @@ instance.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
   // 开启loading 禁止背景点击 以服务的方式调用的全屏 Loading 是单例的
   startLoading()
-  // 配置headers，有token就添加token
+  // 配置headers，有token就添加token，要判断token是否过期
   const token = store.getters.token
-  if (token) {
+  if (token && checkExpire(token)) {
     config.headers.token = token
   }
 

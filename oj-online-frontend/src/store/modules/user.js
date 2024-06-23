@@ -25,8 +25,9 @@ export default {
   },
   actions: {
     logout (context) {
-      // 个人信息要重置
+      // 重置
       context.commit('setUserInfo', {})
+      context.commit('setToken', '')
     }
   },
   getters: {}

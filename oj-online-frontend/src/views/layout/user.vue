@@ -21,34 +21,34 @@ import * as echarts from 'echarts'
 import { getUserProfile, getUserSolvedList } from '@/api/user'
 export default {
   name: 'UserPage',
-  data () {
+  data() {
     return {
       size: 80,
       squareUrl:
-        'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+        'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
     }
   },
   computed: {
-    nickname () {
+    nickname() {
       return this.$store.state.user.userInfo.nickname
-    }
+    },
   },
-  created () {
+  created() {
     // 拉取用户信息
     this.getUserProfile()
   },
-  mounted () {
+  mounted() {
     // 初始化饼图
     this.myChart = echarts.init(document.querySelector('#e-box'))
     this.myChart.setOption({
       // 提示框
       tooltip: {
-        trigger: 'item'
+        trigger: 'item',
       },
       // 图例
       legend: {
         top: '10%',
-        left: 'center'
+        left: 'center',
       },
       // 数据
       series: [
@@ -62,7 +62,7 @@ export default {
           data: [
             { value: 1048, name: 'Easy' },
             { value: 735, name: 'Medium' },
-            { value: 580, name: 'Hard' }
+            { value: 580, name: 'Hard' },
           ],
           itemStyle: {
             // 自定义每个扇区的颜色
@@ -70,19 +70,19 @@ export default {
               // params是每个扇区的相关信息，包括数据、数据索引和名称
               const colorList = ['#00BFFF', '#FFFF00', '#CD5C5C']
               return colorList[params.dataIndex]
-            }
-          }
-        }
-      ]
+            },
+          },
+        },
+      ],
     })
   },
   methods: {
-    async getUserProfile () {
+    async getUserProfile() {
       const uid = this.$store.getters.uid
       if (!uid) {
         this.$message({
           message: '请先登录',
-          type: 'warning'
+          type: 'warning',
         })
         return
       }
@@ -96,8 +96,8 @@ export default {
       // 更新到store
       console.log(res)
       this.$store.commit('user/setUserSolvedList', res.data)
-    }
-  }
+    },
+  },
 }
 </script>
 
