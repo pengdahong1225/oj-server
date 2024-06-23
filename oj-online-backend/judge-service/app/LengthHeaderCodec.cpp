@@ -4,17 +4,28 @@
 
 #include "LengthHeaderCodec.h"
 #include "common/logger/rlog.h"
+#include <arpa/inet.h>  // for ntohl
 
-int LengthHeaderCodec::decode(const muduo::string &data, SSJudgeRequest &msg) {
-    int32_t length = std::atoi(data.substr(0, kHeaderLen).c_str());
-    muduo::string body = data.substr(kHeaderLen);
-    if (length != body.size()) {
-        LOG_ERROR("LengthHeaderCodec::onMessage -> length[%d] not equal body size[%d]", length, body.size());
-        return -1;
+int LengthHeaderCodec::decode(const muduo::string &data, SSJudgeRequest& msg) {
+    // 检查数据是否足够包含长度头
+    if (data.size() < sizeof(uint32_t)) {
+        LOG_ERROR("LengthHeaderCodec::onMessage -> length[%d] not a complete packet header size[%d]", data.size(), sizeof(uint32_t));
+        return -1;  // 不满足一个完整的包头
     }
-    if (!msg.ParseFromString(body)) {
+
+    // 读取并解析长度头
+    uint32_t length = ntohl(*reinterpret_cast<const uint32_t*>(data.data()));
+
+    // 检查数据是否足够包含消息体
+    if (data.size() != sizeof(uint32_t) + length) {
+        LOG_ERROR("LengthHeaderCodec::onMessage -> length[%d] not equal body size[%d]", length, data.size() - sizeof(uint32_t));
+        return -1;  // 不满足一个完整的包体
+    }
+
+    // 解析消息
+    if (!msg.ParseFromArray(data.data() + sizeof(uint32_t), length)) {
         LOG_ERROR("LengthHeaderCodec::onMessage -> decode from string error");
-        return -1;
+        return -1;  // 解析失败
     }
     return 0;
 }
