@@ -58,6 +58,8 @@ void AppServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::
     // 处理
     SSJudgeResponse response = HandlerProxy::handle(request);
 
+    LOG_INFO("response: %s", response.DebugString().c_str());
+
     // 返回
     muduo::net::Buffer buffer;
     if (LengthHeaderCodec::encode(buffer, response) == 0) {
