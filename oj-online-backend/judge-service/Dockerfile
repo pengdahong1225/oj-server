@@ -1,4 +1,4 @@
-FROM debian:trixie-slim
+FROM debian:latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Shanghai
