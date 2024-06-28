@@ -22,20 +22,20 @@ services:
     networks:
       - net
 
-  judge-service:
-    container_name: judge-service
-    privileged: true
-    build:
-      context: ./judge-service
-      dockerfile: Dockerfile
-    volumes:
-      - /root/server/Oj-Online-Server/oj-online-backend/log:/app/log
-    ports:
-      - "9020:9020"
-    networks:
-      - net
-    depends_on: # 本地服务的依赖，控制启动先后顺序
-      - db-service
+  # judge-service:
+  #   container_name: judge-service
+  #   privileged: true
+  #   build:
+  #     context: ./judge-service
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - /root/server/Oj-Online-Server/oj-online-backend/log:/app/log
+  #   ports:
+  #     - "9020:9020"
+  #   networks:
+  #     - net
+  #   depends_on: # 本地服务的依赖，控制启动先后顺序
+  #     - db-service
   
   question-service:
     container_name: question-service
