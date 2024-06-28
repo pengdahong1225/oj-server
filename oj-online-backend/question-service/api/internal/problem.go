@@ -2,17 +2,21 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	pb "question-service/api/proto"
 	"question-service/models"
-	"question-service/services/judgeClient"
+	"question-service/services/ants"
+	"question-service/services/judgeService"
+	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
 )
 
-func ProblemSet(cursor int) *models.Response {
+type ProblemHandler struct {
+}
+
+func (receiver ProblemHandler) GetProblemSet(cursor int) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -43,57 +47,60 @@ func ProblemSet(cursor int) *models.Response {
 	return res
 }
 
-func ProblemSubmitHandler(uid int64, form *models.SubmitForm) *models.Response {
+// ProblemSubmit
+// 判断“用户”是否处于判题状态？true就拒绝
+// 用户提交了题目就立刻返回，并给题目设置状态
+// 客户端通过其他接口轮询题目结果
+func (receiver ProblemHandler) ProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
 
-	system, err := settings.GetSystemConf("judge-service")
+	// 判断用户是否处于判题状态
+	state, err := redis.GetUserState(uid)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res
 	}
-
-	// 从缓存读取test_cast
-	// test, err := redis.GetTestCaseJson(uid)
-	// if err != nil {
-	// 	res.Code = http.StatusInternalServerError
-	// 	res.Message = err.Error()
-	// 	logrus.Errorln(err.Error())
-	// 	return res
-	// }
-	test := "\"test_case\": \"{\\r\\n  \\\"info\\\": {\\r\\n    \\\"test_case_number\\\": 1,\\r\\n    \\\"spj\\\": false,\\r\\n    \\\"test_cases\\\": {\\r\\n      \\\"1\\\": {\\r\\n        \\\"input_name\\\": \\\"1.in\\\",\\r\\n        \\\"output_name\\\": \\\"1.out\\\"\\r\\n      }\\r\\n    }\\r\\n  },\\r\\n  \\\"input\\\": [\\r\\n    {\\r\\n      \\\"name\\\": \\\"1.in\\\",\\r\\n      \\\"content\\\": \\\"1 2\\\"\\r\\n    }\\r\\n  ],\\r\\n  \\\"output\\\": [\\r\\n    {\\r\\n      \\\"name\\\": \\\"1.out\\\",\\r\\n      \\\"content\\\": \\\"3\\\"\\r\\n    }\\r\\n  ]\\r\\n}\",\n"
-
-	request := &pb.SSJudgeRequest{
-		Code:         form.Code,
-		Language:     form.Lang,
-		TestCaseJson: test,
+	if state != models.UserStateNormal {
+		res.Code = http.StatusBadRequest
+		res.Message = "用户处于判题状态，请等待判题完成"
+		return res
 	}
-	client := judgeClient.TcpClient{}
 
-	if err := client.Connect(fmt.Sprintf("%s:%d", system.Host, system.Port)); err != nil {
+	// 设置用户状态为判题中
+	if err := redis.SetUserState(uid, models.UserStateJudging); err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res
 	}
-	response, err := client.RpcJudgeRequest(request)
+
+	// 异步处理：提交到judgeService
+	err = ants.AntsPoolInstance.Submit(func() {
+		judgeService.Handle(uid, form)
+	})
 	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	} else {
+		// 返回题目id
 		res.Code = http.StatusOK
-		res.Message = err.Error()
-		logrus.Errorf("RpcJudgeRequest err:%s", err.Error())
+		res.Message = "题目提交成功"
+		res.Data = map[string]interface{}{
+			"problemID": form.ProblemID,
+		}
 		return res
 	}
-
-	res.Data = response.ResultList
-	return res
 }
 
-func GetProblemDetailHandler(problemID int64) *models.Response {
+func (receiver ProblemHandler) GetProblemDetail(problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",

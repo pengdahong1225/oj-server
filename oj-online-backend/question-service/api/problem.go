@@ -22,11 +22,11 @@ func ProblemSet(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	res := internal.ProblemSet(cursor)
+	res := internal.ProblemHandler{}.GetProblemSet(cursor)
 	ctx.JSON(res.Code, res)
 }
 
-func GetProblemDetail(ctx *gin.Context) {
+func ProblemDetail(ctx *gin.Context) {
 	// 查询参数
 	problemID := ctx.Query("problemID")
 	if problemID == "" {
@@ -38,11 +38,11 @@ func GetProblemDetail(ctx *gin.Context) {
 	}
 
 	ID, _ := strconv.ParseInt(problemID, 10, 64)
-	res := internal.GetProblemDetailHandler(ID)
+	res := internal.ProblemHandler{}.GetProblemDetail(ID)
 	ctx.JSON(res.Code, res)
 }
 
-func QueryProblem(ctx *gin.Context) {}
+func ProblemSearch(ctx *gin.Context) {}
 
 func ProblemSubmit(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
@@ -52,6 +52,6 @@ func ProblemSubmit(ctx *gin.Context) {
 		return
 	}
 
-	res := internal.ProblemSubmitHandler(claims.Uid, form)
+	res := internal.ProblemHandler{}.ProblemSubmit(claims.Uid, form)
 	ctx.JSON(res.Code, res)
 }

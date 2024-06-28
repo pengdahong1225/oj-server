@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/panjf2000/ants/v2"
 	"question-service/logger"
 	"question-service/routers"
+	ants2 "question-service/services/ants"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
@@ -30,6 +32,7 @@ func AppInit() {
 	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
 		panic(err)
 	}
+	ants2.AntsPoolInstance, _ = ants.NewPool(ants.DefaultAntsPoolSize, ants.WithPanicHandler(ants2.AntsPanicHandler))
 }
 
 func ServerLoop(port int) {

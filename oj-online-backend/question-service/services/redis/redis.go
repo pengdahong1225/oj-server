@@ -33,6 +33,15 @@ func newConn() redis.Conn {
 	return pool.Get()
 }
 
+func SetKVByString(key string, value string) error {
+	conn := newConn()
+	defer conn.Close()
+	if _, err := conn.Do("Set", key, value); err != nil {
+		return err
+	}
+	return nil
+}
+
 func SetKVByStringWithExpire(key string, value string, expire int) error {
 	conn := newConn()
 	defer conn.Close()
@@ -50,4 +59,32 @@ func GetValueByString(key string) (string, error) {
 	} else {
 		return reply, nil
 	}
+}
+
+func SetKVByHash(key string, field string, value string) error {
+	conn := newConn()
+	defer conn.Close()
+	if _, err := conn.Do("HSet", key, field, value); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetValueByHash(key string, field string) (string, error) {
+	conn := newConn()
+	defer conn.Close()
+	if reply, err := redis.String(conn.Do("HGet", key, field)); err != nil {
+		return "", err
+	} else {
+		return reply, nil
+	}
+}
+
+func SetKVByHashWithExpire(key string, field string, value string, expire int) error {
+	conn := newConn()
+	defer conn.Close()
+	if _, err := conn.Do("HSet", key, field, value, "ex", expire); err != nil {
+		return err
+	}
+	return nil
 }
