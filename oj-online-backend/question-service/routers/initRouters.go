@@ -18,7 +18,6 @@ func HealthCheckRouters(engine *gin.Engine) {
 	})
 }
 
-// QuestionRouters 服务路由
 func QuestionRouters(engine *gin.Engine) {
 	// api/
 	{
