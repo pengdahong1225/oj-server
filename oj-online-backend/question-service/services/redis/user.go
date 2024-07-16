@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"question-service/models"
 	"strconv"
 )
 
@@ -16,7 +15,7 @@ func GetUserState(uid int64) (int, error) {
 		return -1, err
 	}
 	if state == "" {
-		return models.UserStateNormal, nil
+		return 0, nil
 	}
 	return strconv.Atoi(state)
 }

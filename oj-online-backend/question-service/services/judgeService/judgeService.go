@@ -11,11 +11,9 @@ import (
 )
 
 var (
-	baseUrl       string
-	compileResult chan string // 编译结果
-	runResult     chan string // 运行结果
-	judgeResult   chan string // 判题结果
-	exeName       string      // 执行文件名
+	baseUrl   string
+	exeName   string      // 执行文件名
+	runResult chan Result // 运行结果
 )
 
 type Param struct {
@@ -36,9 +34,7 @@ func init() {
 	}
 	baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
 
-	compileResult = make(chan string, 1024)
-	runResult = make(chan string, 1024)
-	judgeResult = make(chan string, 1024)
+	runResult = make(chan Result, 256)
 	exeName = "main"
 }
 
@@ -46,7 +42,7 @@ func init() {
 func Handle(uid int64, form *models.SubmitForm) {
 	defer func() {
 		// 恢复题目状态
-		if err := redis.SetUPState(uid, form.ProblemID, models.UPStateNormal); err != nil {
+		if err := redis.SetUPState(uid, form.ProblemID, UPStateNormal); err != nil {
 			logrus.Errorln(err.Error())
 		}
 	}()
@@ -61,34 +57,7 @@ func Handle(uid int64, form *models.SubmitForm) {
 	}
 
 	start := time.Now()
-
-	handler := &Handler{}
-	// 编译
-	res, err := handler.Compile(param)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return
-	}
-	ok, compileResult := checkResult(res)
-	if !ok {
-		logrus.Errorln("result校验失败")
-		return
-	}
-	// 运行
-	param.fileIds = compileResult.FileIds
-
-	res, err = handler.Run(param)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return
-	}
-	// 判题
-	res, err = handler.Judge(param)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return
-	}
-
+	doAction(param)
 	duration := time.Now().Sub(start).Milliseconds()
 	logrus.Infoln("---judgeService.Handle--- uid:%d, problemID:%d, total-cost:%d ms", uid, form.ProblemID, duration)
 }
@@ -96,7 +65,7 @@ func Handle(uid int64, form *models.SubmitForm) {
 func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 	param := &Param{}
 	// 设置题目状态
-	if err := redis.SetUPState(uid, form.ProblemID, models.UPStateNormal); err != nil {
+	if err := redis.SetUPState(uid, form.ProblemID, UPStateNormal); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
@@ -146,15 +115,72 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 	return true, param
 }
 
-// 结果判断
-func checkResult(res string) (bool, *Result) {
-	result := &Result{}
-	if err := json.Unmarshal([]byte(res), result); err != nil {
+// 操作(编译，运行，评判)，操作的上下文信息需要缓存到redis
+// redis需要持久化的信息：
+// 1.本次提交的状态
+// 2.编译结果
+// 3.运行结果
+// 4.评判结果
+func doAction(param *Param) {
+	handler := &Handler{}
+	// 设置题目状态[编译]
+	if err := redis.SetUPState(param.uid, param.problemID, UPStateCompiling); err != nil {
 		logrus.Errorln(err.Error())
-		return false, nil
 	}
-	if result.Status != "Accepted" {
-		return false, nil
+	compileResult, err := handler.Compile(param)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return
 	}
-	return true, result
+	// 判断编译结果，并更新状态和结果
+	if compileResult.Status == "Accepted" {
+		res := ResultInCache{
+			Content: "编译成功",
+			Results: []*Result{
+				compileResult,
+			},
+		}
+		bys, err := json.Marshal(&res)
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return
+		}
+		if err := redis.SetUPResult(param.uid, param.problemID, string(bys)); err != nil {
+			logrus.Errorln(err.Error())
+			return
+		}
+	} else {
+		res := ResultInCache{
+			Content: "编译失败",
+			Results: []*Result{
+				compileResult,
+			},
+		}
+		bys, err := json.Marshal(&res)
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return
+		}
+		if err := redis.SetUPResult(param.uid, param.problemID, string(bys)); err != nil {
+			logrus.Errorln(err.Error())
+		}
+		return
+	}
+
+	// 设置题目状态[运行]
+	param.fileIds = compileResult.FileIds
+	if err := redis.SetUPState(param.uid, param.problemID, UPStateRunning); err != nil {
+		logrus.Errorln(err.Error())
+	}
+	handler.Run(param)
+
+	// 设置题目状态[判题]
+	if err := redis.SetUPState(param.uid, param.problemID, UPStateJudging); err != nil {
+		logrus.Errorln(err.Error())
+	}
+	res, err := handler.Judge(param)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return
+	}
 }

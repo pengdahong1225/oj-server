@@ -28,20 +28,6 @@ func GetUPState(uid int64, problemID int64) (int, error) {
 	return strconv.Atoi(state)
 }
 
-func SetUPResult(uid int64, problemID int64, result string) error {
-	submitID := fmt.Sprintf("%d:%d", uid, problemID)
-	return SetKVByHashWithExpire(submitID, UPResultField, result, 60)
-}
-
-func GetUPResult(uid int64, problemID int64) (string, error) {
-	submitID := fmt.Sprintf("%d:%d", uid, problemID)
-	result, err := GetValueByHash(submitID, UPResultField)
-	if err != nil {
-		return "", err
-	}
-	return result, nil
-}
-
 func GetProblemCompileConfig(problemID int64) (string, error) {
 	conn := newConn()
 	defer conn.Close()
@@ -76,4 +62,19 @@ func QueryRankList() ([]string, error) {
 	defer conn.Close()
 
 	return redigo.Strings(conn.Do("zrange", "rank", 0, -1))
+}
+
+// 将用户提交结果写入redis，默认过期时间60分钟
+func PushUPResult(uid int64, problemID int64, result string) error {
+	submitID := fmt.Sprintf("%d:%d", uid, problemID)
+	return PushValueByList(submitID, UPResultField, result, 60*60)
+}
+
+func GetUPResult(uid int64, problemID int64) (string, error) {
+	submitID := fmt.Sprintf("%d:%d", uid, problemID)
+	result, err := GetValueByHash(submitID, UPResultField)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
 }

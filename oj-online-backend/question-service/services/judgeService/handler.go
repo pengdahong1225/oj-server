@@ -6,19 +6,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-	"question-service/models"
 	"question-service/services/ants"
-	"question-service/services/redis"
+	"sync"
 )
 
 type Handler struct {
 }
 
-func (receiver *Handler) Compile(param *Param) (string, error) {
-	// 设置题目状态
-	if err := redis.SetUPState(param.uid, param.problemID, models.UPStateCompiling); err != nil {
-		logrus.Errorln(err.Error())
-	}
+func (receiver *Handler) Compile(param *Param) (*Result, error) {
 	// 定义请求的body内容
 	body := map[string]interface{}{
 		"cmd": []map[string]interface{}{
@@ -48,26 +43,22 @@ func (receiver *Handler) Compile(param *Param) (string, error) {
 	jsonData, err := json.Marshal(body)
 	if err != nil {
 		logrus.Errorln("Error marshalling JSON:", err.Error())
-		return "", err
-
+		return nil, err
 	}
 
-	// 创建HTTP POST请求
+	// 初始化POST请求
 	req, err := http.NewRequest("POST", baseUrl+"/run", bytes.NewBuffer(jsonData))
 	if err != nil {
 		logrus.Errorln("Error creating request:", err.Error())
-		return "", err
+		return nil, err
 	}
-
-	// 设置请求头
 	req.Header.Set("Content-Type", "application/json")
-
 	// 创建HTTP客户端并发送请求
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.Errorln("Error sending request:", err)
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -75,20 +66,26 @@ func (receiver *Handler) Compile(param *Param) (string, error) {
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logrus.Errorln("Error reading response:", err)
-		return "", err
+		return nil, err
 	}
-
-	// 打印响应
 	logrus.Debugln("Response Status:", resp.Status)
 	logrus.Debugln("Response Body:", string(bodyResp))
 
-	return string(bodyResp), nil
+	result := &Result{}
+	if err := json.Unmarshal(bodyResp, result); err != nil {
+		logrus.Errorln(err.Error())
+		return nil, err
+	}
+	return result, nil
 }
 
-func (receiver *Handler) Run(param *Param) (string, error) {
-	// 循环调用(扔协程池一次性调用所有的请求，再一起等待)
+func (receiver *Handler) Run(param *Param) {
+	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
+	wg := new(sync.WaitGroup)
 	for _, test := range param.testCases {
 		ants.AntsPoolInstance.Submit(func() {
+			wg.Add(1)
+			defer wg.Done()
 			// 定义请求的body内容
 			body := map[string]interface{}{
 				"cmd": []map[string]interface{}{
@@ -144,16 +141,21 @@ func (receiver *Handler) Run(param *Param) (string, error) {
 				logrus.Errorln("Error reading response:", err)
 				return
 			}
-
-			// 打印响应
 			logrus.Debugln("Response Status:", resp.Status)
 			logrus.Debugln("Response Body:", string(bodyResp))
+			var result Result
+			if err := json.Unmarshal(bodyResp, &result); err != nil {
+				logrus.Errorln("Error unmarshalling JSON:", err)
+				return
+			}
+			// 将结果放入管道
+			runResult <- result
 		})
 	}
-
-	return "", nil
+	wg.Wait()
 }
 
+// Judge 判断结果是否满足预期
 func (receiver *Handler) Judge(param *Param) (string, error) {
 	return "", nil
 }

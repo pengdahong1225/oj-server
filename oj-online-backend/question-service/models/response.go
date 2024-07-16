@@ -26,21 +26,3 @@ type UserInfo struct {
 	PassCount   int64                `json:"passCount"`
 	SubmitCount int64                `json:"submitCount"`
 }
-
-type SubmitResponse struct {
-	QuestionID int64          `json:"questionID"`
-	UserID     int64          `json:"userID"`
-	Clang      string         `json:"clang"`
-	ResultList []SubmitResult `json:"resultList"`
-}
-
-type SubmitResult struct {
-	Result   int32  `json:"result,omitempty"`
-	CpuTime  int32  `json:"cpu_time,omitempty"`
-	RealTime int32  `json:"real_time,omitempty"`
-	Memory   int32  `json:"memory,omitempty"`
-	Signal   int32  `json:"signal,omitempty"`
-	ExitCode int32  `json:"exit_code,omitempty"`
-	Error    int32  `json:"error,omitempty"`
-	Content  string `json:"content,omitempty"`
-}

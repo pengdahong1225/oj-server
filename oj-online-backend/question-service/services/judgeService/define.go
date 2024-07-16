@@ -30,3 +30,23 @@ type Result struct {
 	FileIds    map[string]string `json:"fileIds,omitempty"`    // copyFileCached 指定的文件 id
 	FileError  []string          `json:"fileError,omitempty"`  // 文件错误详细信息
 }
+
+type ResultInCache struct {
+	Content string    `json:"content,omitempty"`
+	Results []*Result `json:"results,omitempty"`
+}
+
+// 用户状态枚举
+const (
+	UserStateNormal = iota
+	UserStateJudging
+)
+
+// 用户提交题目状态枚举
+const (
+	UPStateNormal    = iota
+	UPStateCompiling // 正在编译
+	UPStateRunning   // 正在运行
+	UPStateJudging   // 正在判题
+	UPStateExited    // 已退出
+)

@@ -66,14 +66,14 @@ func (receiver ProblemHandler) ProblemSubmit(uid int64, form *models.SubmitForm)
 		logrus.Errorln(err.Error())
 		return res
 	}
-	if state != models.UserStateNormal {
+	if state != judgeService.UserStateNormal {
 		res.Code = http.StatusBadRequest
 		res.Message = "用户处于判题状态，请等待判题完成"
 		return res
 	}
 
 	// 设置用户状态为判题中
-	if err := redis.SetUserState(uid, models.UserStateJudging); err != nil {
+	if err := redis.SetUserState(uid, judgeService.UserStateJudging); err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
