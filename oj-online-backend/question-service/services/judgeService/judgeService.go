@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"question-service/models"
+	"question-service/services/ants"
 	"question-service/services/redis"
 	"question-service/settings"
+	"sync"
 	"time"
 )
 
 var (
-	baseUrl   string
-	exeName   string      // 执行文件名
-	runResult chan Result // 运行结果
+	baseUrl    string
+	exeName    string      // 执行文件名
+	runResults chan Result // 运行结果
 )
 
 type Param struct {
@@ -34,41 +36,33 @@ func init() {
 	}
 	baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
 
-	runResult = make(chan Result, 256)
+	runResults = make(chan Result, 256)
 	exeName = "main"
 }
 
 // Handle 判题服务入口
-func Handle(uid int64, form *models.SubmitForm) {
-	defer func() {
-		// 恢复题目状态
-		if err := redis.SetUPState(uid, form.ProblemID, UPStateNormal); err != nil {
-			logrus.Errorln(err.Error())
-		}
-	}()
+func Handle(uid int64, form *models.SubmitForm) []Result {
+	// 设置“提交”状态
+	if err := redis.SetUPState(uid, form.ProblemID, UPStateNormal); err != nil {
+		logrus.Errorln(err.Error())
+		return nil
+	}
 
-	// preAction
-	// 1.题目缓存到redis，设置状态
-	// 2.读取题目配置
 	ok, param := preAction(uid, form)
 	if !ok {
-		logrus.Errorln("预处理失败!")
-		return
+		logrus.Errorln("预处理失败")
+		return nil
 	}
 
 	start := time.Now()
-	doAction(param)
+	res := doAction(param)
 	duration := time.Now().Sub(start).Milliseconds()
 	logrus.Infoln("---judgeService.Handle--- uid:%d, problemID:%d, total-cost:%d ms", uid, form.ProblemID, duration)
+	return res
 }
 
 func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 	param := &Param{}
-	// 设置题目状态
-	if err := redis.SetUPState(uid, form.ProblemID, UPStateNormal); err != nil {
-		logrus.Errorln(err.Error())
-		return false, nil
-	}
 
 	// 编译配置
 	compileJson, err := redis.GetProblemCompileConfig(form.ProblemID)
@@ -81,7 +75,6 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-
 	// 运行配置
 	runJson, err := redis.GetProblemRunConfig(form.ProblemID)
 	if err != nil {
@@ -121,66 +114,55 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 // 2.编译结果
 // 3.运行结果
 // 4.评判结果
-func doAction(param *Param) {
+func doAction(param *Param) []Result {
 	handler := &Handler{}
+	results := make([]Result, 0)
 	// 设置题目状态[编译]
 	if err := redis.SetUPState(param.uid, param.problemID, UPStateCompiling); err != nil {
 		logrus.Errorln(err.Error())
 	}
-	compileResult, err := handler.Compile(param)
+	compileResult, err := handler.compile(param)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return
+		return nil
 	}
-	// 判断编译结果，并更新状态和结果
-	if compileResult.Status == "Accepted" {
-		res := ResultInCache{
-			Content: "编译成功",
-			Results: []*Result{
-				compileResult,
-			},
-		}
-		bys, err := json.Marshal(&res)
-		if err != nil {
+	if compileResult.Status != "Accepted" {
+		compileResult.Content = "编译失败"
+		results = append(results, *compileResult)
+		// 更新状态
+		if err := redis.SetUPState(param.uid, param.problemID, UPStateExited); err != nil {
 			logrus.Errorln(err.Error())
-			return
+			return nil
 		}
-		if err := redis.SetUPResult(param.uid, param.problemID, string(bys)); err != nil {
-			logrus.Errorln(err.Error())
-			return
-		}
-	} else {
-		res := ResultInCache{
-			Content: "编译失败",
-			Results: []*Result{
-				compileResult,
-			},
-		}
-		bys, err := json.Marshal(&res)
-		if err != nil {
-			logrus.Errorln(err.Error())
-			return
-		}
-		if err := redis.SetUPResult(param.uid, param.problemID, string(bys)); err != nil {
-			logrus.Errorln(err.Error())
-		}
-		return
+		return results
 	}
+	compileResult.Content = "编译成功"
+	results = append(results, *compileResult)
 
-	// 设置题目状态[运行]
+	// 编译成功 => 设置题目状态[判题中]
+	// 运行和判题是协同的步骤，由两个协程去同时进行，通过channel通信
 	param.fileIds = compileResult.FileIds
-	if err := redis.SetUPState(param.uid, param.problemID, UPStateRunning); err != nil {
-		logrus.Errorln(err.Error())
-	}
-	handler.Run(param)
-
-	// 设置题目状态[判题]
 	if err := redis.SetUPState(param.uid, param.problemID, UPStateJudging); err != nil {
 		logrus.Errorln(err.Error())
 	}
-	res, err := handler.Judge(param)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return
-	}
+	wgRun := new(sync.WaitGroup)
+	wgRun.Add(1)
+	ants.AntsPoolInstance.Submit(func() {
+		defer wgRun.Done()
+		handler.run(param)
+	})
+	wgJudge := new(sync.WaitGroup)
+	wgJudge.Add(1)
+	ants.AntsPoolInstance.Submit(func() {
+		defer wgJudge.Done()
+		judgeResults := handler.judge()
+		results = append(results, judgeResults...)
+	})
+
+	wgRun.Wait()
+	// 关闭管道，触发后续goroutine结束
+	close(runResults)
+	wgJudge.Wait()
+
+	return results
 }

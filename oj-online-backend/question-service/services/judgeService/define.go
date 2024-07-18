@@ -29,11 +29,10 @@ type Result struct {
 	Files      map[string]string `json:"files,omitempty"`      // copyOut 和 pipeCollector 指定的文件内容
 	FileIds    map[string]string `json:"fileIds,omitempty"`    // copyFileCached 指定的文件 id
 	FileError  []string          `json:"fileError,omitempty"`  // 文件错误详细信息
-}
 
-type ResultInCache struct {
-	Content string    `json:"content,omitempty"`
-	Results []*Result `json:"results,omitempty"`
+	// 以下字段不属于判题服务的返回字段
+	Content string   `json:"content,omitempty"`
+	Test    TestCase `json:"test,omitempty"`
 }
 
 // 用户状态枚举
@@ -42,11 +41,10 @@ const (
 	UserStateJudging
 )
 
-// 用户提交题目状态枚举
+// “提交”状态枚举，如果没有查询到状态，就意味着最近没有提交题目or题目提交过期了
 const (
-	UPStateNormal    = iota
-	UPStateCompiling // 正在编译
-	UPStateRunning   // 正在运行
-	UPStateJudging   // 正在判题
-	UPStateExited    // 已退出
+	UPStateNormal    = iota // 初始状态
+	UPStateCompiling        // 正在编译
+	UPStateJudging          // 已编译成功，正在判题
+	UPStateExited           // 已退出 -> 如何查询到这个状态，就意味着可以查询结果了
 )

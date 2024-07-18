@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	pb "question-service/api/proto"
@@ -68,7 +69,7 @@ func (receiver ProblemHandler) ProblemSubmit(uid int64, form *models.SubmitForm)
 	}
 	if state != judgeService.UserStateNormal {
 		res.Code = http.StatusBadRequest
-		res.Message = "用户处于判题状态，请等待判题完成"
+		res.Message = "用户处于判题状态，请稍等..."
 		return res
 	}
 
@@ -82,7 +83,17 @@ func (receiver ProblemHandler) ProblemSubmit(uid int64, form *models.SubmitForm)
 
 	// 异步处理：提交到judgeService
 	err = ants.AntsPoolInstance.Submit(func() {
-		judgeService.Handle(uid, form)
+		// 处理结果
+		results := judgeService.Handle(uid, form)
+		data, err := json.Marshal(results)
+		if err != nil {
+			logrus.Errorln(err.Error())
+		} else {
+			// 存储结果
+			if err := redis.SetJudgeResult(uid, form.ProblemID, string(data)); err != nil {
+				logrus.Errorln(err.Error())
+			}
+		}
 	})
 	if err != nil {
 		res.Code = http.StatusInternalServerError

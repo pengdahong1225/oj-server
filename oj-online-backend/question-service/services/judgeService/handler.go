@@ -13,7 +13,7 @@ import (
 type Handler struct {
 }
 
-func (receiver *Handler) Compile(param *Param) (*Result, error) {
+func (receiver *Handler) compile(param *Param) (*Result, error) {
 	// 定义请求的body内容
 	body := map[string]interface{}{
 		"cmd": []map[string]interface{}{
@@ -79,7 +79,7 @@ func (receiver *Handler) Compile(param *Param) (*Result, error) {
 	return result, nil
 }
 
-func (receiver *Handler) Run(param *Param) {
+func (receiver *Handler) run(param *Param) {
 	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 	for _, test := range param.testCases {
@@ -143,19 +143,40 @@ func (receiver *Handler) Run(param *Param) {
 			}
 			logrus.Debugln("Response Status:", resp.Status)
 			logrus.Debugln("Response Body:", string(bodyResp))
+
+			// 将结果放入管道
 			var result Result
 			if err := json.Unmarshal(bodyResp, &result); err != nil {
 				logrus.Errorln("Error unmarshalling JSON:", err)
 				return
 			}
-			// 将结果放入管道
-			runResult <- result
+			result.Test = test
+			runResults <- result
 		})
 	}
 	wg.Wait()
 }
 
-// Judge 判断结果是否满足预期
-func (receiver *Handler) Judge(param *Param) (string, error) {
-	return "", nil
+// 1.检查结果状态，只judge结果状态为Accepted的
+// 2.如果结果状态为其他，不judge直接缓存
+func (receiver *Handler) judge() []Result {
+	var results []Result
+	for runResult := range runResults {
+		if runResult.Status != "Accepted" {
+			runResult.Content = "可执行程序运行错误"
+			results = append(results, runResult)
+			continue
+		}
+		// 判断output是否满足预期
+		// 不满足结果的状态为Wrong Answer，这里需要把本轮的测试用例也缓存起来，这样才知道是哪一个测试用例出错了
+		if runResult.Files["stdout"] != runResult.Test.Output {
+			runResult.Status = "Wrong Answer"
+			runResult.Content = "运行结果错误"
+			results = append(results, runResult)
+		} else {
+			runResult.Content = "运行结果正确"
+			results = append(results, runResult)
+		}
+	}
+	return results
 }

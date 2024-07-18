@@ -88,12 +88,3 @@ func SetKVByHashWithExpire(key string, field string, value string, expire int) e
 	}
 	return nil
 }
-
-func PushValueByList(key string, value string) error {
-	conn := newConn()
-	defer conn.Close()
-	if _, err := conn.Do("RPush", key, value); err != nil {
-		return err
-	}
-	return nil
-}

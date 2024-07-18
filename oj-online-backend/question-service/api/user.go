@@ -70,3 +70,7 @@ func GetUserSolvedList(ctx *gin.Context) {
 	res := internal.GetUserSolvedList(claims.Uid)
 	ctx.JSON(res.Code, res)
 }
+
+func QueryResult(ctx *gin.Context) {
+	
+}
