@@ -55,3 +55,7 @@ func ProblemSubmit(ctx *gin.Context) {
 	res := internal.ProblemHandler{}.ProblemSubmit(claims.Uid, form)
 	ctx.JSON(res.Code, res)
 }
+
+func QueryResult(ctx *gin.Context) {
+
+}
