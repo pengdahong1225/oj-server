@@ -15,7 +15,6 @@ import { checkExpire } from '@/utils/auth'
  * 配置基地址和超时时间
  */
 const instance = axios.create({
-  // baseURL: 'http://smart-shop.itheima.net/index.php?s=/api',
   baseURL: 'http://127.0.0.1:9010',
   timeout: 5000
 })
