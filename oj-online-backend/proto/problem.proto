@@ -14,8 +14,9 @@ message Problem{
   repeated string tags = 7;
   string test_case = 8;
 
-  int32 time_limit = 9;
-  int32 memory_limit = 10;
-  string io_mode = 11;
-  string create_by = 12;
+  int64 cpu_limit = 9;
+  int64 clock_limit = 10;
+  int64 memory_limit = 11;
+  int64 proc_limit = 12;
+  int64 create_by = 13;
 }

@@ -21,3 +21,16 @@ type SubmitForm struct {
 	Lang      string `json:"lang" form:"lang" binding:"required"`
 	Code      string `json:"code" form:"code" binding:"required"`
 }
+
+// AddProblemForm 添加题目表单
+type AddProblemForm struct {
+	Title       string   `json:"title" form:"title" binding:"required"`
+	Level       int32    `json:"level" form:"level" binding:"required"`
+	Tags        []string `json:"tags" form:"tags" binding:"required"`
+	Desc        string   `json:"description" form:"description" binding:"required"`
+	TestCase    string   `json:"testCase" form:"testCase" binding:"required"`
+	CpuLimit    int64    `json:"cpuLimit" form:"cpuLimit" binding:"required"`
+	ClockLimit  int64    `json:"clockLimit" form:"clockLimit" binding:"required"`
+	MemoryLimit int64    `json:"memoryLimit" form:"memoryLimit" binding:"required"`
+	ProcLimit   int64    `json:"procLimit" form:"procLimit" binding:"required"`
+}

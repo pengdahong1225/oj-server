@@ -55,11 +55,11 @@ func QuestionRouters(engine *gin.Engine) {
 }
 
 // CmsRouters cms路由
+// 题目的增删改操作
 func CmsRouters(engine *gin.Engine) {
 	cmsRouter := engine.Group("/cms")
 	// 需要管理员权限
 	cmsRouter.Use(middlewares.AuthLogin()).Use(middlewares.Admin())
-	cmsRouter.GET("/userList", api.GetUserList)
 	cmsRouter.POST("/addQuestion", api.AddQuestion)
 	cmsRouter.POST("/deleteQuestion", api.DeleteQuestion)
 	cmsRouter.POST("/updateQuestion", api.UpdateQuestion)

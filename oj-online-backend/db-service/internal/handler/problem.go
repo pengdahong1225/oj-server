@@ -7,29 +7,18 @@ import (
 	"db-service/services/dao/mysql"
 	"db-service/services/dao/redis"
 	"db-service/utils"
+	"encoding/json"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// GetProblemData
-// 获取题目信息
 func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	db := mysql.DB
 
-	/**
-	select problem.*, user_info.nickname
-	from problem
-	Left JOIN user_info on problem.create_by=user_info.id
-	where problem.id = 1;
-	*/
-	var problemDataResult models.ProblemDataResult
-	// result := db.Where("id = ?", request.Id).Find(&Problem)
-	result := db.Table("problem").
-		Select("problem.*, user_info.nickname").
-		Joins("Left JOIN user_info on problem.create_by=user_info.id").
-		Where("problem.id = ?", request.Id).
-		Scan(&problemDataResult)
+	var problem models.Problem
+	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, QueryField
@@ -39,17 +28,18 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 	}
 
 	data := &pb.Problem{
-		Id:          problemDataResult.ID,
-		CreateAt:    timestamppb.New(problemDataResult.CreateAt),
-		Title:       problemDataResult.Title,
-		Description: problemDataResult.Description,
-		Level:       problemDataResult.Level,
-		Tags:        utils.SplitStringWithX(problemDataResult.Tags, "#"),
-		TestCase:    problemDataResult.TestCase,
-		TimeLimit:   problemDataResult.TimeLimit,
-		MemoryLimit: problemDataResult.MemoryLimit,
-		IoMode:      problemDataResult.IoMode,
-		CreateBy:    problemDataResult.CreateUserNickName,
+		Id:          problem.ID,
+		CreateAt:    timestamppb.New(problem.CreateAt),
+		Title:       problem.Title,
+		Description: problem.Description,
+		Level:       problem.Level,
+		Tags:        utils.SplitStringWithX(problem.Tags, "#"),
+		TestCase:    problem.TestCase,
+		CpuLimit:    problem.CpuLimit,
+		ClockLimit:  problem.ClockLimit,
+		MemoryLimit: problem.MemoryLimit,
+		ProcLimit:   problem.ProcLimit,
+		CreateBy:    problem.CreateBy,
 	}
 	return &pb.GetProblemResponse{
 		Data: data,
@@ -60,10 +50,15 @@ func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request 
 	db := mysql.DB
 	problem := &models.Problem{
 		Title:       request.Data.Title,
-		Description: request.Data.Description,
 		Level:       request.Data.Level,
 		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description: request.Data.Description,
 		TestCase:    request.Data.TestCase,
+		CpuLimit:    request.Data.CpuLimit,
+		ClockLimit:  request.Data.ClockLimit,
+		MemoryLimit: request.Data.MemoryLimit,
+		ProcLimit:   request.Data.ProcLimit,
+		CreateBy:    request.Data.CreateBy,
 	}
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
@@ -80,8 +75,8 @@ func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request 
 		return nil, InsertFailed
 	}
 
-	// 插入成功 -- 将测试案例更新到redis
-	updateTestCases(request.Data.Id, request.Data.TestCase)
+	// 插入成功 -- 将热点数据写到缓存(测试用例，题目配置)
+	cacheProblemHotData(problem)
 
 	return &pb.CreateProblemResponse{
 		Id: problem.ID,
@@ -92,10 +87,15 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 	db := mysql.DB
 	problem := &models.Problem{
 		Title:       request.Data.Title,
-		Description: request.Data.Description,
 		Level:       request.Data.Level,
 		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description: request.Data.Description,
 		TestCase:    request.Data.TestCase,
+		CpuLimit:    request.Data.CpuLimit,
+		ClockLimit:  request.Data.ClockLimit,
+		MemoryLimit: request.Data.MemoryLimit,
+		ProcLimit:   request.Data.ProcLimit,
+		CreateBy:    request.Data.CreateBy,
 	}
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
@@ -112,9 +112,7 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 		logrus.Errorln(result.Error.Error())
 		return nil, UpdateFailed
 	}
-
-	// 更新测试案例
-	updateTestCases(request.Data.Id, request.Data.TestCase)
+	cacheProblemHotData(problem)
 
 	return &empty.Empty{}, nil
 }
@@ -212,15 +210,24 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 	}, nil
 }
 
-// 测试用例要插入到redis
-func updateTestCases(field int64, value string) {
-	var key = "ProblemTestCases"
-	conn := redis.NewConn()
-	defer conn.Close()
-
-	_, err := conn.Do("HSET", key, field, value)
+// 缓存题目热点数据
+func cacheProblemHotData(problem *models.Problem) {
+	data := &models.ProblemHotData{
+		TestCase:    problem.TestCase,
+		ClockLimit:  problem.ClockLimit,
+		CpuLimit:    problem.CpuLimit,
+		MemoryLimit: problem.MemoryLimit,
+		ProcLimit:   problem.ProcLimit,
+		TimeLimit:   problem.TimeLimit,
+	}
+	bys, err := json.Marshal(data)
 	if err != nil {
-		logrus.Errorf("UpdateTestCases error: %s", err.Error())
+		logrus.Errorln(err.Error())
+		return
+	}
+	err = redis.SetKVByHash(fmt.Sprintf("problem:%d", problem.ID), "hotData", string(bys))
+	if err != nil {
+		logrus.Errorln(err.Error())
 		return
 	}
 }

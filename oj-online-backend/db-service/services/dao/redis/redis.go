@@ -32,3 +32,12 @@ func Close() {
 func NewConn() redis.Conn {
 	return pool.Get()
 }
+
+func SetKVByHash(key string, field string, value string) error {
+	conn := NewConn()
+	defer conn.Close()
+	if _, err := conn.Do("HSet", key, field, value); err != nil {
+		return err
+	}
+	return nil
+}

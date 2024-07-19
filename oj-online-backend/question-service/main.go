@@ -6,6 +6,7 @@ import (
 	"question-service/logger"
 	"question-service/routers"
 	ants2 "question-service/services/ants"
+	"question-service/services/judgeService"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
@@ -33,6 +34,7 @@ func AppInit() {
 		panic(err)
 	}
 	ants2.AntsPoolInstance, _ = ants.NewPool(ants.DefaultAntsPoolSize, ants.WithPanicHandler(ants2.AntsPanicHandler))
+	judgeService.Init()
 }
 
 func ServerLoop(port int) {

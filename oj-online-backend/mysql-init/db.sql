@@ -50,12 +50,13 @@ create table if not exists problem
     description TEXT NOT null comment '题目描述',
     test_case TEXT NOT null comment '测试用例', -- json
 
-
     -- 2024/06/16 新增字段
-    time_limit INT DEFAULT 0 comment '时间限制单位毫秒',
-    memory_limit INT DEFAULT 0 comment '内存限制单位MB 1MB = 1024*1024 Byte',
-    io_mode VARCHAR(64) DEFAULT 'Standard IO' comment 'IO模式(Standard IO/File IO)',
-    create_by BIGINT DEFAULT 0 comment '题目创建者ID',
+    cpu_limit BIGINT DEFAULT 0 comment 'CPU时间限制，单位纳秒',
+    clock_limit BIGINT DEFAULT 0 comment '等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）',
+    memory_limit BIGINT DEFAULT 0 comment '内存限制，单位 byte',
+    proc_limit BIGINT DEFAULT 0 comment '线程数量限制',
+
+    create_by BIGINT DEFAULT 0 comment '题目创建者',
 
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;

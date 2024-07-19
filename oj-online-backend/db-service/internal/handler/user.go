@@ -10,10 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type DBServiceServer struct {
-	pb.UnimplementedDBServiceServer
-}
-
 func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
 	db := mysql.DB
 	var user models.UserInfo

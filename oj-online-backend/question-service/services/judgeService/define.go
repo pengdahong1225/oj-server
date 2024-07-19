@@ -1,13 +1,7 @@
 package judgeService
 
-// 部分编译和运行配置
-type CompileConfig struct {
-	CpuLimit    int64 `json:"cpu_limit,omitempty"`    // CPU时间限制，单位纳秒
-	ClockLimit  int64 `json:"clock_limit,omitempty"`  // 等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）
-	MemoryLimit int64 `json:"memory_limit,omitempty"` // 内存限制，单位 byte
-	ProcLimit   int64 `json:"proc_limit,omitempty"`   // 线程数量限制
-}
-type RunConfig struct {
+// JudgeConfig 判题服务的运行参数配置
+type JudgeConfig struct {
 	CpuLimit    int64 `json:"cpu_limit,omitempty"`    // CPU时间限制，单位纳秒
 	ClockLimit  int64 `json:"clock_limit,omitempty"`  // 等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）
 	MemoryLimit int64 `json:"memory_limit,omitempty"` // 内存限制，单位 byte

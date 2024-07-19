@@ -21,14 +21,14 @@ var (
 type Param struct {
 	uid           int64
 	problemID     int64
-	compileConfig *CompileConfig
-	runConfig     *RunConfig
+	compileConfig *JudgeConfig
+	runConfig     *JudgeConfig
 	content       string // 源代码
 	testCases     []TestCase
 	fileIds       map[string]string // 文件id
 }
 
-func init() {
+func Init() {
 	srv, err := settings.GetSystemConf("judge-service")
 	if err != nil {
 		logrus.Fatalln("Error getting system config:", err)
@@ -70,7 +70,7 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	compileConfig := &CompileConfig{}
+	compileConfig := &JudgeConfig{}
 	if err := json.Unmarshal([]byte(compileJson), compileConfig); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
@@ -81,7 +81,7 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	runConfig := &RunConfig{}
+	runConfig := &JudgeConfig{}
 	if err := json.Unmarshal([]byte(runJson), runConfig); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
