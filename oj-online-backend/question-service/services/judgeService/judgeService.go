@@ -75,7 +75,7 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	// 运行配置
+	// 读取热点配置
 	runJson, err := redis.GetProblemRunConfig(form.ProblemID)
 	if err != nil {
 		logrus.Errorln(err.Error())

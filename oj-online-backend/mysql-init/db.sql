@@ -48,13 +48,11 @@ create table if not exists problem
     tags VARCHAR(64) DEFAULT '' comment '题目标签，#做前缀', -- '#数组 #双指针 #哈希表'
 
     description TEXT NOT null comment '题目描述',
-    test_case TEXT NOT null comment '测试用例', -- json
 
-    -- 2024/06/16 新增字段
-    cpu_limit BIGINT DEFAULT 0 comment 'CPU时间限制，单位纳秒',
-    clock_limit BIGINT DEFAULT 0 comment '等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）',
-    memory_limit BIGINT DEFAULT 0 comment '内存限制，单位 byte',
-    proc_limit BIGINT DEFAULT 0 comment '线程数量限制',
+    -- 三项配置文本格式：json
+    test_case TEXT NOT null comment '测试用例',
+    compile_config TEXT NOT null comment '编译配置',
+    run_config TEXT NOT null comment '运行配置',
 
     create_by BIGINT DEFAULT 0 comment '题目创建者',
 
