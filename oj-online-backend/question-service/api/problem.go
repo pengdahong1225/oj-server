@@ -22,7 +22,7 @@ func ProblemSet(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	res := internal.ProblemHandler{}.GetProblemSet(cursor)
+	res := internal.ProblemHandler{}.HandleProblemSet(cursor)
 	ctx.JSON(res.Code, res)
 }
 
@@ -38,11 +38,9 @@ func ProblemDetail(ctx *gin.Context) {
 	}
 
 	ID, _ := strconv.ParseInt(problemID, 10, 64)
-	res := internal.ProblemHandler{}.GetProblemDetail(ID)
+	res := internal.ProblemHandler{}.HandleProblemDetail(ID)
 	ctx.JSON(res.Code, res)
 }
-
-func ProblemSearch(ctx *gin.Context) {}
 
 func ProblemSubmit(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
@@ -52,10 +50,25 @@ func ProblemSubmit(ctx *gin.Context) {
 		return
 	}
 
-	res := internal.ProblemHandler{}.ProblemSubmit(claims.Uid, form)
+	res := internal.ProblemHandler{}.HandleProblemSubmit(claims.Uid, form)
 	ctx.JSON(res.Code, res)
 }
 
+// 查询提交结果
 func QueryResult(ctx *gin.Context) {
-
+	// 查询参数
+	id := ctx.Query("problemID")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数错误",
+		})
+		return
+	}
+	problemID, _ := strconv.ParseInt(id, 10, 64)
+	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	res := internal.ProblemHandler{}.HandleQueryResult(claims.Uid, problemID)
+	ctx.JSON(res.Code, res)
 }
+
+func ProblemSearch(ctx *gin.Context) {}

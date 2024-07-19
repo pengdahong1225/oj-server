@@ -21,8 +21,8 @@ var (
 type Param struct {
 	uid           int64
 	problemID     int64
-	compileConfig *JudgeConfig
-	runConfig     *JudgeConfig
+	compileConfig *ProblemConfig
+	runConfig     *ProblemConfig
 	content       string // 源代码
 	testCases     []TestCase
 	fileIds       map[string]string // 文件id
@@ -42,6 +42,13 @@ func Init() {
 
 // Handle 判题服务入口
 func Handle(uid int64, form *models.SubmitForm) []Result {
+	// 退出之后，需要将状态置为UPStateExited，主要针对异常退出的情况，正常退出会设置状态
+	defer func() {
+		if err := redis.SetUPState(uid, form.ProblemID, UPStateExited); err != nil {
+			logrus.Errorln(err.Error())
+		}
+	}()
+
 	// 设置“提交”状态
 	if err := redis.SetUPState(uid, form.ProblemID, UPStateNormal); err != nil {
 		logrus.Errorln(err.Error())
@@ -64,37 +71,29 @@ func Handle(uid int64, form *models.SubmitForm) []Result {
 func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 	param := &Param{}
 
-	// 编译配置
-	compileJson, err := redis.GetProblemCompileConfig(form.ProblemID)
+	// 读取题目配置
+	data, err := redis.GetProblemHotData(form.ProblemID)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	compileConfig := &JudgeConfig{}
-	if err := json.Unmarshal([]byte(compileJson), compileConfig); err != nil {
+	hotData := &ProblemHotData{}
+	if err := json.Unmarshal([]byte(data), hotData); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	// 读取热点配置
-	runJson, err := redis.GetProblemRunConfig(form.ProblemID)
-	if err != nil {
+	compileConfig := &ProblemConfig{}
+	if err := json.Unmarshal([]byte(hotData.CompileConfig), compileConfig); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	runConfig := &JudgeConfig{}
-	if err := json.Unmarshal([]byte(runJson), runConfig); err != nil {
-		logrus.Errorln(err.Error())
-		return false, nil
-	}
-
-	// 测试用例
-	test, err := redis.GetProblemTest(form.ProblemID)
-	if err != nil {
+	runConfig := &ProblemConfig{}
+	if err := json.Unmarshal([]byte(hotData.RunConfig), runConfig); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
 	var testCases []TestCase
-	if err := json.Unmarshal([]byte(test), &testCases); err != nil {
+	if err := json.Unmarshal([]byte(hotData.TestCase), &testCases); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}

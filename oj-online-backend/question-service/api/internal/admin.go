@@ -34,13 +34,26 @@ func (receiver AdminHandler) HandleAddQuestion(uid int64, form *models.AddProble
 		Level:       form.Level,
 		Tags:        form.Tags,
 		Description: form.Desc,
-		TestCase:    form.TestCase,
-		CpuLimit:    form.CpuLimit,
-		ClockLimit:  form.ClockLimit,
-		MemoryLimit: form.MemoryLimit,
-		ProcLimit:   form.ProcLimit,
 		CreateBy:    uid,
+		CompileConfig: &pb.ProblemConfig{
+			ClockLimit:  form.CompileConfig.ClockLimit,
+			CpuLimit:    form.CompileConfig.CpuLimit,
+			MemoryLimit: form.CompileConfig.MemoryLimit,
+			ProcLimit:   form.CompileConfig.ProcLimit,
+		},
+		RunConfig: &pb.ProblemConfig{
+			ClockLimit:  form.RunConfig.ClockLimit,
+			CpuLimit:    form.RunConfig.CpuLimit,
+			MemoryLimit: form.RunConfig.MemoryLimit,
+			ProcLimit:   form.RunConfig.ProcLimit,
+		},
 	}}
+	for _, test := range form.TestCases {
+		request.Data.TestCases = append(request.Data.TestCases, &pb.TestCase{
+			Input:  test.Input,
+			Output: test.Output,
+		})
+	}
 	response, err := client.CreateProblemData(context.Background(), request)
 	if err != nil {
 		res.Code = http.StatusOK

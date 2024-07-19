@@ -14,51 +14,53 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
-	db := mysql.DB
-
-	var problem models.Problem
-	result := db.Where("id = ?", request.Id).Find(&problem)
-	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
-	}
-	if result.RowsAffected == 0 {
-		return nil, NotFound
-	}
-
-	data := &pb.Problem{
-		Id:          problem.ID,
-		CreateAt:    timestamppb.New(problem.CreateAt),
-		Title:       problem.Title,
-		Description: problem.Description,
-		Level:       problem.Level,
-		Tags:        utils.SplitStringWithX(problem.Tags, "#"),
-		TestCase:    problem.TestCase,
-		CpuLimit:    problem.CpuLimit,
-		ClockLimit:  problem.ClockLimit,
-		MemoryLimit: problem.MemoryLimit,
-		ProcLimit:   problem.ProcLimit,
-		CreateBy:    problem.CreateBy,
-	}
-	return &pb.GetProblemResponse{
-		Data: data,
-	}, nil
-}
-
 func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
 	db := mysql.DB
+
+	compileConfig := models.ProblemConfig{
+		ClockLimit:  request.Data.CompileConfig.ClockLimit,
+		CpuLimit:    request.Data.CompileConfig.CpuLimit,
+		MemoryLimit: request.Data.CompileConfig.MemoryLimit,
+		ProcLimit:   request.Data.CompileConfig.ProcLimit,
+	}
+	runConfig := models.ProblemConfig{
+		ClockLimit:  request.Data.RunConfig.ClockLimit,
+		CpuLimit:    request.Data.RunConfig.CpuLimit,
+		MemoryLimit: request.Data.RunConfig.MemoryLimit,
+		ProcLimit:   request.Data.RunConfig.ProcLimit,
+	}
+	var testCases []models.TestCase
+	for _, test := range request.Data.TestCases {
+		testCases = append(testCases, models.TestCase{
+			Input:  test.Input,
+			Output: test.Output,
+		})
+	}
+	cbys, err := json.Marshal(&compileConfig)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, InsertFailed
+	}
+	rbys, err := json.Marshal(&runConfig)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, InsertFailed
+	}
+	tbys, err := json.Marshal(testCases)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, InsertFailed
+	}
+
 	problem := &models.Problem{
-		Title:       request.Data.Title,
-		Level:       request.Data.Level,
-		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
-		Description: request.Data.Description,
-		TestCase:    request.Data.TestCase,
-		CpuLimit:    request.Data.CpuLimit,
-		ClockLimit:  request.Data.ClockLimit,
-		MemoryLimit: request.Data.MemoryLimit,
-		ProcLimit:   request.Data.ProcLimit,
-		CreateBy:    request.Data.CreateBy,
+		Title:         request.Data.Title,
+		Level:         request.Data.Level,
+		Tags:          utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description:   request.Data.Description,
+		CreateBy:      request.Data.CreateBy,
+		TestCase:      string(tbys),
+		CompileConfig: string(cbys),
+		RunConfig:     string(rbys),
 	}
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
@@ -75,7 +77,7 @@ func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request 
 		return nil, InsertFailed
 	}
 
-	// 插入成功 -- 将热点数据写到缓存(测试用例，题目配置)
+	// 将热点数据写到缓存(测试用例，题目配置)
 	cacheProblemHotData(problem)
 
 	return &pb.CreateProblemResponse{
@@ -83,19 +85,117 @@ func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request 
 	}, nil
 }
 
+func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
+	db := mysql.DB
+
+	var problem models.Problem
+	result := db.Where("id = ?", request.Id).Find(&problem)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, QueryField
+	}
+	if result.RowsAffected == 0 {
+		return nil, NotFound
+	}
+
+	var compileConfig models.ProblemConfig
+	var runConfig models.ProblemConfig
+	var testCases []models.TestCase
+	err := json.Unmarshal([]byte(problem.CompileConfig), &compileConfig)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, QueryField
+	}
+	err = json.Unmarshal([]byte(problem.RunConfig), &runConfig)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, QueryField
+	}
+	err = json.Unmarshal([]byte(problem.TestCase), &testCases)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, QueryField
+	}
+
+	data := &pb.Problem{
+		Id:          problem.ID,
+		CreateAt:    timestamppb.New(problem.CreateAt),
+		Title:       problem.Title,
+		Description: problem.Description,
+		Level:       problem.Level,
+		Tags:        utils.SplitStringWithX(problem.Tags, "#"),
+		CreateBy:    problem.CreateBy,
+		CompileConfig: &pb.ProblemConfig{
+			ClockLimit:  compileConfig.ClockLimit,
+			CpuLimit:    compileConfig.CpuLimit,
+			MemoryLimit: compileConfig.MemoryLimit,
+			ProcLimit:   compileConfig.ProcLimit,
+		},
+		RunConfig: &pb.ProblemConfig{
+			ClockLimit:  runConfig.ClockLimit,
+			CpuLimit:    runConfig.CpuLimit,
+			MemoryLimit: runConfig.MemoryLimit,
+			ProcLimit:   runConfig.ProcLimit,
+		},
+	}
+	for _, test := range testCases {
+		data.TestCases = append(data.TestCases, &pb.TestCase{
+			Input:  test.Input,
+			Output: test.Output,
+		})
+	}
+
+	return &pb.GetProblemResponse{
+		Data: data,
+	}, nil
+}
+
 func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*empty.Empty, error) {
 	db := mysql.DB
+	compileConfig := models.ProblemConfig{
+		ClockLimit:  request.Data.CompileConfig.ClockLimit,
+		CpuLimit:    request.Data.CompileConfig.CpuLimit,
+		MemoryLimit: request.Data.CompileConfig.MemoryLimit,
+		ProcLimit:   request.Data.CompileConfig.ProcLimit,
+	}
+	runConfig := models.ProblemConfig{
+		ClockLimit:  request.Data.RunConfig.ClockLimit,
+		CpuLimit:    request.Data.RunConfig.CpuLimit,
+		MemoryLimit: request.Data.RunConfig.MemoryLimit,
+		ProcLimit:   request.Data.RunConfig.ProcLimit,
+	}
+	var testCases []models.TestCase
+	for _, test := range request.Data.TestCases {
+		testCases = append(testCases, models.TestCase{
+			Input:  test.Input,
+			Output: test.Output,
+		})
+	}
+	cbys, err := json.Marshal(&compileConfig)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, InsertFailed
+	}
+	rbys, err := json.Marshal(&runConfig)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, InsertFailed
+	}
+	tbys, err := json.Marshal(testCases)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, InsertFailed
+	}
+
 	problem := &models.Problem{
-		Title:       request.Data.Title,
-		Level:       request.Data.Level,
-		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
-		Description: request.Data.Description,
-		TestCase:    request.Data.TestCase,
-		CpuLimit:    request.Data.CpuLimit,
-		ClockLimit:  request.Data.ClockLimit,
-		MemoryLimit: request.Data.MemoryLimit,
-		ProcLimit:   request.Data.ProcLimit,
-		CreateBy:    request.Data.CreateBy,
+		Title:         request.Data.Title,
+		Level:         request.Data.Level,
+		Tags:          utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description:   request.Data.Description,
+		CreateBy:      request.Data.CreateBy,
+		TestCase:      string(tbys),
+		CompileConfig: string(cbys),
+		RunConfig:     string(rbys),
 	}
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
@@ -202,7 +302,6 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 			Level:       Problem.Level,
 			Tags:        utils.SplitStringWithX(Problem.Tags, "#"),
 			Description: Problem.Description,
-			TestCase:    Problem.TestCase,
 		})
 	}
 	return &pb.QueryProblemWithNameResponse{
@@ -213,12 +312,9 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 // 缓存题目热点数据
 func cacheProblemHotData(problem *models.Problem) {
 	data := &models.ProblemHotData{
-		TestCase:    problem.TestCase,
-		ClockLimit:  problem.ClockLimit,
-		CpuLimit:    problem.CpuLimit,
-		MemoryLimit: problem.MemoryLimit,
-		ProcLimit:   problem.ProcLimit,
-		TimeLimit:   problem.TimeLimit,
+		TestCase:      problem.TestCase,
+		CompileConfig: problem.CompileConfig,
+		RunConfig:     problem.RunConfig,
 	}
 	bys, err := json.Marshal(data)
 	if err != nil {

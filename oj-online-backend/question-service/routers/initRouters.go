@@ -50,7 +50,7 @@ func QuestionRouters(engine *gin.Engine) {
 		problemRouter.GET("/search", api.ProblemSearch)
 		// 需要登录
 		problemRouter.POST("/submit", middlewares.AuthLogin(), api.ProblemSubmit)
-		problemRouter.GET("/queryResult", api.QueryResult)
+		problemRouter.GET("/queryResult", middlewares.AuthLogin(), api.QueryResult)
 	}
 }
 

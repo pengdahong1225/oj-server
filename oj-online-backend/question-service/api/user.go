@@ -37,7 +37,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	res := internal.ProcessForLogin(form)
+	res := internal.UserHandler{}.HandleLogin(form)
 	ctx.JSON(res.Code, res)
 }
 
@@ -52,12 +52,12 @@ func GetUserProfile(ctx *gin.Context) {
 	}
 
 	uidInt, _ := strconv.ParseInt(uid, 10, 64)
-	res := internal.GetUserProfileByUid(uidInt)
+	res := internal.UserHandler{}.HandleGetUserProfile(uidInt)
 	ctx.JSON(res.Code, res)
 }
 
 func GetRankList(ctx *gin.Context) {
-	res := internal.GetRankList()
+	res := internal.UserHandler{}.HandleGetRankList()
 	ctx.JSON(res.Code, res)
 }
 
@@ -67,6 +67,6 @@ func GetSubmitRecord(ctx *gin.Context) {
 
 func GetUserSolvedList(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := internal.GetUserSolvedList(claims.Uid)
+	res := internal.UserHandler{}.HandleGetUserSolvedList(claims.Uid)
 	ctx.JSON(res.Code, res)
 }

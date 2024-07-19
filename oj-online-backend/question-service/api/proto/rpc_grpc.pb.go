@@ -26,7 +26,7 @@ const (
 	DBService_UpdateUserData_FullMethodName         = "/DBService/UpdateUserData"
 	DBService_DeleteUserData_FullMethodName         = "/DBService/DeleteUserData"
 	DBService_GetUserList_FullMethodName            = "/DBService/GetUserList"
-	DBService_GetUserSolvedList_FullMethodName      = "/DBService/GetUserSolvedList"
+	DBService_GetUserSolvedList_FullMethodName      = "/DBService/HandleGetUserSolvedList"
 	DBService_GetProblemData_FullMethodName         = "/DBService/GetProblemData"
 	DBService_CreateProblemData_FullMethodName      = "/DBService/CreateProblemData"
 	DBService_UpdateProblemData_FullMethodName      = "/DBService/UpdateProblemData"
@@ -250,7 +250,7 @@ func (UnimplementedDBServiceServer) GetUserList(context.Context, *GetUserListReq
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
 }
 func (UnimplementedDBServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserSolvedList not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method HandleGetUserSolvedList not implemented")
 }
 func (UnimplementedDBServiceServer) GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemData not implemented")
@@ -591,7 +591,7 @@ var DBService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DBService_GetUserList_Handler,
 		},
 		{
-			MethodName: "GetUserSolvedList",
+			MethodName: "HandleGetUserSolvedList",
 			Handler:    _DBService_GetUserSolvedList_Handler,
 		},
 		{

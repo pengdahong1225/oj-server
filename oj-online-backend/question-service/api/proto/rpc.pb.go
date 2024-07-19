@@ -1443,7 +1443,7 @@ var file_rpc_proto_depIdxs = []int32{
 	7,  // 13: DBService.UpdateUserData:input_type -> UpdateUserRequest
 	8,  // 14: DBService.DeleteUserData:input_type -> DeleteUserRequest
 	9,  // 15: DBService.GetUserList:input_type -> GetUserListRequest
-	3,  // 16: DBService.GetUserSolvedList:input_type -> GetUserSolvedListRequest
+	3,  // 16: DBService.HandleGetUserSolvedList:input_type -> GetUserSolvedListRequest
 	11, // 17: DBService.GetProblemData:input_type -> GetProblemRequest
 	13, // 18: DBService.CreateProblemData:input_type -> CreateProblemRequest
 	15, // 19: DBService.UpdateProblemData:input_type -> UpdateProblemRequest
@@ -1458,7 +1458,7 @@ var file_rpc_proto_depIdxs = []int32{
 	27, // 28: DBService.UpdateUserData:output_type -> google.protobuf.Empty
 	27, // 29: DBService.DeleteUserData:output_type -> google.protobuf.Empty
 	10, // 30: DBService.GetUserList:output_type -> GetUserListResponse
-	4,  // 31: DBService.GetUserSolvedList:output_type -> GetUserSolvedListResponse
+	4,  // 31: DBService.HandleGetUserSolvedList:output_type -> GetUserSolvedListResponse
 	12, // 32: DBService.GetProblemData:output_type -> GetProblemResponse
 	14, // 33: DBService.CreateProblemData:output_type -> CreateProblemResponse
 	27, // 34: DBService.UpdateProblemData:output_type -> google.protobuf.Empty

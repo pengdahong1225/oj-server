@@ -22,7 +22,10 @@ var (
 	issuer           = "Messi"
 )
 
-func ProcessForLogin(form *models.LoginFrom) *models.Response {
+type UserHandler struct {
+}
+
+func (receiver UserHandler) HandleLogin(form *models.LoginFrom) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -80,7 +83,7 @@ func ProcessForLogin(form *models.LoginFrom) *models.Response {
 	return res
 }
 
-func GetUserProfileByUid(uid int64) *models.Response {
+func (receiver UserHandler) HandleGetUserProfile(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -110,7 +113,7 @@ func GetUserProfileByUid(uid int64) *models.Response {
 	return res
 }
 
-func GetRankList() *models.Response {
+func (receiver UserHandler) HandleGetRankList() *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -148,12 +151,12 @@ func GetRankList() *models.Response {
 	return res
 }
 
-func GetSubmitRecord(userId int64) {
+func (receiver UserHandler) HandleGetSubmitRecord(userId int64) {
 
 }
 
-// GetUserSolvedList 获取用户解决了哪些题目
-func GetUserSolvedList(uid int64) *models.Response {
+// HandleGetUserSolvedList 获取用户解决了哪些题目
+func (receiver UserHandler) HandleGetUserSolvedList(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",

@@ -12,11 +12,21 @@ message Problem{
   string description = 5;
   int32 level = 6;
   repeated string tags = 7;
-  string test_case = 8;
+  int64 create_by = 8;
 
-  int64 cpu_limit = 9;
-  int64 clock_limit = 10;
-  int64 memory_limit = 11;
-  int64 proc_limit = 12;
-  int64 create_by = 13;
+  repeated TestCase test_cases = 9;
+  ProblemConfig compile_config = 10;
+  ProblemConfig run_config = 11;
+}
+
+message TestCase{
+  string input = 1;
+  string output = 2;
+}
+
+message ProblemConfig{
+  int64 cpu_limit = 1;
+  int64 clock_limit = 2;
+  int64 memory_limit = 3;
+  int64 proc_limit = 4;
 }

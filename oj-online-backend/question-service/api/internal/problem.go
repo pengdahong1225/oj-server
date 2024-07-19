@@ -17,7 +17,7 @@ import (
 type ProblemHandler struct {
 }
 
-func (receiver ProblemHandler) GetProblemSet(cursor int) *models.Response {
+func (receiver ProblemHandler) HandleProblemSet(cursor int) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -48,11 +48,11 @@ func (receiver ProblemHandler) GetProblemSet(cursor int) *models.Response {
 	return res
 }
 
-// ProblemSubmit
+// HandleProblemSubmit
 // 判断“用户”是否处于判题状态？true就拒绝
 // 用户提交了题目就立刻返回，并给题目设置状态
 // 客户端通过其他接口轮询题目结果
-func (receiver ProblemHandler) ProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
+func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -111,7 +111,7 @@ func (receiver ProblemHandler) ProblemSubmit(uid int64, form *models.SubmitForm)
 	}
 }
 
-func (receiver ProblemHandler) GetProblemDetail(problemID int64) *models.Response {
+func (receiver ProblemHandler) HandleProblemDetail(problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -141,5 +141,57 @@ func (receiver ProblemHandler) GetProblemDetail(problemID int64) *models.Respons
 	res.Message = "OK"
 	res.Data = response.Data
 
+	return res
+}
+
+// 先查询状态：如果没有查询到，就意味着最近没有提交题目or题目提交过期了
+// 如果是已退出状态，就可以查询结果
+// 如果是：有状态，但是没有结果 -> 被中断，需要查看日志排查
+func (receiver ProblemHandler) HandleQueryResult(uid int64, problemID int64) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+
+	// 查询状态
+	state, err := redis.QueryUPState(uid, problemID)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+	if state < 0 {
+		res.Code = http.StatusOK
+		res.Message = "题目未提交或提交已过期"
+		return res
+	}
+	if state != judgeService.UPStateExited {
+		res.Code = http.StatusOK
+		res.Message = "running"
+		return res
+	}
+
+	// 查询结果
+	r, err := redis.QueryJudgeResult(uid, problemID)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+	// 解析
+	var results []judgeService.Result
+	if err := json.Unmarshal([]byte(r), &results); err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+
+	res.Code = http.StatusOK
+	res.Message = "OK"
+	res.Data = results
 	return res
 }
