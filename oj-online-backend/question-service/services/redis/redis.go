@@ -70,13 +70,23 @@ func SetKVByHash(key string, field string, value string) error {
 	return nil
 }
 
+// 要区分nil和error
 func GetValueByHash(key string, field string) (string, error) {
 	conn := newConn()
 	defer conn.Close()
-	if reply, err := redis.String(conn.Do("HGet", key, field)); err != nil {
+
+	reply, err := conn.Do("HGet", key, field)
+	if err != nil {
+		return "", err
+	}
+	if reply == nil {
+		return "", nil // 不存在
+	}
+
+	if val, err := redis.String(reply, nil); err != nil {
 		return "", err
 	} else {
-		return reply, nil
+		return val, nil
 	}
 }
 

@@ -31,7 +31,7 @@ func GetProblemHotData(problemID int64) (string, error) {
 	conn := newConn()
 	defer conn.Close()
 
-	test, err := GetValueByHash(fmt.Sprintf("%d", problemID), "compile")
+	test, err := GetValueByHash(fmt.Sprintf("%d", problemID), "hotData")
 	if err != nil {
 		return "", err
 	}

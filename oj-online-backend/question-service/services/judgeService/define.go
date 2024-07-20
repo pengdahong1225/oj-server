@@ -37,7 +37,7 @@ type Result struct {
 	Test    TestCase `json:"test,omitempty"`
 }
 
-// 用户状态枚举
+// 用户状态枚举，如果没有查询到，意味着用户最近没有提交过题目
 const (
 	UserStateNormal = iota
 	UserStateJudging
