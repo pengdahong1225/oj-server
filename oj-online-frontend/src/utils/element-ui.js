@@ -7,7 +7,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 import {
   Button, Select, Menu, MenuItem, Table, TableColumn, Autocomplete, Divider, Option, Avatar, Tag,
   Dialog, Form, FormItem, Loading, Message, Descriptions, DescriptionsItem, Card, Icon,
-  Dropdown, DropdownMenu, DropdownItem, Link, Collapse, CollapseItem, Container, Header, Main, Footer
+  Dropdown, DropdownMenu, DropdownItem, Link, Collapse, CollapseItem, Container, Header, Main, Footer,
+  MenuItemGroup, Submenu, Aside
 } from 'element-ui'
 
 Vue.use(Button)
@@ -40,3 +41,6 @@ Vue.use(Container)
 Vue.use(Header)
 Vue.use(Main)
 Vue.use(Footer)
+Vue.use(MenuItemGroup)
+Vue.use(Submenu)
+Vue.use(Aside)

@@ -28,7 +28,7 @@ export default {
 
 <style scoped lang="less">
 .code-block{
-    background-color: #f0f0f0; /* 浅灰色 */
+    background-color: #ffffff; /* 浅灰色 */
     .code{
         color: #495060;
         font-size: 100%;

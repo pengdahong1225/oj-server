@@ -5,24 +5,31 @@ import store from '@/store'
 /**
  * 默认加载
  */
-import Layout from '@/views'
-import Home from '@/views/layout/home'
-import ProblemList from '@/views/layout/problemlist'
-import Rank from '@/views/layout/rank'
+import Layout from '@/views/normal'
+import Home from '@/views/normal/layout/home'
+import ProblemList from '@/views/normal/layout/problemlist'
+import Rank from '@/views/normal/layout/rank'
 
 /**
  * 懒加载 => 异步组件
  */
-const User = () => import('@/views/layout/user')
-const Problem = () => import('@/views/layout/problem')
-const Submission = () => import('@/views/layout/submission')
-const Setting = () => import('@/views/layout/setting')
+const User = () => import('@/views/normal/layout/user')
+const Problem = () => import('@/views/normal/layout/problem')
+const Submission = () => import('@/views/normal/layout/submission')
+const Setting = () => import('@/views/normal/layout/setting')
+
+const AdminLayout = () => import('@/views/admin')
+const AdminHome = () => import('@/views/admin/layout/home')
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
+    redirect: '/normal',
+  },
+  {
+    path: '/normal',
     component: Layout,
     redirect: '/home',
     children: [
@@ -47,9 +54,18 @@ const routes = [
       {
         path: '/setting', component: Setting
       }
+    ],
+  },
+  {
+    path: '/admin',
+    component: AdminLayout,
+    redirect: '/admin/home',
+    children: [
+      {
+        path: '/admin/home', component: AdminHome
+      }
     ]
   },
-
   { path: '*', redirect: '/home' }
 ]
 

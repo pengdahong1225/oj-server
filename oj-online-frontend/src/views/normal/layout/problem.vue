@@ -12,25 +12,13 @@
       <div class="content-box">{{ problemInfo.output }}</div>
 
       <div class="test-case">
-        <div class="in-box">
-          <div class="title-box">Sample-input</div>
-          <input
-            class="content-box"
-            type="text"
-            :value="problemInfo.test.input"
-            readonly
-          />
-        </div>
-
-        <div class="out-box">
-          <div class="title-box">Sample-output</div>
-          <input
-            class="content-box"
-            type="text"
-            :value="problemInfo.test.output"
-            readonly
-          />
-        </div>
+        <TestCase
+          v-for="test in problemInfo.test_cases"
+          :key="test"
+          :input="test.input"
+          :output="test.output"
+        >
+        </TestCase>
       </div>
 
       <div class="Hint-box">
@@ -40,9 +28,7 @@
               <span class="el-collapse-item-title-box"> Hint </span>
             </template>
 
-            <CodeBlock
-              :code="problemInfo.code"
-            ></CodeBlock>
+            <CodeBlock :code="problemInfo.code"></CodeBlock>
           </el-collapse-item>
         </el-collapse>
       </div>
@@ -57,18 +43,21 @@
     </div>
 
     <div class="information-container">
-      <el-descriptions title="Information" :column=1>
+      <el-descriptions title="Information" :column="1">
         <el-descriptions-item label="ID">{{
           problemInfo.id
         }}</el-descriptions-item>
-        <el-descriptions-item label="Time Limit"
-          >{{ problemInfo.time_limit }} MS</el-descriptions-item
+        <el-descriptions-item label="Cpu Limit"
+          >{{ problemInfo.run_config.cpu_limit }} ns</el-descriptions-item
+        >
+        <el-descriptions-item label="Clock Limit"
+          >{{ problemInfo.run_config.clock_limit }} ns</el-descriptions-item
         >
         <el-descriptions-item label="Memory Limit"
-          >{{ problemInfo.memory_limit }} MB</el-descriptions-item
+          >{{ problemInfo.run_config.memory_limit }} byte</el-descriptions-item
         >
-        <el-descriptions-item label="IO Mode">{{
-          problemInfo.io_mode
+        <el-descriptions-item label="Proc Limit">{{
+          problemInfo.run_config.proc_limit
         }}</el-descriptions-item>
         <el-descriptions-item label="Create By">{{
           problemInfo.create_by
@@ -76,6 +65,9 @@
         <el-descriptions-item label="Level">
           {{ problemInfo.level }}
         </el-descriptions-item>
+        <el-descriptions-item label="Tags">{{
+          problemInfo.tags
+        }}</el-descriptions-item>
       </el-descriptions>
     </div>
   </div>
@@ -85,57 +77,58 @@
 import CodeEditor from '@/components/codeEditor.vue'
 import CodeBlock from '@/components/codeBlock.vue'
 import { getProblemDetail, submitCode } from '@/api/problem'
+import TestCase from '@/components/testCase.vue'
 
 export default {
   name: 'ProblemPage',
   components: {
     CodeEditor,
-    CodeBlock
+    CodeBlock,
+    TestCase,
   },
-  data () {
+  data() {
     return {
       problemInfo: {
         id: Number,
         create_at: '',
-        create_by: '',
-        io_mode: '',
-        memory_limit: Number,
-        time_limit: Number,
+        create_by: Number,
         problem_title: '',
         level: '',
+        tags: [],
         description: '',
         input: '',
         output: '',
-        test: {
-          input: '',
-          output: ''
-        },
-        code: 'printf("%d\\n", a+b);'
+        test_cases: [
+          {
+            input: '',
+            output: '',
+          },
+        ],
+        compile_config: {},
+        run_config: {},
+        code: '',
       },
       activeLang: 'c_cpp',
       languages: [
         { value: 'c_cpp', label: 'c_cpp', disabled: false },
         { value: 'Java', label: 'Java', disabled: true },
         { value: 'Python', label: 'Python', disabled: true },
-        { value: 'Golang', label: 'Golang', disabled: false }
-      ]
+        { value: 'Golang', label: 'Golang', disabled: false },
+      ],
     }
   },
-  created () {
+  created() {
     // 拉取题目详细数据
     this.getProblemDetail(this.$route.params.id)
   },
   methods: {
-    async getProblemDetail (id) {
+    async getProblemDetail(id) {
       const { data } = await getProblemDetail(id)
-
+      // 题目基础信息
       this.problemInfo.id = data.id
       this.problemInfo.create_at = data.create_at
-      this.problemInfo.create_by = data.create_by
+      this.problemInfo.create_by = data.create_by ? data.create_by : 0
       this.problemInfo.problem_title = data.title
-      this.problemInfo.io_mode = data.io_mode
-      this.problemInfo.time_limit = data.time_limit
-      this.problemInfo.memory_limit = data.memory_limit
       switch (data.level) {
         case 1:
           this.problemInfo.level = '简单'
@@ -150,24 +143,20 @@ export default {
           this.problemInfo.level = '困难'
           break
       }
-
-      const des = JSON.parse(data.description)
-      this.problemInfo.description = des.Description
-      this.problemInfo.input = des.Input
-      this.problemInfo.output = des.Output
-
-      const testCast = JSON.parse(data.test_case)
-      this.problemInfo.test.input = testCast.input[0]
-        ? testCast.input[0].content
-        : ''
-      this.problemInfo.test.output = testCast.output[0]
-        ? testCast.output[0].content
-        : ''
+      this.problemInfo.tags = data.tags
+      const desc = JSON.parse(data.description)
+      this.problemInfo.description = desc.Description
+      this.problemInfo.input = desc.Input
+      this.problemInfo.output = desc.Output
+      // 配置
+      this.problemInfo.test_cases = data.test_cases
+      this.problemInfo.compile_config = data.compile_config
+      this.problemInfo.run_config = data.run_config
     },
-    async submitHandler () {
+    async submitHandler() {
       const submitData = this.$refs.codeEditor.getValue()
       if (submitData === '') {
-        this.$message.error('请写入代码')
+        this.$message.error('请编写代码')
         return
       }
       console.log(submitData)
@@ -177,18 +166,18 @@ export default {
         problem_id: this.problemInfo.id,
         title: this.problemInfo.problem_title,
         lang: lang,
-        code: submitData
-      }).catch(err => {
+        code: submitData,
+      }).catch((err) => {
         console.log(err)
       })
 
       console.log(res)
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 @main-width: 85%; // 主容器宽度
 @info-width: 15%; // 信息容器宽度
 @gap: 20px;
@@ -230,27 +219,9 @@ export default {
       font-weight: 400;
     }
 
-    .test-case {
+    .test-case-title-box {
       display: flex;
       width: 90%;
-      .in-box {
-        width: 50%;
-        .content-box{
-          height: 25px;
-          font-size: 15px;
-        }
-      }
-      .out-box {
-        width: 50%;
-        .content-box{
-          height: 25px;
-          font-size: 15px;
-        }
-      }
-      .content-box {
-        width: 80%;
-        border: 1px solid rgba(143, 143, 143, 0.5);
-      }
     }
   }
   .information-container {
