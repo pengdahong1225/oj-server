@@ -22,7 +22,9 @@ service DBService{
   rpc DeleteProblemData(DeleteProblemRequest) returns(google.protobuf.Empty);
   rpc GetProblemList(GetProblemListRequest) returns(GetProblemListResponse);
   rpc QueryProblemWithName(QueryProblemWithNameRequest) returns(QueryProblemWithNameResponse);
+  rpc GetProblemHotData(GetProblemHotDataRequest) returns(GetProblemHotDataResponse);
 
+  // record
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
   rpc UpdateUserSubmitRecord(UpdateUserSubmitRecordRequest) returns(google.protobuf.Empty);
 }
@@ -122,8 +124,15 @@ message QueryProblemWithNameResponse{
 
 message UpdateUserSubmitRecordRequest{
   int64 user_id = 1;
-  int64 Problem_id = 2;
+  int64 problem_id = 2;
   string code = 3;
   string result = 4;
   string lang = 5;
+}
+
+message GetProblemHotDataRequest{
+  int64 problem_id = 1;
+}
+message GetProblemHotDataResponse{
+  string data = 1;
 }

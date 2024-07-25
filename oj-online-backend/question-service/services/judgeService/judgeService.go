@@ -1,12 +1,15 @@
 package judgeService
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	pb "question-service/api/proto"
 	"question-service/models"
 	"question-service/services/ants"
 	"question-service/services/redis"
+	"question-service/services/registry"
 	"question-service/settings"
 	"sync"
 	"time"
@@ -72,16 +75,7 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 	param := &Param{}
 
 	// 读取题目配置
-	data, err := redis.GetProblemHotData(form.ProblemID)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return false, nil
-	}
-	hotData := &ProblemHotData{}
-	if err := json.Unmarshal([]byte(data), hotData); err != nil {
-		logrus.Errorln(err.Error())
-		return false, nil
-	}
+	hotData := getProblemHotData(form.ProblemID)
 	compileConfig := &ProblemConfig{}
 	if err := json.Unmarshal([]byte(hotData.CompileConfig), compileConfig); err != nil {
 		logrus.Errorln(err.Error())
@@ -164,4 +158,41 @@ func doAction(param *Param) []Result {
 	wgJudge.Wait()
 
 	return results
+}
+
+// 获取题目热点数据
+// cache中获取失败就去db获取
+func getProblemHotData(ProblemID int64) *ProblemHotData {
+	// cache
+	data, err := redis.GetProblemHotData(ProblemID)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil
+	}
+	if data == "" {
+		// db
+		dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+		if err != nil {
+			logrus.Errorf("db服连接失败:%s\n", err.Error())
+			return nil
+		}
+		defer dbConn.Close()
+		client := pb.NewDBServiceClient(dbConn)
+		request := &pb.GetProblemHotDataRequest{
+			ProblemId: ProblemID,
+		}
+		res, err := client.GetProblemHotData(context.Background(), request)
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return nil
+		}
+		data = res.Data
+	}
+
+	hotData := &ProblemHotData{}
+	if err := json.Unmarshal([]byte(data), hotData); err != nil {
+		logrus.Errorln(err.Error())
+		return nil
+	}
+	return hotData
 }

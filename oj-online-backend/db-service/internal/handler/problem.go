@@ -282,7 +282,7 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
 	db := mysql.DB
 	var problemList []models.Problem
-	// select * from Problem
+	// select * from problem
 	// where title like '%name%';
 	names := "%" + request.Name + "%"
 	result := db.Where("name LINK ?", names).Find(&problemList)
@@ -309,8 +309,31 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 	}, nil
 }
 
+// GetProblemHotData 读取题目热点数据
+// 获取后更新到缓存
+func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
+	db := mysql.DB
+	var problem models.Problem
+	// select test_case, compile_config, run_config
+	// from problem
+	// where id = ?
+	result := db.Where("id = ?", request.ProblemId).Find(&problem)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, QueryField
+	}
+	if result.RowsAffected == 0 {
+		return nil, NotFound
+	}
+
+	str := cacheProblemHotData(&problem)
+
+	response := &pb.GetProblemHotDataResponse{Data: str}
+	return response, nil
+}
+
 // 缓存题目热点数据
-func cacheProblemHotData(problem *models.Problem) {
+func cacheProblemHotData(problem *models.Problem) string {
 	data := &models.ProblemHotData{
 		TestCase:      problem.TestCase,
 		CompileConfig: problem.CompileConfig,
@@ -319,11 +342,12 @@ func cacheProblemHotData(problem *models.Problem) {
 	bys, err := json.Marshal(data)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return
+		return ""
 	}
 	err = redis.SetKVByHash(fmt.Sprintf("problem:%d", problem.ID), "hotData", string(bys))
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return
+		return ""
 	}
+	return string(bys)
 }
