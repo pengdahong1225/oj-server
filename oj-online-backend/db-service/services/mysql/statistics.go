@@ -1,4 +1,4 @@
-package models
+package mysql
 
 import "time"
 
@@ -19,23 +19,4 @@ type Statistics struct {
 
 func (Statistics) TableName() string {
 	return "user_problem_statistics"
-}
-
-type SubMitRecord struct {
-	ID        int64     `gorm:"<-:false;primary_key;autoIncrement;column:id" json:"id"`
-	CreateAt  time.Time `gorm:"<-:false;column:create_at" json:"createAt"`
-	DeletedAt time.Time `gorm:"<-:false;column:delete_at" json:"deleteAt"`
-
-	Uid       int64  `gorm:"column:uid" json:"uid"`
-	ProblemID int64  `gorm:"column:problem_id" json:"problem_id"`
-	Code      string `gorm:"column:code" json:"code"`
-	Result    string `gorm:"column:result" json:"result"`
-	Lang      string `gorm:"column:lang" json:"lang"`
-
-	User    UserInfo `gorm:"foreignKey:Uid;references:id" json:"userInfo"`
-	Problem Problem  `gorm:"foreignKey:ProblemID;references:id" json:"problem"`
-}
-
-func (SubMitRecord) TableName() string {
-	return "user_submit_record"
 }

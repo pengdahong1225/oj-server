@@ -2,17 +2,16 @@ package handler
 
 import (
 	"context"
-	"db-service/internal/models"
 	pb "db-service/internal/proto"
-	"db-service/services/dao/mysql"
+	mysql2 "db-service/services/mysql"
 	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 )
 
 func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
-	db := mysql.DB
-	var user models.UserInfo
+	db := mysql2.DB
+	var user mysql2.UserInfo
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -38,8 +37,8 @@ func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, reques
 }
 
 func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
-	db := mysql.DB
-	var user models.UserInfo
+	db := mysql2.DB
+	var user mysql2.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -65,8 +64,8 @@ func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *
 }
 
 func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	db := mysql.DB
-	var user models.UserInfo
+	db := mysql2.DB
+	var user mysql2.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile)
 	if result.RowsAffected > 0 {
 		return nil, AlreadyExists
@@ -92,8 +91,8 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
-	db := mysql.DB
-	var user models.UserInfo
+	db := mysql2.DB
+	var user mysql2.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -119,8 +118,8 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
-	db := mysql.DB
-	var user models.UserInfo
+	db := mysql2.DB
+	var user mysql2.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -182,8 +181,8 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 
 // GetUserSolvedList 查询用户哪些题目
 func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
-	db := mysql.DB
-	var userSolutionList []models.UserSolution
+	db := mysql2.DB
+	var userSolutionList []mysql2.UserSolution
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())

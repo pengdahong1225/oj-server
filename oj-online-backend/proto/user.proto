@@ -6,8 +6,8 @@ import "google/protobuf/timestamp.proto";
 // 用户基本数据
 message UserInfo{
   int64 uid = 1;
-  google.protobuf.Timestamp create_at = 2;
-  google.protobuf.Timestamp delete_at = 3;
+  int64 create_at = 2;
+  int64 delete_at = 3;
 
   int64 mobile = 4;
   string nickname = 5;
@@ -34,5 +34,5 @@ message UserSubmitRecord{
   string code = 3;
   string result = 4;
   string lang = 5;
-  google.protobuf.Timestamp submit_time = 6;
+  int64 stamp = 6;
 }

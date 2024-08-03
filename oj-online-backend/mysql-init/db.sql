@@ -57,7 +57,7 @@ create table if not exists problem
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;
 
--- 用户提交记录表，在线运行不用记录，提交代码需要记录
+-- 用户提交记录表
 create table if not exists user_submit_record
 (
     id BIGINT AUTO_INCREMENT,
@@ -67,7 +67,7 @@ create table if not exists user_submit_record
     uid BIGINT not null,
     problem_id BIGINT not null,
     code TEXT NOT null comment '提交的代码',
-    result TEXT NOT null comment '运行结果', -- json
+    result TEXT NOT null comment '运行结果集', -- json
     lang VARCHAR(64) DEFAULT '' comment '语言',
 
     PRIMARY KEY(id),

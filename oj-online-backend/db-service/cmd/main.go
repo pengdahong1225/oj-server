@@ -2,10 +2,10 @@ package main
 
 import (
 	"db-service/internal"
-	"db-service/logger"
 	ants2 "db-service/services/ants"
-	"db-service/services/dao/mysql"
-	"db-service/services/dao/redis"
+	"db-service/services/logger"
+	"db-service/services/mysql"
+	"db-service/services/redis"
 	"db-service/services/registry"
 	"db-service/settings"
 	"db-service/utils"

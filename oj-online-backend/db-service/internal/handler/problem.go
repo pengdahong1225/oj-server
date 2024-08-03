@@ -2,10 +2,9 @@ package handler
 
 import (
 	"context"
-	"db-service/internal/models"
 	pb "db-service/internal/proto"
-	"db-service/services/dao/mysql"
-	"db-service/services/dao/redis"
+	mysql2 "db-service/services/mysql"
+	"db-service/services/redis"
 	"db-service/utils"
 	"encoding/json"
 	"fmt"
@@ -15,23 +14,23 @@ import (
 )
 
 func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
-	db := mysql.DB
+	db := mysql2.DB
 
-	compileConfig := models.ProblemConfig{
+	compileConfig := mysql2.ProblemConfig{
 		ClockLimit:  request.Data.CompileConfig.ClockLimit,
 		CpuLimit:    request.Data.CompileConfig.CpuLimit,
 		MemoryLimit: request.Data.CompileConfig.MemoryLimit,
 		ProcLimit:   request.Data.CompileConfig.ProcLimit,
 	}
-	runConfig := models.ProblemConfig{
+	runConfig := mysql2.ProblemConfig{
 		ClockLimit:  request.Data.RunConfig.ClockLimit,
 		CpuLimit:    request.Data.RunConfig.CpuLimit,
 		MemoryLimit: request.Data.RunConfig.MemoryLimit,
 		ProcLimit:   request.Data.RunConfig.ProcLimit,
 	}
-	var testCases []models.TestCase
+	var testCases []mysql2.TestCase
 	for _, test := range request.Data.TestCases {
-		testCases = append(testCases, models.TestCase{
+		testCases = append(testCases, mysql2.TestCase{
 			Input:  test.Input,
 			Output: test.Output,
 		})
@@ -52,7 +51,7 @@ func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request 
 		return nil, InsertFailed
 	}
 
-	problem := &models.Problem{
+	problem := &mysql2.Problem{
 		Title:         request.Data.Title,
 		Level:         request.Data.Level,
 		Tags:          utils.SpliceStringWithX(request.Data.Tags, "#"),
@@ -86,9 +85,9 @@ func (receiver *DBServiceServer) CreateProblemData(ctx context.Context, request 
 }
 
 func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
-	db := mysql.DB
+	db := mysql2.DB
 
-	var problem models.Problem
+	var problem mysql2.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -98,9 +97,9 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 		return nil, NotFound
 	}
 
-	var compileConfig models.ProblemConfig
-	var runConfig models.ProblemConfig
-	var testCases []models.TestCase
+	var compileConfig mysql2.ProblemConfig
+	var runConfig mysql2.ProblemConfig
+	var testCases []mysql2.TestCase
 	err := json.Unmarshal([]byte(problem.CompileConfig), &compileConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
@@ -151,22 +150,22 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*empty.Empty, error) {
-	db := mysql.DB
-	compileConfig := models.ProblemConfig{
+	db := mysql2.DB
+	compileConfig := mysql2.ProblemConfig{
 		ClockLimit:  request.Data.CompileConfig.ClockLimit,
 		CpuLimit:    request.Data.CompileConfig.CpuLimit,
 		MemoryLimit: request.Data.CompileConfig.MemoryLimit,
 		ProcLimit:   request.Data.CompileConfig.ProcLimit,
 	}
-	runConfig := models.ProblemConfig{
+	runConfig := mysql2.ProblemConfig{
 		ClockLimit:  request.Data.RunConfig.ClockLimit,
 		CpuLimit:    request.Data.RunConfig.CpuLimit,
 		MemoryLimit: request.Data.RunConfig.MemoryLimit,
 		ProcLimit:   request.Data.RunConfig.ProcLimit,
 	}
-	var testCases []models.TestCase
+	var testCases []mysql2.TestCase
 	for _, test := range request.Data.TestCases {
-		testCases = append(testCases, models.TestCase{
+		testCases = append(testCases, mysql2.TestCase{
 			Input:  test.Input,
 			Output: test.Output,
 		})
@@ -187,7 +186,7 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 		return nil, InsertFailed
 	}
 
-	problem := &models.Problem{
+	problem := &mysql2.Problem{
 		Title:         request.Data.Title,
 		Level:         request.Data.Level,
 		Tags:          utils.SpliceStringWithX(request.Data.Tags, "#"),
@@ -218,8 +217,8 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 }
 
 func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request *pb.DeleteProblemRequest) (*empty.Empty, error) {
-	db := mysql.DB
-	var problem *models.Problem
+	db := mysql2.DB
+	var problem *mysql2.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -243,11 +242,11 @@ func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request 
 // GetProblemList 题库列表
 // 游标分页，查询id，title，level，tags
 func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
-	db := mysql.DB
+	db := mysql2.DB
 	var pageSize = 10
 	rsp := &pb.GetProblemListResponse{}
 
-	var problemList []models.Problem
+	var problemList []mysql2.Problem
 	var count int64 = 0
 	result := db.Model(problemList).Count(&count)
 	if result.Error != nil {
@@ -280,8 +279,8 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 // QueryProblemWithName 根据题目名查询题目
 // 模糊查询
 func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
-	db := mysql.DB
-	var problemList []models.Problem
+	db := mysql2.DB
+	var problemList []mysql2.Problem
 	// select * from problem
 	// where title like '%name%';
 	names := "%" + request.Name + "%"
@@ -312,8 +311,8 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 // GetProblemHotData 读取题目热点数据
 // 获取后更新到缓存
 func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
-	db := mysql.DB
-	var problem models.Problem
+	db := mysql2.DB
+	var problem mysql2.Problem
 	// select test_case, compile_config, run_config
 	// from problem
 	// where id = ?
@@ -333,8 +332,8 @@ func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request 
 }
 
 // 缓存题目热点数据
-func cacheProblemHotData(problem *models.Problem) string {
-	data := &models.ProblemHotData{
+func cacheProblemHotData(problem *mysql2.Problem) string {
+	data := &mysql2.ProblemHotData{
 		TestCase:      problem.TestCase,
 		CompileConfig: problem.CompileConfig,
 		RunConfig:     problem.RunConfig,

@@ -1,9 +1,8 @@
 package daemon
 
 import (
-	"db-service/internal/models"
-	"db-service/services/dao/mysql"
-	"db-service/services/dao/redis"
+	mysql2 "db-service/services/mysql"
+	"db-service/services/redis"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -31,8 +30,8 @@ func (receiver Daemon) loopRank() {
 	conn := redis.NewConn()
 	defer conn.Close()
 
-	db := mysql.DB
-	var orderList []models.Statistics
+	db := mysql2.DB
+	var orderList []mysql2.Statistics
 
 	/**
 	SELECT

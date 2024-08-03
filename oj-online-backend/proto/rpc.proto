@@ -26,7 +26,7 @@ service DBService{
 
   // record
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
-  rpc UpdateUserSubmitRecord(UpdateUserSubmitRecordRequest) returns(google.protobuf.Empty);
+  rpc CreateUserSubmitRecord(CreateUserSubmitRecordRequest) returns(google.protobuf.Empty);
 }
 
 // 获取用户信息
@@ -110,6 +110,7 @@ message GetProblemListResponse{
 
 message GetUserSubmitRecordRequest{
   int64 user_id = 1;
+  int64 stamp = 2;
 }
 message GetUserSubmitRecordResponse{
   repeated UserSubmitRecord data = 1;
@@ -122,12 +123,13 @@ message QueryProblemWithNameResponse{
   repeated Problem data = 1;
 }
 
-message UpdateUserSubmitRecordRequest{
+message CreateUserSubmitRecordRequest{
   int64 user_id = 1;
   int64 problem_id = 2;
   string code = 3;
   string result = 4;
   string lang = 5;
+  int64 stamp = 6;
 }
 
 message GetProblemHotDataRequest{
