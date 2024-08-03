@@ -3,8 +3,8 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/api/internal"
-	"question-service/middlewares"
+	"question-service/internal/api/handler"
+	"question-service/internal/middlewares"
 	"question-service/models"
 	"question-service/services/captcha"
 	"regexp"
@@ -37,7 +37,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	res := internal.UserHandler{}.HandleLogin(form)
+	res := handler.UserHandler{}.HandleLogin(form)
 	ctx.JSON(res.Code, res)
 }
 
@@ -52,21 +52,32 @@ func GetUserProfile(ctx *gin.Context) {
 	}
 
 	uidInt, _ := strconv.ParseInt(uid, 10, 64)
-	res := internal.UserHandler{}.HandleGetUserProfile(uidInt)
+	res := handler.UserHandler{}.HandleGetUserProfile(uidInt)
 	ctx.JSON(res.Code, res)
 }
 
 func GetRankList(ctx *gin.Context) {
-	res := internal.UserHandler{}.HandleGetRankList()
+	res := handler.UserHandler{}.HandleGetRankList()
 	ctx.JSON(res.Code, res)
 }
 
 func GetSubmitRecord(ctx *gin.Context) {
-
+	t, ok := ctx.GetQuery("stamp")
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数错误",
+		})
+		return
+	}
+	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	stamp, _ := strconv.ParseInt(t, 10, 64)
+	res := handler.UserHandler{}.HandleGetSubmitRecord(claims.Uid, stamp)
+	ctx.JSON(res.Code, res)
 }
 
 func GetUserSolvedList(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := internal.UserHandler{}.HandleGetUserSolvedList(claims.Uid)
+	res := handler.UserHandler{}.HandleGetUserSolvedList(claims.Uid)
 	ctx.JSON(res.Code, res)
 }

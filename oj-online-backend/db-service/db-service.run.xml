@@ -3,8 +3,8 @@
     <module name="oj-online-backend" />
     <working_directory value="$PROJECT_DIR$/db-service" />
     <kind value="DIRECTORY" />
-    <package value="db-service" />
-    <directory value="$PROJECT_DIR$/db-service" />
+    <package value="D:\Codes\Oj-Online-Server\oj-online-backend\db-service" />
+    <directory value="$PROJECT_DIR$/db-service/cmd" />
     <filePath value="$PROJECT_DIR$" />
     <output_directory value="$PROJECT_DIR$/db-service/bin" />
     <option name="run" value="false" />

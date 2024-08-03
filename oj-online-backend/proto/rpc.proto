@@ -17,8 +17,7 @@ service DBService{
 
   // problem接口
   rpc GetProblemData(GetProblemRequest) returns(GetProblemResponse);
-  rpc CreateProblemData(CreateProblemRequest) returns(CreateProblemResponse);
-  rpc UpdateProblemData(UpdateProblemRequest) returns(google.protobuf.Empty);
+  rpc UpdateProblemData(UpdateProblemRequest) returns(UpdateProblemResponse);
   rpc DeleteProblemData(DeleteProblemRequest) returns(google.protobuf.Empty);
   rpc GetProblemList(GetProblemListRequest) returns(GetProblemListResponse);
   rpc QueryProblemWithName(QueryProblemWithNameRequest) returns(QueryProblemWithNameResponse);
@@ -83,16 +82,13 @@ message GetProblemResponse{
   Problem data = 1;
 }
 
-message CreateProblemRequest{
-  Problem data = 1;
-}
-message CreateProblemResponse{
-  int64 id = 1;
-}
-
 message UpdateProblemRequest{
   Problem data = 1;
 }
+message UpdateProblemResponse{
+  int64 id = 1;
+}
+
 message DeleteProblemRequest{
   int64 id = 1;
 }

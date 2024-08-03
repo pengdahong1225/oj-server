@@ -1,11 +1,11 @@
-package internal
+package handler
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	pb "question-service/api/proto"
+	"question-service/internal/proto"
 	"question-service/models"
 	"question-service/services/ants"
 	"question-service/services/judgeService"
@@ -193,5 +193,34 @@ func (receiver ProblemHandler) HandleQueryResult(uid int64, problemID int64) *mo
 	res.Code = http.StatusOK
 	res.Message = "OK"
 	res.Data = results
+	return res
+}
+
+func (receiver ProblemHandler) HandleProblemSearch(name string) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+
+	client := pb.NewDBServiceClient(dbConn)
+	response, err := client.QueryProblemWithName(context.Background(), &pb.QueryProblemWithNameRequest{Name: name})
+	if err != nil {
+		res.Code = http.StatusOK
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+	res.Message = "OK"
+	res.Data = response.Data
 	return res
 }

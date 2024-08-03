@@ -3,8 +3,8 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"question-service/api"
-	"question-service/middlewares"
+	"question-service/internal/api"
+	"question-service/internal/middlewares"
 	"time"
 )
 
@@ -60,7 +60,6 @@ func CmsRouters(engine *gin.Engine) {
 	cmsRouter := engine.Group("/cms")
 	// 需要管理员权限
 	cmsRouter.Use(middlewares.AuthLogin()).Use(middlewares.Admin())
-	cmsRouter.POST("/addQuestion", api.AddQuestion)
-	cmsRouter.POST("/deleteQuestion", api.DeleteQuestion)
 	cmsRouter.POST("/updateQuestion", api.UpdateQuestion)
+	cmsRouter.POST("/deleteQuestion", api.DeleteQuestion)
 }

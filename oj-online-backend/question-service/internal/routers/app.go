@@ -3,7 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"os"
-	"question-service/middlewares"
+	"question-service/internal/middlewares"
 )
 
 func Router() *gin.Engine {

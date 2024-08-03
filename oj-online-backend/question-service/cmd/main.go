@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/panjf2000/ants/v2"
-	"question-service/logger"
-	"question-service/routers"
+	"question-service/internal/routers"
 	ants2 "question-service/services/ants"
 	"question-service/services/judgeService"
+	"question-service/services/logger"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"

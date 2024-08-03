@@ -2,8 +2,8 @@ package api
 
 import (
 	"net/http"
-	"question-service/api/internal"
-	"question-service/middlewares"
+	"question-service/internal/api/handler"
+	"question-service/internal/middlewares"
 	"question-service/models"
 	"strconv"
 
@@ -22,7 +22,7 @@ func ProblemSet(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	res := internal.ProblemHandler{}.HandleProblemSet(cursor)
+	res := handler.ProblemHandler{}.HandleProblemSet(cursor)
 	ctx.JSON(res.Code, res)
 }
 
@@ -38,7 +38,7 @@ func ProblemDetail(ctx *gin.Context) {
 	}
 
 	ID, _ := strconv.ParseInt(problemID, 10, 64)
-	res := internal.ProblemHandler{}.HandleProblemDetail(ID)
+	res := handler.ProblemHandler{}.HandleProblemDetail(ID)
 	ctx.JSON(res.Code, res)
 }
 
@@ -50,7 +50,7 @@ func ProblemSubmit(ctx *gin.Context) {
 		return
 	}
 
-	res := internal.ProblemHandler{}.HandleProblemSubmit(claims.Uid, form)
+	res := handler.ProblemHandler{}.HandleProblemSubmit(claims.Uid, form)
 	ctx.JSON(res.Code, res)
 }
 
@@ -67,8 +67,19 @@ func QueryResult(ctx *gin.Context) {
 	}
 	problemID, _ := strconv.ParseInt(id, 10, 64)
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := internal.ProblemHandler{}.HandleQueryResult(claims.Uid, problemID)
+	res := handler.ProblemHandler{}.HandleQueryResult(claims.Uid, problemID)
 	ctx.JSON(res.Code, res)
 }
 
-func ProblemSearch(ctx *gin.Context) {}
+func ProblemSearch(ctx *gin.Context) {
+	name := ctx.Query("name")
+	if name == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数错误",
+		})
+		return
+	}
+	res := handler.ProblemHandler{}.HandleProblemSearch(name)
+	ctx.JSON(res.Code, res)
+}

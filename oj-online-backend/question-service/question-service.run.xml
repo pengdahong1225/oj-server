@@ -4,7 +4,7 @@
     <working_directory value="$PROJECT_DIR$/question-service" />
     <kind value="DIRECTORY" />
     <package value="question-service" />
-    <directory value="$PROJECT_DIR$/question-service" />
+    <directory value="$PROJECT_DIR$/question-service/cmd" />
     <filePath value="$PROJECT_DIR$" />
     <output_directory value="$PROJECT_DIR$/question-service/bin" />
     <option name="run" value="false" />

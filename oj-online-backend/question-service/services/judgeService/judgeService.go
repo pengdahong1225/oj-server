@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	pb "question-service/api/proto"
+	"question-service/internal/proto"
 	"question-service/models"
 	"question-service/services/ants"
 	"question-service/services/redis"

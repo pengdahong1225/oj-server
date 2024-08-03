@@ -1,4 +1,4 @@
-package internal
+package handler
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"question-service/api/proto"
-	"question-service/middlewares"
+	"question-service/internal/middlewares"
+	"question-service/internal/proto"
 	"question-service/models"
 	"question-service/services/redis"
 	"question-service/services/registry"
@@ -151,8 +151,30 @@ func (receiver UserHandler) HandleGetRankList() *models.Response {
 	return res
 }
 
-func (receiver UserHandler) HandleGetSubmitRecord(userId int64) {
+func (receiver UserHandler) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorf("db服务连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
 
+	client := pb.NewDBServiceClient(dbConn)
+	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{UserId: uid, Stamp: stamp})
+	if err != nil {
+		res.Message = err.Error()
+		return res
+	}
+	res.Message = "OK"
+	res.Data = response.Data
+	return res
 }
 
 // HandleGetUserSolvedList 获取用户解决了哪些题目
