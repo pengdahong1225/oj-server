@@ -2,9 +2,9 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/api"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/middlewares"
 	"net/http"
-	"question-service/internal/api"
-	"question-service/internal/middlewares"
 	"time"
 )
 

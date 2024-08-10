@@ -6,6 +6,7 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/config"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
@@ -46,7 +47,7 @@ func Registry() {
 	if err != nil {
 		panic(err)
 	}
-	system, err := settings.GetSystemConf("db-service")
+	system, err := config.GetSystemConf(settings.Conf.SystemConfigs, "db-service")
 	if err != nil {
 		panic(err)
 	}
