@@ -12,9 +12,9 @@ create table if not exists comment(
     content TEXT NOT NULL COMMENT '评论内容',
     is_root tinyint DEFAULT 1 COMMENT '是否是楼主 1：是 0：不是',
     status tinyint DEFAULT 1 COMMENT '状态 1：正常 0：隐藏',
-    reply_count BIGINT DEFAULT 0 COMMENT '回复数量',
-    like_count BIGINT DEFAULT 0 COMMENT '点赞数量',
-    child_count BIGINT DEFAULT 0 COMMENT '子评论数量，不管是不是回复自己，只要在本评论下都算',
+    reply_count INT DEFAULT 0 COMMENT '回复数量',
+    like_count INT DEFAULT 0 COMMENT '点赞数量',
+    child_count INT DEFAULT 0 COMMENT '子评论数量，不管是不是回复自己，只要在本评论下都算',
 
     PRIMARY KEY(id),
     INDEX idx_obj_id(obj_id),

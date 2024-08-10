@@ -1,12 +1,12 @@
-package judgeService
+package judgeClient
 
 import (
 	"bytes"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"io"
+	"judge-service/services/goroutinePool"
 	"net/http"
-	"question-service/services/ants"
 	"sync"
 )
 
@@ -83,7 +83,7 @@ func (receiver *Handler) run(param *Param) {
 	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 	for _, test := range param.testCases {
-		ants.AntsPoolInstance.Submit(func() {
+		goroutinePool.PoolInstance.Submit(func() {
 			wg.Add(1)
 			defer wg.Done()
 			// 定义请求的body内容

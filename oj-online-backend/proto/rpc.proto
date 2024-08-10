@@ -4,6 +4,7 @@ option go_package = "./;pb";
 import "google/protobuf/empty.proto";
 import "user.proto";
 import "problem.proto";
+import  "comment.proto";
 
 service DBService{
   // user接口
@@ -26,6 +27,27 @@ service DBService{
   // record
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
   rpc CreateUserSubmitRecord(CreateUserSubmitRecordRequest) returns(google.protobuf.Empty);
+
+  // comment接口
+  rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
+  rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
+}
+
+// 评论接口
+message QueryCommentRequest{
+  int64  obj_id = 1;
+  int64  user_id = 2;
+  int64  root_id = 3;
+  int64 reply_id = 4;
+}
+message QueryCommentResponse{
+  Comment data = 1;
+}
+message DeleteCommentRequest{
+  int64  obj_id = 1;
+  int64  user_id = 2;
+  int64  root_id = 3;
+  int64 reply_id = 4;
 }
 
 // 获取用户信息

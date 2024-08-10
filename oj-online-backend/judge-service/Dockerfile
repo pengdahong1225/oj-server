@@ -1,21 +1,23 @@
-FROM debian:latest
+FROM golang:1.21-alpine AS budiler
 
-ARG DEBIAN_FRONTEND=noninteractive
-ENV TZ=Asia/Shanghai
+ENV GO111MODULE=on \
+    CGO_ENABLE=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOPROXY=https://goproxy.cn \
+    GIN_MODE=release \
+    LOG_MODE=release
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    gcc \
-    g++ \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
+WORKDIR /app/judge-service
 
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
-COPY ./go-judge_1.8.5_linux_amd64 /app/go-judge_1.8.5_linux_amd64
+COPY . .
+COPY ../../config /config
 
-EXPOSE 5050/tcp 5051/tcp
+RUN go mod tidy
+RUN go build -o judge_service .
 
-ENTRYPOINT ["/app/go-judge_1.8.5_linux_amd64"]
+EXPOSE 9020
+
+ENTRYPOINT ["/app/judge-service/judge_service"]

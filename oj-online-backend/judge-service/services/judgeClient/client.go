@@ -1,16 +1,15 @@
-package judgeService
+package judgeClient
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"question-service/internal/proto"
-	"question-service/models"
-	"question-service/services/ants"
-	"question-service/services/redis"
-	"question-service/services/registry"
-	"question-service/settings"
+	"judge-service/models"
+	"judge-service/services/goroutinePool"
+	"judge-service/services/redis"
+	"judge-service/services/registry"
+	"judge-service/settings"
 	"sync"
 	"time"
 )
@@ -21,6 +20,19 @@ var (
 	runResults chan Result // 运行结果
 )
 
+func Init() error {
+	srv, err := settings.GetSystemConf("judge-service")
+	if err != nil {
+		return err
+	}
+
+	baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
+	runResults = make(chan Result, 256)
+	exeName = "main"
+
+	return nil
+}
+
 type Param struct {
 	uid           int64
 	problemID     int64
@@ -29,18 +41,6 @@ type Param struct {
 	content       string // 源代码
 	testCases     []TestCase
 	fileIds       map[string]string // 文件id
-}
-
-func Init() {
-	srv, err := settings.GetSystemConf("judge-service")
-	if err != nil {
-		logrus.Fatalln("Error getting system config:", err)
-		return
-	}
-	baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
-
-	runResults = make(chan Result, 256)
-	exeName = "main"
 }
 
 // Handle 判题服务入口
@@ -67,7 +67,7 @@ func Handle(uid int64, form *models.SubmitForm) []Result {
 	start := time.Now()
 	res := doAction(param)
 	duration := time.Now().Sub(start).Milliseconds()
-	logrus.Infoln("---judgeService.Handle--- uid:%d, problemID:%d, total-cost:%d ms", uid, form.ProblemID, duration)
+	logrus.Infoln("---judgeClient.Handle--- uid:%d, problemID:%d, total-cost:%d ms", uid, form.ProblemID, duration)
 	return res
 }
 
@@ -140,13 +140,13 @@ func doAction(param *Param) []Result {
 	}
 	wgRun := new(sync.WaitGroup)
 	wgRun.Add(1)
-	ants.AntsPoolInstance.Submit(func() {
+	goroutinePool.PoolInstance.Submit(func() {
 		defer wgRun.Done()
 		handler.run(param)
 	})
 	wgJudge := new(sync.WaitGroup)
 	wgJudge.Add(1)
-	ants.AntsPoolInstance.Submit(func() {
+	goroutinePool.PoolInstance.Submit(func() {
 		defer wgJudge.Done()
 		judgeResults := handler.judge()
 		results = append(results, judgeResults...)

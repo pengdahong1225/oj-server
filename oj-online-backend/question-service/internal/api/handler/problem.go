@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 	"net/http"
 	"question-service/internal/proto"
 	"question-service/models"
-	"question-service/services/ants"
+	"question-service/services/goroutinePool"
 	"question-service/services/judgeService"
+	"question-service/services/mq"
 	"question-service/services/redis"
 	"question-service/services/registry"
 	"question-service/settings"
@@ -81,20 +83,30 @@ func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models.Submi
 		return res
 	}
 
-	// 异步处理：提交到judgeService
-	err = ants.AntsPoolInstance.Submit(func() {
-		// 处理结果
-		results := judgeService.Handle(uid, form)
-		data, err := json.Marshal(results)
+	// 异步处理
+	err = goroutinePool.PoolInstance.Submit(func() {
+		// protobuf序列化
+		pbForm := pb.SubmitForm{
+			ProblemId: form.ProblemID,
+			Title:     form.Title,
+			Lang:      form.Lang,
+			Code:      form.Code,
+		}
+		data, err := proto.Marshal(&pbForm)
 		if err != nil {
 			logrus.Errorln(err.Error())
 		} else {
-			// 存储结果
-			if err := redis.SetJudgeResult(uid, form.ProblemID, string(data)); err != nil {
-				logrus.Errorln(err.Error())
+			// 提交到mq
+			productor := &mq.Producer{
+				Exkind:     "direct",
+				Exname:     "judge",
+				QuName:     "judge",
+				RoutingKey: "judge",
 			}
+			productor.Publish(data)
 		}
 	})
+
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

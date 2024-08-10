@@ -1,15 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"question-service/internal/routers"
-	"question-service/services/goroutinePool"
-	"question-service/services/logger"
-	"question-service/services/mq"
-	"question-service/services/redis"
-	"question-service/services/registry"
-	"question-service/settings"
-	"question-service/utils"
+	"github.com/pengdahong1225/common-utils"
+	"judge-service/internal"
+	"judge-service/services/goroutinePool"
+	"judge-service/services/judgeClient"
+	"judge-service/services/logger"
+	"judge-service/services/redis"
+	"judge-service/services/registry"
+	"judge-service/settings"
 	"time"
 )
 
@@ -33,15 +32,9 @@ func AppInit() {
 	if err := goroutinePool.Init(); err != nil {
 		panic(err)
 	}
-	if err := mq.Init(); err != nil {
+	if err := judgeClient.Init(); err != nil {
 		panic(err)
 	}
-}
-
-func ServerLoop(port int) {
-	engine := routers.Router()
-	dsn := fmt.Sprintf(":%d", port)
-	_ = engine.Run(dsn)
 }
 
 func main() {
@@ -52,7 +45,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	system, err := settings.GetSystemConf("question-service")
+	system, err := settings.GetSystemConf("judge-service")
 	if err != nil {
 		panic(err)
 	}
@@ -63,6 +56,8 @@ func main() {
 	if err = register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
-	// loop
-	ServerLoop(system.Port)
+
+	// start
+	server := &internal.Server{}
+	server.Loop()
 }
