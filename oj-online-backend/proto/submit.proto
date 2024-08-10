@@ -1,0 +1,23 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+// 用户状态枚举，如果没有查询到，意味着用户最近没有提交过题目
+enum UserState{
+  UserStateNormal = 0;
+  UserStateJudging = 1;
+}
+
+// “提交”状态枚举，如果没有查询到状态，就意味着最近没有提交题目or题目提交过期了
+enum SubmitState{
+  UPStateNormal = 0;        // 初始状态
+  UPStateCompiling = 1;     // 正在编译
+  UPStateJudging = 2;       // 已编译成功，正在判题
+  UPStateExited = 3;        // 已退出 -> 如何查询到这个状态，就意味着可以查询结果了
+}
+
+message SubmitForm{
+  int64 problem_id = 1;
+  string title = 2;
+  string lang = 3;
+  string code = 4;
+}

@@ -30,10 +30,3 @@ message ProblemConfig{
   int64 memory_limit = 3;
   int64 proc_limit = 4;
 }
-
-message SubmitForm{
-  int64 problem_id = 1;
-  string title = 2;
-  string lang = 3;
-  string code = 4;
-}
