@@ -2,48 +2,73 @@ package internal
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/daemon"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/handler"
-	goroutinePool "github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/goroutinePoll"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/setting"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
+	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/common/utils"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
 }
 
 func (receiver Server) Start() {
-	// 后台-排行榜服务
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Errorln(err)
+		}
+	}()
+
 	wg := new(sync.WaitGroup)
-	wg.Add(2)
-	err := goroutinePool.Instance().Submit(func() {
-		defer wg.Done()
-		daemon.StartDaemon()
-	})
-	if err != nil {
-		panic(err)
-	}
+
 	// DB服务
-	err = goroutinePool.Instance().Submit(func() {
+	wg.Add(1)
+	err := goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
 		StartRPCServer()
 	})
 	if err != nil {
 		panic(err)
 	}
+
+	// 排行榜
+	daemonServer := Daemon{}
+	wg.Add(1)
+	err = goroutinePool.Instance().Submit(func() {
+		defer wg.Done()
+		ticker := time.NewTicker(time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				daemonServer.loopRank()
+			}
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	// 消费者
+	wg.Add(1)
+	err = goroutinePool.Instance().Submit(func() {
+		defer wg.Done()
+		daemonServer.CommentSaveConsumer()
+	})
+
 	wg.Wait()
 }
 
 func StartRPCServer() {
-	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "db-service")
+	system, err := settings.Instance().GetSystemConf("db-service")
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +90,7 @@ func StartRPCServer() {
 	healthcheck := health.NewServer()
 	healthpb.RegisterHealthServer(grpcServer, healthcheck)
 	// 注册
-	register, _ := registry.NewRegistry(setting.Instance().RegistryConfig)
+	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
 	if err := register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}

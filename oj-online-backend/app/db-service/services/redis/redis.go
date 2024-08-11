@@ -3,7 +3,7 @@ package redis
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"sync"
 )
 
@@ -14,7 +14,7 @@ var (
 
 func init() {
 	once.Do(func() {
-		cfg := setting.Instance().RedisConfig
+		cfg := settings.Instance().RedisConfig
 		dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 		pool = &redis.Pool{
 			Dial: func() (redis.Conn, error) {

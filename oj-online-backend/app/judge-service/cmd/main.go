@@ -2,12 +2,10 @@ package main
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
+	"github.com/pengdahong1225/Oj-Online-Server/common/logger"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/common/utils"
 	"time"
 )
 
@@ -19,10 +17,7 @@ func AppInit() {
 	}
 	time.Local = loc
 	// 初始化
-	if err := logger.InitLog("judge-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
-		panic(err)
-	}
-	if err := redis.Init(setting.Instance().RedisConfig); err != nil {
+	if err := logger.InitLog("judge-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
 }
@@ -35,11 +30,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "judge-service")
+	system, err := settings.Instance().GetSystemConf("judge-service")
 	if err != nil {
 		panic(err)
 	}
-	register, err := registry.NewRegistry(setting.Instance().RegistryConfig)
+	register, err := registry.NewRegistry(settings.Instance().RegistryConfig)
 	if err != nil {
 		panic(err)
 	}

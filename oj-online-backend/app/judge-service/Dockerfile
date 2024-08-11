@@ -18,6 +18,6 @@ COPY ../../config /config
 RUN go mod tidy
 RUN go build -o judge_service .
 
-EXPOSE 9020
+EXPOSE 9010
 
 ENTRYPOINT ["/app/judge-service/judge_service"]

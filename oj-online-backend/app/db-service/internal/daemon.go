@@ -1,27 +1,55 @@
-package daemon
+package internal
 
 import (
 	"encoding/json"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/handler"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/redis"
+	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/consts"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
-	"time"
+	"google.golang.org/protobuf/proto"
 )
 
-func StartDaemon() {
-	// 周期性定时器
-	ticker := time.NewTicker(time.Hour)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			Daemon{}.loopRank()
+// Daemon 后台服务
+type Daemon struct {
+}
+
+// comment消费者
+func (receiver Daemon) CommentSaveConsumer() {
+	consumer := mq.NewConsumer(
+		consts.RabbitMqExchangeKind,
+		consts.RabbitMqExchangeName,
+		consts.RabbitMqCommentQueue,
+		consts.RabbitMqCommentKey,
+		"", // 消费者标签，用于区别不同的消费者
+	)
+	deliveries := consumer.Consume()
+	for d := range deliveries {
+		if syncHandle(d.Body) {
+			d.Ack(false)
+		} else {
+			d.Reject(false)
 		}
 	}
 }
 
-// Daemon 后台服务
-type Daemon struct {
+// 解析，校验，提交任务给评测机
+func syncHandle(data []byte) bool {
+	comment := &pb.Comment{}
+	err := proto.Unmarshal(data, comment)
+	if err != nil {
+		logrus.Errorln("解析err：", err.Error())
+		return false
+	}
+	// 处理
+	goroutinePool.Instance().Submit(func() {
+		handler.SaveComment(comment)
+	})
+
+	return true
 }
 
 // 排行榜

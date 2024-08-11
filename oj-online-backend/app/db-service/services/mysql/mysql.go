@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"sync"
@@ -15,7 +15,7 @@ var (
 
 func Instance() *gorm.DB {
 	once.Do(func() {
-		cfg := setting.Instance().MysqlConfig
+		cfg := settings.Instance().MysqlConfig
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.User,
 			cfg.Pwd, cfg.Host, cfg.Port, cfg.Db)
 		var err error

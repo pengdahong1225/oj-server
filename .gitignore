@@ -4,8 +4,6 @@ bin
 log
 cmake-build-*
 .vscode
-*.pb.h
-*.pb.cc
 *.log
 *.o
 config/

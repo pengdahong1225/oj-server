@@ -9,7 +9,8 @@ import (
 
 // 表单类型集
 type formTyper interface {
-	models.LoginFrom | models.GetSmsCodeForm | models.SubmitForm | models.AddProblemForm
+	models.LoginFrom | models.GetSmsCodeForm | models.SubmitForm | models.AddProblemForm |
+		models.CommentForm
 }
 
 // validate 通用表单验证

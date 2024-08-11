@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -24,7 +23,7 @@ var (
 
 func init() {
 	once.Do(func() {
-		srv, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "judge-service")
+		srv, err := settings.Instance().GetSystemConf("judge-service")
 		if err != nil {
 			panic(err)
 		}
@@ -88,7 +87,7 @@ func cacheResult(param *Param, data []byte) {
 }
 
 func saveResult(param *Param, data []byte) {
-	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return
@@ -212,7 +211,7 @@ func getProblemHotData(ProblemID int64) *ProblemHotData {
 	}
 	if data == "" {
 		// db
-		dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+		dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 		if err != nil {
 			logrus.Errorf("db服连接失败:%s\n", err.Error())
 			return nil

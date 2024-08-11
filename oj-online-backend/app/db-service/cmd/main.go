@@ -2,12 +2,10 @@ package main
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/setting"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
+	"github.com/pengdahong1225/Oj-Online-Server/common/logger"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/common/utils"
 	"time"
 )
 
@@ -19,10 +17,7 @@ func AppInit() {
 	}
 	time.Local = loc
 	// 初始化
-	if err := logger.InitLog("db-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
-		panic(err)
-	}
-	if err := goroutinePool.Init(); err != nil {
+	if err := logger.InitLog("db-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
 }
@@ -32,11 +27,11 @@ func Registry() {
 	if err != nil {
 		panic(err)
 	}
-	register, err := registry.NewRegistry(setting.Instance().RegistryConfig)
+	register, err := registry.NewRegistry(settings.Instance().RegistryConfig)
 	if err != nil {
 		panic(err)
 	}
-	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "db-service")
+	system, err := settings.Instance().GetSystemConf("db-service")
 	if err != nil {
 		panic(err)
 	}

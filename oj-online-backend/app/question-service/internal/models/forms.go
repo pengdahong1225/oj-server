@@ -44,3 +44,14 @@ type TestCase struct {
 	Input  string `json:"input"`
 	Output string `json:"output"`
 }
+
+type CommentForm struct {
+	ObjId         int64  `json:"obj_id" form:"obj_id" binding:"required"`
+	UserId        int64  `json:"user_id" form:"user_id" binding:"required"`
+	UserName      string `json:"user_name" form:"user_name"`
+	UserAvatarUrl string `json:"user_avatar_url" form:"user_avatar_url"`
+	RootId        int64  `json:"root_id" form:"root_id" binding:"required"`
+	ReplyId       int64  `json:"reply_id" form:"reply_id" binding:"required"`
+	Content       string `json:"content" form:"content" binding:"required"`
+	Stamp         int64  `json:"stamp" form:"stamp"`
+}

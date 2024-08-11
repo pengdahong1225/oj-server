@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	models2 "github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -13,13 +13,13 @@ import (
 type AdminHandler struct {
 }
 
-func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models2.AddProblemForm) *models2.Response {
-	res := &models2.Response{
+func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models.AddProblemForm) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -67,13 +67,13 @@ func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models2.AddPr
 	return res
 }
 
-func (receiver AdminHandler) HandleDelQuestion(problemID int64) *models2.Response {
-	res := &models2.Response{
+func (receiver AdminHandler) HandleDelQuestion(problemID int64) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

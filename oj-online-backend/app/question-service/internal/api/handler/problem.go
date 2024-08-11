@@ -3,12 +3,12 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	models2 "github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -18,13 +18,13 @@ import (
 type ProblemHandler struct {
 }
 
-func (receiver ProblemHandler) HandleProblemSet(cursor int) *models2.Response {
-	res := &models2.Response{
+func (receiver ProblemHandler) HandleProblemSet(cursor int) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -53,8 +53,8 @@ func (receiver ProblemHandler) HandleProblemSet(cursor int) *models2.Response {
 // 判断“用户”是否处于判题状态？true就拒绝
 // 用户提交了题目就立刻返回，并给题目设置状态
 // 客户端通过其他接口轮询题目结果
-func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models2.SubmitForm) *models2.Response {
-	res := &models2.Response{
+func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
@@ -117,13 +117,13 @@ func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models2.Subm
 	}
 }
 
-func (receiver ProblemHandler) HandleProblemDetail(problemID int64) *models2.Response {
-	res := &models2.Response{
+func (receiver ProblemHandler) HandleProblemDetail(problemID int64) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -153,8 +153,8 @@ func (receiver ProblemHandler) HandleProblemDetail(problemID int64) *models2.Res
 // 先查询状态：如果没有查询到，就意味着最近没有提交题目or题目提交过期了
 // 如果是已退出状态，就可以查询结果
 // 如果是：有状态，但是没有结果 -> 被中断，需要查看日志排查
-func (receiver ProblemHandler) HandleQueryResult(uid int64, problemID int64) *models2.Response {
-	res := &models2.Response{
+func (receiver ProblemHandler) HandleQueryResult(uid int64, problemID int64) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
@@ -188,7 +188,7 @@ func (receiver ProblemHandler) HandleQueryResult(uid int64, problemID int64) *mo
 		return res
 	}
 	// 解析
-	var results []models2.SubmitResult
+	var results []models.SubmitResult
 	if err := json.Unmarshal([]byte(r), &results); err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -202,14 +202,14 @@ func (receiver ProblemHandler) HandleQueryResult(uid int64, problemID int64) *mo
 	return res
 }
 
-func (receiver ProblemHandler) HandleProblemSearch(name string) *models2.Response {
-	res := &models2.Response{
+func (receiver ProblemHandler) HandleProblemSearch(name string) *models.Response {
+	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

@@ -3,30 +3,32 @@ package redis
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"sync"
 )
 
-var pool *redis.Pool
+var (
+	pool *redis.Pool
+	once sync.Once
+)
 
-func Init(cfg *settings.RedisConfig) error {
-	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	pool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", dsn)
-		},
-		DialContext:     nil,
-		TestOnBorrow:    nil,
-		MaxIdle:         8,   // 最大空闲数
-		MaxActive:       10,  // 最大连接数 -- 0表示无限制
-		IdleTimeout:     100, // 最大空闲时间
-		Wait:            false,
-		MaxConnLifetime: 0,
-	}
-	return nil
-}
-
-func Close() {
-	_ = pool.Close()
+func init() {
+	once.Do(func() {
+		cfg := settings.Instance().RedisConfig
+		dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+		pool = &redis.Pool{
+			Dial: func() (redis.Conn, error) {
+				return redis.Dial("tcp", dsn)
+			},
+			DialContext:     nil,
+			TestOnBorrow:    nil,
+			MaxIdle:         8,   // 最大空闲数
+			MaxActive:       10,  // 最大连接数 -- 0表示无限制
+			IdleTimeout:     100, // 最大空闲时间
+			Wait:            false,
+			MaxConnLifetime: 0,
+		}
+	})
 }
 
 func newConn() redis.Conn {

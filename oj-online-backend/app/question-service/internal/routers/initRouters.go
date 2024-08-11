@@ -52,6 +52,15 @@ func QuestionRouters(engine *gin.Engine) {
 		problemRouter.POST("/submit", middlewares.AuthLogin(), api.ProblemSubmit)
 		problemRouter.GET("/queryResult", middlewares.AuthLogin(), api.QueryResult)
 	}
+
+	// api/comment
+	commentRouter := engine.Group("/comment")
+	commentRouter.Use(middlewares.AuthLogin())
+	{
+		commentRouter.POST("/add", api.Comment{}.Add)
+		commentRouter.POST("/delete", api.Comment{}.Delete)
+		commentRouter.POST("/like", api.Comment{}.Like)
+	}
 }
 
 // CmsRouters cms路由

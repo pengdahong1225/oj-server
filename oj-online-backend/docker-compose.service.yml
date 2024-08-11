@@ -9,11 +9,19 @@ networks:
           gateway: 172.20.0.1
 
 services:
+  sandbox:
+    image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-service
+    container_name: sandbox
+    privileged: true
+    ports:
+      - "5050"
+      - "5051"
+
   db-service:
     container_name: db-service
     privileged: true
     build:
-      context: ./db-service # 路径
+      context: ./app/db-service # 路径
       dockerfile: Dockerfile
     volumes:
       - /root/server/Oj-Online-Server/oj-online-backend/log:/app/log
@@ -22,31 +30,31 @@ services:
     networks:
       - net
 
-  # judge-service:
-  #   container_name: judge-service
-  #   privileged: true
-  #   build:
-  #     context: ./judge-service
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - /root/server/Oj-Online-Server/oj-online-backend/log:/app/log
-  #   ports:
-  #     - "9020:9020"
-  #   networks:
-  #     - net
-  #   depends_on: # 本地服务的依赖，控制启动先后顺序
-  #     - db-service
-  
-  question-service:
-    container_name: question-service
+  judge-service:
+    container_name: judge-service
     privileged: true
     build:
-      context: ./question-service
+      context: ./app/judge-service
       dockerfile: Dockerfile
     volumes:
       - /root/server/Oj-Online-Server/oj-online-backend/log:/app/log
     ports:
       - "9010"
+    networks:
+      - net
+    depends_on: # 本地服务的依赖，控制启动先后顺序
+      - db-service
+  
+  question-service:
+    container_name: question-service
+    privileged: true
+    build:
+      context: ./app/question-service
+      dockerfile: Dockerfile
+    volumes:
+      - /root/server/Oj-Online-Server/oj-online-backend/log:/app/log
+    ports:
+      - "9020"
     networks:
       - net
     depends_on: # 本地服务的依赖，控制启动先后顺序

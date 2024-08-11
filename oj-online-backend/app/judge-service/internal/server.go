@@ -2,8 +2,8 @@ package internal
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal/judge"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/mq"
+	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"

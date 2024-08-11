@@ -18,6 +18,6 @@ COPY ../../config /config
 RUN go mod tidy
 RUN go build -o question_service .
 
-EXPOSE 9010
+EXPOSE 9020
 
 ENTRYPOINT ["/app/question-service/question_service"]
