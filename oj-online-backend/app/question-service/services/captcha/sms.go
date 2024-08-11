@@ -6,7 +6,7 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/utils"
 	"github.com/sirupsen/logrus"
@@ -58,17 +58,17 @@ func VerifySmsCode(mobile string, code string) bool {
 func send(param []byte, phone string) error {
 	config := &openapi.Config{
 		// 您的AccessKey ID
-		AccessKeyId: &settings.Conf.SmsConfig.AccessKeyId,
+		AccessKeyId: &setting.Instance().SmsConfig.AccessKeyId,
 		// 您的AccessKey Secret
-		AccessKeySecret: &settings.Conf.SmsConfig.AccessKeySecret,
+		AccessKeySecret: &setting.Instance().SmsConfig.AccessKeySecret,
 	}
 	// 访问的域名
-	config.Endpoint = tea.String(settings.Conf.SmsConfig.Endpoint)
+	config.Endpoint = tea.String(setting.Instance().SmsConfig.Endpoint)
 	client, _ := dysmsapi.NewClient(config)
 
 	request := &dysmsapi.SendSmsRequest{}
-	request.SetSignName(settings.Conf.SmsConfig.SignName)
-	request.SetTemplateCode(settings.Conf.SmsConfig.TemplateCode)
+	request.SetSignName(setting.Instance().SmsConfig.SignName)
+	request.SetTemplateCode(setting.Instance().SmsConfig.TemplateCode)
 	request.SetPhoneNumbers(phone)
 	request.SetTemplateParam(string(param))
 

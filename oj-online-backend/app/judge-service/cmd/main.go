@@ -5,10 +5,10 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/judgeClient"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
+	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
 	"time"
 )
@@ -21,16 +21,13 @@ func AppInit() {
 	}
 	time.Local = loc
 	// 初始化
-	if err := settings.Init(); err != nil {
-		panic(err)
-	}
-	if err := logger.InitLog("judge-service", settings.Conf.LogConfig.Path, settings.Conf.LogConfig.Level); err != nil {
+	if err := logger.InitLog("judge-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
 	if err := goroutinePool.Init(); err != nil {
 		panic(err)
 	}
-	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
+	if err := redis.Init(setting.Instance().RedisConfig); err != nil {
 		panic(err)
 	}
 	if err := judgeClient.Init(); err != nil {
@@ -46,11 +43,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	system, err := config.GetSystemConf(settings.Conf.SystemConfigs, "judge-service")
+	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "judge-service")
 	if err != nil {
 		panic(err)
 	}
-	register, err := registry.NewRegistry(settings.Conf.RegistryConfig)
+	register, err := registry.NewRegistry(setting.Instance().RegistryConfig)
 	if err != nil {
 		panic(err)
 	}

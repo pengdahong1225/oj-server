@@ -4,11 +4,11 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
 	"time"
 )
@@ -21,16 +21,13 @@ func AppInit() {
 	}
 	time.Local = loc
 	// 初始化
-	if err := settings.Init(); err != nil {
+	if err := logger.InitLog("db-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
-	if err := logger.InitLog("db-service", settings.Conf.LogConfig.Path, settings.Conf.LogConfig.Level); err != nil {
+	if err := mysql.Init(setting.Instance().MysqlConfig); err != nil {
 		panic(err)
 	}
-	if err := mysql.Init(settings.Conf.MysqlConfig); err != nil {
-		panic(err)
-	}
-	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
+	if err := redis.Init(setting.Instance().RedisConfig); err != nil {
 		panic(err)
 	}
 	if err := goroutinePool.Init(); err != nil {
@@ -43,11 +40,11 @@ func Registry() {
 	if err != nil {
 		panic(err)
 	}
-	register, err := registry.NewRegistry(settings.Conf.RegistryConfig)
+	register, err := registry.NewRegistry(setting.Instance().RegistryConfig)
 	if err != nil {
 		panic(err)
 	}
-	system, err := config.GetSystemConf(settings.Conf.SystemConfigs, "db-service")
+	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "db-service")
 	if err != nil {
 		panic(err)
 	}

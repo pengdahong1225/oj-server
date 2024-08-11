@@ -3,12 +3,12 @@ package redis
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 )
 
 var pool *redis.Pool
 
-func Init(cfg *config.RedisConfig) error {
+func Init(cfg *settings.RedisConfig) error {
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	pool = &redis.Pool{
 		Dial: func() (redis.Conn, error) {

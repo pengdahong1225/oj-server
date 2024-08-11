@@ -7,7 +7,7 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
 	"github.com/sirupsen/logrus"
@@ -32,7 +32,7 @@ func (receiver UserHandler) HandleLogin(form *models.LoginFrom) *models.Response
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -90,7 +90,7 @@ func (receiver UserHandler) HandleGetUserProfile(uid int64) *models.Response {
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -157,7 +157,7 @@ func (receiver UserHandler) HandleGetSubmitRecord(uid int64, stamp int64) *model
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -185,7 +185,7 @@ func (receiver UserHandler) HandleGetUserSolvedList(uid int64) *models.Response 
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

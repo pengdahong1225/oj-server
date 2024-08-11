@@ -6,10 +6,10 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
 	"time"
 )
@@ -22,13 +22,10 @@ func AppInit() {
 	}
 	time.Local = loc
 	// 初始化
-	if err := settings.Init(); err != nil {
+	if err := logger.InitLog("question-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
-	if err := logger.InitLog("question-service", settings.Conf.LogConfig.Path, settings.Conf.LogConfig.Level); err != nil {
-		panic(err)
-	}
-	if err := redis.Init(settings.Conf.RedisConfig); err != nil {
+	if err := redis.Init(setting.Instance().RedisConfig); err != nil {
 		panic(err)
 	}
 	if err := goroutinePool.Init(); err != nil {
@@ -53,11 +50,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	system, err := config.GetSystemConf(settings.Conf.SystemConfigs, "question-service")
+	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "question-service")
 	if err != nil {
 		panic(err)
 	}
-	register, err := registry.NewRegistry(settings.Conf.RegistryConfig)
+	register, err := registry.NewRegistry(setting.Instance().RegistryConfig)
 	if err != nil {
 		panic(err)
 	}

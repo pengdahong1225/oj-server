@@ -2,7 +2,7 @@ package registry
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
@@ -13,7 +13,7 @@ type Registry struct {
 	client *consulapi.Client
 }
 
-func NewRegistry(cfg *config.RegistryConfig) (*Registry, error) {
+func NewRegistry(cfg *settings.RegistryConfig) (*Registry, error) {
 	// 配置中心地址
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	consulConf := consulapi.DefaultConfig()
@@ -46,7 +46,7 @@ func (receiver *Registry) RegisterService(serviceName string, ip string, port in
 }
 
 // NewDBConnection db服务连接
-func NewDBConnection(cfg *config.RegistryConfig) (*grpc.ClientConn, error) {
+func NewDBConnection(cfg *settings.RegistryConfig) (*grpc.ClientConn, error) {
 	register, err := NewRegistry(cfg)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func NewDBConnection(cfg *config.RegistryConfig) (*grpc.ClientConn, error) {
 }
 
 // NewJudgeConnection judge服务连接
-func GetJudgeServerDsn(cfg *config.RegistryConfig) (string, error) {
+func GetJudgeServerDsn(cfg *settings.RegistryConfig) (string, error) {
 	register, err := NewRegistry(cfg)
 	if err != nil {
 		return "", err

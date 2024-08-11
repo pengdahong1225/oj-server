@@ -5,9 +5,9 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/daemon"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/handler"
 	goroutinePool "github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/goroutinePoll"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
 	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
 	"google.golang.org/grpc"
@@ -43,7 +43,7 @@ func (receiver Server) Start() {
 }
 
 func StartRPCServer() {
-	system, err := config.GetSystemConf(settings.Conf.SystemConfigs, "db-service")
+	system, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "db-service")
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func StartRPCServer() {
 	healthcheck := health.NewServer()
 	healthpb.RegisterHealthServer(grpcServer, healthcheck)
 	// 注册
-	register, _ := registry.NewRegistry(settings.Conf.RegistryConfig)
+	register, _ := registry.NewRegistry(setting.Instance().RegistryConfig)
 	if err := register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}

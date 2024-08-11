@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
 	"github.com/sirupsen/logrus"
@@ -19,7 +19,7 @@ func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models.AddPro
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -73,7 +73,7 @@ func (receiver AdminHandler) HandleDelQuestion(problemID int64) *models.Response
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

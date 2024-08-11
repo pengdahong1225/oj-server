@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -23,7 +23,7 @@ var (
 )
 
 func Init() error {
-	srv, err := config.GetSystemConf(settings.Conf.SystemConfigs, "judge-service")
+	srv, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "judge-service")
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func getProblemHotData(ProblemID int64) *ProblemHotData {
 	}
 	if data == "" {
 		// db
-		dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+		dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 		if err != nil {
 			logrus.Errorf("db服连接失败:%s\n", err.Error())
 			return nil

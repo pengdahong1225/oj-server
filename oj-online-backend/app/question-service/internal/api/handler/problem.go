@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
+	"github.com/pengdahong1225/Oj-Online-Server/consts"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
 	"github.com/sirupsen/logrus"
@@ -24,7 +24,7 @@ func (receiver ProblemHandler) HandleProblemSet(cursor int) *models.Response {
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -73,7 +73,6 @@ func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models.Submi
 		res.Message = "用户处于判题状态，请稍等..."
 		return res
 	}
-
 	// 设置用户状态为判题中
 	if err := redis.SetUserState(uid, int(pb.UserState_UserStateJudging)); err != nil {
 		res.Code = http.StatusInternalServerError
@@ -83,36 +82,32 @@ func (receiver ProblemHandler) HandleProblemSubmit(uid int64, form *models.Submi
 	}
 
 	// 异步处理
-	err = goroutinePool.PoolInstance.Submit(func() {
-		// protobuf序列化
-		pbForm := pb.SubmitForm{
-			ProblemId: form.ProblemID,
-			Title:     form.Title,
-			Lang:      form.Lang,
-			Code:      form.Code,
-		}
-		data, err := proto.Marshal(&pbForm)
-		if err != nil {
-			logrus.Errorln(err.Error())
-		} else {
-			// 提交到mq
-			productor := &mq.Producer{
-				Exkind:     "direct",
-				Exname:     "judge",
-				QuName:     "judge",
-				RoutingKey: "judge",
-			}
-			productor.Publish(data)
-		}
-	})
-
+	// protobuf序列化
+	pbForm := pb.SubmitForm{
+		ProblemId: form.ProblemID,
+		Title:     form.Title,
+		Lang:      form.Lang,
+		Code:      form.Code,
+	}
+	data, err := proto.Marshal(&pbForm)
 	if err != nil {
+		logrus.Errorln(err.Error())
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		logrus.Errorln(err.Error())
+		return res
+	}
+	// 提交到mq
+	productor := &mq.Producer{
+		Exkind:     consts.RabbitMqExchangeKind,
+		Exname:     consts.RabbitMqExchangeName,
+		QuName:     consts.RabbitMqJudgeQueue,
+		RoutingKey: consts.RabbitMqJudgeKey,
+	}
+	if !productor.Publish(data) {
+		res.Code = http.StatusInternalServerError
+		logrus.Errorln("任务提交mq失败")
 		return res
 	} else {
-		// 返回题目id
 		res.Code = http.StatusOK
 		res.Message = "题目提交成功"
 		res.Data = map[string]interface{}{
@@ -128,7 +123,7 @@ func (receiver ProblemHandler) HandleProblemDetail(problemID int64) *models.Resp
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -214,7 +209,7 @@ func (receiver ProblemHandler) HandleProblemSearch(name string) *models.Response
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Conf.RegistryConfig)
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

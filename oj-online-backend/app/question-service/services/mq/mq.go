@@ -2,15 +2,15 @@ package mq
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/config"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
+	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
 var connection *amqp.Connection
 
-func connect(cfg *config.MqConfig) (*amqp.Connection, error) {
+func connect(cfg *settings.MqConfig) (*amqp.Connection, error) {
 	dsn := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		cfg.User,
 		cfg.PassWord,
@@ -26,7 +26,7 @@ func connect(cfg *config.MqConfig) (*amqp.Connection, error) {
 func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	if connection.IsClosed() {
 		var err error
-		connection, err = connect(settings.Conf.MqConfig)
+		connection, err = connect(setting.Instance().MqConfig)
 		if err != nil {
 			logrus.Errorln(err)
 			return nil
@@ -81,6 +81,6 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 
 func Init() error {
 	var err error
-	connection, err = connect(settings.Conf.MqConfig)
+	connection, err = connect(setting.Instance().MqConfig)
 	return err
 }
