@@ -44,6 +44,7 @@ services:
       - net
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - db-service
+      - sandbox
   
   question-service:
     container_name: question-service
