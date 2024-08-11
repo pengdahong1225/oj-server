@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
@@ -22,12 +20,6 @@ func AppInit() {
 	time.Local = loc
 	// 初始化
 	if err := logger.InitLog("db-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
-		panic(err)
-	}
-	if err := mysql.Init(setting.Instance().MysqlConfig); err != nil {
-		panic(err)
-	}
-	if err := redis.Init(setting.Instance().RedisConfig); err != nil {
 		panic(err)
 	}
 	if err := goroutinePool.Init(); err != nil {

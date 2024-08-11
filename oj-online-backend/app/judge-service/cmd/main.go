@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/judgeClient"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/logger"
@@ -24,13 +22,7 @@ func AppInit() {
 	if err := logger.InitLog("judge-service", setting.Instance().LogConfig.Path, setting.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
-	if err := goroutinePool.Init(); err != nil {
-		panic(err)
-	}
 	if err := redis.Init(setting.Instance().RedisConfig); err != nil {
-		panic(err)
-	}
-	if err := judgeClient.Init(); err != nil {
 		panic(err)
 	}
 }

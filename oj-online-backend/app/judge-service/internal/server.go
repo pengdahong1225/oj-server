@@ -1,12 +1,13 @@
 package internal
 
 import (
+	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal/judge"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/mq"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/consts"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
-	"sync"
 )
 
 type Server struct{}
@@ -18,39 +19,36 @@ func (receiver *Server) Loop() {
 		}
 	}()
 	consumer := mq.NewConsumer(
-		"judge",
-		"direct",
-		"judge",
-		"judge",
+		consts.RabbitMqExchangeKind,
+		consts.RabbitMqExchangeName,
+		consts.RabbitMqJudgeQueue,
+		consts.RabbitMqJudgeKey,
 		"", // 消费者标签，用于区别不同的消费者
 	)
 	deliveries := consumer.Consume()
-	defer consumer.Shutdown()
-
-	wg := new(sync.WaitGroup)
 	for d := range deliveries {
-		wg.Add(1)
-		goroutinePool.PoolInstance.Submit(func() {
-			defer wg.Done()
-			if handle(d.Body) {
-				d.Ack(false)
-			} else {
-				d.Reject(true)
-			}
-		})
+		if syncHandle(d.Body) {
+			d.Ack(false)
+		} else {
+			d.Reject(false)
+		}
 	}
-	wg.Wait()
+
+	select {}
 }
 
 // 解析，校验，提交任务给评测机
-func handle(data []byte) bool {
+func syncHandle(data []byte) bool {
 	submitForm := &pb.SubmitForm{}
 	err := proto.Unmarshal(data, submitForm)
 	if err != nil {
-		logrus.Errorln("解析消息遇到错误：", err.Error())
+		logrus.Errorln("解析err：", err.Error())
 		return false
 	}
-	// ...
+	// 处理
+	goroutinePool.Instance().Submit(func() {
+		judge.Handle(submitForm)
+	})
 
 	return true
 }

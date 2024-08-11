@@ -30,7 +30,7 @@ func (receiver Daemon) loopRank() {
 	conn := redis.NewConn()
 	defer conn.Close()
 
-	db := mysql.DB
+	db := mysql.Instance()
 	var orderList []mysql.Statistics
 
 	/**

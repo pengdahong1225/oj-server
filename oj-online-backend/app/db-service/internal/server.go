@@ -9,7 +9,7 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/utils"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -24,7 +24,7 @@ func (receiver Server) Start() {
 	// 后台-排行榜服务
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
-	err := goroutinePool.PoolInstance.Submit(func() {
+	err := goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
 		daemon.StartDaemon()
 	})
@@ -32,7 +32,7 @@ func (receiver Server) Start() {
 		panic(err)
 	}
 	// DB服务
-	err = goroutinePool.PoolInstance.Submit(func() {
+	err = goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
 		StartRPCServer()
 	})

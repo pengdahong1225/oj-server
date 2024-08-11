@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
 func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
 	if result.Error != nil {
@@ -37,7 +37,7 @@ func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, reques
 }
 
 func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
@@ -64,7 +64,7 @@ func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *
 }
 
 func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile)
 	if result.RowsAffected > 0 {
@@ -91,7 +91,7 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.Error != nil {
@@ -118,7 +118,7 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
@@ -143,7 +143,7 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 
 // GetUserList 采用游标分页
 func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
-	// db := mysql.DB
+	// db := mysql.Instance()
 	// var pageSize = 10
 	// var userlist []models.UserInfo
 	// rsp := &pb.GetUserListResponse{}
@@ -181,7 +181,7 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 
 // GetUserSolvedList 查询用户哪些题目
 func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var userSolutionList []mysql.UserSolution
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
 	if result.Error != nil {

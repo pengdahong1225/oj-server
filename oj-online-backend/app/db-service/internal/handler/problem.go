@@ -8,13 +8,13 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/utils"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 
 	compileConfig := mysql.ProblemConfig{
 		ClockLimit:  request.Data.CompileConfig.ClockLimit,
@@ -94,7 +94,7 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 }
 
 func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 
 	var problem mysql.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
@@ -159,7 +159,7 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 }
 
 func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request *pb.DeleteProblemRequest) (*empty.Empty, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var problem *mysql.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
@@ -184,7 +184,7 @@ func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request 
 // GetProblemList 题库列表
 // 游标分页，查询id，title，level，tags
 func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var pageSize = 10
 	rsp := &pb.GetProblemListResponse{}
 
@@ -221,7 +221,7 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 // QueryProblemWithName 根据题目名查询题目
 // 模糊查询
 func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var problemList []mysql.Problem
 	// select * from problem
 	// where title like '%name%';
@@ -253,7 +253,7 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 // GetProblemHotData 读取题目热点数据
 // 获取后更新到缓存
 func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
-	db := mysql.DB
+	db := mysql.Instance()
 	var problem mysql.Problem
 	// select test_case, compile_config, run_config
 	// from problem

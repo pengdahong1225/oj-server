@@ -1,4 +1,4 @@
-package judgeClient
+package judge
 
 import (
 	"context"
@@ -7,10 +7,9 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/setting"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/settings"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -20,19 +19,20 @@ var (
 	baseUrl    string
 	exeName    string            // 执行文件名
 	runResults chan SubmitResult // 运行结果
+	once       sync.Once
 )
 
-func Init() error {
-	srv, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "judge-service")
-	if err != nil {
-		return err
-	}
+func init() {
+	once.Do(func() {
+		srv, err := settings.GetSystemConf(setting.Instance().SystemConfigs, "judge-service")
+		if err != nil {
+			panic(err)
+		}
 
-	baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
-	runResults = make(chan SubmitResult, 256)
-	exeName = "main"
-
-	return nil
+		baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
+		runResults = make(chan SubmitResult, 256)
+		exeName = "main"
+	})
 }
 
 type Param struct {
@@ -41,43 +41,81 @@ type Param struct {
 	compileConfig *ProblemConfig
 	runConfig     *ProblemConfig
 	content       string // 源代码
+	lang          string // 语种
 	testCases     []TestCase
 	fileIds       map[string]string // 文件id
 }
 
 // Handle 判题服务入口
-func Handle(uid int64, form *models.SubmitForm) []SubmitResult {
-	// 退出之后，需要将状态置为UPStateExited，主要针对异常退出的情况，正常退出会设置状态
+func Handle(form *pb.SubmitForm) {
+	// 退出之后，需要将"提交"状态置为UPStateExited
 	defer func() {
-		if err := redis.SetUPState(uid, form.ProblemID, int(pb.SubmitState_UPStateExited)); err != nil {
+		if err := redis.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited)); err != nil {
 			logrus.Errorln(err.Error())
 		}
 	}()
 
 	// 设置“提交”状态
-	if err := redis.SetUPState(uid, form.ProblemID, int(pb.SubmitState_UPStateNormal)); err != nil {
+	if err := redis.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateNormal)); err != nil {
 		logrus.Errorln(err.Error())
-		return nil
+		return
 	}
-
-	ok, param := preAction(uid, form)
+	ok, param := preAction(form)
 	if !ok {
 		logrus.Errorln("预处理失败")
-		return nil
+		return
 	}
 
 	start := time.Now()
 	res := doAction(param)
 	duration := time.Now().Sub(start).Milliseconds()
-	logrus.Infoln("---judgeClient.Handle--- uid:%d, problemID:%d, total-cost:%d ms", uid, form.ProblemID, duration)
-	return res
+	logrus.Infoln("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms", form.Uid, form.ProblemId, duration)
+
+	// 落库
+	data, err := json.Marshal(res)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return
+	}
+	saveResult(param, data)
+	cacheResult(param, data)
 }
 
-func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
+func cacheResult(param *Param, data []byte) {
+	if err := redis.SetJudgeResult(param.uid, param.problemID, string(data)); err != nil {
+		logrus.Errorln(err.Error())
+	}
+}
+
+func saveResult(param *Param, data []byte) {
+	dbConn, err := registry.NewDBConnection(setting.Instance().RegistryConfig)
+	if err != nil {
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return
+	}
+	defer dbConn.Close()
+
+	client := pb.NewDBServiceClient(dbConn)
+	request := &pb.SaveUserSubmitRecordRequest{
+		UserId:    param.uid,
+		ProblemId: param.problemID,
+		Code:      param.content,
+		Result:    string(data),
+		Lang:      param.lang,
+		Stamp:     time.Now().Unix(),
+	}
+
+	_, err = client.SaveUserSubmitRecord(context.Background(), request)
+	if err != nil {
+		logrus.Errorln(err.Error())
+	}
+}
+
+func preAction(form *pb.SubmitForm) (bool, *Param) {
 	param := &Param{}
 
 	// 读取题目配置
-	hotData := getProblemHotData(form.ProblemID)
+	hotData := getProblemHotData(form.ProblemId)
 	compileConfig := &ProblemConfig{}
 	if err := json.Unmarshal([]byte(hotData.CompileConfig), compileConfig); err != nil {
 		logrus.Errorln(err.Error())
@@ -94,12 +132,13 @@ func preAction(uid int64, form *models.SubmitForm) (bool, *Param) {
 		return false, nil
 	}
 
-	param.uid = uid
-	param.problemID = form.ProblemID
+	param.uid = form.Uid
+	param.problemID = form.ProblemId
 	param.compileConfig = compileConfig
 	param.runConfig = runConfig
 	param.content = form.Code
 	param.testCases = testCases
+	param.lang = form.Lang
 	return true, param
 }
 
@@ -142,13 +181,13 @@ func doAction(param *Param) []SubmitResult {
 	}
 	wgRun := new(sync.WaitGroup)
 	wgRun.Add(1)
-	goroutinePool.PoolInstance.Submit(func() {
+	goroutinePool.Instance().Submit(func() {
 		defer wgRun.Done()
 		handler.run(param)
 	})
 	wgJudge := new(sync.WaitGroup)
 	wgJudge.Add(1)
-	goroutinePool.PoolInstance.Submit(func() {
+	goroutinePool.Instance().Submit(func() {
 		defer wgJudge.Done()
 		judgeResults := handler.judge()
 		results = append(results, judgeResults...)

@@ -1,24 +1,23 @@
 package mq
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
 type Consumer struct {
-	Exname     string
 	Exkind     string
+	Exname     string
 	QuName     string
 	RoutingKey string
 	CTag       string
 	channel    *amqp.Channel
 }
 
-func NewConsumer(exName, exKind, quName, routingKey, cTag string) *Consumer {
+func NewConsumer(exKind, exName, quName, routingKey, cTag string) *Consumer {
 	return &Consumer{
-		Exname:     exName,
 		Exkind:     exKind,
+		Exname:     exName,
 		QuName:     quName,
 		RoutingKey: routingKey,
 		CTag:       cTag,
@@ -47,13 +46,4 @@ func (receiver *Consumer) Consume() <-chan amqp.Delivery {
 		return nil
 	}
 	return deliveries
-}
-
-func (receiver *Consumer) Shutdown() error {
-	// will close() the deliveries channel
-	if err := receiver.channel.Cancel(receiver.CTag, true); err != nil {
-		return fmt.Errorf("Consumer cancel failed: %s", err)
-	}
-	logrus.Infoln("Consumer Channel shutdown OK")
-	return nil
 }

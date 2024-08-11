@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
 	"net/http"
 )
 

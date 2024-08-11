@@ -24,7 +24,7 @@ func connect(cfg *settings.MqConfig) (*amqp.Connection, error) {
 }
 
 func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
-	if connection.IsClosed() {
+	if connection == nil || connection.IsClosed() {
 		var err error
 		connection, err = connect(setting.Instance().MqConfig)
 		if err != nil {
@@ -77,10 +77,4 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	}
 
 	return ch
-}
-
-func Init() error {
-	var err error
-	connection, err = connect(setting.Instance().MqConfig)
-	return err
 }

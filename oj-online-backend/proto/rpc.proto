@@ -26,7 +26,7 @@ service DBService{
 
   // record
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
-  rpc CreateUserSubmitRecord(CreateUserSubmitRecordRequest) returns(google.protobuf.Empty);
+  rpc SaveUserSubmitRecord(SaveUserSubmitRecordRequest) returns(google.protobuf.Empty);
 
   // comment接口
   rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
@@ -141,7 +141,7 @@ message QueryProblemWithNameResponse{
   repeated Problem data = 1;
 }
 
-message CreateUserSubmitRecordRequest{
+message SaveUserSubmitRecordRequest{
   int64 user_id = 1;
   int64 problem_id = 2;
   string code = 3;

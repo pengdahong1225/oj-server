@@ -1,4 +1,4 @@
-package judgeClient
+package judge
 
 // ProblemHotData 题目热点数据
 type ProblemHotData struct {

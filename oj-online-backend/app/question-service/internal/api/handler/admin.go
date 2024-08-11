@@ -2,10 +2,10 @@ package handler
 
 import (
 	"context"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
+	models2 "github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/setting"
 	"github.com/pengdahong1225/Oj-Online-Server/pkg/registry"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -13,8 +13,8 @@ import (
 type AdminHandler struct {
 }
 
-func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models.AddProblemForm) *models.Response {
-	res := &models.Response{
+func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models2.AddProblemForm) *models2.Response {
+	res := &models2.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
@@ -67,8 +67,8 @@ func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models.AddPro
 	return res
 }
 
-func (receiver AdminHandler) HandleDelQuestion(problemID int64) *models.Response {
-	res := &models.Response{
+func (receiver AdminHandler) HandleDelQuestion(problemID int64) *models2.Response {
+	res := &models2.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,

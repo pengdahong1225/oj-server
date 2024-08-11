@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/api/handler"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/middlewares"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/models"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
 	"net/http"
 	"strconv"
 )

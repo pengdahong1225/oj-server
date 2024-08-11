@@ -1,9 +1,9 @@
-package judgeClient
+package judge
 
 import (
 	"bytes"
 	"encoding/json"
-	goroutinePool "github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/goroutinePoll"
+	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/goroutinePool"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -83,7 +83,7 @@ func (receiver *Handler) run(param *Param) {
 	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 	for _, test := range param.testCases {
-		goroutinePool.PoolInstance.Submit(func() {
+		goroutinePool.Instance().Submit(func() {
 			wg.Add(1)
 			defer wg.Done()
 			// 定义请求的body内容

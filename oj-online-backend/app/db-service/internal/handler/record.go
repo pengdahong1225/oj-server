@@ -4,18 +4,18 @@ import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
-	pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
-func (receiver *DBServiceServer) CreateUserSubmitRecord(ctx context.Context, request *pb.CreateUserSubmitRecordRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
 	/*
 		insert into user_submit_record_xxx
 		(uid, problem_id, code, result, lang)
 		values
 		(?, ?, ?, ?, ?);
 	*/
-	db := mysql.DB
+	db := mysql.Instance()
 	record := &mysql.SubMitRecord{
 		Uid:       request.UserId,
 		ProblemID: request.ProblemId,
@@ -44,7 +44,7 @@ func (receiver *DBServiceServer) GetUserSubmitRecord(ctx context.Context, reques
 		select * from user_submit_record_xx
 		where uid = ? and stamp = ?;
 	*/
-	db := mysql.DB
+	db := mysql.Instance()
 	r := &mysql.SubMitRecord{}
 	if !db.Migrator().HasTable(r.TableName(request.Stamp)) {
 		return nil, NotFound

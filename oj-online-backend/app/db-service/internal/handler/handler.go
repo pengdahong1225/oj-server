@@ -1,6 +1,6 @@
 package handler
 
-import pb "github.com/pengdahong1225/Oj-Online-Server/proto"
+import "github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 
 type DBServiceServer struct {
 	pb.UnimplementedDBServiceServer
