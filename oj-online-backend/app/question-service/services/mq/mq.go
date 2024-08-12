@@ -22,6 +22,7 @@ func connect(cfg *settings.MqConfig) (*amqp.Connection, error) {
 	return MqConnection, err
 }
 
+// 完整的声明交换机，声明队列，绑定
 func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	if connection == nil || connection.IsClosed() {
 		var err error
@@ -41,7 +42,7 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	err = ch.ExchangeDeclare(
 		exName, // 交换机名称
 		exKind, // 交换机类型
-		true,   // 是否持久化
+		true,   // 交换机持久化
 		false,  // 是否自动删除(最后一个消费者取消订阅该队列时，自动删除队列)
 		false,  // 是否独占(只能被一个消费者连接)
 		false,  // 是否阻塞等待队列可用
@@ -53,7 +54,7 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	}
 	queue, err := ch.QueueDeclare(
 		quName, // 队列名称
-		true,   // 是否持久化
+		true,   // 队列持久化
 		false,  // 是否自动删除
 		false,  // 是否独占
 		false,  // 是否阻塞等待队列可用
