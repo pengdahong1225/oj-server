@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/services/redis"
+	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal/svc/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
