@@ -2,10 +2,10 @@ package internal
 
 import (
 	"encoding/json"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/handler"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mq"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/redis"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/logic"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mq"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
@@ -46,7 +46,7 @@ func syncHandle(data []byte) bool {
 	}
 	// 处理
 	goroutinePool.Instance().Submit(func() {
-		handler.SaveComment(comment)
+		logic.SaveComment(comment)
 	})
 
 	return true

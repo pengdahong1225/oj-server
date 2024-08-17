@@ -1,22 +1,23 @@
-package handler
+package logic
 
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/services/mysql"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
+	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
-func (receiver *DBServiceServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
+func (receiver *rpc.DBServiceServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
 	/*
 		insert into user_submit_record_xxx
 		(uid, problem_id, code, result, lang)
 		values
 		(?, ?, ?, ?, ?);
 	*/
-	db := mysql.Instance()
-	record := &mysql.SubMitRecord{
+	db := mysql2.Instance()
+	record := &mysql2.SubMitRecord{
 		Uid:       request.UserId,
 		ProblemID: request.ProblemId,
 		Code:      request.Code,
@@ -39,18 +40,18 @@ func (receiver *DBServiceServer) SaveUserSubmitRecord(ctx context.Context, reque
 	return &empty.Empty{}, nil
 }
 
-func (receiver *DBServiceServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
+func (receiver *rpc.DBServiceServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
 	/*
 		select * from user_submit_record_xx
 		where uid = ? and stamp = ?;
 	*/
-	db := mysql.Instance()
-	r := &mysql.SubMitRecord{}
+	db := mysql2.Instance()
+	r := &mysql2.SubMitRecord{}
 	if !db.Migrator().HasTable(r.TableName(request.Stamp)) {
 		return nil, NotFound
 	}
 
-	var records []mysql.SubMitRecord
+	var records []mysql2.SubMitRecord
 	result := db.Where("uid = ?", request.UserId).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
