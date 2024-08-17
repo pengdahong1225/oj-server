@@ -1,4 +1,4 @@
-package handler
+package logic
 
 type Result struct {
 	Status  int

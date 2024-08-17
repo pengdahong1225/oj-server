@@ -1,15 +1,17 @@
-package api
+package handler
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/captcha"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/svc/captcha"
 	"net/http"
 	"regexp"
 )
 
+type CaptchaHandler struct{}
+
 // GetImageCode 获取图像验证码
-func GetImageCode(ctx *gin.Context) {
+func (receiver CaptchaHandler) GetImageCode(ctx *gin.Context) {
 	id, b64s, err := captcha.GenerateImageCaptcha()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -29,7 +31,7 @@ func GetImageCode(ctx *gin.Context) {
 }
 
 // GetSmsCode 获取短信验证码
-func GetSmsCode(ctx *gin.Context) {
+func (receiver CaptchaHandler) GetSmsCode(ctx *gin.Context) {
 	// 表单校验
 	form, ret := validate(ctx, models.GetSmsCodeForm{})
 	if !ret {

@@ -1,8 +1,8 @@
-package handler
+package logic
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/mq"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/svc/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -11,9 +11,9 @@ import (
 	"time"
 )
 
-type CommentHandler struct{}
+type CommentLogic struct{}
 
-func (receiver CommentHandler) HandleAddComment(form *models.CommentForm) *models.Response {
+func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",

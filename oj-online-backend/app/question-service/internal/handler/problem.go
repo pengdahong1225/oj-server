@@ -1,7 +1,7 @@
-package api
+package handler
 
 import (
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/api/handler"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/logic"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
 	"net/http"
@@ -10,9 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ProblemHandler struct{}
+
 // ProblemSet 题目列表
 // 查询参数 cursor：游标，代表下一个元素的id
-func ProblemSet(ctx *gin.Context) {
+func (receiver ProblemHandler) ProblemSet(ctx *gin.Context) {
 	cursor, _ := strconv.Atoi(ctx.DefaultQuery("cursor", "0"))
 	if cursor < 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -22,11 +24,11 @@ func ProblemSet(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	res := handler.ProblemHandler{}.HandleProblemSet(cursor)
+	res := logic.ProblemLogic{}.HandleProblemSet(cursor)
 	ctx.JSON(res.Code, res)
 }
 
-func ProblemDetail(ctx *gin.Context) {
+func (receiver ProblemHandler) ProblemDetail(ctx *gin.Context) {
 	// 查询参数
 	problemID := ctx.Query("problemID")
 	if problemID == "" {
@@ -38,11 +40,11 @@ func ProblemDetail(ctx *gin.Context) {
 	}
 
 	ID, _ := strconv.ParseInt(problemID, 10, 64)
-	res := handler.ProblemHandler{}.HandleProblemDetail(ID)
+	res := logic.ProblemLogic{}.HandleProblemDetail(ID)
 	ctx.JSON(res.Code, res)
 }
 
-func ProblemSubmit(ctx *gin.Context) {
+func (receiver ProblemHandler) ProblemSubmit(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	// 表单验证
 	form, ret := validate(ctx, models.SubmitForm{})
@@ -50,12 +52,12 @@ func ProblemSubmit(ctx *gin.Context) {
 		return
 	}
 
-	res := handler.ProblemHandler{}.HandleProblemSubmit(claims.Uid, form)
+	res := logic.ProblemLogic{}.HandleProblemSubmit(claims.Uid, form)
 	ctx.JSON(res.Code, res)
 }
 
 // 查询提交结果
-func QueryResult(ctx *gin.Context) {
+func (receiver ProblemHandler) QueryResult(ctx *gin.Context) {
 	// 查询参数
 	id := ctx.Query("problemID")
 	if id == "" {
@@ -67,11 +69,11 @@ func QueryResult(ctx *gin.Context) {
 	}
 	problemID, _ := strconv.ParseInt(id, 10, 64)
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := handler.ProblemHandler{}.HandleQueryResult(claims.Uid, problemID)
+	res := logic.ProblemLogic{}.HandleQueryResult(claims.Uid, problemID)
 	ctx.JSON(res.Code, res)
 }
 
-func ProblemSearch(ctx *gin.Context) {
+func (receiver ProblemHandler) ProblemSearch(ctx *gin.Context) {
 	name := ctx.Query("name")
 	if name == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -80,6 +82,6 @@ func ProblemSearch(ctx *gin.Context) {
 		})
 		return
 	}
-	res := handler.ProblemHandler{}.HandleProblemSearch(name)
+	res := logic.ProblemLogic{}.HandleProblemSearch(name)
 	ctx.JSON(res.Code, res)
 }

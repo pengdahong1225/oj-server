@@ -1,4 +1,4 @@
-package handler
+package logic
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/services/redis"
+	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/svc/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
@@ -22,10 +22,10 @@ var (
 	issuer           = "Messi"
 )
 
-type UserHandler struct {
+type UserLogic struct {
 }
 
-func (receiver UserHandler) HandleLogin(form *models.LoginFrom) *models.Response {
+func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -83,7 +83,7 @@ func (receiver UserHandler) HandleLogin(form *models.LoginFrom) *models.Response
 	return res
 }
 
-func (receiver UserHandler) HandleGetUserProfile(uid int64) *models.Response {
+func (receiver UserLogic) HandleGetUserProfile(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -113,7 +113,7 @@ func (receiver UserHandler) HandleGetUserProfile(uid int64) *models.Response {
 	return res
 }
 
-func (receiver UserHandler) HandleGetRankList() *models.Response {
+func (receiver UserLogic) HandleGetRankList() *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -151,7 +151,7 @@ func (receiver UserHandler) HandleGetRankList() *models.Response {
 	return res
 }
 
-func (receiver UserHandler) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
+func (receiver UserLogic) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -178,7 +178,7 @@ func (receiver UserHandler) HandleGetSubmitRecord(uid int64, stamp int64) *model
 }
 
 // HandleGetUserSolvedList 获取用户解决了哪些题目
-func (receiver UserHandler) HandleGetUserSolvedList(uid int64) *models.Response {
+func (receiver UserLogic) HandleGetUserSolvedList(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",

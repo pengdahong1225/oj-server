@@ -1,4 +1,4 @@
-package handler
+package logic
 
 import (
 	"context"
@@ -10,10 +10,10 @@ import (
 	"net/http"
 )
 
-type AdminHandler struct {
+type AdminLogic struct {
 }
 
-func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models.AddProblemForm) *models.Response {
+func (receiver AdminLogic) HandleUpdateQuestion(uid int64, form *models.AddProblemForm) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -67,7 +67,7 @@ func (receiver AdminHandler) HandleUpdateQuestion(uid int64, form *models.AddPro
 	return res
 }
 
-func (receiver AdminHandler) HandleDelQuestion(problemID int64) *models.Response {
+func (receiver AdminLogic) HandleDelQuestion(problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
