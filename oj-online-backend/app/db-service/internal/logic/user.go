@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
 	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
-func (receiver *rpc.DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
+func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
 	db := mysql2.Instance()
 	var user mysql2.UserInfo
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
@@ -37,7 +36,7 @@ func (receiver *rpc.DBServiceServer) GetUserDataByMobile(ctx context.Context, re
 	}, nil
 }
 
-func (receiver *rpc.DBServiceServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
+func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
 	db := mysql2.Instance()
 	var user mysql2.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
@@ -64,7 +63,7 @@ func (receiver *rpc.DBServiceServer) GetUserDataByUid(ctx context.Context, reque
 	}, nil
 }
 
-func (receiver *rpc.DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	db := mysql2.Instance()
 	var user mysql2.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile)
@@ -91,7 +90,7 @@ func (receiver *rpc.DBServiceServer) CreateUserData(ctx context.Context, request
 	return &pb.CreateUserResponse{Id: user.ID}, nil
 }
 
-func (receiver *rpc.DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
 	db := mysql2.Instance()
 	var user mysql2.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
@@ -118,7 +117,7 @@ func (receiver *rpc.DBServiceServer) UpdateUserData(ctx context.Context, request
 	return &empty.Empty{}, nil
 }
 
-func (receiver *rpc.DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
 	db := mysql2.Instance()
 	var user mysql2.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
@@ -143,7 +142,7 @@ func (receiver *rpc.DBServiceServer) DeleteUserData(ctx context.Context, request
 }
 
 // GetUserList 采用游标分页
-func (receiver *rpc.DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
 	// db := mysql.Instance()
 	// var pageSize = 10
 	// var userlist []models.UserInfo
@@ -181,7 +180,7 @@ func (receiver *rpc.DBServiceServer) GetUserList(ctx context.Context, request *p
 }
 
 // GetUserSolvedList 查询用户哪些题目
-func (receiver *rpc.DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
+func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
 	db := mysql2.Instance()
 	var userSolutionList []mysql2.UserSolution
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)

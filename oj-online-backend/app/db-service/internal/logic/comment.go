@@ -1,7 +1,7 @@
 package logic
 
 import (
-	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
@@ -10,14 +10,14 @@ import (
 // 2.更新回复评论的回复数
 // 3.更新根评论（楼主）的child_count
 func SaveComment(pbComment *pb.Comment) {
-	db := mysql2.Instance()
+	db := mysql.Instance()
 	// obj_id目标评论区是否存在
 	/*
 		select count(*)
 		from problem
 		where id = ?;
 	*/
-	var c mysql2.Comment
+	var c mysql.Comment
 	result := db.Where("id = ?", pbComment.ObjId).Limit(1).Find(&c)
 	if result.Error != nil {
 		logrus.Errorln(result.Error)
@@ -38,7 +38,7 @@ func SaveComment(pbComment *pb.Comment) {
 
 	}
 
-	comment := mysql2.Comment{
+	comment := mysql.Comment{
 		ObjId:         pbComment.ObjId,
 		UserId:        pbComment.UserId,
 		UserName:      pbComment.UserName,

@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/logic"
 	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
@@ -57,7 +57,7 @@ func (receiver Server) Start() {
 		panic(err)
 	}
 
-	// 消费者
+	// mq消费者
 	wg.Add(1)
 	err = goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
@@ -96,7 +96,7 @@ func StartRPCServer() {
 	}
 
 	// 注册并启动db服务
-	dbSrv := rpc.DBServiceServer{}
+	dbSrv := logic.DBServiceServer{}
 	pb.RegisterDBServiceServer(grpcServer, &dbSrv)
 	if err := grpcServer.Serve(listener); err != nil {
 		panic(err)

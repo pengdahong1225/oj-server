@@ -2,7 +2,7 @@ package internal
 
 import (
 	"encoding/json"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/logic"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/logic"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/redis"

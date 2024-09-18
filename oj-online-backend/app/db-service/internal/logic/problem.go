@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
 	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/utils"
@@ -14,7 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (receiver *rpc.DBServiceServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
+func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
 	db := mysql2.Instance()
 
 	compileConfig := mysql2.ProblemConfig{
@@ -94,7 +93,7 @@ func (receiver *rpc.DBServiceServer) UpdateProblemData(ctx context.Context, requ
 	}, nil
 }
 
-func (receiver *rpc.DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
+func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	db := mysql2.Instance()
 
 	var problem mysql2.Problem
@@ -159,7 +158,7 @@ func (receiver *rpc.DBServiceServer) GetProblemData(ctx context.Context, request
 	}, nil
 }
 
-func (receiver *rpc.DBServiceServer) DeleteProblemData(ctx context.Context, request *pb.DeleteProblemRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request *pb.DeleteProblemRequest) (*empty.Empty, error) {
 	db := mysql2.Instance()
 	var problem *mysql2.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
@@ -184,7 +183,7 @@ func (receiver *rpc.DBServiceServer) DeleteProblemData(ctx context.Context, requ
 
 // GetProblemList 题库列表
 // 游标分页，查询id，title，level，tags
-func (receiver *rpc.DBServiceServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
+func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
 	db := mysql2.Instance()
 	var pageSize = 10
 	rsp := &pb.GetProblemListResponse{}
@@ -221,7 +220,7 @@ func (receiver *rpc.DBServiceServer) GetProblemList(ctx context.Context, request
 
 // QueryProblemWithName 根据题目名查询题目
 // 模糊查询
-func (receiver *rpc.DBServiceServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
+func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
 	db := mysql2.Instance()
 	var problemList []mysql2.Problem
 	// select * from problem
@@ -253,7 +252,7 @@ func (receiver *rpc.DBServiceServer) QueryProblemWithName(ctx context.Context, r
 
 // GetProblemHotData 读取题目热点数据
 // 获取后更新到缓存
-func (receiver *rpc.DBServiceServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
+func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
 	db := mysql2.Instance()
 	var problem mysql2.Problem
 	// select test_case, compile_config, run_config

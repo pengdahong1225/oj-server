@@ -3,13 +3,12 @@ package logic
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
 	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
-func (receiver *rpc.DBServiceServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
+func (receiver *DBServiceServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
 	/*
 		insert into user_submit_record_xxx
 		(uid, problem_id, code, result, lang)
@@ -40,7 +39,7 @@ func (receiver *rpc.DBServiceServer) SaveUserSubmitRecord(ctx context.Context, r
 	return &empty.Empty{}, nil
 }
 
-func (receiver *rpc.DBServiceServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
+func (receiver *DBServiceServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
 	/*
 		select * from user_submit_record_xx
 		where uid = ? and stamp = ?;
