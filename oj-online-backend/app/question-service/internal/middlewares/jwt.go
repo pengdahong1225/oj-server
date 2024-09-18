@@ -63,7 +63,7 @@ func (receiver *JWT) ParseToken(tokenString string) (*UserClaims, error) {
 	return nil, TokenInvalid
 }
 
-func (receiver JWT) RefreshToken(tokenString string) (string, error) {
+func (receiver *JWT) RefreshToken(tokenString string) (string, error) {
 	jwt.TimeFunc = func() time.Time {
 		return time.Unix(0, 0)
 	}
