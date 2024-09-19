@@ -2,19 +2,22 @@ syntax = "proto3";
 option go_package = "./;pb";
 
 message Comment{
-  int64  obj_id = 1;
-  int64  user_id = 2;
-  string user_name = 3;
-  string user_avatar_url = 4;
-  int64  root_id = 5;
-  int64 root_comment_id = 6;
-  int64 reply_id = 7;
-  int64 reply_comment_id = 8;
-  string content = 9;
-  bool is_root = 10;
-  int32  status = 11;
-  int32 reply_count = 12;
-  int32 like_count = 13;
-  int32 child_count = 14;
-  int64  stamp = 15;
+  int64 id = 1;
+
+  int64  obj_id = 2;
+  int64  user_id = 3;
+  string user_name = 4;
+  string user_avatar_url = 5;
+  string content = 6;
+  int32  status = 7;
+  int32 reply_count = 8;
+  int32 like_count = 9;
+  int32 child_count = 10;
+  int64  stamp = 11;
+
+  int32 is_root = 12;
+  int64  root_id = 13;
+  int64 root_comment_id = 14;
+  int64 reply_id = 15;
+  int64 reply_comment_id = 16;
 }

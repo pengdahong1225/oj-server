@@ -12,8 +12,70 @@ import (
 )
 
 func (receiver *DBServiceServer) QueryComment(ctx context.Context, request *pb.QueryCommentRequest) (*pb.QueryCommentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryComment not implemented")
+	// 校验
+	checker := commentChecker{}
+	if !checker.assertObj(request.ObjId) {
+		logrus.Errorf("obj[%d] assert failed", request.ObjId)
+		return nil, QueryFailed
+	}
+	if request.RootId > 0 && request.RootCommentId > 0 && !checker.assertRoot(request.RootCommentId, request.RootId) {
+		logrus.Errorf("root comment[%d] assert failed", request.RootCommentId)
+		return nil, QueryFailed
+	}
+	if request.ReplyId > 0 && request.ReplyCommentId > 0 && !checker.assertReply(request.ReplyCommentId, request.ReplyId) {
+		logrus.Errorf("reply comment[%d] assert failed", request.ReplyCommentId)
+		return nil, QueryFailed
+	}
+
+	response := &pb.QueryCommentResponse{}
+	cursor := request.Cursor
+	if cursor < 0 {
+		cursor = 0
+	}
+	if request.RootId > 0 && request.RootCommentId > 0 {
+		comments := receiver.onRootComment(request.ObjId, request.Cursor)
+		for _, comment := range comments {
+			response.Data = append(response.Data, translateComment(&comment))
+		}
+		return response, nil
+	} else {
+		comments := receiver.onChildComment(request.ObjId, request.Cursor)
+		for _, comment := range comments {
+			response.Data = append(response.Data, translateComment(&comment))
+		}
+		return response, nil
+	}
 }
+func (receiver *DBServiceServer) onRootComment(objId int64, cursor int64) []mysql.Comment {
+	/*
+		select * from comment
+		where obj_id = ? and is_root = 1 and id > cursor
+		order by like_count desc
+		limit 10;
+	*/
+	var comments []mysql.Comment
+	db := mysql.Instance()
+	result := db.Where("obj_id = ?", objId).Where("is_root = ?", 1).Where("obj_id > ?", cursor).Order("like_count desc").Limit(10).Find(&comments)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+	}
+	return comments
+}
+func (receiver *DBServiceServer) onChildComment(objId int64, cursor int64) []mysql.Comment {
+	/*
+		select * from comment
+		where obj_id = ? and is_root = 0 and id > cursor
+		limit 5;
+	*/
+	var comments []mysql.Comment
+	db := mysql.Instance()
+	result := db.Where("obj_id = ?", objId).Where("is_root = ?", 0).Where("obj_id > ?", cursor).Limit(5).Find(&comments)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+	}
+	return comments
+}
+
 func (receiver *DBServiceServer) DeleteComment(ctx context.Context, request *pb.DeleteCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
 }
@@ -21,11 +83,12 @@ func (receiver *DBServiceServer) DeleteComment(ctx context.Context, request *pb.
 type CommentSaveHandler struct{}
 
 func (receiver CommentSaveHandler) SaveComment(pbComment *pb.Comment) {
-	if !receiver.assertObj(pbComment) {
+	checker := commentChecker{}
+	if !checker.assertObj(pbComment.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", pbComment.ObjId)
 		return
 	}
-	if pbComment.IsRoot {
+	if pbComment.IsRoot > 0 {
 		receiver.onRootComment(pbComment) // 第一层
 	} else {
 		receiver.onChildComment(pbComment) // 第二层
@@ -68,11 +131,12 @@ func (receiver CommentSaveHandler) onRootComment(pbComment *pb.Comment) {
 	tx.Commit()
 }
 func (receiver CommentSaveHandler) onChildComment(pbComment *pb.Comment) {
-	if !receiver.assertRoot(pbComment) {
+	checker := commentChecker{}
+	if !checker.assertRoot(pbComment.RootCommentId, pbComment.RootId) {
 		logrus.Errorf("root comment[%d] assert failed", pbComment.RootCommentId)
 		return
 	}
-	if pbComment.ReplyId > 0 && pbComment.ReplyCommentId > 0 && !receiver.assertReply(pbComment) {
+	if pbComment.ReplyId > 0 && pbComment.ReplyCommentId > 0 && !checker.assertReply(pbComment.ReplyCommentId, pbComment.ReplyId) {
 		logrus.Errorf("reply comment[%d] assert failed", pbComment.ReplyCommentId)
 		return
 	}
@@ -233,51 +297,77 @@ func (receiver CommentSaveHandler) updateReplyCommentReplyCount(tx *gorm.DB, id 
 	return true
 }
 
+// assert
+type commentChecker struct {
+}
+
 // obj是否存在
-func (receiver CommentSaveHandler) assertObj(pbComment *pb.Comment) bool {
+func (receiver commentChecker) assertObj(id int64) bool {
 	db := mysql.Instance()
 
 	var p mysql.Problem
-	result := db.Where("id = ?", pbComment.ObjId).Limit(1).Find(&p)
+	result := db.Where("id = ?", id).Find(&p)
 	if result.Error != nil {
 		logrus.Errorln(result.Error)
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment obj[%d] not found", pbComment.ObjId)
+		logrus.Errorf("comment obj[%d] not found", id)
 		return false
 	}
 	return true
 }
 
 // 根评论是否存在，校验root_id和root_comment_id
-func (receiver CommentSaveHandler) assertRoot(pbComment *pb.Comment) bool {
+func (receiver commentChecker) assertRoot(rootCommentId int64, rootId int64) bool {
 	db := mysql.Instance()
 	var c mysql.Comment
-	result := db.Where("id = ?", pbComment.RootCommentId).Where("user_id = ?", pbComment.UserId).Find(&c)
+	result := db.Where("id = ?", rootCommentId).Where("user_id = ?", rootId).Find(&c)
 	if result.Error != nil {
 		logrus.Errorln(result.Error)
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("root comment[%d] not found", pbComment.RootCommentId)
+		logrus.Errorf("root comment[%d] not found", rootCommentId)
 		return false
 	}
 	return true
 }
 
 // 回复评论是否存在，校验reply_id和reply_comment_id
-func (receiver CommentSaveHandler) assertReply(pbComment *pb.Comment) bool {
+func (receiver commentChecker) assertReply(replyCommentId int64, replyId int64) bool {
 	db := mysql.Instance()
 	var c mysql.Comment
-	result := db.Where("id = ?", pbComment.ReplyCommentId).Where("user_id = ?", pbComment.UserId).Find(&c)
+	result := db.Where("id = ?", replyCommentId).Where("user_id = ?", replyId).Find(&c)
 	if result.Error != nil {
 		logrus.Errorln(result.Error)
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("reply comment[%d] not found", pbComment.ReplyCommentId)
+		logrus.Errorf("reply comment[%d] not found", replyCommentId)
 		return false
 	}
 	return true
+}
+
+func translateComment(comment *mysql.Comment) *pb.Comment {
+	return &pb.Comment{
+		Id:            int64(comment.ID),
+		ObjId:         comment.ObjId,
+		UserId:        comment.UserId,
+		UserName:      comment.UserName,
+		UserAvatarUrl: comment.UserAvatarUrl,
+		Content:       comment.Content,
+		Status:        int32(comment.Status),
+		LikeCount:     int32(comment.LikeCount),
+		ReplyCount:    int32(comment.ReplyCount),
+		ChildCount:    int32(comment.ChildCount),
+		Stamp:         comment.Stamp,
+
+		IsRoot:         int32(comment.IsRoot),
+		RootId:         comment.RootId,
+		RootCommentId:  comment.RootCommentId,
+		ReplyId:        comment.ReplyId,
+		ReplyCommentId: comment.ReplyCommentId,
+	}
 }

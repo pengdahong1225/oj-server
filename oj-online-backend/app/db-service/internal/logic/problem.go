@@ -64,7 +64,7 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	// 不存在就新增，存在就修改
 	//if result.RowsAffected > 0 {
@@ -100,7 +100,7 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -112,17 +112,17 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 	err := json.Unmarshal([]byte(problem.CompileConfig), &compileConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	err = json.Unmarshal([]byte(problem.RunConfig), &runConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	err = json.Unmarshal([]byte(problem.TestCase), &testCases)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 
 	data := &pb.Problem{
@@ -164,7 +164,7 @@ func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request 
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -193,7 +193,7 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 	result := db.Model(problemList).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	rsp.Total = int32(count)
 
@@ -204,7 +204,7 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 	result = db.Select("id,title,level,tags").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&problemList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	for _, Problem := range problemList {
 		rsp.Data = append(rsp.Data, &pb.Problem{
@@ -229,7 +229,7 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 	result := db.Where("name LINK ?", names).Find(&problemList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -261,7 +261,7 @@ func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request 
 	result := db.Where("id = ?", request.ProblemId).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound

@@ -15,7 +15,7 @@ func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, reques
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -42,7 +42,7 @@ func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -96,7 +96,7 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -123,7 +123,7 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
@@ -186,7 +186,7 @@ func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request 
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound

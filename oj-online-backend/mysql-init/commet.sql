@@ -25,5 +25,6 @@ create table if not exists comment(
     INDEX idx_obj_id(obj_id),
     INDEX idx_user_id(user_id),
     INDEX idx_root_id(root_id),
-    INDEX idx_reply_id(reply_id)
+    INDEX idx_reply_id(reply_id),
+    INDEX idx_like_count(like_count)
 )engine = InnoDB charset = utf8mb4;

@@ -54,7 +54,7 @@ func (receiver *DBServiceServer) GetUserSubmitRecord(ctx context.Context, reques
 	result := db.Where("uid = ?", request.UserId).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryField
+		return nil, QueryFailed
 	}
 	if result.RowsAffected == 0 {
 		return nil, NotFound
