@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/daemon"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/logic"
 	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
@@ -29,7 +30,7 @@ func (receiver Server) Start() {
 
 	wg := new(sync.WaitGroup)
 
-	// DB服务
+	// DB rpc服务
 	wg.Add(1)
 	err := goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
@@ -40,16 +41,16 @@ func (receiver Server) Start() {
 	}
 
 	// 排行榜
-	daemonServer := Daemon{}
+	daemonServer := daemon.Daemon{}
 	wg.Add(1)
 	err = goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
-		ticker := time.NewTicker(time.Hour)
+		ticker := time.NewTicker(time.Hour * 24)
 		defer ticker.Stop()
 		for {
 			select {
 			case <-ticker.C:
-				daemonServer.loopRank()
+				daemonServer.LoopRank()
 			}
 		}
 	})

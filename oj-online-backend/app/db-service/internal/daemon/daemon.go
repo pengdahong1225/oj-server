@@ -1,4 +1,4 @@
-package internal
+package daemon
 
 import (
 	"encoding/json"
@@ -31,7 +31,7 @@ func (receiver Daemon) CommentSaveConsumer() {
 		if syncHandle(d.Body) {
 			d.Ack(false)
 		} else {
-			d.Reject(false)
+			d.Reject(false) // 拒绝并且丢失
 		}
 	}
 }
@@ -46,14 +46,14 @@ func syncHandle(data []byte) bool {
 	}
 	// 处理
 	goroutinePool.Instance().Submit(func() {
-		logic.SaveComment(comment)
+		logic.CommentSaveHandler{}.SaveComment(comment)
 	})
 
 	return true
 }
 
 // 排行榜
-func (receiver Daemon) loopRank() {
+func (receiver Daemon) LoopRank() {
 	var key = "rank"
 	conn := redis.NewConn()
 	defer conn.Close()

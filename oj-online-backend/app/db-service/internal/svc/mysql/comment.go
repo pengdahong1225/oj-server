@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Comment struct {
@@ -25,4 +26,14 @@ type Comment struct {
 
 func (receiver *Comment) TableName() string {
 	return "comment"
+}
+
+func NewComment() *Comment {
+	return &Comment{
+		Status:     1,
+		LikeCount:  0,
+		ChildCount: 0,
+		ReplyCount: 0,
+		Stamp:      time.Now().Unix(),
+	}
 }
