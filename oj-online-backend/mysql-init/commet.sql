@@ -1,3 +1,4 @@
+use oj_online_server;
 create table if not exists comment(
     id BIGINT AUTO_INCREMENT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

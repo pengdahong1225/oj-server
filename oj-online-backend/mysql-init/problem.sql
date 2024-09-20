@@ -1,3 +1,4 @@
+use oj_online_server;
 -- 题目表
 create table if not exists problem
 (
