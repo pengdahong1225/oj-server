@@ -1,8 +1,11 @@
 package logic
 
 import (
+	"context"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/svc/mq"
+	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -13,7 +16,7 @@ import (
 
 type CommentLogic struct{}
 
-func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.Response {
+func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -80,4 +83,40 @@ func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.
 		res.Message = "OK"
 		return res
 	}
+}
+
+func (receiver CommentLogic) OnQueryComment(form *models.QueryCommentForm) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+
+	request := &pb.QueryCommentRequest{
+		ObjId:          form.ObjId,
+		RootCommentId:  form.RootCommentId,
+		RootId:         form.RootId,
+		ReplyCommentId: form.ReplyCommentId,
+		ReplyId:        form.ReplyId,
+		Cursor:         form.CurSor,
+	}
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+	client := pb.NewCommentServiceClient(dbConn)
+	response, err := client.QueryComment(context.Background(), request)
+	if err != nil {
+		res.Code = http.StatusOK
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+	res.Message = "OK"
+	res.Data = response.Data
+	return res
 }

@@ -9,17 +9,23 @@ import (
 type CommentHandler struct {
 }
 
-func (r CommentHandler) Add(ctx *gin.Context) {
-	form, ok := validate(ctx, models.CommentForm{})
+func (r CommentHandler) Insert(ctx *gin.Context) {
+	form, ok := validate(ctx, models.AddCommentForm{})
 	if !ok {
 		return
 	}
-	res := logic.CommentLogic{}.HandleAddComment(form)
+	res := logic.CommentLogic{}.OnAddComment(form)
+	ctx.JSON(200, res)
+}
+func (r CommentHandler) Query(ctx *gin.Context) {
+	form, ok := validate(ctx, models.QueryCommentForm{})
+	if !ok {
+		return
+	}
+	res := logic.CommentLogic{}.OnQueryComment(form)
 	ctx.JSON(200, res)
 }
 
 func (r CommentHandler) Delete(ctx *gin.Context) {}
 
 func (r CommentHandler) Like(ctx *gin.Context) {}
-
-func (r CommentHandler) Get(ctx *gin.Context) {}

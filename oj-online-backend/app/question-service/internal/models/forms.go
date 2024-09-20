@@ -45,7 +45,7 @@ type TestCase struct {
 	Output string `json:"output"`
 }
 
-type CommentForm struct {
+type AddCommentForm struct {
 	ObjId         int64  `json:"obj_id" form:"obj_id" binding:"required"`
 	UserId        int64  `json:"user_id" form:"user_id" binding:"required"`
 	UserName      string `json:"user_name" form:"user_name"`
@@ -57,4 +57,15 @@ type CommentForm struct {
 	RootCommentId  int64 `json:"root_comment_id" form:"root_comment_id" binding:"required"`
 	ReplyId        int64 `json:"reply_id" form:"reply_id" binding:"required"`
 	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id" binding:"required"`
+}
+type QueryCommentForm struct {
+	ObjId int64 `json:"obj_id" form:"obj_id" binding:"required"`
+
+	RootId        int64 `json:"root_id" form:"root_id"`
+	RootCommentId int64 `json:"root_comment_id" form:"root_comment_id"`
+
+	ReplyId        int64 `json:"reply_id" form:"reply_id"`
+	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id"`
+
+	CurSor int64 `json:"cur_cursor" form:"cur_cursor"`
 }
