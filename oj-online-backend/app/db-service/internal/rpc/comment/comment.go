@@ -1,7 +1,8 @@
-package logic
+package comment
 
 import (
 	"context"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -11,20 +12,24 @@ import (
 	"gorm.io/gorm"
 )
 
-func (receiver *DBServiceServer) QueryComment(ctx context.Context, request *pb.QueryCommentRequest) (*pb.QueryCommentResponse, error) {
+type CommentServer struct {
+	pb.UnimplementedCommentServiceServer
+}
+
+func (receiver *CommentServer) QueryComment(ctx context.Context, request *pb.QueryCommentRequest) (*pb.QueryCommentResponse, error) {
 	// 校验
 	checker := commentChecker{}
 	if !checker.assertObj(request.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", request.ObjId)
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if request.RootId > 0 && request.RootCommentId > 0 && !checker.assertRoot(request.RootCommentId, request.RootId) {
 		logrus.Errorf("root comment[%d] assert failed", request.RootCommentId)
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if request.ReplyId > 0 && request.ReplyCommentId > 0 && !checker.assertReply(request.ReplyCommentId, request.ReplyId) {
 		logrus.Errorf("reply comment[%d] assert failed", request.ReplyCommentId)
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 
 	response := &pb.QueryCommentResponse{}
@@ -46,7 +51,7 @@ func (receiver *DBServiceServer) QueryComment(ctx context.Context, request *pb.Q
 		return response, nil
 	}
 }
-func (receiver *DBServiceServer) onRootComment(objId int64, cursor int64) []mysql.Comment {
+func (receiver *CommentServer) onRootComment(objId int64, cursor int64) []mysql.Comment {
 	/*
 		select * from comment
 		where obj_id = ? and is_root = 1 and id > cursor
@@ -61,7 +66,7 @@ func (receiver *DBServiceServer) onRootComment(objId int64, cursor int64) []mysq
 	}
 	return comments
 }
-func (receiver *DBServiceServer) onChildComment(objId int64, cursor int64) []mysql.Comment {
+func (receiver *CommentServer) onChildComment(objId int64, cursor int64) []mysql.Comment {
 	/*
 		select * from comment
 		where obj_id = ? and is_root = 0 and id > cursor
@@ -76,7 +81,7 @@ func (receiver *DBServiceServer) onChildComment(objId int64, cursor int64) []mys
 	return comments
 }
 
-func (receiver *DBServiceServer) DeleteComment(ctx context.Context, request *pb.DeleteCommentRequest) (*emptypb.Empty, error) {
+func (receiver *CommentServer) DeleteComment(ctx context.Context, request *pb.DeleteCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
 }
 

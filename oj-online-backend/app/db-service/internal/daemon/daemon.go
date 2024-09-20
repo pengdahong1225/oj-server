@@ -2,7 +2,7 @@ package daemon
 
 import (
 	"encoding/json"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/logic"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/comment"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/redis"
@@ -38,15 +38,15 @@ func (receiver Daemon) CommentSaveConsumer() {
 
 // 解析，校验，提交任务给评测机
 func syncHandle(data []byte) bool {
-	comment := &pb.Comment{}
-	err := proto.Unmarshal(data, comment)
+	c := &pb.Comment{}
+	err := proto.Unmarshal(data, c)
 	if err != nil {
 		logrus.Errorln("解析err：", err.Error())
 		return false
 	}
 	// 处理
 	goroutinePool.Instance().Submit(func() {
-		logic.CommentSaveHandler{}.SaveComment(comment)
+		comment.CommentSaveHandler{}.SaveComment(c)
 	})
 
 	return true

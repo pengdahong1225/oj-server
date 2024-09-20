@@ -1,11 +1,12 @@
-package logic
+package problem
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
-	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/utils"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
@@ -13,24 +14,28 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
-	db := mysql2.Instance()
+type ProblemServer struct {
+	pb.UnimplementedProblemServiceServer
+}
 
-	compileConfig := mysql2.ProblemConfig{
+func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
+	db := mysql.Instance()
+
+	compileConfig := mysql.ProblemConfig{
 		ClockLimit:  request.Data.CompileConfig.ClockLimit,
 		CpuLimit:    request.Data.CompileConfig.CpuLimit,
 		MemoryLimit: request.Data.CompileConfig.MemoryLimit,
 		ProcLimit:   request.Data.CompileConfig.ProcLimit,
 	}
-	runConfig := mysql2.ProblemConfig{
+	runConfig := mysql.ProblemConfig{
 		ClockLimit:  request.Data.RunConfig.ClockLimit,
 		CpuLimit:    request.Data.RunConfig.CpuLimit,
 		MemoryLimit: request.Data.RunConfig.MemoryLimit,
 		ProcLimit:   request.Data.RunConfig.ProcLimit,
 	}
-	var testCases []mysql2.TestCase
+	var testCases []mysql.TestCase
 	for _, test := range request.Data.TestCases {
-		testCases = append(testCases, mysql2.TestCase{
+		testCases = append(testCases, mysql.TestCase{
 			Input:  test.Input,
 			Output: test.Output,
 		})
@@ -38,20 +43,20 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 	cbys, err := json.Marshal(&compileConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, InsertFailed
+		return nil, rpc.InsertFailed
 	}
 	rbys, err := json.Marshal(&runConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, InsertFailed
+		return nil, rpc.InsertFailed
 	}
 	tbys, err := json.Marshal(testCases)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, InsertFailed
+		return nil, rpc.InsertFailed
 	}
 
-	problem := &mysql2.Problem{
+	problem := &mysql.Problem{
 		Title:         request.Data.Title,
 		Level:         request.Data.Level,
 		Tags:          utils.SpliceStringWithX(request.Data.Tags, "#"),
@@ -64,7 +69,7 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	// 不存在就新增，存在就修改
 	//if result.RowsAffected > 0 {
@@ -75,13 +80,13 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 		result = db.Create(problem)
 		if result.Error != nil {
 			logrus.Errorln(result.Error.Error())
-			return nil, InsertFailed
+			return nil, rpc.InsertFailed
 		}
 	} else {
 		result = db.Updates(problem)
 		if result.Error != nil {
 			logrus.Errorln(result.Error.Error())
-			return nil, UpdateFailed
+			return nil, rpc.UpdateFailed
 		}
 	}
 
@@ -93,36 +98,36 @@ func (receiver *DBServiceServer) UpdateProblemData(ctx context.Context, request 
 	}, nil
 }
 
-func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
-	db := mysql2.Instance()
+func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
+	db := mysql.Instance()
 
-	var problem mysql2.Problem
+	var problem mysql.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
-	var compileConfig mysql2.ProblemConfig
-	var runConfig mysql2.ProblemConfig
-	var testCases []mysql2.TestCase
+	var compileConfig mysql.ProblemConfig
+	var runConfig mysql.ProblemConfig
+	var testCases []mysql.TestCase
 	err := json.Unmarshal([]byte(problem.CompileConfig), &compileConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	err = json.Unmarshal([]byte(problem.RunConfig), &runConfig)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	err = json.Unmarshal([]byte(problem.TestCase), &testCases)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 
 	data := &pb.Problem{
@@ -158,23 +163,23 @@ func (receiver *DBServiceServer) GetProblemData(ctx context.Context, request *pb
 	}, nil
 }
 
-func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request *pb.DeleteProblemRequest) (*empty.Empty, error) {
-	db := mysql2.Instance()
-	var problem *mysql2.Problem
+func (receiver *ProblemServer) DeleteProblemData(ctx context.Context, request *pb.DeleteProblemRequest) (*empty.Empty, error) {
+	db := mysql.Instance()
+	var problem *mysql.Problem
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	// 软删除
 	result = db.Delete(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, DeleteFailed
+		return nil, rpc.DeleteFailed
 	}
 	// 永久删除
 	// result = db.Unscoped().Delete(&user)
@@ -183,17 +188,17 @@ func (receiver *DBServiceServer) DeleteProblemData(ctx context.Context, request 
 
 // GetProblemList 题库列表
 // 游标分页，查询id，title，level，tags
-func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
-	db := mysql2.Instance()
+func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
+	db := mysql.Instance()
 	var pageSize = 10
 	rsp := &pb.GetProblemListResponse{}
 
-	var problemList []mysql2.Problem
+	var problemList []mysql.Problem
 	var count int64 = 0
 	result := db.Model(problemList).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	rsp.Total = int32(count)
 
@@ -204,7 +209,7 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 	result = db.Select("id,title,level,tags").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&problemList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	for _, Problem := range problemList {
 		rsp.Data = append(rsp.Data, &pb.Problem{
@@ -220,19 +225,19 @@ func (receiver *DBServiceServer) GetProblemList(ctx context.Context, request *pb
 
 // QueryProblemWithName 根据题目名查询题目
 // 模糊查询
-func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
-	db := mysql2.Instance()
-	var problemList []mysql2.Problem
+func (receiver *ProblemServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
+	db := mysql.Instance()
+	var problemList []mysql.Problem
 	// select * from problem
 	// where title like '%name%';
 	names := "%" + request.Name + "%"
 	result := db.Where("name LINK ?", names).Find(&problemList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	var data []*pb.Problem
@@ -252,19 +257,19 @@ func (receiver *DBServiceServer) QueryProblemWithName(ctx context.Context, reque
 
 // GetProblemHotData 读取题目热点数据
 // 获取后更新到缓存
-func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
-	db := mysql2.Instance()
-	var problem mysql2.Problem
+func (receiver *ProblemServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
+	db := mysql.Instance()
+	var problem mysql.Problem
 	// select test_case, compile_config, run_config
 	// from problem
 	// where id = ?
 	result := db.Where("id = ?", request.ProblemId).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	str := cacheProblemHotData(&problem)
@@ -274,8 +279,8 @@ func (receiver *DBServiceServer) GetProblemHotData(ctx context.Context, request 
 }
 
 // 缓存题目热点数据
-func cacheProblemHotData(problem *mysql2.Problem) string {
-	data := &mysql2.ProblemHotData{
+func cacheProblemHotData(problem *mysql.Problem) string {
+	data := &mysql.ProblemHotData{
 		TestCase:      problem.TestCase,
 		CompileConfig: problem.CompileConfig,
 		RunConfig:     problem.RunConfig,

@@ -20,30 +20,21 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBService_GetUserDataByMobile_FullMethodName  = "/DBService/GetUserDataByMobile"
-	DBService_GetUserDataByUid_FullMethodName     = "/DBService/GetUserDataByUid"
-	DBService_CreateUserData_FullMethodName       = "/DBService/CreateUserData"
-	DBService_UpdateUserData_FullMethodName       = "/DBService/UpdateUserData"
-	DBService_DeleteUserData_FullMethodName       = "/DBService/DeleteUserData"
-	DBService_GetUserList_FullMethodName          = "/DBService/GetUserList"
-	DBService_GetUserSolvedList_FullMethodName    = "/DBService/GetUserSolvedList"
-	DBService_GetProblemData_FullMethodName       = "/DBService/GetProblemData"
-	DBService_UpdateProblemData_FullMethodName    = "/DBService/UpdateProblemData"
-	DBService_DeleteProblemData_FullMethodName    = "/DBService/DeleteProblemData"
-	DBService_GetProblemList_FullMethodName       = "/DBService/GetProblemList"
-	DBService_QueryProblemWithName_FullMethodName = "/DBService/QueryProblemWithName"
-	DBService_GetProblemHotData_FullMethodName    = "/DBService/GetProblemHotData"
-	DBService_GetUserSubmitRecord_FullMethodName  = "/DBService/GetUserSubmitRecord"
-	DBService_SaveUserSubmitRecord_FullMethodName = "/DBService/SaveUserSubmitRecord"
-	DBService_QueryComment_FullMethodName         = "/DBService/QueryComment"
-	DBService_DeleteComment_FullMethodName        = "/DBService/DeleteComment"
+	UserService_GetUserDataByMobile_FullMethodName = "/UserService/GetUserDataByMobile"
+	UserService_GetUserDataByUid_FullMethodName    = "/UserService/GetUserDataByUid"
+	UserService_CreateUserData_FullMethodName      = "/UserService/CreateUserData"
+	UserService_UpdateUserData_FullMethodName      = "/UserService/UpdateUserData"
+	UserService_DeleteUserData_FullMethodName      = "/UserService/DeleteUserData"
+	UserService_GetUserList_FullMethodName         = "/UserService/GetUserList"
+	UserService_GetUserSolvedList_FullMethodName   = "/UserService/GetUserSolvedList"
 )
 
-// DBServiceClient is the client API for DBService service.
+// UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DBServiceClient interface {
-	// user接口
+//
+// user接口
+type UserServiceClient interface {
 	GetUserDataByMobile(ctx context.Context, in *GetUserDataByMobileRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	GetUserDataByUid(ctx context.Context, in *GetUserDataByUidRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	CreateUserData(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
@@ -51,204 +42,92 @@ type DBServiceClient interface {
 	DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
 	GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error)
-	// problem接口
-	GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
-	UpdateProblemData(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error)
-	DeleteProblemData(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error)
-	QueryProblemWithName(ctx context.Context, in *QueryProblemWithNameRequest, opts ...grpc.CallOption) (*QueryProblemWithNameResponse, error)
-	GetProblemHotData(ctx context.Context, in *GetProblemHotDataRequest, opts ...grpc.CallOption) (*GetProblemHotDataResponse, error)
-	// record
-	GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error)
-	SaveUserSubmitRecord(ctx context.Context, in *SaveUserSubmitRecordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// comment接口
-	QueryComment(ctx context.Context, in *QueryCommentRequest, opts ...grpc.CallOption) (*QueryCommentResponse, error)
-	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
-type dBServiceClient struct {
+type userServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDBServiceClient(cc grpc.ClientConnInterface) DBServiceClient {
-	return &dBServiceClient{cc}
+func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
+	return &userServiceClient{cc}
 }
 
-func (c *dBServiceClient) GetUserDataByMobile(ctx context.Context, in *GetUserDataByMobileRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+func (c *userServiceClient) GetUserDataByMobile(ctx context.Context, in *GetUserDataByMobileRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserResponse)
-	err := c.cc.Invoke(ctx, DBService_GetUserDataByMobile_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_GetUserDataByMobile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) GetUserDataByUid(ctx context.Context, in *GetUserDataByUidRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+func (c *userServiceClient) GetUserDataByUid(ctx context.Context, in *GetUserDataByUidRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserResponse)
-	err := c.cc.Invoke(ctx, DBService_GetUserDataByUid_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_GetUserDataByUid_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) CreateUserData(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+func (c *userServiceClient) CreateUserData(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateUserResponse)
-	err := c.cc.Invoke(ctx, DBService_CreateUserData_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_CreateUserData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) UpdateUserData(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *userServiceClient) UpdateUserData(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DBService_UpdateUserData_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_UpdateUserData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *userServiceClient) DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DBService_DeleteUserData_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_DeleteUserData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error) {
+func (c *userServiceClient) GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserListResponse)
-	err := c.cc.Invoke(ctx, DBService_GetUserList_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_GetUserList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error) {
+func (c *userServiceClient) GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserSolvedListResponse)
-	err := c.cc.Invoke(ctx, DBService_GetUserSolvedList_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_GetUserSolvedList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetProblemResponse)
-	err := c.cc.Invoke(ctx, DBService_GetProblemData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) UpdateProblemData(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateProblemResponse)
-	err := c.cc.Invoke(ctx, DBService_UpdateProblemData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) DeleteProblemData(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DBService_DeleteProblemData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetProblemListResponse)
-	err := c.cc.Invoke(ctx, DBService_GetProblemList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) QueryProblemWithName(ctx context.Context, in *QueryProblemWithNameRequest, opts ...grpc.CallOption) (*QueryProblemWithNameResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryProblemWithNameResponse)
-	err := c.cc.Invoke(ctx, DBService_QueryProblemWithName_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) GetProblemHotData(ctx context.Context, in *GetProblemHotDataRequest, opts ...grpc.CallOption) (*GetProblemHotDataResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetProblemHotDataResponse)
-	err := c.cc.Invoke(ctx, DBService_GetProblemHotData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserSubmitRecordResponse)
-	err := c.cc.Invoke(ctx, DBService_GetUserSubmitRecord_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) SaveUserSubmitRecord(ctx context.Context, in *SaveUserSubmitRecordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DBService_SaveUserSubmitRecord_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) QueryComment(ctx context.Context, in *QueryCommentRequest, opts ...grpc.CallOption) (*QueryCommentResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryCommentResponse)
-	err := c.cc.Invoke(ctx, DBService_QueryComment_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, DBService_DeleteComment_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// DBServiceServer is the server API for DBService service.
-// All implementations must embed UnimplementedDBServiceServer
+// UserServiceServer is the server API for UserService service.
+// All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
-type DBServiceServer interface {
-	// user接口
+//
+// user接口
+type UserServiceServer interface {
 	GetUserDataByMobile(context.Context, *GetUserDataByMobileRequest) (*GetUserResponse, error)
 	GetUserDataByUid(context.Context, *GetUserDataByUidRequest) (*GetUserResponse, error)
 	CreateUserData(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
@@ -256,481 +135,802 @@ type DBServiceServer interface {
 	DeleteUserData(context.Context, *DeleteUserRequest) (*emptypb.Empty, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
 	GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error)
-	// problem接口
-	GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
-	UpdateProblemData(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error)
-	DeleteProblemData(context.Context, *DeleteProblemRequest) (*emptypb.Empty, error)
-	GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error)
-	QueryProblemWithName(context.Context, *QueryProblemWithNameRequest) (*QueryProblemWithNameResponse, error)
-	GetProblemHotData(context.Context, *GetProblemHotDataRequest) (*GetProblemHotDataResponse, error)
-	// record
-	GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error)
-	SaveUserSubmitRecord(context.Context, *SaveUserSubmitRecordRequest) (*emptypb.Empty, error)
-	// comment接口
-	QueryComment(context.Context, *QueryCommentRequest) (*QueryCommentResponse, error)
-	DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedDBServiceServer()
+	mustEmbedUnimplementedUserServiceServer()
 }
 
-// UnimplementedDBServiceServer must be embedded to have
+// UnimplementedUserServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedDBServiceServer struct{}
+type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedDBServiceServer) GetUserDataByMobile(context.Context, *GetUserDataByMobileRequest) (*GetUserResponse, error) {
+func (UnimplementedUserServiceServer) GetUserDataByMobile(context.Context, *GetUserDataByMobileRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserDataByMobile not implemented")
 }
-func (UnimplementedDBServiceServer) GetUserDataByUid(context.Context, *GetUserDataByUidRequest) (*GetUserResponse, error) {
+func (UnimplementedUserServiceServer) GetUserDataByUid(context.Context, *GetUserDataByUidRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserDataByUid not implemented")
 }
-func (UnimplementedDBServiceServer) CreateUserData(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+func (UnimplementedUserServiceServer) CreateUserData(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUserData not implemented")
 }
-func (UnimplementedDBServiceServer) UpdateUserData(context.Context, *UpdateUserRequest) (*emptypb.Empty, error) {
+func (UnimplementedUserServiceServer) UpdateUserData(context.Context, *UpdateUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserData not implemented")
 }
-func (UnimplementedDBServiceServer) DeleteUserData(context.Context, *DeleteUserRequest) (*emptypb.Empty, error) {
+func (UnimplementedUserServiceServer) DeleteUserData(context.Context, *DeleteUserRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserData not implemented")
 }
-func (UnimplementedDBServiceServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error) {
+func (UnimplementedUserServiceServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
 }
-func (UnimplementedDBServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
+func (UnimplementedUserServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserSolvedList not implemented")
 }
-func (UnimplementedDBServiceServer) GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProblemData not implemented")
-}
-func (UnimplementedDBServiceServer) UpdateProblemData(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateProblemData not implemented")
-}
-func (UnimplementedDBServiceServer) DeleteProblemData(context.Context, *DeleteProblemRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteProblemData not implemented")
-}
-func (UnimplementedDBServiceServer) GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProblemList not implemented")
-}
-func (UnimplementedDBServiceServer) QueryProblemWithName(context.Context, *QueryProblemWithNameRequest) (*QueryProblemWithNameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryProblemWithName not implemented")
-}
-func (UnimplementedDBServiceServer) GetProblemHotData(context.Context, *GetProblemHotDataRequest) (*GetProblemHotDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProblemHotData not implemented")
-}
-func (UnimplementedDBServiceServer) GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubmitRecord not implemented")
-}
-func (UnimplementedDBServiceServer) SaveUserSubmitRecord(context.Context, *SaveUserSubmitRecordRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SaveUserSubmitRecord not implemented")
-}
-func (UnimplementedDBServiceServer) QueryComment(context.Context, *QueryCommentRequest) (*QueryCommentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryComment not implemented")
-}
-func (UnimplementedDBServiceServer) DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
-}
-func (UnimplementedDBServiceServer) mustEmbedUnimplementedDBServiceServer() {}
-func (UnimplementedDBServiceServer) testEmbeddedByValue()                   {}
+func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
+func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
 
-// UnsafeDBServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DBServiceServer will
+// UnsafeUserServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UserServiceServer will
 // result in compilation errors.
-type UnsafeDBServiceServer interface {
-	mustEmbedUnimplementedDBServiceServer()
+type UnsafeUserServiceServer interface {
+	mustEmbedUnimplementedUserServiceServer()
 }
 
-func RegisterDBServiceServer(s grpc.ServiceRegistrar, srv DBServiceServer) {
-	// If the following call pancis, it indicates UnimplementedDBServiceServer was
+func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
+	// If the following call pancis, it indicates UnimplementedUserServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&DBService_ServiceDesc, srv)
+	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _DBService_GetUserDataByMobile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetUserDataByMobile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserDataByMobileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetUserDataByMobile(ctx, in)
+		return srv.(UserServiceServer).GetUserDataByMobile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetUserDataByMobile_FullMethodName,
+		FullMethod: UserService_GetUserDataByMobile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetUserDataByMobile(ctx, req.(*GetUserDataByMobileRequest))
+		return srv.(UserServiceServer).GetUserDataByMobile(ctx, req.(*GetUserDataByMobileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetUserDataByUid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetUserDataByUid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserDataByUidRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetUserDataByUid(ctx, in)
+		return srv.(UserServiceServer).GetUserDataByUid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetUserDataByUid_FullMethodName,
+		FullMethod: UserService_GetUserDataByUid_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetUserDataByUid(ctx, req.(*GetUserDataByUidRequest))
+		return srv.(UserServiceServer).GetUserDataByUid(ctx, req.(*GetUserDataByUidRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_CreateUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_CreateUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).CreateUserData(ctx, in)
+		return srv.(UserServiceServer).CreateUserData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_CreateUserData_FullMethodName,
+		FullMethod: UserService_CreateUserData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).CreateUserData(ctx, req.(*CreateUserRequest))
+		return srv.(UserServiceServer).CreateUserData(ctx, req.(*CreateUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_UpdateUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_UpdateUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).UpdateUserData(ctx, in)
+		return srv.(UserServiceServer).UpdateUserData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_UpdateUserData_FullMethodName,
+		FullMethod: UserService_UpdateUserData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).UpdateUserData(ctx, req.(*UpdateUserRequest))
+		return srv.(UserServiceServer).UpdateUserData(ctx, req.(*UpdateUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_DeleteUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_DeleteUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).DeleteUserData(ctx, in)
+		return srv.(UserServiceServer).DeleteUserData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_DeleteUserData_FullMethodName,
+		FullMethod: UserService_DeleteUserData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).DeleteUserData(ctx, req.(*DeleteUserRequest))
+		return srv.(UserServiceServer).DeleteUserData(ctx, req.(*DeleteUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetUserList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetUserList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetUserList(ctx, in)
+		return srv.(UserServiceServer).GetUserList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetUserList_FullMethodName,
+		FullMethod: UserService_GetUserList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetUserList(ctx, req.(*GetUserListRequest))
+		return srv.(UserServiceServer).GetUserList(ctx, req.(*GetUserListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetUserSolvedList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetUserSolvedList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserSolvedListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetUserSolvedList(ctx, in)
+		return srv.(UserServiceServer).GetUserSolvedList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetUserSolvedList_FullMethodName,
+		FullMethod: UserService_GetUserSolvedList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetUserSolvedList(ctx, req.(*GetUserSolvedListRequest))
+		return srv.(UserServiceServer).GetUserSolvedList(ctx, req.(*GetUserSolvedListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+// UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var UserService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "UserService",
+	HandlerType: (*UserServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUserDataByMobile",
+			Handler:    _UserService_GetUserDataByMobile_Handler,
+		},
+		{
+			MethodName: "GetUserDataByUid",
+			Handler:    _UserService_GetUserDataByUid_Handler,
+		},
+		{
+			MethodName: "CreateUserData",
+			Handler:    _UserService_CreateUserData_Handler,
+		},
+		{
+			MethodName: "UpdateUserData",
+			Handler:    _UserService_UpdateUserData_Handler,
+		},
+		{
+			MethodName: "DeleteUserData",
+			Handler:    _UserService_DeleteUserData_Handler,
+		},
+		{
+			MethodName: "GetUserList",
+			Handler:    _UserService_GetUserList_Handler,
+		},
+		{
+			MethodName: "GetUserSolvedList",
+			Handler:    _UserService_GetUserSolvedList_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "rpc.proto",
+}
+
+const (
+	ProblemService_GetProblemData_FullMethodName       = "/ProblemService/GetProblemData"
+	ProblemService_UpdateProblemData_FullMethodName    = "/ProblemService/UpdateProblemData"
+	ProblemService_DeleteProblemData_FullMethodName    = "/ProblemService/DeleteProblemData"
+	ProblemService_GetProblemList_FullMethodName       = "/ProblemService/GetProblemList"
+	ProblemService_QueryProblemWithName_FullMethodName = "/ProblemService/QueryProblemWithName"
+	ProblemService_GetProblemHotData_FullMethodName    = "/ProblemService/GetProblemHotData"
+)
+
+// ProblemServiceClient is the client API for ProblemService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// problem接口
+type ProblemServiceClient interface {
+	GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
+	UpdateProblemData(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error)
+	DeleteProblemData(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error)
+	QueryProblemWithName(ctx context.Context, in *QueryProblemWithNameRequest, opts ...grpc.CallOption) (*QueryProblemWithNameResponse, error)
+	GetProblemHotData(ctx context.Context, in *GetProblemHotDataRequest, opts ...grpc.CallOption) (*GetProblemHotDataResponse, error)
+}
+
+type problemServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewProblemServiceClient(cc grpc.ClientConnInterface) ProblemServiceClient {
+	return &problemServiceClient{cc}
+}
+
+func (c *problemServiceClient) GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProblemResponse)
+	err := c.cc.Invoke(ctx, ProblemService_GetProblemData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) UpdateProblemData(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateProblemResponse)
+	err := c.cc.Invoke(ctx, ProblemService_UpdateProblemData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) DeleteProblemData(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ProblemService_DeleteProblemData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProblemListResponse)
+	err := c.cc.Invoke(ctx, ProblemService_GetProblemList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) QueryProblemWithName(ctx context.Context, in *QueryProblemWithNameRequest, opts ...grpc.CallOption) (*QueryProblemWithNameResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryProblemWithNameResponse)
+	err := c.cc.Invoke(ctx, ProblemService_QueryProblemWithName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) GetProblemHotData(ctx context.Context, in *GetProblemHotDataRequest, opts ...grpc.CallOption) (*GetProblemHotDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProblemHotDataResponse)
+	err := c.cc.Invoke(ctx, ProblemService_GetProblemHotData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ProblemServiceServer is the server API for ProblemService service.
+// All implementations must embed UnimplementedProblemServiceServer
+// for forward compatibility.
+//
+// problem接口
+type ProblemServiceServer interface {
+	GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
+	UpdateProblemData(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error)
+	DeleteProblemData(context.Context, *DeleteProblemRequest) (*emptypb.Empty, error)
+	GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error)
+	QueryProblemWithName(context.Context, *QueryProblemWithNameRequest) (*QueryProblemWithNameResponse, error)
+	GetProblemHotData(context.Context, *GetProblemHotDataRequest) (*GetProblemHotDataResponse, error)
+	mustEmbedUnimplementedProblemServiceServer()
+}
+
+// UnimplementedProblemServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedProblemServiceServer struct{}
+
+func (UnimplementedProblemServiceServer) GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProblemData not implemented")
+}
+func (UnimplementedProblemServiceServer) UpdateProblemData(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProblemData not implemented")
+}
+func (UnimplementedProblemServiceServer) DeleteProblemData(context.Context, *DeleteProblemRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProblemData not implemented")
+}
+func (UnimplementedProblemServiceServer) GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProblemList not implemented")
+}
+func (UnimplementedProblemServiceServer) QueryProblemWithName(context.Context, *QueryProblemWithNameRequest) (*QueryProblemWithNameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryProblemWithName not implemented")
+}
+func (UnimplementedProblemServiceServer) GetProblemHotData(context.Context, *GetProblemHotDataRequest) (*GetProblemHotDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProblemHotData not implemented")
+}
+func (UnimplementedProblemServiceServer) mustEmbedUnimplementedProblemServiceServer() {}
+func (UnimplementedProblemServiceServer) testEmbeddedByValue()                        {}
+
+// UnsafeProblemServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ProblemServiceServer will
+// result in compilation errors.
+type UnsafeProblemServiceServer interface {
+	mustEmbedUnimplementedProblemServiceServer()
+}
+
+func RegisterProblemServiceServer(s grpc.ServiceRegistrar, srv ProblemServiceServer) {
+	// If the following call pancis, it indicates UnimplementedProblemServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ProblemService_ServiceDesc, srv)
+}
+
+func _ProblemService_GetProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProblemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetProblemData(ctx, in)
+		return srv.(ProblemServiceServer).GetProblemData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetProblemData_FullMethodName,
+		FullMethod: ProblemService_GetProblemData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetProblemData(ctx, req.(*GetProblemRequest))
+		return srv.(ProblemServiceServer).GetProblemData(ctx, req.(*GetProblemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_UpdateProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProblemService_UpdateProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateProblemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).UpdateProblemData(ctx, in)
+		return srv.(ProblemServiceServer).UpdateProblemData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_UpdateProblemData_FullMethodName,
+		FullMethod: ProblemService_UpdateProblemData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).UpdateProblemData(ctx, req.(*UpdateProblemRequest))
+		return srv.(ProblemServiceServer).UpdateProblemData(ctx, req.(*UpdateProblemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_DeleteProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProblemService_DeleteProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteProblemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).DeleteProblemData(ctx, in)
+		return srv.(ProblemServiceServer).DeleteProblemData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_DeleteProblemData_FullMethodName,
+		FullMethod: ProblemService_DeleteProblemData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).DeleteProblemData(ctx, req.(*DeleteProblemRequest))
+		return srv.(ProblemServiceServer).DeleteProblemData(ctx, req.(*DeleteProblemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetProblemList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProblemService_GetProblemList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProblemListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetProblemList(ctx, in)
+		return srv.(ProblemServiceServer).GetProblemList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetProblemList_FullMethodName,
+		FullMethod: ProblemService_GetProblemList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetProblemList(ctx, req.(*GetProblemListRequest))
+		return srv.(ProblemServiceServer).GetProblemList(ctx, req.(*GetProblemListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_QueryProblemWithName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProblemService_QueryProblemWithName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryProblemWithNameRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).QueryProblemWithName(ctx, in)
+		return srv.(ProblemServiceServer).QueryProblemWithName(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_QueryProblemWithName_FullMethodName,
+		FullMethod: ProblemService_QueryProblemWithName_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).QueryProblemWithName(ctx, req.(*QueryProblemWithNameRequest))
+		return srv.(ProblemServiceServer).QueryProblemWithName(ctx, req.(*QueryProblemWithNameRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetProblemHotData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProblemService_GetProblemHotData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProblemHotDataRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetProblemHotData(ctx, in)
+		return srv.(ProblemServiceServer).GetProblemHotData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetProblemHotData_FullMethodName,
+		FullMethod: ProblemService_GetProblemHotData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetProblemHotData(ctx, req.(*GetProblemHotDataRequest))
+		return srv.(ProblemServiceServer).GetProblemHotData(ctx, req.(*GetProblemHotDataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_GetUserSubmitRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+// ProblemService_ServiceDesc is the grpc.ServiceDesc for ProblemService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ProblemService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ProblemService",
+	HandlerType: (*ProblemServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetProblemData",
+			Handler:    _ProblemService_GetProblemData_Handler,
+		},
+		{
+			MethodName: "UpdateProblemData",
+			Handler:    _ProblemService_UpdateProblemData_Handler,
+		},
+		{
+			MethodName: "DeleteProblemData",
+			Handler:    _ProblemService_DeleteProblemData_Handler,
+		},
+		{
+			MethodName: "GetProblemList",
+			Handler:    _ProblemService_GetProblemList_Handler,
+		},
+		{
+			MethodName: "QueryProblemWithName",
+			Handler:    _ProblemService_QueryProblemWithName_Handler,
+		},
+		{
+			MethodName: "GetProblemHotData",
+			Handler:    _ProblemService_GetProblemHotData_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "rpc.proto",
+}
+
+const (
+	RecordService_GetUserSubmitRecord_FullMethodName  = "/RecordService/GetUserSubmitRecord"
+	RecordService_SaveUserSubmitRecord_FullMethodName = "/RecordService/SaveUserSubmitRecord"
+)
+
+// RecordServiceClient is the client API for RecordService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// record
+type RecordServiceClient interface {
+	GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error)
+	SaveUserSubmitRecord(ctx context.Context, in *SaveUserSubmitRecordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+}
+
+type recordServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewRecordServiceClient(cc grpc.ClientConnInterface) RecordServiceClient {
+	return &recordServiceClient{cc}
+}
+
+func (c *recordServiceClient) GetUserSubmitRecord(ctx context.Context, in *GetUserSubmitRecordRequest, opts ...grpc.CallOption) (*GetUserSubmitRecordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserSubmitRecordResponse)
+	err := c.cc.Invoke(ctx, RecordService_GetUserSubmitRecord_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *recordServiceClient) SaveUserSubmitRecord(ctx context.Context, in *SaveUserSubmitRecordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, RecordService_SaveUserSubmitRecord_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// RecordServiceServer is the server API for RecordService service.
+// All implementations must embed UnimplementedRecordServiceServer
+// for forward compatibility.
+//
+// record
+type RecordServiceServer interface {
+	GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error)
+	SaveUserSubmitRecord(context.Context, *SaveUserSubmitRecordRequest) (*emptypb.Empty, error)
+	mustEmbedUnimplementedRecordServiceServer()
+}
+
+// UnimplementedRecordServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedRecordServiceServer struct{}
+
+func (UnimplementedRecordServiceServer) GetUserSubmitRecord(context.Context, *GetUserSubmitRecordRequest) (*GetUserSubmitRecordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubmitRecord not implemented")
+}
+func (UnimplementedRecordServiceServer) SaveUserSubmitRecord(context.Context, *SaveUserSubmitRecordRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveUserSubmitRecord not implemented")
+}
+func (UnimplementedRecordServiceServer) mustEmbedUnimplementedRecordServiceServer() {}
+func (UnimplementedRecordServiceServer) testEmbeddedByValue()                       {}
+
+// UnsafeRecordServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RecordServiceServer will
+// result in compilation errors.
+type UnsafeRecordServiceServer interface {
+	mustEmbedUnimplementedRecordServiceServer()
+}
+
+func RegisterRecordServiceServer(s grpc.ServiceRegistrar, srv RecordServiceServer) {
+	// If the following call pancis, it indicates UnimplementedRecordServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&RecordService_ServiceDesc, srv)
+}
+
+func _RecordService_GetUserSubmitRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserSubmitRecordRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).GetUserSubmitRecord(ctx, in)
+		return srv.(RecordServiceServer).GetUserSubmitRecord(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_GetUserSubmitRecord_FullMethodName,
+		FullMethod: RecordService_GetUserSubmitRecord_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).GetUserSubmitRecord(ctx, req.(*GetUserSubmitRecordRequest))
+		return srv.(RecordServiceServer).GetUserSubmitRecord(ctx, req.(*GetUserSubmitRecordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_SaveUserSubmitRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RecordService_SaveUserSubmitRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SaveUserSubmitRecordRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).SaveUserSubmitRecord(ctx, in)
+		return srv.(RecordServiceServer).SaveUserSubmitRecord(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_SaveUserSubmitRecord_FullMethodName,
+		FullMethod: RecordService_SaveUserSubmitRecord_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).SaveUserSubmitRecord(ctx, req.(*SaveUserSubmitRecordRequest))
+		return srv.(RecordServiceServer).SaveUserSubmitRecord(ctx, req.(*SaveUserSubmitRecordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_QueryComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+// RecordService_ServiceDesc is the grpc.ServiceDesc for RecordService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var RecordService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "RecordService",
+	HandlerType: (*RecordServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUserSubmitRecord",
+			Handler:    _RecordService_GetUserSubmitRecord_Handler,
+		},
+		{
+			MethodName: "SaveUserSubmitRecord",
+			Handler:    _RecordService_SaveUserSubmitRecord_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "rpc.proto",
+}
+
+const (
+	CommentService_QueryComment_FullMethodName  = "/CommentService/QueryComment"
+	CommentService_DeleteComment_FullMethodName = "/CommentService/DeleteComment"
+)
+
+// CommentServiceClient is the client API for CommentService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// comment接口
+type CommentServiceClient interface {
+	QueryComment(ctx context.Context, in *QueryCommentRequest, opts ...grpc.CallOption) (*QueryCommentResponse, error)
+	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+}
+
+type commentServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewCommentServiceClient(cc grpc.ClientConnInterface) CommentServiceClient {
+	return &commentServiceClient{cc}
+}
+
+func (c *commentServiceClient) QueryComment(ctx context.Context, in *QueryCommentRequest, opts ...grpc.CallOption) (*QueryCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryCommentResponse)
+	err := c.cc.Invoke(ctx, CommentService_QueryComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commentServiceClient) DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, CommentService_DeleteComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CommentServiceServer is the server API for CommentService service.
+// All implementations must embed UnimplementedCommentServiceServer
+// for forward compatibility.
+//
+// comment接口
+type CommentServiceServer interface {
+	QueryComment(context.Context, *QueryCommentRequest) (*QueryCommentResponse, error)
+	DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error)
+	mustEmbedUnimplementedCommentServiceServer()
+}
+
+// UnimplementedCommentServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedCommentServiceServer struct{}
+
+func (UnimplementedCommentServiceServer) QueryComment(context.Context, *QueryCommentRequest) (*QueryCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryComment not implemented")
+}
+func (UnimplementedCommentServiceServer) DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
+}
+func (UnimplementedCommentServiceServer) mustEmbedUnimplementedCommentServiceServer() {}
+func (UnimplementedCommentServiceServer) testEmbeddedByValue()                        {}
+
+// UnsafeCommentServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CommentServiceServer will
+// result in compilation errors.
+type UnsafeCommentServiceServer interface {
+	mustEmbedUnimplementedCommentServiceServer()
+}
+
+func RegisterCommentServiceServer(s grpc.ServiceRegistrar, srv CommentServiceServer) {
+	// If the following call pancis, it indicates UnimplementedCommentServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&CommentService_ServiceDesc, srv)
+}
+
+func _CommentService_QueryComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryCommentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).QueryComment(ctx, in)
+		return srv.(CommentServiceServer).QueryComment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_QueryComment_FullMethodName,
+		FullMethod: CommentService_QueryComment_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).QueryComment(ctx, req.(*QueryCommentRequest))
+		return srv.(CommentServiceServer).QueryComment(ctx, req.(*QueryCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_DeleteComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CommentService_DeleteComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteCommentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).DeleteComment(ctx, in)
+		return srv.(CommentServiceServer).DeleteComment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_DeleteComment_FullMethodName,
+		FullMethod: CommentService_DeleteComment_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).DeleteComment(ctx, req.(*DeleteCommentRequest))
+		return srv.(CommentServiceServer).DeleteComment(ctx, req.(*DeleteCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// DBService_ServiceDesc is the grpc.ServiceDesc for DBService service.
+// CommentService_ServiceDesc is the grpc.ServiceDesc for CommentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var DBService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "DBService",
-	HandlerType: (*DBServiceServer)(nil),
+var CommentService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "CommentService",
+	HandlerType: (*CommentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetUserDataByMobile",
-			Handler:    _DBService_GetUserDataByMobile_Handler,
-		},
-		{
-			MethodName: "GetUserDataByUid",
-			Handler:    _DBService_GetUserDataByUid_Handler,
-		},
-		{
-			MethodName: "CreateUserData",
-			Handler:    _DBService_CreateUserData_Handler,
-		},
-		{
-			MethodName: "UpdateUserData",
-			Handler:    _DBService_UpdateUserData_Handler,
-		},
-		{
-			MethodName: "DeleteUserData",
-			Handler:    _DBService_DeleteUserData_Handler,
-		},
-		{
-			MethodName: "GetUserList",
-			Handler:    _DBService_GetUserList_Handler,
-		},
-		{
-			MethodName: "GetUserSolvedList",
-			Handler:    _DBService_GetUserSolvedList_Handler,
-		},
-		{
-			MethodName: "GetProblemData",
-			Handler:    _DBService_GetProblemData_Handler,
-		},
-		{
-			MethodName: "UpdateProblemData",
-			Handler:    _DBService_UpdateProblemData_Handler,
-		},
-		{
-			MethodName: "DeleteProblemData",
-			Handler:    _DBService_DeleteProblemData_Handler,
-		},
-		{
-			MethodName: "GetProblemList",
-			Handler:    _DBService_GetProblemList_Handler,
-		},
-		{
-			MethodName: "QueryProblemWithName",
-			Handler:    _DBService_QueryProblemWithName_Handler,
-		},
-		{
-			MethodName: "GetProblemHotData",
-			Handler:    _DBService_GetProblemHotData_Handler,
-		},
-		{
-			MethodName: "GetUserSubmitRecord",
-			Handler:    _DBService_GetUserSubmitRecord_Handler,
-		},
-		{
-			MethodName: "SaveUserSubmitRecord",
-			Handler:    _DBService_SaveUserSubmitRecord_Handler,
-		},
-		{
 			MethodName: "QueryComment",
-			Handler:    _DBService_QueryComment_Handler,
+			Handler:    _CommentService_QueryComment_Handler,
 		},
 		{
 			MethodName: "DeleteComment",
-			Handler:    _DBService_DeleteComment_Handler,
+			Handler:    _CommentService_DeleteComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

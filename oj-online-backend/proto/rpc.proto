@@ -6,8 +6,8 @@ import "user.proto";
 import "problem.proto";
 import  "comment.proto";
 
-service DBService{
-  // user接口
+// user接口
+service UserService{
   rpc GetUserDataByMobile(GetUserDataByMobileRequest) returns(GetUserResponse);
   rpc GetUserDataByUid(GetUserDataByUidRequest) returns(GetUserResponse);
   rpc CreateUserData(CreateUserRequest) returns(CreateUserResponse);
@@ -15,20 +15,23 @@ service DBService{
   rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
   rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
-
-  // problem接口
+}
+// problem接口
+service ProblemService{
   rpc GetProblemData(GetProblemRequest) returns(GetProblemResponse);
   rpc UpdateProblemData(UpdateProblemRequest) returns(UpdateProblemResponse);
   rpc DeleteProblemData(DeleteProblemRequest) returns(google.protobuf.Empty);
   rpc GetProblemList(GetProblemListRequest) returns(GetProblemListResponse);
   rpc QueryProblemWithName(QueryProblemWithNameRequest) returns(QueryProblemWithNameResponse);
   rpc GetProblemHotData(GetProblemHotDataRequest) returns(GetProblemHotDataResponse);
-
-  // record
+}
+// record
+service RecordService{
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
   rpc SaveUserSubmitRecord(SaveUserSubmitRecordRequest) returns(google.protobuf.Empty);
-
-  // comment接口
+}
+// comment接口
+service CommentService{
   rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
   rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
 }

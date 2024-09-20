@@ -3,7 +3,10 @@ package internal
 import (
 	"fmt"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/daemon"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/logic"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/comment"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/problem"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/record"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/user"
 	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
@@ -90,15 +93,33 @@ func StartRPCServer() {
 	// 健康检查
 	healthcheck := health.NewServer()
 	healthpb.RegisterHealthServer(grpcServer, healthcheck)
-	// 注册
+	// 注册服务节点
 	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
 	if err := register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
 
-	// 注册并启动db服务
-	dbSrv := logic.DBServiceServer{}
-	pb.RegisterDBServiceServer(grpcServer, &dbSrv)
+	// 启动rpc服务
+	userSrv := user.UserServer{}
+	pb.RegisterUserServiceServer(grpcServer, &userSrv)
+	if err := grpcServer.Serve(listener); err != nil {
+		panic(err)
+	}
+
+	problemSrv := problem.ProblemServer{}
+	pb.RegisterProblemServiceServer(grpcServer, &problemSrv)
+	if err := grpcServer.Serve(listener); err != nil {
+		panic(err)
+	}
+
+	recordSrv := record.RecordServer{}
+	pb.RegisterRecordServiceServer(grpcServer, &recordSrv)
+	if err := grpcServer.Serve(listener); err != nil {
+		panic(err)
+	}
+
+	commentSrv := comment.CommentServer{}
+	pb.RegisterCommentServiceServer(grpcServer, &commentSrv)
 	if err := grpcServer.Serve(listener); err != nil {
 		panic(err)
 	}

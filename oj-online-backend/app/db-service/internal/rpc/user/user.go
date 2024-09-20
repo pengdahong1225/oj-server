@@ -1,24 +1,29 @@
-package logic
+package user
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
-	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
-func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
-	db := mysql2.Instance()
-	var user mysql2.UserInfo
+type UserServer struct {
+	pb.UnimplementedUserServiceServer
+}
+
+func (receiver *UserServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
+	db := mysql.Instance()
+	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	userInfo := &pb.UserInfo{
@@ -36,16 +41,16 @@ func (receiver *DBServiceServer) GetUserDataByMobile(ctx context.Context, reques
 	}, nil
 }
 
-func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
-	db := mysql2.Instance()
-	var user mysql2.UserInfo
+func (receiver *UserServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
+	db := mysql.Instance()
+	var user mysql.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	userInfo := &pb.UserInfo{
@@ -63,12 +68,12 @@ func (receiver *DBServiceServer) GetUserDataByUid(ctx context.Context, request *
 	}, nil
 }
 
-func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
-	db := mysql2.Instance()
-	var user mysql2.UserInfo
+func (receiver *UserServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	db := mysql.Instance()
+	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile)
 	if result.RowsAffected > 0 {
-		return nil, AlreadyExists
+		return nil, rpc.AlreadyExists
 	}
 
 	user.Mobile = request.Data.Mobile
@@ -81,7 +86,7 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 	result = db.Create(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, InsertFailed
+		return nil, rpc.InsertFailed
 	}
 
 	l, _ := json.Marshal(user)
@@ -90,16 +95,16 @@ func (receiver *DBServiceServer) CreateUserData(ctx context.Context, request *pb
 	return &pb.CreateUserResponse{Id: user.ID}, nil
 }
 
-func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
-	db := mysql2.Instance()
-	var user mysql2.UserInfo
+func (receiver *UserServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
+	db := mysql.Instance()
+	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	// 更新
@@ -112,28 +117,28 @@ func (receiver *DBServiceServer) UpdateUserData(ctx context.Context, request *pb
 	result = db.Save(&user) // gorm在事务执行(可重复读)，innodb自动加写锁
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, InsertFailed
+		return nil, rpc.InsertFailed
 	}
 	return &empty.Empty{}, nil
 }
 
-func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
-	db := mysql2.Instance()
-	var user mysql2.UserInfo
+func (receiver *UserServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
+	db := mysql.Instance()
+	var user mysql.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	// 软删除
 	result = db.Delete(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, DeleteFailed
+		return nil, rpc.DeleteFailed
 	}
 	// 永久删除
 	// result = global.DBInstance.Unscoped().Delete(&user)
@@ -142,7 +147,7 @@ func (receiver *DBServiceServer) DeleteUserData(ctx context.Context, request *pb
 }
 
 // GetUserList 采用游标分页
-func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+func (receiver *UserServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
 	// db := mysql.Instance()
 	// var pageSize = 10
 	// var userlist []models.UserInfo
@@ -180,16 +185,16 @@ func (receiver *DBServiceServer) GetUserList(ctx context.Context, request *pb.Ge
 }
 
 // GetUserSolvedList 查询用户哪些题目
-func (receiver *DBServiceServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
-	db := mysql2.Instance()
-	var userSolutionList []mysql2.UserSolution
+func (receiver *UserServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
+	db := mysql.Instance()
+	var userSolutionList []mysql.UserSolution
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	var rsp = new(pb.GetUserSolvedListResponse)

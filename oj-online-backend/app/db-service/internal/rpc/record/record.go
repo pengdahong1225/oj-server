@@ -1,22 +1,27 @@
-package logic
+package record
 
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	mysql2 "github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc"
+	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 )
 
-func (receiver *DBServiceServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
+type RecordServer struct {
+	pb.UnimplementedRecordServiceServer
+}
+
+func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
 	/*
 		insert into user_submit_record_xxx
 		(uid, problem_id, code, result, lang)
 		values
 		(?, ?, ?, ?, ?);
 	*/
-	db := mysql2.Instance()
-	record := &mysql2.SubMitRecord{
+	db := mysql.Instance()
+	record := &mysql.SubMitRecord{
 		Uid:       request.UserId,
 		ProblemID: request.ProblemId,
 		Code:      request.Code,
@@ -27,37 +32,37 @@ func (receiver *DBServiceServer) SaveUserSubmitRecord(ctx context.Context, reque
 		err := db.Table(record.TableName(request.Stamp)).AutoMigrate(record)
 		if err != nil {
 			logrus.Errorln(err.Error())
-			return nil, InsertFailed
+			return nil, rpc.InsertFailed
 		}
 	}
 	result := db.Table(record.TableName(request.Stamp)).Create(record)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, InsertFailed
+		return nil, rpc.InsertFailed
 	}
 
 	return &empty.Empty{}, nil
 }
 
-func (receiver *DBServiceServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
+func (receiver *RecordServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
 	/*
 		select * from user_submit_record_xx
 		where uid = ? and stamp = ?;
 	*/
-	db := mysql2.Instance()
-	r := &mysql2.SubMitRecord{}
+	db := mysql.Instance()
+	r := &mysql.SubMitRecord{}
 	if !db.Migrator().HasTable(r.TableName(request.Stamp)) {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
-	var records []mysql2.SubMitRecord
+	var records []mysql.SubMitRecord
 	result := db.Where("uid = ?", request.UserId).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, QueryFailed
+		return nil, rpc.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, NotFound
+		return nil, rpc.NotFound
 	}
 
 	data := make([]*pb.UserSubmitRecord, 0, len(records))
