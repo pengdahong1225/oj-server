@@ -1,3 +1,6 @@
+# 沙箱
+SandBox使用的是开源项目go-judge的Linux版本，更多调用方式请自行浏览[go-judge](https://github.com/criyle/go-judge)
+
 ## REST API 接口
 
 沙箱服务提供 REST API 接口来在受限制的环境中运行程序（默认监听于 localhost:5050）。
