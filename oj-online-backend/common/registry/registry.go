@@ -58,7 +58,7 @@ func NewDBConnection(cfg *settings.RegistryConfig) (*grpc.ClientConn, error) {
 	}
 	// 如果是集群的话，这里可以添加简单的负载均衡，访问压力均摊给集群中的每个服务
 	dsn := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
-	return grpc.Dial(dsn, grpc.WithTransportCredentials(insecure.NewCredentials())) // 不安全连接
+	return grpc.NewClient(dsn, grpc.WithTransportCredentials(insecure.NewCredentials())) // 不安全连接
 }
 
 // NewJudgeConnection judge服务连接
