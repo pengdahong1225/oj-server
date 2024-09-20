@@ -41,7 +41,7 @@ func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewUserServiceClient(dbConn)
 	mobile, _ := strconv.ParseInt(form.Mobile, 10, 64)
 	request := &pb.GetUserDataByMobileRequest{
 		Mobile: mobile,
@@ -99,7 +99,7 @@ func (receiver UserLogic) HandleGetUserProfile(uid int64) *models.Response {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewUserServiceClient(dbConn)
 	response, err := client.GetUserDataByUid(context.Background(), &pb.GetUserDataByUidRequest{
 		Id: uid,
 	})
@@ -166,7 +166,7 @@ func (receiver UserLogic) HandleGetSubmitRecord(uid int64, stamp int64) *models.
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewRecordServiceClient(dbConn)
 	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{UserId: uid, Stamp: stamp})
 	if err != nil {
 		res.Message = err.Error()
@@ -194,7 +194,7 @@ func (receiver UserLogic) HandleGetUserSolvedList(uid int64) *models.Response {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewUserServiceClient(dbConn)
 	response, err := client.GetUserSolvedList(context.Background(), &pb.GetUserSolvedListRequest{Uid: uid})
 	if err != nil {
 		res.Message = err.Error()

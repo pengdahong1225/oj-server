@@ -28,7 +28,7 @@ func (receiver AdminLogic) HandleUpdateQuestion(uid int64, form *models.AddProbl
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewProblemServiceClient(dbConn)
 	request := &pb.UpdateProblemRequest{Data: &pb.Problem{
 		Title:       form.Title,
 		Level:       form.Level,
@@ -81,7 +81,7 @@ func (receiver AdminLogic) HandleDelQuestion(problemID int64) *models.Response {
 		return res
 	}
 	defer dbConn.Close()
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewProblemServiceClient(dbConn)
 
 	_, err = client.DeleteProblemData(context.Background(), &pb.DeleteProblemRequest{Id: problemID})
 	if err != nil {

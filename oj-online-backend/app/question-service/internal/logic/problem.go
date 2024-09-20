@@ -33,7 +33,7 @@ func (receiver ProblemLogic) HandleProblemSet(cursor int) *models.Response {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewProblemServiceClient(dbConn)
 	request := &pb.GetProblemListRequest{Cursor: int32(cursor)}
 	response, err := client.GetProblemList(context.Background(), request)
 	if err != nil {
@@ -132,7 +132,7 @@ func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Respon
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewProblemServiceClient(dbConn)
 	response, err := client.GetProblemData(context.Background(), &pb.GetProblemRequest{
 		Id: problemID,
 	})
@@ -218,7 +218,7 @@ func (receiver ProblemLogic) HandleProblemSearch(name string) *models.Response {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewProblemServiceClient(dbConn)
 	response, err := client.QueryProblemWithName(context.Background(), &pb.QueryProblemWithNameRequest{Name: name})
 	if err != nil {
 		res.Code = http.StatusOK

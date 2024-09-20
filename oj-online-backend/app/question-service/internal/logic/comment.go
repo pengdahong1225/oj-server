@@ -25,8 +25,6 @@ func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.
 		UserId:        form.UserId,
 		UserName:      form.UserName,
 		UserAvatarUrl: form.UserAvatarUrl,
-		RootId:        form.RootId,
-		ReplyId:       form.ReplyId,
 		Content:       form.Content,
 		Status:        1,
 		LikeCount:     0,
@@ -34,14 +32,26 @@ func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.
 		Stamp:         form.Stamp,
 	}
 
-	// 根评论
-	if pbComment.RootId == 0 {
-		pbComment.IsRoot = true
-		pbComment.ReplyId = 0
+	// 非楼主评论
+	if form.RootId > 0 && form.RootCommentId > 0 {
+		pbComment.RootId = form.RootId
+		pbComment.RootCommentId = form.RootCommentId
+		pbComment.IsRoot = 0
+		if form.ReplyId > 0 && form.ReplyCommentId > 0 {
+			pbComment.ReplyId = form.ReplyId
+			pbComment.ReplyCommentId = form.ReplyCommentId
+		} else {
+			// 默认回复楼主
+			pbComment.ReplyId = form.RootId
+			pbComment.ReplyCommentId = form.RootCommentId
+		}
 	} else {
-		// 回复评论
-		pbComment.IsRoot = false
-		pbComment.ReplyId = form.ReplyId
+		// 楼主评论
+		pbComment.RootId = 0
+		pbComment.RootCommentId = 0
+		pbComment.IsRoot = 1
+		pbComment.ReplyId = 0
+		pbComment.ReplyCommentId = 0
 	}
 
 	if pbComment.Stamp <= 0 {
@@ -49,7 +59,7 @@ func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.
 	}
 
 	// 异步
-	option, err := proto.Marshal(&pbComment)
+	msg, err := proto.Marshal(&pbComment)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -61,7 +71,7 @@ func (receiver CommentLogic) HandleAddComment(form *models.CommentForm) *models.
 		QuName:     consts.RabbitMqCommentQueue,
 		RoutingKey: consts.RabbitMqCommentKey,
 	}
-	if !productor.Publish(option) {
+	if !productor.Publish(msg) {
 		res.Code = http.StatusInternalServerError
 		logrus.Errorln("评论任务提交mq失败")
 		return res

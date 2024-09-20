@@ -6,7 +6,7 @@
     <package value="question-service" />
     <directory value="$PROJECT_DIR$/app/question-service/cmd" />
     <filePath value="$PROJECT_DIR$" />
-    <output_directory value="$PROJECT_DIR$/bin" />
+    <output_directory value="$PROJECT_DIR$/app/bin" />
     <option name="run" value="false" />
     <method v="2" />
   </configuration>

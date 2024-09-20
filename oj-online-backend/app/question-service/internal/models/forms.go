@@ -50,8 +50,11 @@ type CommentForm struct {
 	UserId        int64  `json:"user_id" form:"user_id" binding:"required"`
 	UserName      string `json:"user_name" form:"user_name"`
 	UserAvatarUrl string `json:"user_avatar_url" form:"user_avatar_url"`
-	RootId        int64  `json:"root_id" form:"root_id" binding:"required"`
-	ReplyId       int64  `json:"reply_id" form:"reply_id" binding:"required"`
 	Content       string `json:"content" form:"content" binding:"required"`
 	Stamp         int64  `json:"stamp" form:"stamp"`
+
+	RootId         int64 `json:"root_id" form:"root_id" binding:"required"`
+	RootCommentId  int64 `json:"root_comment_id" form:"root_comment_id" binding:"required"`
+	ReplyId        int64 `json:"reply_id" form:"reply_id" binding:"required"`
+	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id" binding:"required"`
 }
