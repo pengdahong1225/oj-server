@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="judge-service" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="oj-online-backend" />
+    <working_directory value="$PROJECT_DIR$/app/judge-service" />
+    <kind value="DIRECTORY" />
+    <package value="D:\project\peter\Oj-Online-Server\oj-online-backend\app\judge-service\cmd" />
+    <directory value="$PROJECT_DIR$/app/judge-service/cmd" />
+    <filePath value="$PROJECT_DIR$" />
+    <output_directory value="$PROJECT_DIR$/app/bin" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>

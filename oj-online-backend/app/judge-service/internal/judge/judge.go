@@ -94,7 +94,7 @@ func saveResult(param *Param, data []byte) {
 	}
 	defer dbConn.Close()
 
-	client := pb.NewDBServiceClient(dbConn)
+	client := pb.NewRecordServiceClient(dbConn)
 	request := &pb.SaveUserSubmitRecordRequest{
 		UserId:    param.uid,
 		ProblemId: param.problemID,
@@ -217,7 +217,7 @@ func getProblemHotData(ProblemID int64) *ProblemHotData {
 			return nil
 		}
 		defer dbConn.Close()
-		client := pb.NewDBServiceClient(dbConn)
+		client := pb.NewProblemServiceClient(dbConn)
 		request := &pb.GetProblemHotDataRequest{
 			ProblemId: ProblemID,
 		}
