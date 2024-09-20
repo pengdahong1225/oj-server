@@ -45,7 +45,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err = register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
+	if err = register.RegisterServiceWithHttp(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
 	// loop

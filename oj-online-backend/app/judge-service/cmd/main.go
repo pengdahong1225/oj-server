@@ -38,11 +38,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err = register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
+	if err = register.RegisterServiceWithHttp(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
 
 	// start
 	server := &internal.Server{}
-	server.Loop()
+	server.Loop(ip.String(), system.Port)
 }

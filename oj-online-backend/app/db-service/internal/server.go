@@ -90,14 +90,15 @@ func StartRPCServer() {
 	defer listener.Close()
 
 	grpcServer := grpc.NewServer()
-	// 健康检查
-	healthcheck := health.NewServer()
-	healthpb.RegisterHealthServer(grpcServer, healthcheck)
+
 	// 注册服务节点
 	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
-	if err := register.RegisterService(system.Name, ip.String(), system.Port); err != nil {
+	if err := register.RegisterServiceWithGrpc(system.Name, ip.String(), system.Port); err != nil {
 		panic(err)
 	}
+	// 监听健康检查
+	healthcheck := health.NewServer()
+	healthpb.RegisterHealthServer(grpcServer, healthcheck)
 
 	// 启动rpc服务
 	userSrv := user.UserServer{}
