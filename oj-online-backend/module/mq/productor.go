@@ -7,17 +7,32 @@ import (
 )
 
 type Producer struct {
-	Exname     string
-	Exkind     string
-	QuName     string
-	RoutingKey string
+	exName     string
+	exKind     string
+	queName    string
+	routingKey string
+}
+
+func NewProducer(exKind, exName, quName, routingKey string) *Producer {
+	return &Producer{
+		exName:     exName,
+		exKind:     exKind,
+		queName:    quName,
+		routingKey: routingKey,
+	}
 }
 
 func (receiver *Producer) Publish(msg []byte) bool {
-	channel := newChannel(receiver.Exname, receiver.Exkind, receiver.QuName, receiver.RoutingKey)
+	channel := newChannel(receiver.exName, receiver.exKind, receiver.queName, receiver.routingKey)
+	if channel == nil {
+		logrus.Errorln("获取channel失败")
+		return false
+	}
+	defer channel.Close()
+
 	err := channel.Publish(
-		receiver.Exname,     // 指明交换机
-		receiver.RoutingKey, // 指明路由键
+		receiver.exName,     // 指明交换机
+		receiver.routingKey, // 指明路由键
 		false,               // false 表示如果交换机无法找到符合条件的队列时消息会被丢弃
 		false,               // false 表示不需要立即被消费者接收
 		amqp.Publishing{

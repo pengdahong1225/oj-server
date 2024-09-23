@@ -6,35 +6,35 @@ import (
 )
 
 type Consumer struct {
-	Exkind     string
-	Exname     string
-	QuName     string
-	RoutingKey string
-	CTag       string
+	exKind     string
+	exName     string
+	queName    string
+	routingKey string
+	cTag       string
 	channel    *amqp.Channel
 }
 
 func NewConsumer(exKind, exName, quName, routingKey, cTag string) *Consumer {
 	return &Consumer{
-		Exkind:     exKind,
-		Exname:     exName,
-		QuName:     quName,
-		RoutingKey: routingKey,
-		CTag:       cTag,
+		exKind:     exKind,
+		exName:     exName,
+		queName:    quName,
+		routingKey: routingKey,
+		cTag:       cTag,
 		channel:    nil,
 	}
 }
 
 func (receiver *Consumer) Consume() <-chan amqp.Delivery {
-	channel := newChannel(receiver.Exname, receiver.Exkind, receiver.QuName, receiver.RoutingKey)
+	channel := newChannel(receiver.exName, receiver.exKind, receiver.queName, receiver.routingKey)
 	if channel != nil {
 		logrus.Errorln("获取channel失败")
 		return nil
 	}
 	receiver.channel = channel // 保存channel
 	deliveries, err := receiver.channel.Consume(
-		receiver.QuName,
-		receiver.CTag,
+		receiver.queName,
+		receiver.cTag,
 		false, // 是否自动确认
 		false, // 是否独占队列
 		false, // true代表生产者和消费者不能是同一个connect
@@ -46,4 +46,8 @@ func (receiver *Consumer) Consume() <-chan amqp.Delivery {
 		return nil
 	}
 	return deliveries
+}
+
+func (receiver *Consumer) Close() {
+	receiver.channel.Close()
 }

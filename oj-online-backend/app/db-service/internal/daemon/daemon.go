@@ -27,6 +27,12 @@ func (receiver Daemon) CommentSaveConsumer() {
 		"", // 消费者标签，用于区别不同的消费者
 	)
 	deliveries := consumer.Consume()
+	if deliveries == nil {
+		logrus.Errorln("消费失败")
+		return
+	}
+	defer consumer.Close()
+
 	for d := range deliveries {
 		if syncHandle(d.Body) {
 			d.Ack(false)

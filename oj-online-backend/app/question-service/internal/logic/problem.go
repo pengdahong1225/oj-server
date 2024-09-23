@@ -97,12 +97,12 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 		return res
 	}
 	// 提交到mq
-	productor := &mq.Producer{
-		Exkind:     consts.RabbitMqExchangeKind,
-		Exname:     consts.RabbitMqExchangeName,
-		QuName:     consts.RabbitMqJudgeQueue,
-		RoutingKey: consts.RabbitMqJudgeKey,
-	}
+	productor := mq.NewProducer(
+		consts.RabbitMqExchangeKind,
+		consts.RabbitMqExchangeName,
+		consts.RabbitMqCommentQueue,
+		consts.RabbitMqCommentKey,
+	)
 	if !productor.Publish(data) {
 		res.Code = http.StatusInternalServerError
 		logrus.Errorln("任务提交mq失败")

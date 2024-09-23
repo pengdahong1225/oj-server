@@ -68,12 +68,12 @@ func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm) *models.R
 		res.Message = err.Error()
 		return res
 	}
-	productor := mq.Producer{
-		Exname:     consts.RabbitMqExchangeName,
-		Exkind:     consts.RabbitMqExchangeKind,
-		QuName:     consts.RabbitMqCommentQueue,
-		RoutingKey: consts.RabbitMqCommentKey,
-	}
+	productor := mq.NewProducer(
+		consts.RabbitMqExchangeKind,
+		consts.RabbitMqExchangeName,
+		consts.RabbitMqCommentQueue,
+		consts.RabbitMqCommentKey,
+	)
 	if !productor.Publish(msg) {
 		res.Code = http.StatusInternalServerError
 		logrus.Errorln("评论任务提交mq失败")
