@@ -3,7 +3,7 @@ package middlewares
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"time"
 )
 

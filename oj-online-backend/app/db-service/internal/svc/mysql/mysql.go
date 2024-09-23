@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"sync"

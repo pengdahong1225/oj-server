@@ -8,7 +8,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/svc/redis"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/utils"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"github.com/sirupsen/logrus"
 	"os"
 )

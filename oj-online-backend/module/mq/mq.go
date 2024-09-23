@@ -2,7 +2,7 @@ package mq
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -22,7 +22,6 @@ func connect(cfg *settings.MqConfig) (*amqp.Connection, error) {
 	return MqConnection, err
 }
 
-// 完整的声明交换机，声明队列，绑定
 func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	if connection == nil || connection.IsClosed() {
 		var err error
@@ -42,9 +41,9 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	err = ch.ExchangeDeclare(
 		exName, // 交换机名称
 		exKind, // 交换机类型
-		true,   // 交换机持久化
-		false,  // 是否自动删除(最后一个消费者取消订阅该队列时，自动删除队列)
-		false,  // 是否独占(只能被一个消费者连接)
+		true,   // 是否持久化
+		false,  // 是否自动删除
+		false,  // 是否独占
 		false,  // 是否阻塞等待队列可用
 		nil,    // 可选的额外参数
 	)
@@ -54,7 +53,7 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	}
 	queue, err := ch.QueueDeclare(
 		quName, // 队列名称
-		true,   // 队列持久化
+		true,   // 是否持久化
 		false,  // 是否自动删除
 		false,  // 是否独占
 		false,  // 是否阻塞等待队列可用
@@ -68,8 +67,8 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 		exName,     // 交换机名称
 		queue.Name, // 队列名称
 		routingKey, // 路由键
-		false,      // 是否发送额外的bind headers
-		nil,        // 可选的额外参数
+		false,      // noWait
+		nil,        // arguments
 	)
 	if err != nil {
 		logrus.Errorf("绑定队列失败:%s", err.Error())

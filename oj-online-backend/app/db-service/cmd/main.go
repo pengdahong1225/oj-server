@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal"
-	"github.com/pengdahong1225/Oj-Online-Server/common/logger"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/logger"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"time"
 )
 

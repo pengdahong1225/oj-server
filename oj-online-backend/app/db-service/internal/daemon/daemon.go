@@ -3,11 +3,11 @@ package daemon
 import (
 	"encoding/json"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/rpc/comment"
-	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal/svc/redis"
-	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
+	"github.com/pengdahong1225/Oj-Online-Server/module/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/module/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"

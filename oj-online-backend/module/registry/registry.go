@@ -2,7 +2,7 @@ package registry
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"

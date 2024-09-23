@@ -3,10 +3,10 @@ package logic
 import (
 	"context"
 	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/models"
-	"github.com/pengdahong1225/Oj-Online-Server/app/question-service/internal/svc/mq"
-	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
+	"github.com/pengdahong1225/Oj-Online-Server/module/mq"
+	"github.com/pengdahong1225/Oj-Online-Server/module/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"

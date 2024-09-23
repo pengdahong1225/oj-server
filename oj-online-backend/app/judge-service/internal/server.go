@@ -3,9 +3,9 @@ package internal
 import (
 	"fmt"
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal/judge"
-	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal/svc/mq"
-	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
+	"github.com/pengdahong1225/Oj-Online-Server/module/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/module/mq"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"

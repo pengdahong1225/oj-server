@@ -3,7 +3,7 @@ package judge
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pengdahong1225/Oj-Online-Server/common/goroutinePool"
+	"github.com/pengdahong1225/Oj-Online-Server/module/goroutinePool"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"

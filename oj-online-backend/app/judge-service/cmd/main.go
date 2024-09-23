@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/judge-service/internal"
-	"github.com/pengdahong1225/Oj-Online-Server/common/logger"
-	"github.com/pengdahong1225/Oj-Online-Server/common/registry"
-	"github.com/pengdahong1225/Oj-Online-Server/common/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/common/utils"
+	"github.com/pengdahong1225/Oj-Online-Server/module/logger"
+	"github.com/pengdahong1225/Oj-Online-Server/module/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/utils"
 	"time"
 )
 
