@@ -37,7 +37,7 @@ func (receiver *CommentServer) QueryComment(ctx context.Context, request *pb.Que
 	if cursor < 0 {
 		cursor = 0
 	}
-	if request.RootId > 0 && request.RootCommentId > 0 {
+	if request.RootId == 0 || request.RootCommentId == 0 {
 		comments := receiver.onRootComment(request.ObjId, request.Cursor)
 		for _, comment := range comments {
 			response.Data = append(response.Data, translateComment(&comment))
@@ -119,7 +119,7 @@ func (receiver CommentSaveHandler) onRootComment(pbComment *pb.Comment) {
 	}
 
 	// 插入评论
-	result := tx.Create(comment)
+	result := tx.Omit("ID", "CreateAt", "UpdateAt", "DeletedAt").Create(comment)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		tx.Rollback()
@@ -170,7 +170,7 @@ func (receiver CommentSaveHandler) onChildComment(pbComment *pb.Comment) {
 		comment.ReplyId = 0
 		comment.ReplyCommentId = 0
 	}
-	result := tx.Create(comment)
+	result := tx.Omit("ID", "CreateAt", "UpdateAt", "DeletedAt").Create(comment)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		tx.Rollback()
@@ -222,7 +222,7 @@ func (receiver CommentSaveHandler) updateObjCommentCount(tx *gorm.DB, id int64, 
 	if count < 0 {
 		count = 0
 	}
-	result = tx.Model(&obj).Update("comment_count", count)
+	result = tx.Model(&obj).Where("id = ?", id).Update("comment_count", count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
