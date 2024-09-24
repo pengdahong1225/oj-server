@@ -64,9 +64,9 @@ func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 		return nil
 	}
 	err = ch.QueueBind(
-		exName,     // 交换机名称
 		queue.Name, // 队列名称
 		routingKey, // 路由键
+		exName,     // 交换机名称
 		false,      // noWait
 		nil,        // arguments
 	)

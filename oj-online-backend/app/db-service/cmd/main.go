@@ -4,28 +4,34 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/app/db-service/internal"
 	"github.com/pengdahong1225/Oj-Online-Server/module/logger"
 	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/utils"
 	"time"
 )
 
-func AppInit() {
-	// 配置全局时区
+func main() {
+	// 初始化
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
 		panic(err)
 	}
 	time.Local = loc
-	// 初始化
 	if err := logger.InitLog("db-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
-}
 
-func ServerLoop() {
-	server := internal.Server{}
+	system, err := settings.Instance().GetSystemConf("db-service")
+	if err != nil {
+		panic(err)
+	}
+	// 获取ip地址
+	ip, err := utils.GetOutboundIP()
+	if err != nil {
+		panic(err)
+	}
+	server := internal.Server{
+		Name: system.Name,
+		IP:   ip.String(),
+		Port: system.Port,
+	}
 	server.Start()
-}
-
-func main() {
-	AppInit()
-	ServerLoop()
 }

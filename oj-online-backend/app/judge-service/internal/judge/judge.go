@@ -23,12 +23,7 @@ var (
 
 func init() {
 	once.Do(func() {
-		srv, err := settings.Instance().GetSystemConf("judge-service")
-		if err != nil {
-			panic(err)
-		}
-
-		baseUrl = fmt.Sprintf("http://%s:%d", srv.Host, srv.Port)
+		baseUrl = fmt.Sprintf("http://%s:%d", "localhost", 5050)
 		runResults = make(chan SubmitResult, 256)
 		exeName = "main"
 	})

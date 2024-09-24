@@ -17,7 +17,6 @@ type AppConfig struct {
 type SystemConfig struct {
 	Name string `mapstructure:"name"`
 	Port int    `mapstructure:"port"`
-	Host string `mapstructure:"host"`
 }
 
 type MysqlConfig struct {

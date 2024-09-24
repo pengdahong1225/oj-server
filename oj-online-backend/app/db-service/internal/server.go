@@ -10,21 +10,23 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/module/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/module/registry"
 	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
-	"github.com/pengdahong1225/Oj-Online-Server/module/utils"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"sync"
 	"time"
 )
 
 type Server struct {
+	Name string
+	IP   string
+	Port int
 }
 
-func (receiver Server) Start() {
+func (receiver *Server) Start() {
 	defer func() {
 		if err := recover(); err != nil {
 			logrus.Errorln(err)
@@ -37,7 +39,7 @@ func (receiver Server) Start() {
 	wg.Add(1)
 	err := goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
-		StartRPCServer()
+		receiver.rpcServerStart()
 	})
 	if err != nil {
 		panic(err)
@@ -71,18 +73,9 @@ func (receiver Server) Start() {
 	wg.Wait()
 }
 
-func StartRPCServer() {
-	system, err := settings.Instance().GetSystemConf("db-service")
-	if err != nil {
-		panic(err)
-	}
-	// 获取ip地址
-	ip, err := utils.GetOutboundIP()
-	if err != nil {
-		panic(err)
-	}
+func (receiver *Server) rpcServerStart() {
 	// 监听端口
-	netAddr := fmt.Sprintf("%s:%d", ip.String(), system.Port)
+	netAddr := fmt.Sprintf("%s:%d", receiver.IP, receiver.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
 		panic(err)
@@ -93,35 +86,22 @@ func StartRPCServer() {
 
 	// 注册服务节点
 	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
-	if err := register.RegisterServiceWithGrpc(system.Name, ip.String(), system.Port); err != nil {
+	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port); err != nil {
 		panic(err)
 	}
-	// 监听健康检查
-	healthcheck := health.NewServer()
-	healthpb.RegisterHealthServer(grpcServer, healthcheck)
+	// 健康检查
+	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 
 	// 启动rpc服务
 	userSrv := user.UserServer{}
 	pb.RegisterUserServiceServer(grpcServer, &userSrv)
-	if err := grpcServer.Serve(listener); err != nil {
-		panic(err)
-	}
-
 	problemSrv := problem.ProblemServer{}
 	pb.RegisterProblemServiceServer(grpcServer, &problemSrv)
-	if err := grpcServer.Serve(listener); err != nil {
-		panic(err)
-	}
-
 	recordSrv := record.RecordServer{}
 	pb.RegisterRecordServiceServer(grpcServer, &recordSrv)
-	if err := grpcServer.Serve(listener); err != nil {
-		panic(err)
-	}
-
 	commentSrv := comment.CommentServer{}
 	pb.RegisterCommentServiceServer(grpcServer, &commentSrv)
-	if err := grpcServer.Serve(listener); err != nil {
+	if err = grpcServer.Serve(listener); err != nil {
 		panic(err)
 	}
 }

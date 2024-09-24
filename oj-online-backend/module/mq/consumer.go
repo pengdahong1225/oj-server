@@ -27,7 +27,7 @@ func NewConsumer(exKind, exName, quName, routingKey, cTag string) *Consumer {
 
 func (receiver *Consumer) Consume() <-chan amqp.Delivery {
 	channel := newChannel(receiver.exName, receiver.exKind, receiver.queName, receiver.routingKey)
-	if channel != nil {
+	if channel == nil {
 		logrus.Errorln("获取channel失败")
 		return nil
 	}

@@ -6,6 +6,8 @@ import (
 	"github.com/pengdahong1225/Oj-Online-Server/consts"
 	"github.com/pengdahong1225/Oj-Online-Server/module/goroutinePool"
 	"github.com/pengdahong1225/Oj-Online-Server/module/mq"
+	"github.com/pengdahong1225/Oj-Online-Server/module/registry"
+	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
 	"github.com/pengdahong1225/Oj-Online-Server/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -13,9 +15,24 @@ import (
 	"sync"
 )
 
-type Server struct{}
+type Server struct {
+	Name string
+	IP   string
+	Port int
+}
 
-func (receiver *Server) Loop(ip string, port int) {
+func (receiver *Server) Register() error {
+	register, err := registry.NewRegistry(settings.Instance().RegistryConfig)
+	if err != nil {
+		return err
+	}
+	if err = register.RegisterServiceWithHttp(receiver.Name, receiver.IP, receiver.Port); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (receiver *Server) Start() {
 	defer func() {
 		if err := recover(); err != nil {
 			logrus.Errorln(err)
@@ -27,13 +44,14 @@ func (receiver *Server) Loop(ip string, port int) {
 	wg.Add(1)
 	goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
-		dsn := fmt.Sprintf("%s:%d", ip, port)
+		dsn := fmt.Sprintf("%s:%d", receiver.IP, receiver.Port)
 		http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
 			if req.Method == "GET" {
 				res.Write([]byte("ok"))
 			}
 		})
 		http.ListenAndServe(dsn, nil)
+		logrus.Infoln("健康检查线程退出")
 	})
 
 	// 消费者线程
@@ -61,7 +79,10 @@ func (receiver *Server) Loop(ip string, port int) {
 				d.Reject(false)
 			}
 		}
+		logrus.Infoln("消费者线程退出")
 	})
+
+	wg.Wait()
 }
 
 // 解析，校验，提交任务给评测机

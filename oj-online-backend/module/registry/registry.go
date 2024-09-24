@@ -53,7 +53,7 @@ func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string,
 		Address: ip,
 		Check: &consulapi.AgentServiceCheck{
 			CheckID:                        fmt.Sprintf("%s-%s-%d", serviceName, ip, port),
-			HTTP:                           fmt.Sprintf("%s:%d/%s", ip, port, "health"),
+			HTTP:                           fmt.Sprintf("http://%s:%d/%s", ip, port, "health"),
 			Timeout:                        "10s",
 			Interval:                       "10s",
 			DeregisterCriticalServiceAfter: "1m",
