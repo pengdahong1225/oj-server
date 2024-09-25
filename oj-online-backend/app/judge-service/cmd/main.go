@@ -33,8 +33,5 @@ func main() {
 		IP:   ip.String(),
 		Port: system.Port,
 	}
-	if err = server.Register(); err != nil {
-		panic(err)
-	}
 	server.Start()
 }

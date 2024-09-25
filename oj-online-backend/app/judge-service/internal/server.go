@@ -21,7 +21,7 @@ type Server struct {
 	Port int
 }
 
-func (receiver *Server) Register() error {
+func (receiver *Server) register() error {
 	register, err := registry.NewRegistry(settings.Instance().RegistryConfig)
 	if err != nil {
 		return err
@@ -81,6 +81,10 @@ func (receiver *Server) Start() {
 		}
 		logrus.Infoln("消费者线程退出")
 	})
+
+	if err := receiver.register(); err != nil {
+		panic(err)
+	}
 
 	wg.Wait()
 }

@@ -70,6 +70,12 @@ func (receiver *Server) Start() {
 		daemonServer.CommentSaveConsumer()
 	})
 
+	// 注册服务节点
+	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
+	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port); err != nil {
+		panic(err)
+	}
+
 	wg.Wait()
 }
 
@@ -84,15 +90,8 @@ func (receiver *Server) rpcServerStart() {
 
 	grpcServer := grpc.NewServer()
 
-	// 注册服务节点
-	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
-	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port); err != nil {
-		panic(err)
-	}
-	// 健康检查
-	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
-
 	// 启动rpc服务
+	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	userSrv := user.UserServer{}
 	pb.RegisterUserServiceServer(grpcServer, &userSrv)
 	problemSrv := problem.ProblemServer{}

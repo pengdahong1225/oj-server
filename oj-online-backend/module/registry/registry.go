@@ -3,6 +3,8 @@ package registry
 import (
 	"fmt"
 	"github.com/pengdahong1225/Oj-Online-Server/module/settings"
+	"github.com/pengdahong1225/Oj-Online-Server/module/signal"
+	"github.com/pengdahong1225/Oj-Online-Server/module/utils"
 
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
@@ -28,38 +30,60 @@ func NewRegistry(cfg *settings.RegistryConfig) (*Registry, error) {
 
 // RegisterService 注册service节点
 func (receiver *Registry) RegisterServiceWithGrpc(serviceName string, ip string, port int) error {
+	nodeID, err := utils.GenerateUUID()
+	if err != nil {
+		return err
+	}
 	srv := &consulapi.AgentServiceRegistration{
-		ID:      fmt.Sprintf("%s-%s-%d", serviceName, ip, port), // 服务唯一ID
-		Name:    serviceName,                                    // 服务名称
+		ID:      nodeID,      // 服务唯一ID
+		Name:    serviceName, // 服务名称
 		Tags:    []string{serviceName},
 		Port:    port,
 		Address: ip,
 		Check: &consulapi.AgentServiceCheck{
-			CheckID:                        fmt.Sprintf("%s-%s-%d", serviceName, ip, port),
+			CheckID:                        nodeID,
 			GRPC:                           fmt.Sprintf("%s:%d", ip, port),
 			Timeout:                        "10s",
 			Interval:                       "10s",
 			DeregisterCriticalServiceAfter: "1m",
 		},
 	}
-	return receiver.client.Agent().ServiceRegister(srv)
+	err = receiver.client.Agent().ServiceRegister(srv)
+	if err != nil {
+		return err
+	}
+	go signal.SignalListen(func() {
+		receiver.client.Agent().ServiceDeregister(nodeID)
+	})
+	return nil
 }
 func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string, port int) error {
+	nodeID, err := utils.GenerateUUID()
+	if err != nil {
+		return err
+	}
 	srv := &consulapi.AgentServiceRegistration{
-		ID:      fmt.Sprintf("%s-%s-%d", serviceName, ip, port), // 服务唯一ID
-		Name:    serviceName,                                    // 服务名称
+		ID:      nodeID,      // 服务唯一ID
+		Name:    serviceName, // 服务名称
 		Tags:    []string{serviceName},
 		Port:    port,
 		Address: ip,
 		Check: &consulapi.AgentServiceCheck{
-			CheckID:                        fmt.Sprintf("%s-%s-%d", serviceName, ip, port),
+			CheckID:                        nodeID,
 			HTTP:                           fmt.Sprintf("http://%s:%d/%s", ip, port, "health"),
 			Timeout:                        "10s",
 			Interval:                       "10s",
 			DeregisterCriticalServiceAfter: "1m",
 		},
 	}
-	return receiver.client.Agent().ServiceRegister(srv)
+	err = receiver.client.Agent().ServiceRegister(srv)
+	if err != nil {
+		return err
+	}
+	go signal.SignalListen(func() {
+		receiver.client.Agent().ServiceDeregister(nodeID)
+	})
+	return nil
 }
 
 // NewDBConnection db服务连接

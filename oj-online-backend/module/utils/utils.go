@@ -1,6 +1,9 @@
 package utils
 
-import "net"
+import (
+	"github.com/google/uuid"
+	"net"
+)
 
 // GetOutboundIP 获取本机的出口IP
 func GetOutboundIP() (net.IP, error) {
@@ -11,4 +14,11 @@ func GetOutboundIP() (net.IP, error) {
 	defer conn.Close()
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	return localAddr.IP, nil
+}
+func GenerateUUID() (string, error) {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return "", err
+	}
+	return id.String(), nil
 }
