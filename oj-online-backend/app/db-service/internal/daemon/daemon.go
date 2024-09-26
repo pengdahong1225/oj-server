@@ -42,7 +42,6 @@ func (receiver Daemon) CommentSaveConsumer() {
 	}
 }
 
-// 解析，校验，提交任务给评测机
 func syncHandle(data []byte) bool {
 	c := &pb.Comment{}
 	err := proto.Unmarshal(data, c)

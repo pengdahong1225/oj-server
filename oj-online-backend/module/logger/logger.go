@@ -86,7 +86,11 @@ func InitLog(appName, path, level string) error {
 	} else {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+
+	format := &logrus.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+	}
+	logrus.SetFormatter(format)
 	logrus.SetOutput(os.Stdout)
 	logrus.SetReportCaller(true)
 	return nil
