@@ -19,6 +19,3 @@ for s in "${services[@]}"; do
     # 返回上级目录
     cd ..
 done
-
-# 构建serverbase
-docker build -f dockerfile.serverbase -t serverbase:latest .

@@ -25,6 +25,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /root/server/Oj-Online-Server/oj-online-backend/log/db-service:/app/log
+      - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
     ports:
       - "9000"
     networks:
@@ -38,6 +39,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /root/server/Oj-Online-Server/oj-online-backend/log/judge-service:/app/log
+      - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
     ports:
       - "9010"
     networks:
@@ -54,6 +56,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - /root/server/Oj-Online-Server/oj-online-backend/log/question-service:/app/log
+      - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
     ports:
       - "9020"
     networks:

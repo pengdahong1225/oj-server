@@ -1,5 +1,0 @@
-FROM debian:latest AS serverbase
-
-RUN if [ ! -d "/app/log" ]; then mkdir -p /app/log; fi
-
-COPY ./config /app/config
