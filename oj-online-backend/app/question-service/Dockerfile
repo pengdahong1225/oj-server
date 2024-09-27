@@ -16,7 +16,7 @@ COPY . .
 COPY ../../config /config
 
 RUN go mod tidy
-RUN go build -o question_service .
+RUN go build -o question_service ./cmd
 
 EXPOSE 9020
 

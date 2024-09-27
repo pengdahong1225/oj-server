@@ -12,6 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang/protobuf v1.5.3
 	github.com/gomodule/redigo v1.9.2
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.28.2
 	github.com/juju/ratelimit v1.0.2
 	github.com/mojocn/base64Captcha v1.3.6
@@ -48,7 +49,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
