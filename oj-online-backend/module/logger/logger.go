@@ -68,9 +68,9 @@ func InitLog(appName, path, level string) error {
 	}
 
 	// 日志文件
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, appName, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, appName, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", path, appName, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
 
 	hook := &FileHook{
 		errFile:   errFile,
