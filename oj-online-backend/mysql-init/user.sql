@@ -20,52 +20,44 @@ create table if not exists user_info
 
 -- 做题信息表
 create table if not exists user_problem_statistics(
-    id BIGINT AUTO_INCREMENT,
+    uid BIGINT not null comment '用户id',
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
-    
-    uid BIGINT not null,
+
     submit_count BIGINT DEFAULT 0 comment '题目提交数量',
     accomplish_count BIGINT DEFAULT 0 comment '题目通过数量',
     easy_problem_count BIGINT DEFAULT 0 comment '通过的简单题目数量',
     medium_problem_count BIGINT DEFAULT 0 comment '通过的中等题目数量',
     hard_problem_count BIGINT DEFAULT 0 comment '通过的困难题目数量',
 
-    PRIMARY KEY(id),
-    FOREIGN KEY(uid) REFERENCES user_info(id),
-    UNIQUE INDEX idx_uid(uid)
+    PRIMARY KEY(uid)
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户提交记录表
 create table if not exists user_submit_record
 (
-    id BIGINT AUTO_INCREMENT,
+    uid BIGINT not null comment '用户id',
+    problem_id BIGINT not null comment '题目id',
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
-    uid BIGINT not null,
-    problem_id BIGINT not null,
     code TEXT NOT null comment '提交的代码',
     result TEXT NOT null comment '运行结果集', -- json
     lang VARCHAR(64) DEFAULT '' comment '语言',
 
-    PRIMARY KEY(id),
-    FOREIGN KEY(uid) REFERENCES user_info(id),
-    FOREIGN KEY(problem_id) REFERENCES problem(id)
+    PRIMARY KEY(uid),
+    INDEX idx(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题表
 create table if not exists user_solution
 (
-    id BIGINT AUTO_INCREMENT,
+    uid BIGINT NOT NULL COMMENT '用户id',
+    problem_id BIGINT NOT NULL comment '题目id',
+
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
-    uid BIGINT NOT NULL,
-    problem_id BIGINT NOT NULL,
-
-    PRIMARY KEY(id),
-    FOREIGN KEY(uid) REFERENCES user_info(id),
-    FOREIGN KEY(problem_id) REFERENCES problem(id),
-    INDEX idx_uid(uid)
+    PRIMARY KEY(uid),
+    INDEX idx_uid(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
