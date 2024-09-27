@@ -1,22 +1,11 @@
-FROM golang:1.21-alpine AS budiler
+ARG image="serverbase"
+FROM "${image}"
 
-ENV GO111MODULE=on \
-    CGO_ENABLE=0 \
-    GOOS=linux \
-    GOARCH=amd64 \
-    GOPROXY=https://goproxy.cn \
-    LOG_MODE=debug
+ENV LOG_MODE=debug
 
 WORKDIR /app
 
-RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
-
-COPY . .
-COPY ../../config /app/config
-
-RUN go mod tidy
-RUN go build -o db_service ./cmd
+COPY ./service /app
 
 EXPOSE 9000
-
-ENTRYPOINT ["/app/db_service"]
+ENTRYPOINT ["/app/service"]

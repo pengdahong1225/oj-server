@@ -10,7 +10,7 @@ networks:
 
 services:
   sandbox:
-    image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-service
+    image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-service:v1.0.0
     container_name: sandbox
     privileged: true
     ports:
