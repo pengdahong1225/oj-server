@@ -43,9 +43,9 @@ func (receiver *Registry) RegisterServiceWithGrpc(serviceName string, ip string,
 		Check: &consulapi.AgentServiceCheck{
 			CheckID:                        nodeID,
 			GRPC:                           fmt.Sprintf("%s:%d", ip, port),
-			Timeout:                        "10s",
-			Interval:                       "10s",
-			DeregisterCriticalServiceAfter: "1m",
+			Interval:                       "5s",  // 每5秒检测一次
+			Timeout:                        "5s",  // 5秒超时
+			DeregisterCriticalServiceAfter: "10s", // 超时10秒注销节点
 		},
 	}
 	err = receiver.client.Agent().ServiceRegister(srv)
@@ -71,9 +71,9 @@ func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string,
 		Check: &consulapi.AgentServiceCheck{
 			CheckID:                        nodeID,
 			HTTP:                           fmt.Sprintf("http://%s:%d/%s", ip, port, "health"),
-			Timeout:                        "10s",
-			Interval:                       "10s",
-			DeregisterCriticalServiceAfter: "1m",
+			Interval:                       "5s",  // 每5秒检测一次
+			Timeout:                        "5s",  // 5秒超时
+			DeregisterCriticalServiceAfter: "10s", // 超时10秒注销节点
 		},
 	}
 	err = receiver.client.Agent().ServiceRegister(srv)
