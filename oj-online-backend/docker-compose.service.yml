@@ -58,7 +58,7 @@ services:
       - /root/server/Oj-Online-Server/oj-online-backend/log/question-service:/app/log
       - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
     ports:
-      - "9020"
+      - "9020:9020"
     networks:
       - net
     depends_on: # 本地服务的依赖，控制启动先后顺序
