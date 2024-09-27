@@ -6,7 +6,7 @@
     <package value="D:\Codes\Oj-Online-Server\oj-online-backend\db-service" />
     <directory value="$PROJECT_DIR$/app/db-service/cmd" />
     <filePath value="$PROJECT_DIR$" />
-    <output_directory value="$PROJECT_DIR$/app/bin" />
+    <output_directory value="$PROJECT_DIR$/app/db-service" />
     <option name="run" value="false" />
     <method v="2" />
   </configuration>

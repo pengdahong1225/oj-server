@@ -5,10 +5,10 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn \
-    GIN_MODE=release \
-    LOG_MODE=release
+    GIN_MODE=debug \
+    LOG_MODE=debug
 
-WORKDIR /app/question-service
+WORKDIR /app
 
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
@@ -20,4 +20,4 @@ RUN go build -o question_service .
 
 EXPOSE 9020
 
-ENTRYPOINT ["/app/question-service/question_service"]
+ENTRYPOINT ["/app/question_service"]

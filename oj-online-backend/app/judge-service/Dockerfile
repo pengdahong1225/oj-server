@@ -5,10 +5,10 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn \
-    GIN_MODE=release \
-    LOG_MODE=release
+    GIN_MODE=debug \
+    LOG_MODE=debug
 
-WORKDIR /app/judge-service
+WORKDIR /app
 
 RUN if [ ! -d "/app/log" ]; then mkdir /app/log; fi
 
@@ -20,4 +20,4 @@ RUN go build -o judge_service .
 
 EXPOSE 9010
 
-ENTRYPOINT ["/app/judge-service/judge_service"]
+ENTRYPOINT ["/app/judge_service"]

@@ -6,7 +6,7 @@
     <package value="D:\project\peter\Oj-Online-Server\oj-online-backend\app\judge-service\cmd" />
     <directory value="$PROJECT_DIR$/app/judge-service/cmd" />
     <filePath value="$PROJECT_DIR$" />
-    <output_directory value="$PROJECT_DIR$/app/bin" />
+    <output_directory value="$PROJECT_DIR$/app/judge-service" />
     <option name="run" value="false" />
     <method v="2" />
   </configuration>
