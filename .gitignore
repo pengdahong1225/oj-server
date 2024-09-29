@@ -7,6 +7,6 @@ cmake-build-*
 *.log
 *.o
 config/
-oj-online-backend/app/db-service/service
-oj-online-backend/app/judge-service/service
-oj-online-backend/app/question-service/service
+backend/app/db-service/service
+backend/app/judge-service/service
+backend/app/question-service/service
