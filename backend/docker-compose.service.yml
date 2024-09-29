@@ -24,8 +24,8 @@ services:
       context: ./app/db-service # 路径
       dockerfile: Dockerfile
     volumes:
-      - /root/server/Oj-Online-Server/oj-online-backend/log/db-service:/app/log
-      - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
+      - /root/server/oj-server/backend/log/db-service:/app/log
+      - /root/server/oj-server/backend/config:/app/config
     ports:
       - "9000"
     networks:
@@ -38,8 +38,8 @@ services:
       context: ./app/judge-service
       dockerfile: Dockerfile
     volumes:
-      - /root/server/Oj-Online-Server/oj-online-backend/log/judge-service:/app/log
-      - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
+      - /root/server/oj-server/backend/log/judge-service:/app/log
+      - /root/server/oj-server/backend/config:/app/config
     ports:
       - "9010"
     networks:
@@ -55,8 +55,8 @@ services:
       context: ./app/question-service
       dockerfile: Dockerfile
     volumes:
-      - /root/server/Oj-Online-Server/oj-online-backend/log/question-service:/app/log
-      - /root/server/Oj-Online-Server/oj-online-backend/config:/app/config
+      - /root/server/oj-server/backend/log/question-service:/app/log
+      - /root/server/oj-server/backend/config:/app/config
     ports:
       - "9020:9020"
     networks:

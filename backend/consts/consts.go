@@ -2,7 +2,7 @@ package consts
 
 const (
 	RabbitMqExchangeKind = "direct"
-	RabbitMqExchangeName = "oj"
+	RabbitMqExchangeName = "amq.direct"
 
 	RabbitMqJudgeKey     = "judge"
 	RabbitMqJudgeQueue   = "judge-task-queue"
