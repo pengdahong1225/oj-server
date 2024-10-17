@@ -2,7 +2,7 @@ package captcha
 
 import "github.com/mojocn/base64Captcha"
 
-// store
+// 基于内存的store
 var store = base64Captcha.DefaultMemStore
 
 func GenerateImageCaptcha() (id string, b64s string, err error) {

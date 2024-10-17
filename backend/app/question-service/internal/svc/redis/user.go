@@ -1,26 +1,21 @@
 package redis
 
 import (
-	"strconv"
+	"fmt"
+	"github.com/gomodule/redigo/redis"
 )
 
-// fields
+func LockUser(uid int64, expire int64) (bool, error) {
+	conn := newConn()
+	defer conn.Close()
 
-const (
-	UserStateField = "state"
-)
-
-func SetUserState(uid int64, state int) error {
-	return SetKVByHash(strconv.FormatInt(uid, 10), UserStateField, strconv.Itoa(state))
+	key := fmt.Sprintf("lock:%d", uid)
+	return redis.Bool(conn.Do("SetNx", key, "locked", "ex", expire))
 }
+func UnLockUser(uid int64) (bool, error) {
+	conn := newConn()
+	defer conn.Close()
 
-func GetUserState(uid int64) (int, error) {
-	state, err := GetValueByHash(strconv.FormatInt(uid, 10), UserStateField)
-	if err != nil {
-		return -1, err
-	}
-	if state == "" {
-		return 0, nil
-	}
-	return strconv.Atoi(state)
+	key := fmt.Sprintf("lock:%d", uid)
+	return redis.Bool(conn.Do("DEL", key))
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/svc/redis"
+	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
@@ -16,28 +17,15 @@ import (
 
 var (
 	baseUrl    string
-	exeName    string            // 执行文件名
-	runResults chan SubmitResult // 运行结果
+	runResults chan types.SubmitResult // 运行结果
 	once       sync.Once
 )
 
 func init() {
 	once.Do(func() {
 		baseUrl = fmt.Sprintf("http://%s:%d", "localhost", 5050)
-		runResults = make(chan SubmitResult, 256)
-		exeName = "main"
+		runResults = make(chan types.SubmitResult, 256)
 	})
-}
-
-type Param struct {
-	uid           int64
-	problemID     int64
-	compileConfig *ProblemConfig
-	runConfig     *ProblemConfig
-	content       string // 源代码
-	lang          string // 语种
-	testCases     []TestCase
-	fileIds       map[string]string // 文件id
 }
 
 // Handle 判题服务入口
@@ -65,23 +53,19 @@ func Handle(form *pb.SubmitForm) {
 	duration := time.Now().Sub(start).Milliseconds()
 	logrus.Infoln("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms", form.Uid, form.ProblemId, duration)
 
-	// 落库
+	// 解锁用户
+	redis.UnLockUser(form.Uid)
+
+	// 记录
 	data, err := json.Marshal(res)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return
 	}
 	saveResult(param, data)
-	cacheResult(param, data)
 }
 
-func cacheResult(param *Param, data []byte) {
-	if err := redis.SetJudgeResult(param.uid, param.problemID, string(data)); err != nil {
-		logrus.Errorln(err.Error())
-	}
-}
-
-func saveResult(param *Param, data []byte) {
+func saveResult(param *types.Param, data []byte) {
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
@@ -91,11 +75,11 @@ func saveResult(param *Param, data []byte) {
 
 	client := pb.NewRecordServiceClient(dbConn)
 	request := &pb.SaveUserSubmitRecordRequest{
-		UserId:    param.uid,
-		ProblemId: param.problemID,
-		Code:      param.content,
+		UserId:    param.Uid,
+		ProblemId: param.ProblemID,
+		Code:      param.Code,
 		Result:    string(data),
-		Lang:      param.lang,
+		Lang:      param.Language,
 		Stamp:     time.Now().Unix(),
 	}
 
@@ -103,36 +87,40 @@ func saveResult(param *Param, data []byte) {
 	if err != nil {
 		logrus.Errorln(err.Error())
 	}
+
+	if err := redis.SetJudgeResult(param.Uid, param.ProblemID, string(data)); err != nil {
+		logrus.Errorln(err.Error())
+	}
 }
 
-func preAction(form *pb.SubmitForm) (bool, *Param) {
-	param := &Param{}
+func preAction(form *pb.SubmitForm) (bool, *types.Param) {
+	param := &types.Param{}
 
 	// 读取题目配置
 	hotData := getProblemHotData(form.ProblemId)
-	compileConfig := &ProblemConfig{}
-	if err := json.Unmarshal([]byte(hotData.CompileConfig), compileConfig); err != nil {
+	compileLimit := types.Limit{}
+	if err := json.Unmarshal([]byte(hotData.CompileLimit), &compileLimit); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	runConfig := &ProblemConfig{}
-	if err := json.Unmarshal([]byte(hotData.RunConfig), runConfig); err != nil {
+	runLimit := types.Limit{}
+	if err := json.Unmarshal([]byte(hotData.RunLimit), &runLimit); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
-	var testCases []TestCase
-	if err := json.Unmarshal([]byte(hotData.TestCase), &testCases); err != nil {
+	var testCases []types.TestCase
+	if err := json.Unmarshal([]byte(hotData.TestCases), &testCases); err != nil {
 		logrus.Errorln(err.Error())
 		return false, nil
 	}
+	param.Uid = form.Uid
+	param.ProblemID = form.ProblemId
+	param.Code = form.Code
+	param.Language = form.Lang
+	param.CompileLimit = compileLimit
+	param.RunLimit = runLimit
+	param.TestCases = testCases
 
-	param.uid = form.Uid
-	param.problemID = form.ProblemId
-	param.compileConfig = compileConfig
-	param.runConfig = runConfig
-	param.content = form.Code
-	param.testCases = testCases
-	param.lang = form.Lang
 	return true, param
 }
 
@@ -142,11 +130,11 @@ func preAction(form *pb.SubmitForm) (bool, *Param) {
 // 2.编译结果
 // 3.运行结果
 // 4.评判结果
-func doAction(param *Param) []SubmitResult {
+func doAction(param *types.Param) []types.SubmitResult {
 	handler := &Handler{}
-	results := make([]SubmitResult, 0)
+	results := make([]types.SubmitResult, 0)
 	// 设置题目状态[编译]
-	if err := redis.SetUPState(param.uid, param.problemID, int(pb.SubmitState_UPStateCompiling)); err != nil {
+	if err := redis.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling)); err != nil {
 		logrus.Errorln(err.Error())
 	}
 	compileResult, err := handler.compile(param)
@@ -158,7 +146,7 @@ func doAction(param *Param) []SubmitResult {
 		compileResult.Content = "编译失败"
 		results = append(results, *compileResult)
 		// 更新状态
-		if err := redis.SetUPState(param.uid, param.problemID, int(pb.SubmitState_UPStateExited)); err != nil {
+		if err := redis.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited)); err != nil {
 			logrus.Errorln(err.Error())
 			return nil
 		}
@@ -167,10 +155,10 @@ func doAction(param *Param) []SubmitResult {
 	compileResult.Content = "编译成功"
 	results = append(results, *compileResult)
 
-	// 编译成功 => 设置题目状态[判题中]
-	// 运行和判题是协同的步骤，由两个协程去同时进行，通过channel通信
-	param.fileIds = compileResult.FileIds
-	if err := redis.SetUPState(param.uid, param.problemID, int(pb.SubmitState_UPStateJudging)); err != nil {
+	// 保存可执行文件的文件ID
+	param.FileIds = compileResult.FileIds
+	// 设置题目状态[判题中]
+	if err := redis.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateJudging)); err != nil {
 		logrus.Errorln(err.Error())
 	}
 	wgRun := new(sync.WaitGroup)
@@ -197,7 +185,7 @@ func doAction(param *Param) []SubmitResult {
 
 // 获取题目热点数据
 // cache中获取失败就去db获取
-func getProblemHotData(ProblemID int64) *ProblemHotData {
+func getProblemHotData(ProblemID int64) *types.ProblemHotData {
 	// cache
 	data, err := redis.GetProblemHotData(ProblemID)
 	if err != nil {
@@ -224,7 +212,7 @@ func getProblemHotData(ProblemID int64) *ProblemHotData {
 		data = res.Data
 	}
 
-	hotData := &ProblemHotData{}
+	hotData := &types.ProblemHotData{}
 	if err := json.Unmarshal([]byte(data), hotData); err != nil {
 		logrus.Errorln(err.Error())
 		return nil

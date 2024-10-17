@@ -42,7 +42,8 @@ func (receiver *JWT) ParseToken(tokenString string) (*UserClaims, error) {
 		return receiver.SigningKey, nil
 	})
 	if err != nil {
-		if ve, ok := err.(*jwt.ValidationError); ok {
+		var ve *jwt.ValidationError
+		if errors.As(err, &ve) {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 				return nil, TokenMalformed
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {

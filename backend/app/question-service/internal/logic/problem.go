@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	redis2 "github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/redis"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/redis"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
@@ -60,24 +60,17 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 		Data:    nil,
 	}
 
-	// 判断用户是否处于判题状态
-	state, err := redis2.GetUserState(uid)
+	ok, err := redis.LockUser(uid, 60)
 	if err != nil {
+		logrus.Errorln("lock user err:", err.Error())
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		logrus.Errorln(err.Error())
 		return res
 	}
-	if state != int(pb.UserState_UserStateNormal) {
-		res.Code = http.StatusBadRequest
-		res.Message = "用户处于判题状态，请稍等..."
-		return res
-	}
-	// 设置用户状态为判题中
-	if err := redis2.SetUserState(uid, int(pb.UserState_UserStateJudging)); err != nil {
-		res.Code = http.StatusInternalServerError
-		res.Message = err.Error()
-		logrus.Errorln(err.Error())
+	if !ok {
+		logrus.Errorln("lock user failed")
+		res.Code = http.StatusOK
+		res.Message = "正在判题中"
 		return res
 	}
 
@@ -94,6 +87,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 		logrus.Errorln(err.Error())
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
+		redis.UnLockUser(uid)
 		return res
 	}
 	// 提交到mq
@@ -106,6 +100,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 	if !productor.Publish(data) {
 		res.Code = http.StatusInternalServerError
 		logrus.Errorln("任务提交mq失败")
+		redis.UnLockUser(uid)
 		return res
 	} else {
 		res.Code = http.StatusOK
@@ -161,7 +156,7 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 	}
 
 	// 查询状态
-	state, err := redis2.QueryUPState(uid, problemID)
+	state, err := redis.QueryUPState(uid, problemID)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -180,7 +175,7 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 	}
 
 	// 查询结果
-	r, err := redis2.QueryJudgeResult(uid, problemID)
+	r, err := redis.QueryJudgeResult(uid, problemID)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
