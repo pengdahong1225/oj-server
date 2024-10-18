@@ -1,0 +1,39 @@
+{
+  "compile": {
+    "cpuLimit": 0,
+    "clockLimit": 0,
+    "memoryLimit": 0,
+    "stackLimit": 0,
+    "procLimit": 0,
+
+    "args": ["/usr/bin/g++", "main.cc", "-o", "main"],
+    "env": ["PATH=/usr/bin:/bin"],
+
+    "files": [
+      {"content": ""},
+      {"name": "stdout", "max": 10240},
+      {"name": "stderr", "max": 10240}
+    ],
+    "copyIn": {"main.cc": {"content": ""}},
+    "copyOut": ["stdout", "stderr"],
+    "copyOutCached": ["main"]
+  },
+  "run":{
+    "cpuLimit": 0,
+    "clockLimit": 0,
+    "memoryLimit": 0,
+    "stackLimit": 0,
+    "procLimit": 0,
+
+    "args": ["main"],
+    "env": ["PATH=/usr/bin:/bin"],
+
+    "files": [
+      {"content": ""},
+      {"name": "stdout", "max": 10240},
+      {"name": "stderr", "max": 10240}
+    ],
+    "copyIn": {"main": {"fileId": ""}},
+    "copyOut": ["stdout", "stderr"]
+  }
+}
