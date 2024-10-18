@@ -14,19 +14,23 @@ message Problem{
   repeated string tags = 7;
   int64 create_by = 8;
 
-  repeated TestCase test_cases = 9;
-  ProblemConfig compile_config = 10;
-  ProblemConfig run_config = 11;
+  ProblemConfig config = 9;
+}
+
+message ProblemConfig{
+  repeated TestCase test_cases = 1;
+  Limit compile_limit = 2;
+  Limit run_limit = 3;
 }
 
 message TestCase{
   string input = 1;
   string output = 2;
 }
-
-message ProblemConfig{
-  int64 cpu_limit = 1;
-  int64 clock_limit = 2;
-  int64 memory_limit = 3;
-  int64 proc_limit = 4;
+message Limit{
+  int64 cpu_limit = 2;
+  int64 clock_limit = 3;
+  int64 memory_limit = 4;
+  int64 stack_limit = 5;
+  int64 proc_limit = 6;
 }

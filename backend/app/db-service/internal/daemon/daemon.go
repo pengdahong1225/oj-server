@@ -1,7 +1,6 @@
 package daemon
 
 import (
-	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/comment"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/redis"
@@ -59,10 +58,6 @@ func syncHandle(data []byte) bool {
 
 // 排行榜
 func (receiver Daemon) LoopRank() {
-	var key = "rank"
-	conn := redis.NewConn()
-	defer conn.Close()
-
 	db := mysql.Instance()
 	var orderList []mysql.Statistics
 
@@ -89,12 +84,7 @@ func (receiver Daemon) LoopRank() {
 		return
 	}
 
-	for _, item := range orderList {
-		data, _ := json.Marshal(item.User) // 序列化
-		_, err := conn.Do("ZADD", key, item.AccomplishCount, data)
-		if err != nil {
-			logrus.Errorln("更新排行榜失败", err.Error())
-			break
-		}
+	if err := redis.UpdateRankList(orderList); err != nil {
+		logrus.Errorln("更新排行榜失败", err.Error())
 	}
 }

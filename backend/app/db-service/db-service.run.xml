@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="db-service" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <module name="oj-online-backend" />
+    <module name="backend" />
     <working_directory value="$PROJECT_DIR$/app/db-service" />
     <kind value="DIRECTORY" />
     <package value="D:\Codes\Oj-Online-Server\oj-online-backend\db-service" />

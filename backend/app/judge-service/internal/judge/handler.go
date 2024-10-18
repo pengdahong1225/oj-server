@@ -20,9 +20,9 @@ func (receiver *Handler) compile(param *types.Param) (*types.SubmitResult, error
 		"cmd": []map[string]any{
 			{
 				// 资源限制
-				"cpuLimit":    param.CompileLimit.CpuLimit,
-				"memoryLimit": param.CompileLimit.MemoryLimit,
-				"procLimit":   param.CompileLimit.ProcLimit,
+				"cpuLimit":    param.ProblemConfig.CompileLimit.CpuLimit,
+				"memoryLimit": param.ProblemConfig.CompileLimit.MemoryLimit,
+				"procLimit":   param.ProblemConfig.CompileLimit.ProcLimit,
 				// 程序命令行参数
 				"args": []string{"/usr/bin/g++", "main.cc", "-o", "main"},
 				// 程序环境变量
@@ -82,7 +82,7 @@ func (receiver *Handler) run(param *types.Param) {
 	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 
-	for _, test := range param.TestCases {
+	for _, test := range param.ProblemConfig.TestCases {
 		goroutinePool.Instance().Submit(func() {
 			wg.Add(1)
 			defer wg.Done()
@@ -91,9 +91,9 @@ func (receiver *Handler) run(param *types.Param) {
 				"cmd": []map[string]any{
 					{
 						// 资源限制
-						"cpuLimit":    param.RunLimit.CpuLimit,
-						"memoryLimit": param.RunLimit.MemoryLimit,
-						"procLimit":   param.RunLimit.ProcLimit,
+						"cpuLimit":    param.ProblemConfig.RunLimit.CpuLimit,
+						"memoryLimit": param.ProblemConfig.RunLimit.MemoryLimit,
+						"procLimit":   param.ProblemConfig.RunLimit.ProcLimit,
 						// 程序命令行参数
 						"args": []string{"main"},
 						// 程序环境变量

@@ -2,8 +2,6 @@ package problem
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
@@ -11,6 +9,7 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -21,50 +20,18 @@ type ProblemServer struct {
 func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
 	db := mysql.Instance()
 
-	compileConfig := mysql.ProblemConfig{
-		ClockLimit:  request.Data.CompileConfig.ClockLimit,
-		CpuLimit:    request.Data.CompileConfig.CpuLimit,
-		MemoryLimit: request.Data.CompileConfig.MemoryLimit,
-		ProcLimit:   request.Data.CompileConfig.ProcLimit,
-	}
-	runConfig := mysql.ProblemConfig{
-		ClockLimit:  request.Data.RunConfig.ClockLimit,
-		CpuLimit:    request.Data.RunConfig.CpuLimit,
-		MemoryLimit: request.Data.RunConfig.MemoryLimit,
-		ProcLimit:   request.Data.RunConfig.ProcLimit,
-	}
-	var testCases []mysql.TestCase
-	for _, test := range request.Data.TestCases {
-		testCases = append(testCases, mysql.TestCase{
-			Input:  test.Input,
-			Output: test.Output,
-		})
-	}
-	cbys, err := json.Marshal(&compileConfig)
+	config, err := proto.Marshal(request.Data.Config)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, rpc.InsertFailed
 	}
-	rbys, err := json.Marshal(&runConfig)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return nil, rpc.InsertFailed
-	}
-	tbys, err := json.Marshal(testCases)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return nil, rpc.InsertFailed
-	}
-
 	problem := &mysql.Problem{
-		Title:         request.Data.Title,
-		Level:         request.Data.Level,
-		Tags:          utils.SpliceStringWithX(request.Data.Tags, "#"),
-		Description:   request.Data.Description,
-		CreateBy:      request.Data.CreateBy,
-		TestCase:      string(tbys),
-		CompileConfig: string(cbys),
-		RunConfig:     string(rbys),
+		Title:       request.Data.Title,
+		Level:       request.Data.Level,
+		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Description: request.Data.Description,
+		CreateBy:    request.Data.CreateBy,
+		Config:      config,
 	}
 	result := db.Where("title = ?", problem.Title)
 	if result.Error != nil {
@@ -90,8 +57,10 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 		}
 	}
 
-	// 将热点数据写到缓存(测试用例，题目配置)
-	cacheProblemHotData(problem)
+	// 缓存题目配置
+	if err = redis.CacheProblemConfig(problem.ID, config); err != nil {
+		logrus.Errorln(err.Error())
+	}
 
 	return &pb.UpdateProblemResponse{
 		Id: problem.ID,
@@ -111,20 +80,8 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 		return nil, rpc.NotFound
 	}
 
-	var compileConfig mysql.ProblemConfig
-	var runConfig mysql.ProblemConfig
-	var testCases []mysql.TestCase
-	err := json.Unmarshal([]byte(problem.CompileConfig), &compileConfig)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return nil, rpc.QueryFailed
-	}
-	err = json.Unmarshal([]byte(problem.RunConfig), &runConfig)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return nil, rpc.QueryFailed
-	}
-	err = json.Unmarshal([]byte(problem.TestCase), &testCases)
+	config := &pb.ProblemConfig{}
+	err := proto.Unmarshal(problem.Config, config)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, rpc.QueryFailed
@@ -138,24 +95,7 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 		Level:       problem.Level,
 		Tags:        utils.SplitStringWithX(problem.Tags, "#"),
 		CreateBy:    problem.CreateBy,
-		CompileConfig: &pb.ProblemConfig{
-			ClockLimit:  compileConfig.ClockLimit,
-			CpuLimit:    compileConfig.CpuLimit,
-			MemoryLimit: compileConfig.MemoryLimit,
-			ProcLimit:   compileConfig.ProcLimit,
-		},
-		RunConfig: &pb.ProblemConfig{
-			ClockLimit:  runConfig.ClockLimit,
-			CpuLimit:    runConfig.CpuLimit,
-			MemoryLimit: runConfig.MemoryLimit,
-			ProcLimit:   runConfig.ProcLimit,
-		},
-	}
-	for _, test := range testCases {
-		data.TestCases = append(data.TestCases, &pb.TestCase{
-			Input:  test.Input,
-			Output: test.Output,
-		})
+		Config:      config,
 	}
 
 	return &pb.GetProblemResponse{
@@ -260,10 +200,10 @@ func (receiver *ProblemServer) QueryProblemWithName(ctx context.Context, request
 func (receiver *ProblemServer) GetProblemHotData(ctx context.Context, request *pb.GetProblemHotDataRequest) (*pb.GetProblemHotDataResponse, error) {
 	db := mysql.Instance()
 	var problem mysql.Problem
-	// select test_case, compile_config, run_config
+	// select config
 	// from problem
 	// where id = ?
-	result := db.Where("id = ?", request.ProblemId).Find(&problem)
+	result := db.Select("config").Where("id = ?", request.ProblemId).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
@@ -272,28 +212,11 @@ func (receiver *ProblemServer) GetProblemHotData(ctx context.Context, request *p
 		return nil, rpc.NotFound
 	}
 
-	str := cacheProblemHotData(&problem)
+	err := redis.CacheProblemConfig(problem.ID, problem.Config)
+	if err != nil {
+		logrus.Errorln(err.Error())
+	}
 
-	response := &pb.GetProblemHotDataResponse{Data: str}
+	response := &pb.GetProblemHotDataResponse{Data: string(problem.Config)}
 	return response, nil
-}
-
-// 缓存题目热点数据
-func cacheProblemHotData(problem *mysql.Problem) string {
-	data := &mysql.ProblemHotData{
-		TestCase:      problem.TestCase,
-		CompileConfig: problem.CompileConfig,
-		RunConfig:     problem.RunConfig,
-	}
-	bys, err := json.Marshal(data)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return ""
-	}
-	err = redis.SetKVByHash(fmt.Sprintf("problem:%d", problem.ID), "hotData", string(bys))
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return ""
-	}
-	return string(bys)
 }

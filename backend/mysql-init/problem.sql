@@ -13,10 +13,7 @@ create table if not exists problem
     create_by BIGINT DEFAULT 0 comment '题目创建者',
     comment_count BIGINT DEFAULT 0 comment '评论总数量',
 
-    -- 三项配置文本格式：json
-    test_case TEXT NOT null comment '测试用例',
-    compile_config TEXT NOT null comment '编译配置',
-    run_config TEXT NOT null comment '运行配置',
+    config BLOB comment '题目配置',
 
     PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;

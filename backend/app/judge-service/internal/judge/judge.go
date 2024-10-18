@@ -54,7 +54,7 @@ func Handle(form *pb.SubmitForm) {
 	logrus.Infoln("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms", form.Uid, form.ProblemId, duration)
 
 	// 解锁用户
-	redis.UnLockUser(form.Uid)
+	//redis.UnLockUser(form.Uid)
 
 	// 记录
 	data, err := json.Marshal(res)
@@ -97,30 +97,17 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 	param := &types.Param{}
 
 	// 读取题目配置
-	hotData := getProblemHotData(form.ProblemId)
-	compileLimit := types.Limit{}
-	if err := json.Unmarshal([]byte(hotData.CompileLimit), &compileLimit); err != nil {
-		logrus.Errorln(err.Error())
+	problemConfig, err := redis.GetProblemConfig(form.ProblemId)
+	if err != nil {
+		logrus.Errorln("预处理失败:%s", err.Error())
 		return false, nil
 	}
-	runLimit := types.Limit{}
-	if err := json.Unmarshal([]byte(hotData.RunLimit), &runLimit); err != nil {
-		logrus.Errorln(err.Error())
-		return false, nil
-	}
-	var testCases []types.TestCase
-	if err := json.Unmarshal([]byte(hotData.TestCases), &testCases); err != nil {
-		logrus.Errorln(err.Error())
-		return false, nil
-	}
+
 	param.Uid = form.Uid
 	param.ProblemID = form.ProblemId
 	param.Code = form.Code
 	param.Language = form.Lang
-	param.CompileLimit = compileLimit
-	param.RunLimit = runLimit
-	param.TestCases = testCases
-
+	param.ProblemConfig = problemConfig
 	return true, param
 }
 
@@ -181,41 +168,4 @@ func doAction(param *types.Param) []types.SubmitResult {
 	wgJudge.Wait()
 
 	return results
-}
-
-// 获取题目热点数据
-// cache中获取失败就去db获取
-func getProblemHotData(ProblemID int64) *types.ProblemHotData {
-	// cache
-	data, err := redis.GetProblemHotData(ProblemID)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return nil
-	}
-	if data == "" {
-		// db
-		dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
-		if err != nil {
-			logrus.Errorf("db服连接失败:%s\n", err.Error())
-			return nil
-		}
-		defer dbConn.Close()
-		client := pb.NewProblemServiceClient(dbConn)
-		request := &pb.GetProblemHotDataRequest{
-			ProblemId: ProblemID,
-		}
-		res, err := client.GetProblemHotData(context.Background(), request)
-		if err != nil {
-			logrus.Errorln(err.Error())
-			return nil
-		}
-		data = res.Data
-	}
-
-	hotData := &types.ProblemHotData{}
-	if err := json.Unmarshal([]byte(data), hotData); err != nil {
-		logrus.Errorln(err.Error())
-		return nil
-	}
-	return hotData
 }

@@ -1,56 +1,61 @@
 package redis
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	redigo "github.com/gomodule/redigo/redis"
+	"github.com/pengdahong1225/oj-server/backend/module/registry"
+	"github.com/pengdahong1225/oj-server/backend/module/settings"
+	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"github.com/redis/go-redis/v9"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 	"strconv"
 )
 
-// fields
-const (
-	UPStateField = "state"
-)
-
-// 用户提交状态缓存到redis，默认过期时间1分钟
-func SetUPState(uid int64, problemID int64, state int) error {
-	submitID := fmt.Sprintf("%d:%d", uid, problemID)
-
-	return SetKVByHashWithExpire(submitID, UPStateField, fmt.Sprintf("%d", state), 60)
-}
-
-func QueryUPState(uid int64, problemID int64) (int, error) {
-	submitID := fmt.Sprintf("%d:%d", uid, problemID)
-	state, err := GetValueByHash(submitID, UPStateField)
-	if err != nil {
-		return -1, err
-	}
-	return strconv.Atoi(state)
-}
-
-func GetProblemHotData(problemID int64) (string, error) {
-	conn := newConn()
-	defer conn.Close()
-
-	test, err := GetValueByHash(fmt.Sprintf("%d", problemID), "hotData")
-	if err != nil {
-		return "", err
-	}
-	return test, nil
-}
-
-// QueryRankList 获取排行榜信息
-func QueryRankList() ([]string, error) {
-	conn := newConn()
-	defer conn.Close()
-
-	return redigo.Strings(conn.Do("zrange", "rank", 0, -1))
-}
-
-// SetJudgeResult 将结果写入redis，默认过期时间60分钟
 func SetJudgeResult(uid int64, problemID int64, result string) error {
-	submitID := fmt.Sprintf("%d:%d", uid, problemID)
-	return SetKVByStringWithExpire(submitID, result, 60*60)
+	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
+	return rdb.SetEx(context.Background(), key, result, 60*10).Err()
 }
-func QueryJudgeResult(uid int64, problemID int64) (string, error) {
-	return GetValueByString(fmt.Sprintf("%d:%d", uid, problemID))
+
+func SetUPState(uid int64, problemID int64, state int) error {
+	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "state")
+	return rdb.SetEx(context.Background(), key, state, 60*10).Err()
+}
+
+func GetProblemConfig(problemID int64) (*pb.ProblemConfig, error) {
+	problemConfig := &pb.ProblemConfig{}
+	data, err := onGetProblemConfig(problemID)
+	if err != nil {
+		return nil, err
+	}
+	if err := proto.Unmarshal(data, problemConfig); err != nil {
+		return nil, err
+	}
+	return problemConfig, nil
+}
+func onGetProblemConfig(problemID int64) ([]byte, error) {
+	data, err := rdb.HGet(context.Background(), strconv.FormatInt(problemID, 10), "hotData").Bytes()
+	switch {
+	case err == nil:
+		return data, nil
+	case errors.Is(err, redis.Nil):
+		db, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+		if err != nil {
+			logrus.Errorf("db服连接失败:%s\n", err.Error())
+			return nil, err
+		}
+		defer db.Close()
+		client := pb.NewProblemServiceClient(db)
+		res, err := client.GetProblemHotData(context.Background(), &pb.GetProblemHotDataRequest{
+			ProblemId: problemID,
+		})
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return nil, err
+		}
+		data = []byte(res.Data)
+		return data, nil
+	}
+	return nil, err
 }
