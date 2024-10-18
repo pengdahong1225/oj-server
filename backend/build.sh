@@ -10,10 +10,10 @@ for s in "${services[@]}"; do
     cd "$path" || { echo "无法进入目录 $path"; exit 1; }
 
     # 执行命令
-    echo "在 $path 中执行 go mod tidy"
+    echo "$path : go mod tidy"
     go mod tidy
 
-    echo "在 $path 中执行 go build -o service ./cmd"
+    echo "$path : go build -o service ./cmd"
     go build -o service ./cmd
 
     # 返回上级目录
