@@ -1,21 +1,15 @@
-# 编译
-services=("./db-service" "./judge-service" "./question-service")
+#!/bin/bash
 
-cd ./app || { echo "无法进入目录 app"; exit 1; }
+services=("db-service" "judge-service" "question-service")
+function build() {
+    echo "build $1 start ......."
+    go build -o service ./app/cmd/$1
+    echo "build $1 end ......."
+}
 
-# 遍历文件夹名
-for s in "${services[@]}"; do
-    path="$s"
-    # 进入文件夹
-    cd "$path" || { echo "无法进入目录 $path"; exit 1; }
+echo "go mod tidy"
+go mod tidy
 
-    # 执行命令
-    echo "$path : go mod tidy"
-    go mod tidy
-
-    echo "$path : go build -o service ./cmd"
-    go build -o service ./cmd
-
-    # 返回上级目录
-    cd ..
+for srv in "${services[@]}"; do
+    build ${srv}
 done
