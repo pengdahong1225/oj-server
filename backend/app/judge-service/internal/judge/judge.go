@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/svc/redis"
+	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
@@ -32,13 +32,13 @@ func init() {
 func Handle(form *pb.SubmitForm) {
 	// 退出之后，需要将"提交"状态置为UPStateExited
 	defer func() {
-		if err := redis.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited)); err != nil {
+		if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited)); err != nil {
 			logrus.Errorln(err.Error())
 		}
 	}()
 
 	// 设置“提交”状态
-	if err := redis.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateNormal)); err != nil {
+	if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateNormal)); err != nil {
 		logrus.Errorln(err.Error())
 		return
 	}
@@ -88,7 +88,7 @@ func saveResult(param *types.Param, data []byte) {
 		logrus.Errorln(err.Error())
 	}
 
-	if err := redis.SetJudgeResult(param.Uid, param.ProblemID, string(data)); err != nil {
+	if err := cache.SetJudgeResult(param.Uid, param.ProblemID, string(data)); err != nil {
 		logrus.Errorln(err.Error())
 	}
 }
@@ -97,7 +97,7 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 	param := &types.Param{}
 
 	// 读取题目配置
-	problemConfig, err := redis.GetProblemConfig(form.ProblemId)
+	problemConfig, err := cache.GetProblemConfig(form.ProblemId)
 	if err != nil {
 		logrus.Errorln("预处理失败:%s", err.Error())
 		return false, nil
@@ -121,7 +121,7 @@ func doAction(param *types.Param) []types.SubmitResult {
 	handler := &Handler{}
 	results := make([]types.SubmitResult, 0)
 	// 设置题目状态[编译]
-	if err := redis.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling)); err != nil {
+	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling)); err != nil {
 		logrus.Errorln(err.Error())
 	}
 	compileResult, err := handler.compile(param)
@@ -133,7 +133,7 @@ func doAction(param *types.Param) []types.SubmitResult {
 		compileResult.Content = "编译失败"
 		results = append(results, *compileResult)
 		// 更新状态
-		if err := redis.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited)); err != nil {
+		if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited)); err != nil {
 			logrus.Errorln(err.Error())
 			return nil
 		}
@@ -145,7 +145,7 @@ func doAction(param *types.Param) []types.SubmitResult {
 	// 保存可执行文件的文件ID
 	param.FileIds = compileResult.FileIds
 	// 设置题目状态[判题中]
-	if err := redis.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateJudging)); err != nil {
+	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateJudging)); err != nil {
 		logrus.Errorln(err.Error())
 	}
 	wgRun := new(sync.WaitGroup)
