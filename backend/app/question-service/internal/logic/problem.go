@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/redis"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
@@ -60,7 +60,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 		Data:    nil,
 	}
 
-	ok, err := redis.LockUser(uid, 60)
+	ok, err := cache.LockUser(uid, 60)
 	if err != nil {
 		logrus.Errorln("lock user err:", err.Error())
 		res.Code = http.StatusInternalServerError
@@ -87,7 +87,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 		logrus.Errorln(err.Error())
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
-		redis.UnLockUser(uid)
+		cache.UnLockUser(uid)
 		return res
 	}
 	// 提交到mq
@@ -100,7 +100,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 	if !productor.Publish(data) {
 		res.Code = http.StatusInternalServerError
 		logrus.Errorln("任务提交mq失败")
-		redis.UnLockUser(uid)
+		cache.UnLockUser(uid)
 		return res
 	} else {
 		res.Code = http.StatusOK
@@ -145,9 +145,6 @@ func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Respon
 	return res
 }
 
-// 先查询状态：如果没有查询到，就意味着最近没有提交题目or题目提交过期了
-// 如果是已退出状态，就可以查询结果
-// 如果是：有状态，但是没有结果 -> 被中断，需要查看日志排查
 func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
@@ -156,7 +153,7 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 	}
 
 	// 查询状态
-	state, err := redis.QueryUPState(uid, problemID)
+	state, err := cache.QueryUPState(uid, problemID)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()
@@ -168,14 +165,14 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 		res.Message = "题目未提交或提交已过期"
 		return res
 	}
-	if state != int(pb.SubmitState_UPStateExited) {
+	if state != int32(pb.SubmitState_UPStateExited) {
 		res.Code = http.StatusOK
 		res.Message = "running"
 		return res
 	}
 
 	// 查询结果
-	r, err := redis.QueryJudgeResult(uid, problemID)
+	r, err := cache.QueryJudgeResult(uid, problemID)
 	if err != nil {
 		res.Code = http.StatusInternalServerError
 		res.Message = err.Error()

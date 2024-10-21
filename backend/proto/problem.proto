@@ -28,9 +28,9 @@ message TestCase{
   string output = 2;
 }
 message Limit{
-  int64 cpu_limit = 2;
-  int64 clock_limit = 3;
-  int64 memory_limit = 4;
-  int64 stack_limit = 5;
-  int64 proc_limit = 6;
+  int64 cpu_limit = 1;
+  int64 clock_limit = 2;
+  int64 memory_limit = 3;
+  int64 stack_limit = 4;
+  int64 proc_limit = 5;
 }

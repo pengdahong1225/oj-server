@@ -6,7 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/redis"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
@@ -121,10 +121,10 @@ func (receiver UserLogic) HandleGetRankList() *models.Response {
 	}
 
 	// 获取排行榜
-	reply, err := redis.QueryRankList()
-	if err != nil {
+	reply := cache.QueryRankList()
+	if reply == nil {
 		res.Message = "排行榜获取失败"
-		logrus.Debugf("排行榜获取失败:%s\n", err.Error())
+		logrus.Debugln("排行榜获取失败")
 		return res
 	}
 	var rankList []models.RankList

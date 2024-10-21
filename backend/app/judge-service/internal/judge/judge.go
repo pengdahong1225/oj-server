@@ -54,7 +54,7 @@ func Handle(form *pb.SubmitForm) {
 	logrus.Infoln("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms", form.Uid, form.ProblemId, duration)
 
 	// 解锁用户
-	//redis.UnLockUser(form.Uid)
+	//cache.UnLockUser(form.Uid)
 
 	// 记录
 	data, err := json.Marshal(res)

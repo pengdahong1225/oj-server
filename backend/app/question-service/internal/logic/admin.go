@@ -35,21 +35,26 @@ func (receiver AdminLogic) HandleUpdateQuestion(uid int64, form *models.AddProbl
 		Tags:        form.Tags,
 		Description: form.Desc,
 		CreateBy:    uid,
-		CompileConfig: &pb.ProblemConfig{
-			ClockLimit:  form.CompileConfig.ClockLimit,
-			CpuLimit:    form.CompileConfig.CpuLimit,
-			MemoryLimit: form.CompileConfig.MemoryLimit,
-			ProcLimit:   form.CompileConfig.ProcLimit,
-		},
-		RunConfig: &pb.ProblemConfig{
-			ClockLimit:  form.RunConfig.ClockLimit,
-			CpuLimit:    form.RunConfig.CpuLimit,
-			MemoryLimit: form.RunConfig.MemoryLimit,
-			ProcLimit:   form.RunConfig.ProcLimit,
+		Config: &pb.ProblemConfig{
+			TestCases: nil,
+			CompileLimit: &pb.Limit{
+				CpuLimit:    form.Config.CompileLimit.CpuLimit,
+				ClockLimit:  form.Config.CompileLimit.ClockLimit,
+				MemoryLimit: form.Config.CompileLimit.MemoryLimit,
+				StackLimit:  form.Config.CompileLimit.StackLimit,
+				ProcLimit:   form.Config.CompileLimit.ProcLimit,
+			},
+			RunLimit: &pb.Limit{
+				CpuLimit:    form.Config.RunLimit.CpuLimit,
+				ClockLimit:  form.Config.RunLimit.ClockLimit,
+				MemoryLimit: form.Config.RunLimit.MemoryLimit,
+				StackLimit:  form.Config.RunLimit.StackLimit,
+				ProcLimit:   form.Config.RunLimit.ProcLimit,
+			},
 		},
 	}}
-	for _, test := range form.TestCases {
-		request.Data.TestCases = append(request.Data.TestCases, &pb.TestCase{
+	for _, test := range form.Config.TestCases {
+		request.Data.Config.TestCases = append(request.Data.Config.TestCases, &pb.TestCase{
 			Input:  test.Input,
 			Output: test.Output,
 		})

@@ -24,19 +24,24 @@ type SubmitForm struct {
 
 // AddProblemForm 添加、修改题目表单
 type AddProblemForm struct {
-	Title         string        `json:"title" form:"title" binding:"required"`
-	Level         int32         `json:"level" form:"level" binding:"required"`
-	Tags          []string      `json:"tags" form:"tags" binding:"required"`
-	Desc          string        `json:"description" form:"description" binding:"required"`
-	TestCases     []TestCase    `json:"testCases" form:"testCases" binding:"required"`
-	CompileConfig ProblemConfig `json:"compile_config" form:"compile_config" binding:"required"`
-	RunConfig     ProblemConfig `json:"run_config" form:"run_config" binding:"required"`
+	Title  string        `json:"title" form:"title" binding:"required"`
+	Level  int32         `json:"level" form:"level" binding:"required"`
+	Tags   []string      `json:"tags" form:"tags" binding:"required"`
+	Desc   string        `json:"description" form:"description" binding:"required"`
+	Config ProblemConfig `json:"config" form:"config" binding:"required"`
 }
 
 type ProblemConfig struct {
+	TestCases    []TestCase `json:"test_cases" form:"test_cases" binding:"required"`
+	CompileLimit Limit      `json:"compile_limit" form:"compile_config" binding:"required"`
+	RunLimit     Limit      `json:"run_limit" form:"run_config" binding:"required"`
+}
+
+type Limit struct {
 	CpuLimit    int64 `json:"cpu_limit"`
 	ClockLimit  int64 `json:"clock_limit"`
 	MemoryLimit int64 `json:"memory_limit"`
+	StackLimit  int64 `json:"stack_limit"`
 	ProcLimit   int64 `json:"proc_limit"`
 }
 

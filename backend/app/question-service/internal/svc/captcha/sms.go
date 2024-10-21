@@ -6,7 +6,7 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/redis"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/sirupsen/logrus"
@@ -30,7 +30,7 @@ func SendSmsCode(mobile string) error {
 		}
 
 		// 缓存验证码
-		if err := redis.SetKVByStringWithExpire(mobile, c, expire); err != nil {
+		if err := cache.SetKVByStringWithExpire(mobile, c, expire); err != nil {
 			return err
 		}
 	} else {
@@ -43,9 +43,9 @@ func SendSmsCode(mobile string) error {
 func VerifySmsCode(mobile string, code string) bool {
 	logMode := os.Getenv("LOG_MODE")
 	if logMode == "release" {
-		value, err := redis.GetValueByString(mobile)
+		value, err := cache.GetValueByString(mobile)
 		if err != nil {
-			logrus.Infoln("redis get value err:", err)
+			logrus.Infoln("cache get value err:", err)
 			return false
 		} else {
 			return value == code
