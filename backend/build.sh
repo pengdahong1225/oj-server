@@ -3,7 +3,7 @@
 services=("db-service" "judge-service" "question-service")
 function build() {
     echo "build $1 start ......."
-    go build -o service ./app/cmd/$1
+    go build -o ./app/$1/service ./app/$1/cmd
     echo "build $1 end ......."
 }
 
