@@ -30,7 +30,7 @@ func SendSmsCode(mobile string) error {
 		}
 
 		// 缓存验证码
-		if err := cache.SetKVByStringWithExpire(mobile, c, expire); err != nil {
+		if err := cache.SetCaptcha(mobile, c, expire); err != nil {
 			return err
 		}
 	} else {
@@ -43,7 +43,7 @@ func SendSmsCode(mobile string) error {
 func VerifySmsCode(mobile string, code string) bool {
 	logMode := os.Getenv("LOG_MODE")
 	if logMode == "release" {
-		value, err := cache.GetValueByString(mobile)
+		value, err := cache.GetCaptcha(mobile)
 		if err != nil {
 			logrus.Infoln("cache get value err:", err)
 			return false
