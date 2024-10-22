@@ -22,17 +22,19 @@ func QuestionRouters(engine *gin.Engine) {
 	// api/
 	{
 		engine.GET("/problemSet", handler.ProblemHandler{}.OnProblemSet)
-		engine.GET("/rankList", middlewares.AuthLogin(), handler.UserHandler{}.GetRankList)
-		engine.POST("/login", handler.UserHandler{}.Login)
+		engine.GET("/rankList", middlewares.AuthLogin(), handler.User{}.HandleRankList)
+		engine.POST("/login", handler.User{}.HandleLogin)
+		engine.POST("/register", handler.User{}.HandleRegister)
+		engine.POST("/resetPassword", handler.User{}.HandleResetPassword)
 	}
 
 	// api/user
 	userRouter := engine.Group("/user")
 	{
 		userRouter.Use(middlewares.AuthLogin())
-		userRouter.GET("/profile", handler.UserHandler{}.GetUserProfile)
-		userRouter.GET("/submitRecord", handler.UserHandler{}.GetSubmitRecord)
-		userRouter.GET("/solvedList", handler.UserHandler{}.GetUserSolvedList)
+		userRouter.GET("/profile", handler.User{}.HandleUserProfile)
+		userRouter.GET("/submitRecord", handler.User{}.GetSubmitRecord)
+		userRouter.GET("/solvedList", handler.User{}.GetUserSolvedList)
 	}
 
 	// api/captcha

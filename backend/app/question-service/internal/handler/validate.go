@@ -9,7 +9,7 @@ import (
 
 // 表单类型集
 type formTyper interface {
-	models.LoginFrom | models.GetSmsCodeForm | models.SubmitForm | models.AddProblemForm |
+	models.RegisterForm | models.LoginFrom | models.GetSmsCodeForm | models.SubmitForm | models.AddProblemForm |
 		models.AddCommentForm | models.QueryCommentForm
 }
 

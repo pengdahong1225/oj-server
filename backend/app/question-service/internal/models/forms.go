@@ -9,9 +9,15 @@ type GetSmsCodeForm struct {
 	Mobile       string `form:"mobile" json:"mobile" binding:"required"`
 }
 
+// 注册登录表单
+type RegisterForm struct {
+	Mobile     string `form:"mobile" json:"mobile" binding:"required"`
+	PassWord   string `form:"password" json:"password" binding:"required"`
+	RePassWord string `form:"repassword" json:"repassword" binding:"required"`
+}
 type LoginFrom struct {
-	Mobile  string `form:"mobile" json:"mobile" binding:"required"`
-	SmsCode string `form:"smsCode" json:"smsCode" binding:"required"`
+	Mobile   string `form:"mobile" json:"mobile" binding:"required"`
+	PassWord string `form:"password" json:"password" binding:"required"`
 }
 
 // SubmitForm 代码提交表单

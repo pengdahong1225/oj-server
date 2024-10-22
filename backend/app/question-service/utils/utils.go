@@ -2,6 +2,8 @@ package utils
 
 import (
 	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -38,4 +40,9 @@ func GenerateSubmitID(userID, questionID int) (int64, error) {
 	}
 
 	return submitID, nil
+}
+
+func HashPassword(from string) string {
+	hash := sha256.Sum256([]byte(from))
+	return hex.EncodeToString(hash[:])
 }
