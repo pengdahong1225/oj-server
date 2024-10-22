@@ -1,29 +1,35 @@
 {
-  "name": "oj-online-frontend",
-  "version": "0.1.0",
+  "name": "frontend",
+  "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "axios": "^1.7.2",
-    "core-js": "^3.8.3",
-    "echarts": "^5.5.0",
-    "element-ui": "^2.15.14",
-    "js-base64": "^3.7.7",
-    "vue": "^2.6.14",
-    "vue-router": "^3.5.1",
-    "vue2-ace-editor": "^0.0.15",
-    "vuex": "^3.6.2"
+    "axios": "^1.7.7",
+    "element-plus": "^2.8.6",
+    "less": "^4.2.0",
+    "pinia": "^2.2.4",
+    "pinia-plugin-persistedstate": "^4.1.1",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-router": "~5.0.0",
-    "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "less": "^4.0.0",
-    "less-loader": "^8.0.0",
-    "vue-template-compiler": "^2.6.14"
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.16.11",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vue/tsconfig": "^0.5.1",
+    "npm-run-all2": "^6.2.3",
+    "sass-embedded": "^1.80.3",
+    "typescript": "~5.5.4",
+    "unplugin-auto-import": "^0.18.3",
+    "unplugin-vue-components": "^0.27.4",
+    "vite": "^5.4.8",
+    "vue-tsc": "^2.1.6"
   }
 }
