@@ -18,7 +18,7 @@ import (
 type ProblemLogic struct {
 }
 
-func (receiver ProblemLogic) HandleProblemSet(cursor int) *models.Response {
+func (receiver ProblemLogic) GetProblemList(params *models.QueryProblemListParams) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -34,7 +34,10 @@ func (receiver ProblemLogic) HandleProblemSet(cursor int) *models.Response {
 	defer dbConn.Close()
 
 	client := pb.NewProblemServiceClient(dbConn)
-	request := &pb.GetProblemListRequest{Cursor: int32(cursor)}
+	request := &pb.GetProblemListRequest{
+		Page:     params.Page,
+		PageSize: params.PageSize,
+	}
 	response, err := client.GetProblemList(context.Background(), request)
 	if err != nil {
 		res.Code = http.StatusOK

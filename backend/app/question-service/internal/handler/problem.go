@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
@@ -12,11 +13,10 @@ import (
 
 type ProblemHandler struct{}
 
-// ProblemSet 题目列表
-// 查询参数 cursor：游标，代表下一个元素的id
-func (receiver ProblemHandler) ProblemSet(ctx *gin.Context) {
-	cursor, _ := strconv.Atoi(ctx.DefaultQuery("cursor", "0"))
-	if cursor < 0 {
+// OnProblemSet 题目列表
+func (receiver ProblemHandler) OnProblemSet(ctx *gin.Context) {
+	p := ctx.Query("params")
+	if p == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
 			"message": "参数错误",
@@ -24,7 +24,26 @@ func (receiver ProblemHandler) ProblemSet(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	res := logic.ProblemLogic{}.HandleProblemSet(cursor)
+	params := &models.QueryProblemListParams{}
+	err := json.Unmarshal([]byte(p), params)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": err.Error(),
+		})
+		ctx.Abort()
+		return
+	}
+	if params.Page <= 0 || params.PageSize <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数错误",
+		})
+		ctx.Abort()
+		return
+	}
+
+	res := logic.ProblemLogic{}.GetProblemList(params)
 	ctx.JSON(res.Code, res)
 }
 

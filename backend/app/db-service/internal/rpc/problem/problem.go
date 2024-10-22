@@ -126,8 +126,8 @@ func (receiver *ProblemServer) DeleteProblemData(ctx context.Context, request *p
 	return &empty.Empty{}, nil
 }
 
-// GetProblemList 题库列表
-// 游标分页，查询id，title，level，tags
+// GetProblemList 分页查询题库列表
+// 查询id，title，level，tags
 func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
 	db := mysql.Instance()
 	var pageSize = 10
@@ -142,11 +142,13 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 	}
 	rsp.Total = int32(count)
 
+	offSet := int((request.Page - 1) * request.PageSize)
+
 	// select id,title,level,tags from Problem
-	// where id>=cursor
+	// where id > offSet
 	// order by id
 	// limit 10;
-	result = db.Select("id,title,level,tags").Where("id >= ?", request.Cursor).Order("id").Limit(pageSize).Find(&problemList)
+	result = db.Select("id,title,level,tags").Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
@@ -159,7 +161,6 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 			Tags:  utils.SplitStringWithX(Problem.Tags, "#"),
 		})
 	}
-	rsp.Cursor = request.Cursor + int32(result.RowsAffected) + 1
 	return rsp, nil
 }
 

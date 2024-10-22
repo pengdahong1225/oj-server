@@ -21,7 +21,7 @@ func HealthCheckRouters(engine *gin.Engine) {
 func QuestionRouters(engine *gin.Engine) {
 	// api/
 	{
-		engine.GET("/problemSet", handler.ProblemHandler{}.ProblemSet)
+		engine.GET("/problemSet", handler.ProblemHandler{}.OnProblemSet)
 		engine.GET("/rankList", middlewares.AuthLogin(), handler.UserHandler{}.GetRankList)
 		engine.POST("/login", handler.UserHandler{}.Login)
 	}
