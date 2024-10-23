@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
-const baseURL = 'http://192.168.201.128'
+const baseURL = 'http://192.168.201.128/api'
 
 /**
  * axios

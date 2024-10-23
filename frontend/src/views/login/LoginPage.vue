@@ -3,17 +3,21 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { userRegisterService, userLoginService } from '@/api/user'
+import type { RegisterForm, LoginForm } from '@/types/user'
 // import { useUserStore } from '@/stores'
 
 const isRegister = ref(false)
 const form = ref()
-
-// 整个的用于提交的form数据对象
-const formModel = ref({
-  username: '',
+const register_form = ref(<RegisterForm>{
+  mobile: '',
   password: '',
   repassword: ''
 })
+const login_form = ref(<LoginForm>{
+  mobile: '',
+  password: ''
+})
+
 // 整个表单的校验规则
 // 1. 非空校验 required: true      message消息提示，  trigger触发校验的时机 blur change
 // 2. 长度校验 min:xx, max: xx
@@ -26,9 +30,9 @@ const formModel = ref({
 //        - callback() 校验成功
 //        - callback(new Error(错误信息)) 校验失败
 const rules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 5, max: 10, message: '用户名必须是 5-10位 的字符', trigger: 'blur' }
+  mobile: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式错误', trigger: 'blur' }
   ],
   password: [ 
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -48,7 +52,7 @@ const rules = {
     {
       validator: (rule: any, value: string, callback: Function) => {
         // 判断 value 和 当前 form 中收集的 password 是否一致
-        if (value !== formModel.value.password) {
+        if (value !== register_form.value.password) {
           callback(new Error('两次输入密码不一致'))
         } else {
           callback() // 就算校验成功，也需要callback
@@ -61,14 +65,23 @@ const rules = {
 
 // 登录和注册页面切换 -- 清空表单
 watch(() => isRegister.value, (newValue) => {
-  formModel.value = { username: '', password: '', repassword: '' }
+  register_form.value = {
+    mobile: '',
+    password: '',
+    repassword: ''
+  }
+  login_form.value = {
+    mobile: '',
+    password: ''
+  }
 })
 
 const register = async () => {
-//   await form.value.validate()
-//   await userRegisterService(formModel.value)
-//   ElMessage.success('注册成功')
-//   isRegister.value = false
+  await form.value.validate()
+  const res = await userRegisterService(register_form.value)
+  console.log(res)
+  ElMessage.success('注册成功')
+  isRegister.value = false
 }
 const router = useRouter()
 // const userStore = useUserStore()
@@ -106,7 +119,7 @@ const login = async () => {
     <el-col :span="6" :offset="3" class="form">
       <!-- 注册相关表单 -->
       <el-form
-        :model="formModel"
+        :model="register_form"
         :rules="rules"
         ref="form"
         size="large"
@@ -116,16 +129,16 @@ const login = async () => {
         <el-form-item>
           <h1>注册</h1>
         </el-form-item>
-        <el-form-item prop="username">
+        <el-form-item prop="mobile">
           <el-input
-            v-model="formModel.username"
+            v-model="register_form.mobile"
             :prefix-icon="User"
-            placeholder="请输入用户名"
+            placeholder="请输入手机号"
           ></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input
-            v-model="formModel.password"
+            v-model="register_form.password"
             :prefix-icon="Lock"
             type="password"
             placeholder="请输入密码"
@@ -133,7 +146,7 @@ const login = async () => {
         </el-form-item>
         <el-form-item prop="repassword">
           <el-input
-            v-model="formModel.repassword"
+            v-model="register_form.repassword"
             :presfix-icon="Lock"
             type="password"
             placeholder="请输入再次密码"
@@ -158,7 +171,7 @@ const login = async () => {
 
       <!-- 登录相关表单 -->
       <el-form
-        :model="formModel"
+        :model="login_form"
         :rules="rules"
         ref="form"
         size="large"
@@ -168,16 +181,16 @@ const login = async () => {
         <el-form-item>
           <h1>登录</h1>
         </el-form-item>
-        <el-form-item prop="username">
+        <el-form-item prop="mobile">
           <el-input
-            v-model="formModel.username"
+            v-model="login_form.mobile"
             :prefix-icon="User"
-            placeholder="请输入用户名"
+            placeholder="请输入手机号"
           ></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input
-            v-model="formModel.password"
+            v-model="login_form.password"
             name="password"
             :prefix-icon="Lock"
             type="password"
