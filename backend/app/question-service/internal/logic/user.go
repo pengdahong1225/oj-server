@@ -28,7 +28,7 @@ type User struct {
 
 func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
@@ -39,7 +39,7 @@ func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服务连接失败:%s", err.Error())
 		return res
@@ -52,6 +52,7 @@ func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 	}}
 	response, err := client.CreateUserData(context.Background(), request)
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Debugln(err.Error())
 		return res

@@ -38,7 +38,7 @@ func (r User) HandleRegister(ctx *gin.Context) {
 		return
 	}
 	res := logic.User{}.OnUserRegister(form)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 func (r User) HandleLogin(ctx *gin.Context) {
 	// 表单验证

@@ -4,10 +4,15 @@ import "github.com/golang/protobuf/ptypes/timestamp"
 
 // Response 统一返回格式
 type Response struct {
-	Code    int    `json:"code"`
+	Code    int    `json:"code"` // 业务状态码
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 }
+
+const (
+	Success = 0
+	Failed  = 1
+)
 
 type RankList struct {
 	Phone     int64  `json:"phone"`
