@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { User } from '@/types/user'
 
 /**
  * 用户模块
@@ -14,10 +15,21 @@ export const useUserStore = defineStore('user', () => {
         token.value = ''
     }
 
+    const userInfo = ref<User>()
+    const setUserInfo = (value: User) => {
+        userInfo.value = value
+    }
+    const clearUserInfo = () => {
+        userInfo.value = undefined
+    }
+
     return {
         token,
         setToken,
-        clearToken
+        clearToken,
+        userInfo,
+        setUserInfo,
+        clearUserInfo
     }
 }, {
     persist: true

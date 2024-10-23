@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { userRegisterService, userLoginService } from '@/api/user'
 import type { RegisterForm, LoginForm } from '@/types/user'
-// import { useUserStore } from '@/stores'
+import { useUserStore } from '@/stores'
 
 const isRegister = ref(false)
 const form = ref()
@@ -84,13 +84,14 @@ const register = async () => {
   isRegister.value = false
 }
 const router = useRouter()
-// const userStore = useUserStore()
+const userStore = useUserStore()
 const login = async () => {
-//   await form.value.validate()
-//   const res = await userLoginService(formModel.value.username, formModel.value.password)
-//   ElMessage.success('登录成功')
-//   userStore.setToken(res.data.token)
-//   router.push('/')
+  await form.value.validate()
+  const res = await userLoginService(login_form.value)
+  console.log(res)
+  ElMessage.success('登录成功')
+  userStore.setToken(res.data.token)
+  router.push('/')
 }
 </script>
 

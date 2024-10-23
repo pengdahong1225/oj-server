@@ -1,9 +1,11 @@
 export interface User {
-    id: Number;
-    username: String;
-    nickname: String;
-    email: String;
-    user_pic: String;
+    id: number;
+    mobile: number;
+    nickname: string;
+    email: string;
+    gender: number;
+    role: number;
+    avatar_url: number;
 }
 
 // 注册登录表单参数
