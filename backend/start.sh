@@ -1,3 +1,5 @@
+#!/bin/bash
+
 services=("question-service" "judge-service" "db-service")
 
 for srv in "${services[@]}"; do

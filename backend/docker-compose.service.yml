@@ -16,6 +16,8 @@ services:
     ports:
       - "5050"
       - "5051"
+    networks:
+      - net
 
   db-service:
     container_name: db-service

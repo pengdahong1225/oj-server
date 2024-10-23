@@ -6,8 +6,8 @@ ENV LOG_MODE=debug
 WORKDIR /app
 
 RUN if [ ! -d "/app/log" ]; then mkdir -p /app/log; fi
+RUN if [ ! -d "/app/config" ]; then mkdir -p /app/config; fi
 
 COPY ./service /app
 
-EXPOSE 9000
 ENTRYPOINT ["/app/service"]
