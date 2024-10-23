@@ -13,8 +13,8 @@ import (
 
 type ProblemHandler struct{}
 
-// OnProblemSet 题目列表
-func (receiver ProblemHandler) OnProblemSet(ctx *gin.Context) {
+// HandleProblemSet 题目列表
+func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 	p := ctx.Query("params")
 	if p == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -47,7 +47,7 @@ func (receiver ProblemHandler) OnProblemSet(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func (receiver ProblemHandler) ProblemDetail(ctx *gin.Context) {
+func (receiver ProblemHandler) HandleDetail(ctx *gin.Context) {
 	// 查询参数
 	problemID := ctx.Query("problemID")
 	if problemID == "" {
@@ -63,7 +63,7 @@ func (receiver ProblemHandler) ProblemDetail(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func (receiver ProblemHandler) ProblemSubmit(ctx *gin.Context) {
+func (receiver ProblemHandler) HandleSubmit(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	// 表单验证
 	form, ret := validate(ctx, models.SubmitForm{})
@@ -76,7 +76,7 @@ func (receiver ProblemHandler) ProblemSubmit(ctx *gin.Context) {
 }
 
 // 查询提交结果
-func (receiver ProblemHandler) QueryResult(ctx *gin.Context) {
+func (receiver ProblemHandler) HandleResult(ctx *gin.Context) {
 	// 查询参数
 	id := ctx.Query("problemID")
 	if id == "" {
@@ -92,7 +92,7 @@ func (receiver ProblemHandler) QueryResult(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func (receiver ProblemHandler) ProblemSearch(ctx *gin.Context) {
+func (receiver ProblemHandler) HandleSearch(ctx *gin.Context) {
 	name := ctx.Query("name")
 	if name == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{

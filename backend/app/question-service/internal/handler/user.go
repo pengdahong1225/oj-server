@@ -84,7 +84,7 @@ func (r User) HandleRankList(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func (r User) GetSubmitRecord(ctx *gin.Context) {
+func (r User) HandleSubmitRecord(ctx *gin.Context) {
 	t, ok := ctx.GetQuery("stamp")
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -99,7 +99,7 @@ func (r User) GetSubmitRecord(ctx *gin.Context) {
 	ctx.JSON(res.Code, res)
 }
 
-func (r User) GetUserSolvedList(ctx *gin.Context) {
+func (r User) HandleSolvedList(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	res := logic.User{}.HandleGetUserSolvedList(claims.Uid)
 	ctx.JSON(res.Code, res)

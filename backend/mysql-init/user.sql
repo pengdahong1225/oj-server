@@ -8,6 +8,7 @@ create table if not exists user_info
     delete_at TIMESTAMP,
 
     mobile BIGINT not NULL comment '手机号',
+    password VARCHAR(256) not NULL comment '密码',
     nickname VARCHAR(64) DEFAULT '新用户',
     email VARCHAR(64) DEFAULT '',
     gender tinyint DEFAULT 0 comment '0:woman 1:man',
