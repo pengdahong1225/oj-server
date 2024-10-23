@@ -2,23 +2,17 @@ package main
 
 import (
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/module/logger"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/module/utils"
-	"time"
 )
 
 func main() {
-	// 配置全局时区
-	loc, err := time.LoadLocation("Asia/Shanghai")
-	if err != nil {
+	if err := logger.InitLog("db-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
-	time.Local = loc
-	// 初始化
-	if err := logger.InitLog("question-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
-		panic(err)
-	}
+	cache.Init(settings.Instance().RedisConfig.Host, settings.Instance().RedisConfig.Port)
 
 	system, err := settings.Instance().GetSystemConf("question-service")
 	if err != nil {

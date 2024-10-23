@@ -2,22 +2,17 @@ package main
 
 import (
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal"
+	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/module/logger"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/module/utils"
-	"time"
 )
 
 func main() {
-	// 初始化
-	loc, err := time.LoadLocation("Asia/Shanghai")
-	if err != nil {
+	if err := logger.InitLog("db-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
 		panic(err)
 	}
-	time.Local = loc
-	if err := logger.InitLog("judge-service", settings.Instance().LogConfig.Path, settings.Instance().LogConfig.Level); err != nil {
-		panic(err)
-	}
+	cache.Init(settings.Instance().RedisConfig.Host, settings.Instance().RedisConfig.Port)
 
 	system, err := settings.Instance().GetSystemConf("judge-service")
 	if err != nil {

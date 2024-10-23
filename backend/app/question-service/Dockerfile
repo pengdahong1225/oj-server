@@ -1,7 +1,8 @@
 ARG image="debian:latest"
 FROM "${image}"
 
-ENV LOG_MODE=debug
+ENV LOG_MODE=debug \
+    TZ=Asia/Shanghai
 
 WORKDIR /app
 

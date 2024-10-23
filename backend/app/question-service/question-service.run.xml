@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="question-service" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <module name="oj-online-backend" />
+    <module name="backend" />
     <working_directory value="$PROJECT_DIR$/app/question-service" />
     <kind value="DIRECTORY" />
     <package value="question-service" />

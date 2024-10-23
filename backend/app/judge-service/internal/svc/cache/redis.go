@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"sync"
 )
 
@@ -13,10 +12,9 @@ var (
 	once sync.Once
 )
 
-func init() {
+func Init(ip string, port int) {
 	once.Do(func() {
-		cfg := settings.Instance().RedisConfig
-		dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+		dsn := fmt.Sprintf("%s:%d", ip, port)
 		rdb = redis.NewClient(&redis.Options{
 			Network: "tcp",
 			Addr:    dsn,

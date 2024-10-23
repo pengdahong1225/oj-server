@@ -6,7 +6,7 @@ import "errors"
 type AppConfig struct {
 	SystemConfigs   []SystemConfig `mapstructure:"system"`
 	*MysqlConfig    `mapstructure:"mysql"`
-	*RedisConfig    `mapstructure:"cache"`
+	*RedisConfig    `mapstructure:"redis"`
 	*LogConfig      `mapstructure:"log"`
 	*RegistryConfig `mapstructure:"registry"`
 	*MqConfig       `mapstructure:"rabbitmq"`
