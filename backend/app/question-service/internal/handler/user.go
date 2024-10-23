@@ -24,7 +24,7 @@ func (r User) HandleRegister(ctx *gin.Context) {
 	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "手机号格式错误",
 		})
 		return
@@ -32,7 +32,7 @@ func (r User) HandleRegister(ctx *gin.Context) {
 	// 密码校验
 	if form.PassWord != form.RePassWord {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "两次密码输入不匹配",
 		})
 		return
@@ -51,14 +51,14 @@ func (r User) HandleLogin(ctx *gin.Context) {
 	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "手机号格式错误",
 		})
 		return
 	}
 
 	res := logic.User{}.HandleLogin(form)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 func (r User) HandleResetPassword(ctx *gin.Context) {
 
@@ -68,7 +68,7 @@ func (r User) HandleUserProfile(ctx *gin.Context) {
 	uid, ok := ctx.GetQuery("uid")
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		return
@@ -76,19 +76,19 @@ func (r User) HandleUserProfile(ctx *gin.Context) {
 
 	uidInt, _ := strconv.ParseInt(uid, 10, 64)
 	res := logic.User{}.HandleGetUserProfile(uidInt)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (r User) HandleRankList(ctx *gin.Context) {
 	res := logic.User{}.HandleGetRankList()
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (r User) HandleSubmitRecord(ctx *gin.Context) {
 	t, ok := ctx.GetQuery("stamp")
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		return
@@ -96,11 +96,11 @@ func (r User) HandleSubmitRecord(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	stamp, _ := strconv.ParseInt(t, 10, 64)
 	res := logic.User{}.HandleGetSubmitRecord(claims.Uid, stamp)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (r User) HandleSolvedList(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	res := logic.User{}.HandleGetUserSolvedList(claims.Uid)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }

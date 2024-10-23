@@ -12,7 +12,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
-	"net/http"
 )
 
 type ProblemLogic struct {
@@ -20,13 +19,13 @@ type ProblemLogic struct {
 
 func (receiver ProblemLogic) GetProblemList(params *models.QueryProblemListParams) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return res
@@ -40,13 +39,12 @@ func (receiver ProblemLogic) GetProblemList(params *models.QueryProblemListParam
 	}
 	response, err := client.GetProblemList(context.Background(), request)
 	if err != nil {
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = "获取题目列表失败"
 		logrus.Debugf("获取题目列表失败:%s\n", err.Error())
 		return res
 	}
 
-	res.Code = http.StatusOK
 	res.Message = "OK"
 	res.Data = response
 	return res
@@ -58,7 +56,7 @@ func (receiver ProblemLogic) GetProblemList(params *models.QueryProblemListParam
 // 客户端通过其他接口轮询题目结果
 func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
@@ -66,13 +64,13 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 	ok, err := cache.LockUser(uid, 60)
 	if err != nil {
 		logrus.Errorln("lock user err:", err.Error())
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		return res
 	}
 	if !ok {
 		logrus.Errorln("lock user failed")
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = "正在判题中"
 		return res
 	}
@@ -88,7 +86,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 	data, err := proto.Marshal(&pbForm)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		cache.UnLockUser(uid)
 		return res
@@ -101,12 +99,12 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 		consts.RabbitMqCommentKey,
 	)
 	if !productor.Publish(data) {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
+		res.Message = "任务提交mq失败"
 		logrus.Errorln("任务提交mq失败")
 		cache.UnLockUser(uid)
 		return res
 	} else {
-		res.Code = http.StatusOK
 		res.Message = "题目提交成功"
 		res.Data = map[string]interface{}{
 			"problemID": form.ProblemID,
@@ -117,13 +115,13 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 
 func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return res
@@ -135,13 +133,12 @@ func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Respon
 		Id: problemID,
 	})
 	if err != nil {
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res
 	}
 
-	res.Code = http.StatusOK
 	res.Message = "OK"
 	res.Data = response.Data
 
@@ -150,7 +147,7 @@ func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Respon
 
 func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
@@ -158,18 +155,18 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 	// 查询状态
 	state, err := cache.QueryUPState(uid, problemID)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res
 	}
 	if state < 0 {
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = "题目未提交或提交已过期"
 		return res
 	}
 	if state != int32(pb.SubmitState_UPStateExited) {
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = "running"
 		return res
 	}
@@ -177,7 +174,7 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 	// 查询结果
 	r, err := cache.QueryJudgeResult(uid, problemID)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res
@@ -185,13 +182,12 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 	// 解析
 	var results []models.SubmitResult
 	if err := json.Unmarshal([]byte(r), &results); err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res
 	}
 
-	res.Code = http.StatusOK
 	res.Message = "OK"
 	res.Data = results
 	return res
@@ -199,14 +195,14 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 
 func (receiver ProblemLogic) HandleProblemSearch(name string) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return res
@@ -216,7 +212,7 @@ func (receiver ProblemLogic) HandleProblemSearch(name string) *models.Response {
 	client := pb.NewProblemServiceClient(dbConn)
 	response, err := client.QueryProblemWithName(context.Background(), &pb.QueryProblemWithNameRequest{Name: name})
 	if err != nil {
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorln(err.Error())
 		return res

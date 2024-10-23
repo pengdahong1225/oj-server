@@ -20,13 +20,13 @@ func validate[T formTyper](ctx *gin.Context, form T) (*T, bool) {
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
 			ctx.JSON(http.StatusForbidden, gin.H{
-				"code":    http.StatusForbidden,
+				"code":    models.Failed,
 				"message": "表单验证错误",
 			})
 			return nil, false
 		}
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": errs.Error(),
 		})
 		return nil, false

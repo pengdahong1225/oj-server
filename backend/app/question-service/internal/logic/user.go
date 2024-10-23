@@ -12,7 +12,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -66,7 +65,7 @@ func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 
 func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
@@ -75,7 +74,7 @@ func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服务连接失败:%s", err.Error())
 		return res
@@ -94,6 +93,7 @@ func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 
 	// 校验密码
 	if utils.HashPassword(form.PassWord) != response.Data.Password {
+		res.Code = models.Failed
 		res.Message = "密码错误"
 		return res
 	}
@@ -113,7 +113,7 @@ func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 	}
 	token, err := j.CreateToken(claims)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("生成token失败:%s\n", err.Error())
 		return res
@@ -130,14 +130,14 @@ func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 
 func (r User) HandleGetUserProfile(uid int64) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服务连接失败:%s\n", err.Error())
 		return res
@@ -149,6 +149,7 @@ func (r User) HandleGetUserProfile(uid int64) *models.Response {
 		Id: uid,
 	})
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		return res
 	}
@@ -160,7 +161,7 @@ func (r User) HandleGetUserProfile(uid int64) *models.Response {
 
 func (r User) HandleGetRankList() *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
@@ -168,6 +169,7 @@ func (r User) HandleGetRankList() *models.Response {
 	// 获取排行榜
 	reply := cache.QueryRankList()
 	if reply == nil {
+		res.Code = models.Failed
 		res.Message = "排行榜获取失败"
 		logrus.Debugln("排行榜获取失败")
 		return res
@@ -186,6 +188,7 @@ func (r User) HandleGetRankList() *models.Response {
 
 	bytes, err := json.Marshal(rankList)
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("排行榜序列化失败:%s", err.Error())
 		return res
@@ -198,13 +201,13 @@ func (r User) HandleGetRankList() *models.Response {
 
 func (r User) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服务连接失败:%s\n", err.Error())
 		return res
@@ -214,6 +217,7 @@ func (r User) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
 	client := pb.NewRecordServiceClient(dbConn)
 	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{UserId: uid, Stamp: stamp})
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		return res
 	}
@@ -225,14 +229,14 @@ func (r User) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
 // HandleGetUserSolvedList 获取用户解决了哪些题目
 func (r User) HandleGetUserSolvedList(uid int64) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服务连接失败:%s\n", err.Error())
 		return res
@@ -242,6 +246,7 @@ func (r User) HandleGetUserSolvedList(uid int64) *models.Response {
 	client := pb.NewUserServiceClient(dbConn)
 	response, err := client.GetUserSolvedList(context.Background(), &pb.GetUserSolvedListRequest{Uid: uid})
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		return res
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type AdminLogic struct {
@@ -15,13 +14,13 @@ type AdminLogic struct {
 
 func (receiver AdminLogic) HandleUpdateQuestion(uid int64, form *models.AddProblemForm) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return res
@@ -61,12 +60,12 @@ func (receiver AdminLogic) HandleUpdateQuestion(uid int64, form *models.AddProbl
 	}
 	response, err := client.UpdateProblemData(context.Background(), request)
 	if err != nil {
-		res.Code = http.StatusOK
+		res.Code = models.Failed
 		res.Message = "update题目失败"
 		logrus.Debugf("update题目失败:%s\n", err.Error())
 		return res
 	}
-	res.Code = http.StatusOK
+	res.Code = models.Success
 	res.Message = "OK"
 	res.Data = response.Id
 	return res
@@ -74,13 +73,13 @@ func (receiver AdminLogic) HandleUpdateQuestion(uid int64, form *models.AddProbl
 
 func (receiver AdminLogic) HandleDelQuestion(problemID int64) *models.Response {
 	res := &models.Response{
-		Code:    http.StatusOK,
+		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = http.StatusInternalServerError
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return res
@@ -90,6 +89,7 @@ func (receiver AdminLogic) HandleDelQuestion(problemID int64) *models.Response {
 
 	_, err = client.DeleteProblemData(context.Background(), &pb.DeleteProblemRequest{Id: problemID})
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		return res
 	}

@@ -15,7 +15,7 @@ func (receiver CaptchaHandler) GetImageCode(ctx *gin.Context) {
 	id, b64s, err := captcha.GenerateImageCaptcha()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
+			"code":    models.Failed,
 			"message": err.Error(),
 		})
 	} else {
@@ -23,7 +23,7 @@ func (receiver CaptchaHandler) GetImageCode(ctx *gin.Context) {
 		data["captchaID"] = id
 		data["captchaUrl"] = b64s
 		ctx.JSON(http.StatusOK, gin.H{
-			"code":    http.StatusOK,
+			"code":    models.Success,
 			"message": "OK",
 			"data":    data,
 		})
@@ -42,7 +42,7 @@ func (receiver CaptchaHandler) GetSmsCode(ctx *gin.Context) {
 	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "手机号格式错误",
 		})
 		return
@@ -51,18 +51,18 @@ func (receiver CaptchaHandler) GetSmsCode(ctx *gin.Context) {
 	if captcha.VerifyImageCaptcha(form.CaptchaID, form.CaptchaValue) {
 		if err := captcha.SendSmsCode(form.Mobile); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusInternalServerError,
+				"code":    models.Failed,
 				"message": err.Error(),
 			})
 		} else {
 			ctx.JSON(http.StatusOK, gin.H{
-				"code":    http.StatusOK,
+				"code":    models.Success,
 				"message": "发送成功[测试环境的验证码均为123456]",
 			})
 		}
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{
-			"code":    http.StatusOK,
+			"code":    models.Failed,
 			"message": "图形验证码输入错误",
 		})
 	}

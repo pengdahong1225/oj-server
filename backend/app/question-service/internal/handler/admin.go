@@ -19,7 +19,7 @@ func (receiver AdminHandler) UpdateQuestion(ctx *gin.Context) {
 	}
 
 	res := logic.AdminLogic{}.HandleUpdateQuestion(claims.Uid, form)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (receiver AdminHandler) DeleteQuestion(ctx *gin.Context) {
@@ -33,5 +33,5 @@ func (receiver AdminHandler) DeleteQuestion(ctx *gin.Context) {
 	}
 	problemID, _ := strconv.ParseInt(p, 10, 64)
 	res := logic.AdminLogic{}.HandleDelQuestion(problemID)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }

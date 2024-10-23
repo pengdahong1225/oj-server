@@ -18,7 +18,7 @@ func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 	p := ctx.Query("params")
 	if p == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		ctx.Abort()
@@ -28,7 +28,7 @@ func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 	err := json.Unmarshal([]byte(p), params)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": err.Error(),
 		})
 		ctx.Abort()
@@ -36,7 +36,7 @@ func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 	}
 	if params.Page <= 0 || params.PageSize <= 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		ctx.Abort()
@@ -44,7 +44,7 @@ func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 	}
 
 	res := logic.ProblemLogic{}.GetProblemList(params)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (receiver ProblemHandler) HandleDetail(ctx *gin.Context) {
@@ -52,7 +52,7 @@ func (receiver ProblemHandler) HandleDetail(ctx *gin.Context) {
 	problemID := ctx.Query("problemID")
 	if problemID == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		return
@@ -60,7 +60,7 @@ func (receiver ProblemHandler) HandleDetail(ctx *gin.Context) {
 
 	ID, _ := strconv.ParseInt(problemID, 10, 64)
 	res := logic.ProblemLogic{}.HandleProblemDetail(ID)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (receiver ProblemHandler) HandleSubmit(ctx *gin.Context) {
@@ -72,7 +72,7 @@ func (receiver ProblemHandler) HandleSubmit(ctx *gin.Context) {
 	}
 
 	res := logic.ProblemLogic{}.HandleProblemSubmit(claims.Uid, form)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 // 查询提交结果
@@ -81,7 +81,7 @@ func (receiver ProblemHandler) HandleResult(ctx *gin.Context) {
 	id := ctx.Query("problemID")
 	if id == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		return
@@ -89,18 +89,18 @@ func (receiver ProblemHandler) HandleResult(ctx *gin.Context) {
 	problemID, _ := strconv.ParseInt(id, 10, 64)
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	res := logic.ProblemLogic{}.HandleQueryResult(claims.Uid, problemID)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (receiver ProblemHandler) HandleSearch(ctx *gin.Context) {
 	name := ctx.Query("name")
 	if name == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		return
 	}
 	res := logic.ProblemLogic{}.HandleProblemSearch(name)
-	ctx.JSON(res.Code, res)
+	ctx.JSON(http.StatusOK, res)
 }
