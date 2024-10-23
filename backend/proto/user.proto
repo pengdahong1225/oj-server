@@ -13,6 +13,8 @@ message UserInfo{
   int32 gender = 7;
   int32 role = 8;
   string avatar_url = 9;
+
+  string password = 10; // hash
 }
 
 // 用户做题统计信息

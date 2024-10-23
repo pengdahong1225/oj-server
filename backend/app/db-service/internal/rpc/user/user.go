@@ -34,6 +34,7 @@ func (receiver *UserServer) GetUserDataByMobile(ctx context.Context, request *pb
 		Gender:    user.Gender,
 		Role:      user.Role,
 		AvatarUrl: user.AvatarUrl,
+		Password:  user.PassWord,
 	}
 
 	return &pb.GetUserResponse{
@@ -56,6 +57,7 @@ func (receiver *UserServer) GetUserDataByUid(ctx context.Context, request *pb.Ge
 	userInfo := &pb.UserInfo{
 		Uid:       user.ID,
 		Mobile:    user.Mobile,
+		Password:  user.PassWord,
 		Nickname:  user.NickName,
 		Email:     user.Email,
 		Gender:    user.Gender,
@@ -77,6 +79,7 @@ func (receiver *UserServer) CreateUserData(ctx context.Context, request *pb.Crea
 	}
 
 	user.Mobile = request.Data.Mobile
+	user.PassWord = request.Data.Password
 	user.NickName = request.Data.Nickname
 	user.Email = request.Data.Email
 	user.Gender = request.Data.Gender
@@ -203,4 +206,21 @@ func (receiver *UserServer) GetUserSolvedList(ctx context.Context, request *pb.G
 	}
 
 	return rsp, nil
+}
+
+func (receiver *UserServer) ResetUserPassword(ctx context.Context, request *pb.ResetUserPasswordRequest) (*empty.Empty, error) {
+	db := mysql.Instance()
+	/*
+		update user_info set password = '123456'
+		where id = ?;
+	*/
+	result := db.Model(&mysql.UserInfo{}).Where("id=?", request.Id).Update("password", request.Password)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.UpdateFailed
+	}
+	if result.RowsAffected == 0 {
+		return nil, rpc.NotFound
+	}
+	return &empty.Empty{}, nil
 }

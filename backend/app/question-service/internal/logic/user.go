@@ -7,6 +7,7 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
@@ -22,15 +23,19 @@ var (
 	issuer           = "Messi"
 )
 
-type UserLogic struct {
+type User struct {
 }
 
-func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
+func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
 		Data:    nil,
 	}
+
+	mobile, _ := strconv.ParseInt(form.Mobile, 10, 64)
+	// todo 密码加密
+	hash := utils.HashPassword(form.PassWord)
 
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
@@ -40,9 +45,42 @@ func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
 		return res
 	}
 	defer dbConn.Close()
-
 	client := pb.NewUserServiceClient(dbConn)
+	request := &pb.CreateUserRequest{Data: &pb.UserInfo{
+		Mobile:   mobile,
+		Password: hash,
+	}}
+	response, err := client.CreateUserData(context.Background(), request)
+	if err != nil {
+		res.Message = err.Error()
+		logrus.Debugln(err.Error())
+		return res
+	}
+	res.Message = "ok"
+	res.Data = map[string]int64{
+		"id": response.Id,
+	}
+	return res
+}
+
+func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
+	res := &models.Response{
+		Code:    http.StatusOK,
+		Message: "",
+		Data:    nil,
+	}
+
 	mobile, _ := strconv.ParseInt(form.Mobile, 10, 64)
+
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	if err != nil {
+		res.Code = http.StatusInternalServerError
+		res.Message = err.Error()
+		logrus.Errorf("db服务连接失败:%s", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+	client := pb.NewUserServiceClient(dbConn)
 	request := &pb.GetUserDataByMobileRequest{
 		Mobile: mobile,
 	}
@@ -50,6 +88,12 @@ func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
 	if err != nil {
 		res.Message = err.Error()
 		logrus.Debugln(err.Error())
+		return res
+	}
+
+	// 校验密码
+	if utils.HashPassword(form.PassWord) != response.Data.Password {
+		res.Message = "密码错误"
 		return res
 	}
 
@@ -75,7 +119,7 @@ func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
 	}
 
 	jsonMap := make(map[string]interface{})
-	jsonMap["userinfo"] = response.Data
+	jsonMap["uid"] = response.Data.Uid
 	jsonMap["token"] = token
 
 	res.Data = jsonMap
@@ -83,7 +127,7 @@ func (receiver UserLogic) HandleLogin(form *models.LoginFrom) *models.Response {
 	return res
 }
 
-func (receiver UserLogic) HandleGetUserProfile(uid int64) *models.Response {
+func (r User) HandleGetUserProfile(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -113,7 +157,7 @@ func (receiver UserLogic) HandleGetUserProfile(uid int64) *models.Response {
 	return res
 }
 
-func (receiver UserLogic) HandleGetRankList() *models.Response {
+func (r User) HandleGetRankList() *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -151,7 +195,7 @@ func (receiver UserLogic) HandleGetRankList() *models.Response {
 	return res
 }
 
-func (receiver UserLogic) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
+func (r User) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",
@@ -178,7 +222,7 @@ func (receiver UserLogic) HandleGetSubmitRecord(uid int64, stamp int64) *models.
 }
 
 // HandleGetUserSolvedList 获取用户解决了哪些题目
-func (receiver UserLogic) HandleGetUserSolvedList(uid int64) *models.Response {
+func (r User) HandleGetUserSolvedList(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    http.StatusOK,
 		Message: "",

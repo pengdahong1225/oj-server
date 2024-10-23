@@ -1,16 +1,12 @@
+<script setup lang="ts">
+</script>
+
 <template>
-  <div id="app">
+  <div>
     <router-view></router-view>
   </div>
 </template>
 
-<script>
-export default {
-  data () {
-    return {}
-  }
-}
-</script>
+<style scoped>
 
-<style lang="less">
 </style>

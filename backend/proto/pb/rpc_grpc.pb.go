@@ -27,6 +27,7 @@ const (
 	UserService_DeleteUserData_FullMethodName      = "/UserService/DeleteUserData"
 	UserService_GetUserList_FullMethodName         = "/UserService/GetUserList"
 	UserService_GetUserSolvedList_FullMethodName   = "/UserService/GetUserSolvedList"
+	UserService_ResetUserPassword_FullMethodName   = "/UserService/ResetUserPassword"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -42,6 +43,7 @@ type UserServiceClient interface {
 	DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
 	GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error)
+	ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type userServiceClient struct {
@@ -122,6 +124,16 @@ func (c *userServiceClient) GetUserSolvedList(ctx context.Context, in *GetUserSo
 	return out, nil
 }
 
+func (c *userServiceClient) ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, UserService_ResetUserPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -135,6 +147,7 @@ type UserServiceServer interface {
 	DeleteUserData(context.Context, *DeleteUserRequest) (*emptypb.Empty, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
 	GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error)
+	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -165,6 +178,9 @@ func (UnimplementedUserServiceServer) GetUserList(context.Context, *GetUserListR
 }
 func (UnimplementedUserServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserSolvedList not implemented")
+}
+func (UnimplementedUserServiceServer) ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetUserPassword not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -313,6 +329,24 @@ func _UserService_GetUserSolvedList_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_ResetUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetUserPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ResetUserPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ResetUserPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ResetUserPassword(ctx, req.(*ResetUserPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -347,6 +381,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserSolvedList",
 			Handler:    _UserService_GetUserSolvedList_Handler,
+		},
+		{
+			MethodName: "ResetUserPassword",
+			Handler:    _UserService_ResetUserPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -21,18 +21,40 @@ func HealthCheckRouters(engine *gin.Engine) {
 func QuestionRouters(engine *gin.Engine) {
 	// api/
 	{
-		engine.GET("/problemSet", handler.ProblemHandler{}.OnProblemSet)
-		engine.GET("/rankList", middlewares.AuthLogin(), handler.UserHandler{}.GetRankList)
-		engine.POST("/login", handler.UserHandler{}.Login)
+		engine.GET("/problemSet", handler.ProblemHandler{}.HandleProblemSet)
+		engine.GET("/rankList", middlewares.AuthLogin(), handler.User{}.HandleRankList)
+		engine.POST("/login", handler.User{}.HandleLogin)
+		engine.POST("/register", handler.User{}.HandleRegister)
+		engine.POST("/resetPassword", handler.User{}.HandleResetPassword)
 	}
 
 	// api/user
 	userRouter := engine.Group("/user")
 	{
 		userRouter.Use(middlewares.AuthLogin())
-		userRouter.GET("/profile", handler.UserHandler{}.GetUserProfile)
-		userRouter.GET("/submitRecord", handler.UserHandler{}.GetSubmitRecord)
-		userRouter.GET("/solvedList", handler.UserHandler{}.GetUserSolvedList)
+		userRouter.GET("/profile", handler.User{}.HandleUserProfile)
+		userRouter.GET("/submitRecord", handler.User{}.HandleSubmitRecord)
+		userRouter.GET("/solvedList", handler.User{}.HandleSolvedList)
+	}
+
+	// api/problem
+	problemRouter := engine.Group("/problem")
+	{
+		problemRouter.GET("/detail", handler.ProblemHandler{}.HandleDetail)
+		problemRouter.GET("/search", handler.ProblemHandler{}.HandleSearch)
+		// 需要登录
+		problemRouter.POST("/submit", middlewares.AuthLogin(), handler.ProblemHandler{}.HandleSubmit)
+		problemRouter.GET("/result", middlewares.AuthLogin(), handler.ProblemHandler{}.HandleResult)
+	}
+
+	// api/comment
+	commentRouter := engine.Group("/comment")
+	//commentRouter.Use(middlewares.AuthLogin())
+	{
+		commentRouter.POST("/add", handler.CommentHandler{}.HandleAdd)
+		commentRouter.POST("/get", handler.CommentHandler{}.HandleGet)
+		commentRouter.POST("/delete", handler.CommentHandler{}.HandleDelete)
+		commentRouter.POST("/like", handler.CommentHandler{}.HandleLike)
 	}
 
 	// api/captcha
@@ -41,26 +63,6 @@ func QuestionRouters(engine *gin.Engine) {
 	{
 		captchaRouter.GET("/image", handler.CaptchaHandler{}.GetImageCode)
 		captchaRouter.POST("/sms", handler.CaptchaHandler{}.GetSmsCode)
-	}
-
-	// api/problem
-	problemRouter := engine.Group("/problem")
-	{
-		problemRouter.GET("/detail", handler.ProblemHandler{}.ProblemDetail)
-		problemRouter.GET("/search", handler.ProblemHandler{}.ProblemSearch)
-		// 需要登录
-		problemRouter.POST("/submit", middlewares.AuthLogin(), handler.ProblemHandler{}.ProblemSubmit)
-		problemRouter.GET("/queryResult", middlewares.AuthLogin(), handler.ProblemHandler{}.QueryResult)
-	}
-
-	// api/comment
-	commentRouter := engine.Group("/comment")
-	//commentRouter.Use(middlewares.AuthLogin())
-	{
-		commentRouter.POST("/add", handler.CommentHandler{}.Insert)
-		commentRouter.POST("/get", handler.CommentHandler{}.Query)
-		commentRouter.POST("/delete", handler.CommentHandler{}.Delete)
-		commentRouter.POST("/like", handler.CommentHandler{}.Like)
 	}
 }
 

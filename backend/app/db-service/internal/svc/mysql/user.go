@@ -8,6 +8,7 @@ type UserInfo struct {
 	DeletedAt time.Time `gorm:"<-:false;column:delete_at" json:"deleteAt"`
 
 	Mobile    int64  `gorm:"column:mobile;unique" json:"mobile"`
+	PassWord  string `gorm:"column:password" json:"password"`
 	NickName  string `gorm:"column:nickname" json:"userName"`
 	Email     string `gorm:"column:email" json:"email"`
 	Gender    int32  `gorm:"column:gender" json:"gender"`

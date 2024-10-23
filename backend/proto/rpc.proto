@@ -15,6 +15,7 @@ service UserService{
   rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
   rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
+  rpc ResetUserPassword(ResetUserPasswordRequest) returns(google.protobuf.Empty);
 }
 // problem接口
 service ProblemService{
@@ -163,4 +164,9 @@ message GetProblemHotDataRequest{
 }
 message GetProblemHotDataResponse{
   string data = 1;
+}
+
+message ResetUserPasswordRequest{
+  int64 id = 1;
+  string password = 2;
 }
