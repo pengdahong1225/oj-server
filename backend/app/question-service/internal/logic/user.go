@@ -86,6 +86,7 @@ func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 	}
 	response, err := client.GetUserDataByMobile(context.Background(), request)
 	if err != nil {
+		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Debugln(err.Error())
 		return res
