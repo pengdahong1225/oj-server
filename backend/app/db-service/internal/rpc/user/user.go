@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
@@ -73,7 +72,7 @@ func (receiver *UserServer) GetUserDataByUid(ctx context.Context, request *pb.Ge
 func (receiver *UserServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	db := mysql.Instance()
 	var user mysql.UserInfo
-	result := db.Where("mobile=?", request.Data.Mobile)
+	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.RowsAffected > 0 {
 		return nil, rpc.AlreadyExists
 	}
@@ -91,9 +90,6 @@ func (receiver *UserServer) CreateUserData(ctx context.Context, request *pb.Crea
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.InsertFailed
 	}
-
-	l, _ := json.Marshal(user)
-	logrus.Debugln("create user:%s", l)
 
 	return &pb.CreateUserResponse{Id: user.ID}, nil
 }
