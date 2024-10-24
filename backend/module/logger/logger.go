@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
 	"os"
 	"time"
@@ -35,9 +36,9 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	hook.errFile = errFile
 	hook.infoFile = infoFile
@@ -68,9 +69,9 @@ func InitLog(appName, path, level string) error {
 	}
 
 	// 日志文件
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_CREATE, 0666)
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	hook := &FileHook{
 		errFile:   errFile,
@@ -87,8 +88,12 @@ func InitLog(appName, path, level string) error {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	format := &logrus.TextFormatter{
+	format := &nested.Formatter{
+		HideKeys:        true,
+		NoColors:        true,
 		TimestampFormat: "2006-01-02 15:04:05",
+		ShowFullLevel:   true,
+		CallerFirst:     true,
 	}
 	logrus.SetFormatter(format)
 	logrus.SetOutput(os.Stdout)

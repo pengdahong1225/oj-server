@@ -49,7 +49,7 @@ func QuestionRouters(engine *gin.Engine) {
 
 	// api/comment
 	commentRouter := engine.Group("/comment")
-	//commentRouter.Use(middlewares.AuthLogin())
+	commentRouter.Use(middlewares.AuthLogin())
 	{
 		commentRouter.POST("/add", handler.CommentHandler{}.HandleAdd)
 		commentRouter.POST("/get", handler.CommentHandler{}.HandleGet)
