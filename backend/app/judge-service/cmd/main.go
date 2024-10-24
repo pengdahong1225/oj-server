@@ -27,6 +27,7 @@ func main() {
 		Name: system.Name,
 		IP:   ip.String(),
 		Port: system.Port,
+		UUID: system.UUID,
 	}
 	server.Start()
 }

@@ -2,11 +2,9 @@ package registry
 
 import (
 	"fmt"
+	consulapi "github.com/hashicorp/consul/api"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/module/signal"
-	"github.com/pengdahong1225/oj-server/backend/module/utils"
-
-	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -29,59 +27,51 @@ func NewRegistry(cfg *settings.RegistryConfig) (*Registry, error) {
 }
 
 // RegisterService 注册service节点
-func (receiver *Registry) RegisterServiceWithGrpc(serviceName string, ip string, port int) error {
-	nodeID, err := utils.GenerateUUID()
-	if err != nil {
-		return err
-	}
+func (receiver *Registry) RegisterServiceWithGrpc(serviceName string, ip string, port int, uuid string) error {
 	srv := &consulapi.AgentServiceRegistration{
-		ID:      nodeID,      // 服务唯一ID
+		ID:      uuid,        // 服务唯一ID
 		Name:    serviceName, // 服务名称
 		Tags:    []string{serviceName},
 		Port:    port,
 		Address: ip,
 		Check: &consulapi.AgentServiceCheck{
-			CheckID:                        nodeID,
+			CheckID:                        uuid,
 			GRPC:                           fmt.Sprintf("%s:%d", ip, port),
 			Interval:                       "5s",  // 每5秒检测一次
 			Timeout:                        "5s",  // 5秒超时
 			DeregisterCriticalServiceAfter: "10s", // 超时10秒注销节点
 		},
 	}
-	err = receiver.client.Agent().ServiceRegister(srv)
+	err := receiver.client.Agent().ServiceRegister(srv)
 	if err != nil {
 		return err
 	}
 	go signal.SignalListen(func() {
-		receiver.client.Agent().ServiceDeregister(nodeID)
+		receiver.client.Agent().ServiceDeregister(uuid)
 	})
 	return nil
 }
-func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string, port int) error {
-	nodeID, err := utils.GenerateUUID()
-	if err != nil {
-		return err
-	}
+func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string, port int, uuid string) error {
 	srv := &consulapi.AgentServiceRegistration{
-		ID:      nodeID,      // 服务唯一ID
+		ID:      uuid,        // 服务唯一ID
 		Name:    serviceName, // 服务名称
 		Tags:    []string{serviceName},
 		Port:    port,
 		Address: ip,
 		Check: &consulapi.AgentServiceCheck{
-			CheckID:                        nodeID,
+			CheckID:                        uuid,
 			HTTP:                           fmt.Sprintf("http://%s:%d/%s", ip, port, "health"),
 			Interval:                       "5s",  // 每5秒检测一次
 			Timeout:                        "5s",  // 5秒超时
 			DeregisterCriticalServiceAfter: "10s", // 超时10秒注销节点
 		},
 	}
-	err = receiver.client.Agent().ServiceRegister(srv)
+	err := receiver.client.Agent().ServiceRegister(srv)
 	if err != nil {
 		return err
 	}
 	go signal.SignalListen(func() {
-		receiver.client.Agent().ServiceDeregister(nodeID)
+		receiver.client.Agent().ServiceDeregister(uuid)
 	})
 	return nil
 }

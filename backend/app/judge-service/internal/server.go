@@ -19,6 +19,7 @@ type Server struct {
 	Name string
 	IP   string
 	Port int
+	UUID string
 }
 
 func (receiver *Server) register() error {
@@ -26,7 +27,7 @@ func (receiver *Server) register() error {
 	if err != nil {
 		return err
 	}
-	if err = register.RegisterServiceWithHttp(receiver.Name, receiver.IP, receiver.Port); err != nil {
+	if err = register.RegisterServiceWithHttp(receiver.Name, receiver.IP, receiver.Port, receiver.UUID); err != nil {
 		return err
 	}
 	return nil

@@ -24,6 +24,7 @@ type Server struct {
 	Name string
 	IP   string
 	Port int
+	UUID string
 }
 
 func (receiver *Server) Start() {
@@ -72,7 +73,7 @@ func (receiver *Server) Start() {
 
 	// 注册服务节点
 	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
-	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port); err != nil {
+	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port, receiver.UUID); err != nil {
 		panic(err)
 	}
 
