@@ -8,7 +8,7 @@ create table if not exists problem
 
     title VARCHAR(64) NOT null comment '题目标题',
     level tinyint DEFAULT 0 comment '题目难度 1:简单 2:中等 3:困难',
-    tags VARCHAR(64) DEFAULT '' comment '题目标签，#做前缀', -- '#数组 #双指针 #哈希表'
+    tags JSON comment '题目标签',
     description TEXT NOT null comment '题目描述',
     create_by BIGINT DEFAULT 0 comment '题目创建者',
     comment_count BIGINT DEFAULT 0 comment '评论总数量',
