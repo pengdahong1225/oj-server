@@ -263,6 +263,27 @@ func (r User) QueryUserSolvedListByProblemList(params *models.UPSSParams) *model
 		Message: "",
 		Data:    nil,
 	}
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("db服务连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+
+	client := pb.NewUserServiceClient(dbConn)
+	response, err := client.QueryUserSolvedListByProblemIds(context.Background(), &pb.QueryUserSolvedListByProblemIdsRequest{
+		Uid:        params.Uid,
+		ProblemIds: params.ProblemIds,
+	})
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		return res
+	}
+	res.Message = "ok"
+	res.Data = response
 
 	return res
 }
