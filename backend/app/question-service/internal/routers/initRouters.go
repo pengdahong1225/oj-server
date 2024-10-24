@@ -41,7 +41,6 @@ func QuestionRouters(engine *gin.Engine) {
 	problemRouter := engine.Group("/problem")
 	{
 		problemRouter.GET("/detail", handler.ProblemHandler{}.HandleDetail)
-		problemRouter.GET("/search", handler.ProblemHandler{}.HandleSearch)
 		// 需要登录
 		problemRouter.POST("/submit", middlewares.AuthLogin(), handler.ProblemHandler{}.HandleSubmit)
 		problemRouter.GET("/result", middlewares.AuthLogin(), handler.ProblemHandler{}.HandleResult)

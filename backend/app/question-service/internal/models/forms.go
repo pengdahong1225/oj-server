@@ -83,7 +83,8 @@ type QueryCommentForm struct {
 
 // QueryProblemListParams 题目列表分页查询参数
 type QueryProblemListParams struct {
-	Page     int32 `json:"page" form:"page" binding:"required"`
-	PageSize int32 `json:"page_size" form:"page_size" binding:"required"`
-	// ...多检索条件
+	Page     int32  `json:"page" form:"page" binding:"required"`
+	PageSize int32  `json:"page_size" form:"page_size" binding:"required"`
+	Keyword  string `json:"keyword" form:"keyword"`
+	Tag      string `json:"tag" form:"tag"`
 }

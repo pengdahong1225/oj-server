@@ -36,6 +36,8 @@ func (receiver ProblemLogic) GetProblemList(params *models.QueryProblemListParam
 	request := &pb.GetProblemListRequest{
 		Page:     params.Page,
 		PageSize: params.PageSize,
+		Keyword:  params.Keyword,
+		Tag:      params.Tag,
 	}
 	response, err := client.GetProblemList(context.Background(), request)
 	if err != nil {
@@ -190,34 +192,5 @@ func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *mode
 
 	res.Message = "OK"
 	res.Data = results
-	return res
-}
-
-func (receiver ProblemLogic) HandleProblemSearch(name string) *models.Response {
-	res := &models.Response{
-		Code:    models.Success,
-		Message: "",
-		Data:    nil,
-	}
-
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
-	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		logrus.Errorf("db服连接失败:%s\n", err.Error())
-		return res
-	}
-	defer dbConn.Close()
-
-	client := pb.NewProblemServiceClient(dbConn)
-	response, err := client.QueryProblemWithName(context.Background(), &pb.QueryProblemWithNameRequest{Name: name})
-	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		logrus.Errorln(err.Error())
-		return res
-	}
-	res.Message = "OK"
-	res.Data = response.Data
 	return res
 }
