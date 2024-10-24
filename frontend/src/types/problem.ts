@@ -11,4 +11,5 @@ export interface Problem {
     description: string;
     level: number;
     tags: string[];
+    status?: number;
 }
