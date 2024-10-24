@@ -63,7 +63,7 @@ func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 	return res
 }
 
-func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
+func (r User) OnUserLogin(form *models.LoginFrom) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -129,7 +129,7 @@ func (r User) HandleLogin(form *models.LoginFrom) *models.Response {
 	return res
 }
 
-func (r User) HandleGetUserProfile(uid int64) *models.Response {
+func (r User) GetUserProfile(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -160,7 +160,7 @@ func (r User) HandleGetUserProfile(uid int64) *models.Response {
 	return res
 }
 
-func (r User) HandleGetRankList() *models.Response {
+func (r User) GetRankList() *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -200,7 +200,7 @@ func (r User) HandleGetRankList() *models.Response {
 	return res
 }
 
-func (r User) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
+func (r User) GetSubmitRecord(uid int64, stamp int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -227,8 +227,8 @@ func (r User) HandleGetSubmitRecord(uid int64, stamp int64) *models.Response {
 	return res
 }
 
-// HandleGetUserSolvedList 获取用户解决了哪些题目
-func (r User) HandleGetUserSolvedList(uid int64) *models.Response {
+// GetUserSolvedList 获取用户解决了哪些题目
+func (r User) GetUserSolvedList(uid int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -253,6 +253,16 @@ func (r User) HandleGetUserSolvedList(uid int64) *models.Response {
 	}
 	res.Message = "OK"
 	res.Data = response.ProblemSolvedList
+
+	return res
+}
+
+func (r User) QueryUserSolvedListByProblemList(params *models.UPSSParams) *models.Response {
+	res := &models.Response{
+		Code:    models.Success,
+		Message: "",
+		Data:    nil,
+	}
 
 	return res
 }

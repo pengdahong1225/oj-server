@@ -16,6 +16,7 @@ service UserService{
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
   rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
   rpc ResetUserPassword(ResetUserPasswordRequest) returns(google.protobuf.Empty);
+  rpc QueryUserSolvedListByProblemIds(QueryUserSolvedListByProblemIdsRequest) returns(QueryUserSolvedListByProblemIdsResponse);
 }
 // problem接口
 service ProblemService{
@@ -35,6 +36,15 @@ service RecordService{
 service CommentService{
   rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
   rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
+}
+
+message QueryUserSolvedListByProblemIdsRequest{
+  int64 uid = 1;
+  repeated int64 problem_ids = 2;
+}
+message QueryUserSolvedListByProblemIdsResponse{
+  int64 uid = 1;
+  repeated int64 solved_problem_ids = 2;
 }
 
 // 评论接口

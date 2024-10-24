@@ -34,6 +34,7 @@ func QuestionRouters(engine *gin.Engine) {
 		userRouter.Use(middlewares.AuthLogin())
 		userRouter.GET("/profile", handler.User{}.HandleUserProfile)
 		userRouter.GET("/submitRecord", handler.User{}.HandleSubmitRecord)
+		userRouter.GET("/upss", handler.User{}.HandleUPSS)
 		userRouter.GET("/solvedList", handler.User{}.HandleSolvedList)
 	}
 

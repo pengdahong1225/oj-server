@@ -88,3 +88,10 @@ type QueryProblemListParams struct {
 	Keyword  string `json:"keyword" form:"keyword"`
 	Tag      string `json:"tag" form:"tag"`
 }
+
+// UPSSParams
+// 查询题目集中哪些题目被用户 AC 了
+type UPSSParams struct {
+	Uid        int64   `json:"uid" form:"uid" binding:"required"`
+	ProblemIds []int64 `json:"problem_ids" form:"problem_ids" binding:"required"`
+}

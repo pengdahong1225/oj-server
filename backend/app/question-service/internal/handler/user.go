@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
@@ -11,6 +12,7 @@ import (
 )
 
 type User struct {
+	logic logic.User
 }
 
 func (r User) HandleRegister(ctx *gin.Context) {
@@ -37,7 +39,7 @@ func (r User) HandleRegister(ctx *gin.Context) {
 		})
 		return
 	}
-	res := logic.User{}.OnUserRegister(form)
+	res := r.logic.OnUserRegister(form)
 	ctx.JSON(http.StatusOK, res)
 }
 func (r User) HandleLogin(ctx *gin.Context) {
@@ -57,7 +59,7 @@ func (r User) HandleLogin(ctx *gin.Context) {
 		return
 	}
 
-	res := logic.User{}.HandleLogin(form)
+	res := r.logic.OnUserLogin(form)
 	ctx.JSON(http.StatusOK, res)
 }
 func (r User) HandleResetPassword(ctx *gin.Context) {
@@ -75,12 +77,12 @@ func (r User) HandleUserProfile(ctx *gin.Context) {
 	}
 
 	uidInt, _ := strconv.ParseInt(uid, 10, 64)
-	res := logic.User{}.HandleGetUserProfile(uidInt)
+	res := r.logic.GetUserProfile(uidInt)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (r User) HandleRankList(ctx *gin.Context) {
-	res := logic.User{}.HandleGetRankList()
+	res := r.logic.GetRankList()
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -95,12 +97,36 @@ func (r User) HandleSubmitRecord(ctx *gin.Context) {
 	}
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	stamp, _ := strconv.ParseInt(t, 10, 64)
-	res := logic.User{}.HandleGetSubmitRecord(claims.Uid, stamp)
+	res := r.logic.GetSubmitRecord(claims.Uid, stamp)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (r User) HandleSolvedList(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := logic.User{}.HandleGetUserSolvedList(claims.Uid)
+	res := r.logic.GetUserSolvedList(claims.Uid)
 	ctx.JSON(http.StatusOK, res)
+}
+
+func (r User) HandleUPSS(ctx *gin.Context) {
+	p := ctx.Query("params")
+	if p == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": "参数错误",
+		})
+		ctx.Abort()
+		return
+	}
+
+	params := &models.UPSSParams{}
+	err := json.Unmarshal([]byte(p), params)
+	if err != nil || len(params.ProblemIds) <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": err.Error(),
+		})
+		ctx.Abort()
+		return
+	}
+	ctx.JSON(http.StatusOK, r.logic.QueryUserSolvedListByProblemList(params))
 }

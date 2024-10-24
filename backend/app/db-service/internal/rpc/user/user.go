@@ -13,7 +13,7 @@ type UserServer struct {
 	pb.UnimplementedUserServiceServer
 }
 
-func (receiver *UserServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
+func (r *UserServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUserDataByMobileRequest) (*pb.GetUserResponse, error) {
 	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
@@ -41,7 +41,7 @@ func (receiver *UserServer) GetUserDataByMobile(ctx context.Context, request *pb
 	}, nil
 }
 
-func (receiver *UserServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
+func (r *UserServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDataByUidRequest) (*pb.GetUserResponse, error) {
 	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
@@ -69,7 +69,7 @@ func (receiver *UserServer) GetUserDataByUid(ctx context.Context, request *pb.Ge
 	}, nil
 }
 
-func (receiver *UserServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+func (r *UserServer) CreateUserData(ctx context.Context, request *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
@@ -94,7 +94,7 @@ func (receiver *UserServer) CreateUserData(ctx context.Context, request *pb.Crea
 	return &pb.CreateUserResponse{Id: user.ID}, nil
 }
 
-func (receiver *UserServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
+func (r *UserServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserRequest) (*empty.Empty, error) {
 	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
@@ -121,7 +121,7 @@ func (receiver *UserServer) UpdateUserData(ctx context.Context, request *pb.Upda
 	return &empty.Empty{}, nil
 }
 
-func (receiver *UserServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
+func (r *UserServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserRequest) (*empty.Empty, error) {
 	db := mysql.Instance()
 	var user mysql.UserInfo
 	result := db.Where("id=?", request.Id).Find(&user)
@@ -146,7 +146,7 @@ func (receiver *UserServer) DeleteUserData(ctx context.Context, request *pb.Dele
 }
 
 // GetUserList 采用游标分页
-func (receiver *UserServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+func (r *UserServer) GetUserList(ctx context.Context, request *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
 	// db := mysql.Instance()
 	// var pageSize = 10
 	// var userlist []models.UserInfo
@@ -184,7 +184,7 @@ func (receiver *UserServer) GetUserList(ctx context.Context, request *pb.GetUser
 }
 
 // GetUserSolvedList 查询用户哪些题目
-func (receiver *UserServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
+func (r *UserServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
 	db := mysql.Instance()
 	var userSolutionList []mysql.UserSolution
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
@@ -204,7 +204,7 @@ func (receiver *UserServer) GetUserSolvedList(ctx context.Context, request *pb.G
 	return rsp, nil
 }
 
-func (receiver *UserServer) ResetUserPassword(ctx context.Context, request *pb.ResetUserPasswordRequest) (*empty.Empty, error) {
+func (r *UserServer) ResetUserPassword(ctx context.Context, request *pb.ResetUserPasswordRequest) (*empty.Empty, error) {
 	db := mysql.Instance()
 	/*
 		update user_info set password = '123456'
@@ -219,4 +219,26 @@ func (receiver *UserServer) ResetUserPassword(ctx context.Context, request *pb.R
 		return nil, rpc.NotFound
 	}
 	return &empty.Empty{}, nil
+}
+
+// QueryUserSolvedListByProblemIds
+// 从给定题目集中查询用户ac了哪些题目
+// @uid
+// @problem_ids
+func (r *UserServer) QueryUserSolvedListByProblemIds(ctx context.Context, request *pb.QueryUserSolvedListByProblemIdsRequest) (*pb.QueryUserSolvedListByProblemIdsResponse, error) {
+	db := mysql.Instance()
+	/*
+		select problem_id from user_solution
+		where uid = ? and problem_id in (1,2,3...);
+	*/
+	var ids []int64
+	result := db.Select("problem_id").Model(&mysql.UserSolution{}).Where("uid=?", request.Uid).Where("problem_id in (?)", request.ProblemIds).Find(&ids)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.QueryFailed
+	}
+	return &pb.QueryUserSolvedListByProblemIdsResponse{
+		SolvedProblemIds: ids,
+		Uid:              request.Uid,
+	}, nil
 }
