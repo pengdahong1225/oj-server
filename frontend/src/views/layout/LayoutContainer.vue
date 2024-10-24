@@ -1,6 +1,17 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { useRouter } from 'vue-router'
+import {
+  User,
+  Crop,
+  EditPen,
+  SwitchButton,
+  CaretBottom
+} from '@element-plus/icons-vue'
+import avatar from '@/assets/default.png'
+import { useUserStore } from '@/stores'
 
+const router = useRouter()
+const userStore = useUserStore()
 const handleCommand = (command: string) => {
   if (command === 'logout') {
     // 退出
@@ -13,8 +24,8 @@ const handleCommand = (command: string) => {
         cancelButtonText: 'Cancel',
       }
     ).then(() => {
-      // userStore.clearUser()
-      // userStore.clearToken()
+      userStore.clearToken()
+      userStore.clearUserInfo()
       router.push('/login')
     }).catch(() => {})
   } else {
