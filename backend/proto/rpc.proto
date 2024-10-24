@@ -23,9 +23,9 @@ service ProblemService{
   rpc UpdateProblemData(UpdateProblemRequest) returns(UpdateProblemResponse);
   rpc DeleteProblemData(DeleteProblemRequest) returns(google.protobuf.Empty);
   rpc GetProblemList(GetProblemListRequest) returns(GetProblemListResponse);
-  rpc QueryProblemWithName(QueryProblemWithNameRequest) returns(QueryProblemWithNameResponse);
   rpc GetProblemHotData(GetProblemHotDataRequest) returns(GetProblemHotDataResponse);
 }
+
 // record
 service RecordService{
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
@@ -129,6 +129,8 @@ message DeleteProblemRequest{
 message GetProblemListRequest{
   int32 page = 1;
   int32 page_size = 2;
+  string keyword = 3;
+  string tag = 4;
 }
 message GetProblemListResponse{
   int32 total = 1;
@@ -141,13 +143,6 @@ message GetUserSubmitRecordRequest{
 }
 message GetUserSubmitRecordResponse{
   repeated UserSubmitRecord data = 1;
-}
-
-message QueryProblemWithNameRequest{
-  string name = 1;
-}
-message QueryProblemWithNameResponse{
-  repeated Problem data = 1;
 }
 
 message SaveUserSubmitRecordRequest{

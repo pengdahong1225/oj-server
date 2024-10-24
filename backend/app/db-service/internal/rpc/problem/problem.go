@@ -2,11 +2,11 @@ package problem
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/redis"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -28,7 +28,7 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 	problem := &mysql.Problem{
 		Title:       request.Data.Title,
 		Level:       request.Data.Level,
-		Tags:        utils.SpliceStringWithX(request.Data.Tags, "#"),
+		Tags:        request.Data.Tags,
 		Description: request.Data.Description,
 		CreateBy:    request.Data.CreateBy,
 		Config:      config,
@@ -38,11 +38,8 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
 	}
-	// 不存在就新增，存在就修改
-	//if result.RowsAffected > 0 {
-	//	return nil, AlreadyExists
-	//}
 
+	// 不存在就新增，存在就修改
 	if result.RowsAffected == 0 {
 		result = db.Create(problem)
 		if result.Error != nil {
@@ -93,7 +90,7 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 		Title:       problem.Title,
 		Description: problem.Description,
 		Level:       problem.Level,
-		Tags:        utils.SplitStringWithX(problem.Tags, "#"),
+		Tags:        problem.Tags,
 		CreateBy:    problem.CreateBy,
 		Config:      config,
 	}
@@ -127,73 +124,53 @@ func (receiver *ProblemServer) DeleteProblemData(ctx context.Context, request *p
 }
 
 // GetProblemList 分页查询题库列表
-// 查询id，title，level，tags
+// 查询{id，title，level，tags}
+// @page 页码
+// @page_size 单页数量
+// @keyword 关键字
+// @tag 标签
 func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
 	db := mysql.Instance()
-	var pageSize = 10
 	rsp := &pb.GetProblemListResponse{}
+	name := "%" + request.Keyword + "%"
+	offSet := int((request.Page - 1) * request.PageSize)
+	query := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, request.Tag)
+	logrus.Debugln("query conditions: %s", query)
 
-	var problemList []mysql.Problem
+	/*
+		select COUNT(*) AS count from problem
+		where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表"');
+	*/
 	var count int64 = 0
-	result := db.Model(problemList).Count(&count)
+	result := db.Model(&mysql.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
 	}
 	rsp.Total = int32(count)
 
-	offSet := int((request.Page - 1) * request.PageSize)
-
-	// select id,title,level,tags from Problem
-	// where id > offSet
-	// order by id
-	// limit 10;
-	result = db.Select("id,title,level,tags").Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
+	/*
+		select id,title,level,tags from problem
+		where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表')
+		order by id
+		offset off_set
+		limit page_size;
+	*/
+	var problemList []mysql.Problem
+	result = db.Select("id,title,level,tags").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&problemList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
 	}
-	for _, Problem := range problemList {
+	for _, problem := range problemList {
 		rsp.Data = append(rsp.Data, &pb.Problem{
-			Id:    Problem.ID,
-			Title: Problem.Title,
-			Level: Problem.Level,
-			Tags:  utils.SplitStringWithX(Problem.Tags, "#"),
+			Id:    problem.ID,
+			Title: problem.Title,
+			Level: problem.Level,
+			Tags:  problem.Tags,
 		})
 	}
 	return rsp, nil
-}
-
-// QueryProblemWithName 根据题目名查询题目
-// 模糊查询
-func (receiver *ProblemServer) QueryProblemWithName(ctx context.Context, request *pb.QueryProblemWithNameRequest) (*pb.QueryProblemWithNameResponse, error) {
-	db := mysql.Instance()
-	var problemList []mysql.Problem
-	// select * from problem
-	// where title like '%name%';
-	names := "%" + request.Name + "%"
-	result := db.Where("name LINK ?", names).Find(&problemList)
-	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
-	}
-	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
-	}
-
-	var data []*pb.Problem
-	for _, Problem := range problemList {
-		data = append(data, &pb.Problem{
-			Id:          Problem.ID,
-			Title:       Problem.Title,
-			Level:       Problem.Level,
-			Tags:        utils.SplitStringWithX(Problem.Tags, "#"),
-			Description: Problem.Description,
-		})
-	}
-	return &pb.QueryProblemWithNameResponse{
-		Data: data,
-	}, nil
 }
 
 // GetProblemHotData 读取题目热点数据

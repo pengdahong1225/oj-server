@@ -392,12 +392,11 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	ProblemService_GetProblemData_FullMethodName       = "/ProblemService/GetProblemData"
-	ProblemService_UpdateProblemData_FullMethodName    = "/ProblemService/UpdateProblemData"
-	ProblemService_DeleteProblemData_FullMethodName    = "/ProblemService/DeleteProblemData"
-	ProblemService_GetProblemList_FullMethodName       = "/ProblemService/GetProblemList"
-	ProblemService_QueryProblemWithName_FullMethodName = "/ProblemService/QueryProblemWithName"
-	ProblemService_GetProblemHotData_FullMethodName    = "/ProblemService/GetProblemHotData"
+	ProblemService_GetProblemData_FullMethodName    = "/ProblemService/GetProblemData"
+	ProblemService_UpdateProblemData_FullMethodName = "/ProblemService/UpdateProblemData"
+	ProblemService_DeleteProblemData_FullMethodName = "/ProblemService/DeleteProblemData"
+	ProblemService_GetProblemList_FullMethodName    = "/ProblemService/GetProblemList"
+	ProblemService_GetProblemHotData_FullMethodName = "/ProblemService/GetProblemHotData"
 )
 
 // ProblemServiceClient is the client API for ProblemService service.
@@ -410,7 +409,6 @@ type ProblemServiceClient interface {
 	UpdateProblemData(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error)
 	DeleteProblemData(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error)
-	QueryProblemWithName(ctx context.Context, in *QueryProblemWithNameRequest, opts ...grpc.CallOption) (*QueryProblemWithNameResponse, error)
 	GetProblemHotData(ctx context.Context, in *GetProblemHotDataRequest, opts ...grpc.CallOption) (*GetProblemHotDataResponse, error)
 }
 
@@ -462,16 +460,6 @@ func (c *problemServiceClient) GetProblemList(ctx context.Context, in *GetProble
 	return out, nil
 }
 
-func (c *problemServiceClient) QueryProblemWithName(ctx context.Context, in *QueryProblemWithNameRequest, opts ...grpc.CallOption) (*QueryProblemWithNameResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryProblemWithNameResponse)
-	err := c.cc.Invoke(ctx, ProblemService_QueryProblemWithName_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *problemServiceClient) GetProblemHotData(ctx context.Context, in *GetProblemHotDataRequest, opts ...grpc.CallOption) (*GetProblemHotDataResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetProblemHotDataResponse)
@@ -492,7 +480,6 @@ type ProblemServiceServer interface {
 	UpdateProblemData(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error)
 	DeleteProblemData(context.Context, *DeleteProblemRequest) (*emptypb.Empty, error)
 	GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error)
-	QueryProblemWithName(context.Context, *QueryProblemWithNameRequest) (*QueryProblemWithNameResponse, error)
 	GetProblemHotData(context.Context, *GetProblemHotDataRequest) (*GetProblemHotDataResponse, error)
 	mustEmbedUnimplementedProblemServiceServer()
 }
@@ -515,9 +502,6 @@ func (UnimplementedProblemServiceServer) DeleteProblemData(context.Context, *Del
 }
 func (UnimplementedProblemServiceServer) GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemList not implemented")
-}
-func (UnimplementedProblemServiceServer) QueryProblemWithName(context.Context, *QueryProblemWithNameRequest) (*QueryProblemWithNameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryProblemWithName not implemented")
 }
 func (UnimplementedProblemServiceServer) GetProblemHotData(context.Context, *GetProblemHotDataRequest) (*GetProblemHotDataResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemHotData not implemented")
@@ -615,24 +599,6 @@ func _ProblemService_GetProblemList_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProblemService_QueryProblemWithName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryProblemWithNameRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProblemServiceServer).QueryProblemWithName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProblemService_QueryProblemWithName_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).QueryProblemWithName(ctx, req.(*QueryProblemWithNameRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ProblemService_GetProblemHotData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProblemHotDataRequest)
 	if err := dec(in); err != nil {
@@ -673,10 +639,6 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProblemList",
 			Handler:    _ProblemService_GetProblemList_Handler,
-		},
-		{
-			MethodName: "QueryProblemWithName",
-			Handler:    _ProblemService_QueryProblemWithName_Handler,
 		},
 		{
 			MethodName: "GetProblemHotData",
