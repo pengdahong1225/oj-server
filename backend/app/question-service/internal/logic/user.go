@@ -2,11 +2,9 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
@@ -120,11 +118,16 @@ func (r User) OnUserLogin(form *models.LoginFrom) *models.Response {
 		return res
 	}
 
-	jsonMap := make(map[string]interface{})
-	jsonMap["uid"] = response.Data.Uid
-	jsonMap["token"] = token
-
-	res.Data = jsonMap
+	res.Data = models.LoginRspData{
+		Uid:       response.Data.Uid,
+		Mobile:    response.Data.Mobile,
+		NickName:  response.Data.Nickname,
+		Email:     response.Data.Email,
+		Gender:    response.Data.Gender,
+		Role:      response.Data.Role,
+		AvatarUrl: response.Data.AvatarUrl,
+		Token:     token,
+	}
 	res.Message = "OK"
 	return res
 }
@@ -168,35 +171,35 @@ func (r User) GetRankList() *models.Response {
 	}
 
 	// 获取排行榜
-	reply := cache.QueryRankList()
-	if reply == nil {
-		res.Code = models.Failed
-		res.Message = "排行榜获取失败"
-		logrus.Debugln("排行榜获取失败")
-		return res
-	}
-	var rankList []models.RankList
-	for i := 0; i < len(reply); i += 2 {
-		user := models.UserInfo{}
-		json.Unmarshal([]byte(reply[i]), &user)
-		item := models.RankList{
-			Phone:     user.Phone,
-			NickName:  user.NickName,
-			PassCount: user.PassCount,
-		}
-		rankList = append(rankList, item)
-	}
-
-	bytes, err := json.Marshal(rankList)
-	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		logrus.Errorf("排行榜序列化失败:%s", err.Error())
-		return res
-	}
-
-	res.Message = "OK"
-	res.Data = string(bytes)
+	//reply := cache.QueryRankList()
+	//if reply == nil {
+	//	res.Code = models.Failed
+	//	res.Message = "排行榜获取失败"
+	//	logrus.Debugln("排行榜获取失败")
+	//	return res
+	//}
+	//var rankList []models.RankList
+	//for i := 0; i < len(reply); i += 2 {
+	//	user := models.UserInfo{}
+	//	json.Unmarshal([]byte(reply[i]), &user)
+	//	item := models.RankList{
+	//		Phone:     user.Mobile,
+	//		NickName:  user.NickName,
+	//		PassCount: user.PassCount,
+	//	}
+	//	rankList = append(rankList, item)
+	//}
+	//
+	//bytes, err := json.Marshal(rankList)
+	//if err != nil {
+	//	res.Code = models.Failed
+	//	res.Message = err.Error()
+	//	logrus.Errorf("排行榜序列化失败:%s", err.Error())
+	//	return res
+	//}
+	//
+	//res.Message = "OK"
+	//res.Data = string(bytes)
 	return res
 }
 
