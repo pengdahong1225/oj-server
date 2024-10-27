@@ -5,7 +5,8 @@ export interface User {
     email: string;
     gender: number;
     role: number;
-    avatar_url: number;
+    avatar_url: string;
+    token: string;
 }
 
 // 注册登录表单参数

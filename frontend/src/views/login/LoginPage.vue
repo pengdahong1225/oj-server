@@ -90,7 +90,7 @@ const login = async () => {
   const res = await userLoginService(login_form.value)
   console.log(res)
   ElMessage.success('登录成功')
-  userStore.setToken(res.data.token)
+  userStore.setUserInfo(res.data)
   router.push('/')
 }
 </script>
@@ -220,7 +220,7 @@ const login = async () => {
         </el-form-item>
       </el-form>
     </el-col>
-  </el-row>
+  </el-row> 
 
 </template>
 

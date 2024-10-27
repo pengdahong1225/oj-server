@@ -7,26 +7,31 @@ import type { User } from '@/types/user'
  * token
  */
 export const useUserStore = defineStore('user', () => {
-    const token = ref('')
-    const setToken = (value: string) => {
-        token.value = value
-    }
-    const clearToken = () => {
-        token.value = ''
-    }
-
-    const userInfo = ref<User>()
+    const userInfo = ref<User>({
+        id: 0,
+        nickname: '',
+        avatar_url: '',
+        mobile: 0,
+        email: '',
+        role: 0,
+        token: '',
+        gender: 0
+    })
     const setUserInfo = (value: User) => {
         userInfo.value = value
     }
     const clearUserInfo = () => {
-        userInfo.value = undefined
+        userInfo.value.id = 0
+        userInfo.value.nickname = ''
+        userInfo.value.avatar_url = ''
+        userInfo.value.mobile = 0
+        userInfo.value.email = ''
+        userInfo.value.role = 0
+        userInfo.value.token = ''
+        userInfo.value.gender = 0
     }
 
     return {
-        token,
-        setToken,
-        clearToken,
         userInfo,
         setUserInfo,
         clearUserInfo
