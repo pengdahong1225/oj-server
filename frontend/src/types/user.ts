@@ -1,12 +1,11 @@
-export interface User {
-    id: number;
+export interface UserProfile {
+    uid: number;
     mobile: number;
     nickname: string;
     email: string;
     gender: number;
     role: number;
     avatar_url: string;
-    token: string;
 }
 
 // 注册登录表单参数

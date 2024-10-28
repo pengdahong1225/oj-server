@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores'
-import { ElMessage } from 'element-plus'
 import router from '@/router'
 
 const baseURL = 'http://192.168.201.128/api'
@@ -21,6 +20,7 @@ instance.interceptors.request.use(
     const useStore = useUserStore()
     if (useStore.token) {
       config.headers.Authorization = useStore.token
+      config.headers['token'] = useStore.token
     }
     return config
   },

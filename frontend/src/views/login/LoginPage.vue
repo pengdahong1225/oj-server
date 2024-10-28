@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { userRegisterService, userLoginService } from '@/api/user'
-import type { RegisterForm, LoginForm } from '@/types/user'
+import type { RegisterForm, LoginForm, UserProfile } from '@/types/user'
 import { useUserStore } from '@/stores'
 
 const isRegister = ref(false)
@@ -37,16 +37,16 @@ const rules = {
   password: [ 
     { required: true, message: '请输入密码', trigger: 'blur' },
     {
-      pattern: /^\S{6,15}$/,
-      message: '密码必须是 6-15位 的非空字符',
+      pattern: /^\S{4,15}$/,
+      message: '密码必须是 4-15位 的非空字符',
       trigger: 'blur'
     }
   ],
   repassword: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     {
-      pattern: /^\S{6,15}$/,
-      message: '密码必须是 6-15位 的非空字符',
+      pattern: /^\S{4,15}$/,
+      message: '密码必须是 4-15位 的非空字符',
       trigger: 'blur'
     },
     {
@@ -90,7 +90,17 @@ const login = async () => {
   const res = await userLoginService(login_form.value)
   console.log(res)
   ElMessage.success('登录成功')
-  userStore.setUserInfo(res.data)
+  const user = <UserProfile>{
+    uid: res.data.data.uid,
+    mobile: res.data.data.mobile,
+    nickname: res.data.data.nickname,
+    gender: res.data.data.gender,
+    email: res.data.data.email,
+    avatar_url: res.data.data.avatar_url,
+    role: res.data.data.role
+  }
+  userStore.setUserInfo(user)
+  userStore.setToken(res.data.data.token)
   router.push('/')
 }
 </script>

@@ -13,23 +13,28 @@ import { useUserStore } from '@/stores'
 const router = useRouter()
 const userStore = useUserStore()
 const handleCommand = (command: string) => {
-  if (command === 'logout') {
-    // 退出
-    ElMessageBox.confirm(
-      '你确认要进行退出么',
-      '温馨提示',
-      {
-        type: 'warning',
-        confirmButtonText: 'OK',
-        cancelButtonText: 'Cancel',
-      }
-    ).then(() => {
-      userStore.clearToken()
-      userStore.clearUserInfo()
-      router.push('/login')
-    }).catch(() => {})
-  } else {
-    router.push(`/user/${command}`)
+  switch (command) {
+    case 'profile':
+      router.push(`/user/${command}`)
+      break
+    case 'password':
+      console.log('重置密码')
+      break
+    case 'logout':
+      // 退出
+      ElMessageBox.confirm(
+        '你确认要进行退出么',
+        '温馨提示',
+        {
+          type: 'warning',
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Cancel',
+        }
+      ).then(() => {
+        userStore.clearUserInfo()
+        router.push('/login')
+      }).catch(() => { })
+      break
   }
 }
 
@@ -57,7 +62,6 @@ const handleCommand = (command: string) => {
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
-            <el-dropdown-item command="avatar" :icon="Crop">更换头像</el-dropdown-item>
             <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
             <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
           </el-dropdown-menu>

@@ -1,9 +1,20 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores'
+import { getUserInfoService } from '@/api/user'
+import avatar from '@/assets/default.png'
 
 const userStore = useUserStore()
 const rules = {}
+
+onMounted(() => {
+    getUserInfo()
+})
+const getUserInfo = async () => {
+    const res = await getUserInfoService(userStore.userInfo.uid)
+    console.log(res)
+    userStore.setUserInfo(res.data.data)
+}
 
 </script>
 
@@ -17,8 +28,8 @@ const rules = {}
                 </template>
                 <!-- 表单 -->
                 <el-form :model="userStore.userInfo" :rules="rules" label-width="120px">
-                    <el-form-item label="ID" prop="id" style="width: 500px;">
-                        <el-input v-model="userStore.userInfo.id" disabled />
+                    <el-form-item label="ID" prop="uid" style="width: 500px;">
+                        <el-input v-model="userStore.userInfo.uid" disabled />
                     </el-form-item>
                     <el-form-item label="NickName" prop="nickname" style="width: 500px;">
                         <el-input v-model="userStore.userInfo.nickname" />
@@ -54,7 +65,7 @@ const rules = {}
                 <template #header>
                     <div style="text-align: left;"><strong>Avatar</strong></div>
                 </template>
-                <el-avatar shape="circle" :size="90" :src="squareUrl" style="margin: 10px;" /><br>
+                <el-avatar shape="circle" :size="90" :src="userStore.userInfo.avatar_url || avatar" style="margin: 10px;" /><br>
                 <el-button type="primary">
                     update
                 </el-button>
