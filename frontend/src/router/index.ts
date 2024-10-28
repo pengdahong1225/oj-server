@@ -18,7 +18,6 @@ const router = createRouter({
         { path: '/contest', component: () => import('@/views/contest/ContestPage.vue') },
         { path: '/status', component: () => import('@/views/status/StatusPage.vue') },
         { path: '/user/profile', component: () => import('@/views/user/UserProfilePage.vue') },
-        { path: '/user/avatar', component: () => import('@/views/user/UserAvatorPage.vue') },
         { path: '/user/password', component: () => import('@/views/user/UserPasswordPage.vue') },
       ]
     }
