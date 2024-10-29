@@ -91,16 +91,3 @@ func (receiver ProblemHandler) HandleResult(ctx *gin.Context) {
 	res := logic.ProblemLogic{}.HandleQueryResult(claims.Uid, problemID)
 	ctx.JSON(http.StatusOK, res)
 }
-
-func (receiver ProblemHandler) HandleSearch(ctx *gin.Context) {
-	name := ctx.Query("name")
-	if name == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    models.Failed,
-			"message": "参数错误",
-		})
-		return
-	}
-	res := logic.ProblemLogic{}.HandleProblemSearch(name)
-	ctx.JSON(http.StatusOK, res)
-}

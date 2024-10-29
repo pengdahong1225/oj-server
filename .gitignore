@@ -4,7 +4,7 @@ bin
 log
 cmake-build-*
 .vscode
-*.log
+*.log.*
 *.o
 config/
 backend/app/db-service/service

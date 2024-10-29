@@ -1,11 +1,11 @@
-export interface User {
-    id: number;
+export interface UserProfile {
+    uid: number;
     mobile: number;
     nickname: string;
     email: string;
     gender: number;
     role: number;
-    avatar_url: number;
+    avatar_url: string;
 }
 
 // 注册登录表单参数
@@ -17,4 +17,9 @@ export interface RegisterForm {
 export interface LoginForm {
     mobile: string; // 用户名
     password: string; // 密码
+}
+
+export interface UPSSParams{
+    uid : number;
+    problem_ids: number[];
 }

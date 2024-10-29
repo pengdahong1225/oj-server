@@ -1,7 +1,5 @@
 package models
 
-import "github.com/golang/protobuf/ptypes/timestamp"
-
 // Response 统一返回格式
 type Response struct {
 	Code    int    `json:"code"` // 业务状态码
@@ -20,14 +18,13 @@ type RankList struct {
 	PassCount int64  `json:"passCount"`
 }
 
-type UserInfo struct {
-	CreateAt    *timestamp.Timestamp `json:"createAt"`
-	Phone       int64                `json:"phone"`
-	NickName    string               `json:"nickname"`
-	Email       string               `json:"email"`
-	Gender      int32                `json:"gender"`
-	Role        int32                `json:"role"`
-	HeadUrl     string               `json:"head_url"`
-	PassCount   int64                `json:"passCount"`
-	SubmitCount int64                `json:"submitCount"`
+type LoginRspData struct {
+	Uid       int64  `json:"uid"`
+	Mobile    int64  `json:"mobile"`
+	NickName  string `json:"nickname"`
+	Email     string `json:"email"`
+	Gender    int32  `json:"gender"`
+	Role      int32  `json:"role"`
+	AvatarUrl string `json:"avatar_url"`
+	Token     string `json:"token"`
 }

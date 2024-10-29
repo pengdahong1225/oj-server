@@ -83,7 +83,15 @@ type QueryCommentForm struct {
 
 // QueryProblemListParams 题目列表分页查询参数
 type QueryProblemListParams struct {
-	Page     int32 `json:"page" form:"page" binding:"required"`
-	PageSize int32 `json:"page_size" form:"page_size" binding:"required"`
-	// ...多检索条件
+	Page     int32  `json:"page" form:"page" binding:"required"`
+	PageSize int32  `json:"page_size" form:"page_size" binding:"required"`
+	Keyword  string `json:"keyword" form:"keyword"`
+	Tag      string `json:"tag" form:"tag"`
+}
+
+// UPSSParams
+// 查询题目集中哪些题目被用户 AC 了
+type UPSSParams struct {
+	Uid        int64   `json:"uid" form:"uid" binding:"required"`
+	ProblemIds []int64 `json:"problem_ids" form:"problem_ids" binding:"required"`
 }
