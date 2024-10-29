@@ -1,23 +1,19 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 // import default_banner from '@/assets/default_banner.jpg'
+import { Search } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
+import { queryNoticeListService } from '@/api/notice'
+import type { QueryNoticeListParams, Notice } from '@/types/notice'
+
+onMounted(() => {
+    queryNoticeList()
+})
 
 const loading = ref(false)
-const announcement_list = ref([
-    {
-        id: 1,
-        title: 'frontend',
-        stamp: '1730172635',
-    },
-    {
-        id: 2,
-        title: 'backend',
-        stamp: '1730172198',
-    },
-])
-const total = ref(2)
-const params = ref({
+const notice_list = ref(<Notice[]>[])
+const total = ref(0)
+const params = ref(<QueryNoticeListParams>{
     page: 1,
     page_size: 10, // page_size默认为10
     keyword: '',
@@ -25,6 +21,24 @@ const params = ref({
 const handleCurrentChange = (page: number) => {
     params.value.page = page
     console.log(params.value)
+}
+const handleSearch = () => {
+    params.value.page = 1
+    queryNoticeList()
+}
+const handleReset = () => {
+    params.value.keyword = ''
+    params.value.page = 1
+    queryNoticeList()
+}
+
+const queryNoticeList = async () => {
+    loading.value = true
+    const res = await queryNoticeListService(params.value)
+    console.log(res)
+    notice_list.value = res.data.data.noticeList
+    total.value = res.data.data.total
+    loading.value = false
 }
 
 </script>
@@ -47,7 +61,7 @@ const handleCurrentChange = (page: number) => {
                     <strong>Announcements</strong>
                 </template>
 
-                <el-table v-loading="loading" :data="announcement_list">
+                <el-table v-loading="loading" :data="notice_list">
                     <el-table-column label="#" prop="id" width="80">
                         <template #default="{ row }">
                             <el-link type="primary" :underline="false" @click="
@@ -66,9 +80,9 @@ const handleCurrentChange = (page: number) => {
                                 ">{{ row.title }}</el-link>
                         </template>
                     </el-table-column>
-                    <el-table-column label="Time" prop="stamp">
+                    <el-table-column label="Time" prop="create_at">
                         <template #default="{ row }">
-                            {{ formatTime(row.stamp) }}
+                            {{ formatTime(row.create_at) }}
                         </template>
                     </el-table-column>
 
@@ -86,7 +100,12 @@ const handleCurrentChange = (page: number) => {
                 <template #header>
                     <strong>Search</strong>
                 </template>
-
+                <div class="search-input">
+                    <el-input v-model="params.keyword" placeholder="key word"
+                        :prefix-icon="Search" />
+                    <el-button type="primary" style="margin-left: 10px;" @click="handleSearch">搜索</el-button>
+                    <el-button style="margin-left: 5px;" @click="handleReset">重置</el-button>
+                </div>
             </el-card>
         </div>
 
@@ -96,7 +115,7 @@ const handleCurrentChange = (page: number) => {
 <style lang="scss" scoped>
 .container {
     display: block;
-    width: 60%;
+    width: 70%;
     margin: auto;
 
     .banner {
@@ -108,7 +127,8 @@ const handleCurrentChange = (page: number) => {
     .notice {
         display: flex;
         border-radius: 8px;
-        align-items: flex-start; /* 确保卡片顶部对齐，而不会拉伸高度 */
+        align-items: flex-start;
+        /* 确保卡片顶部对齐，而不会拉伸高度 */
 
         .announcements {
             width: 70%;
@@ -118,6 +138,10 @@ const handleCurrentChange = (page: number) => {
         .search {
             width: 30%;
             margin-left: 6px;
+            .search-input{
+                width: 100%;
+                display: flex;
+            }
         }
     }
 }
