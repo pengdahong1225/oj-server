@@ -25,8 +25,6 @@ func Router() *gin.Engine {
 	// 初始化路由
 	healthCheckRouters(r)
 	questionRouters(r)
-	cmsRouters(r)
-	noticeRouters(r)
 
 	return r
 }

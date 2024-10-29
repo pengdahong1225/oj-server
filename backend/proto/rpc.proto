@@ -40,6 +40,18 @@ service CommentService{
 // notice接口
 service NoticeService{
   rpc GetNoticeList(GetNoticeListRequest) returns(GetNoticeListResponse);
+  rpc AppendNotice(AppendNoticeRequest) returns(AppendNoticeResponse);
+  rpc DeleteNotice(DeleteNoticeRequest) returns(google.protobuf.Empty);
+}
+
+message DeleteNoticeRequest{
+  int64 id = 1;
+}
+message AppendNoticeRequest{
+    Notice data = 1;
+}
+message AppendNoticeResponse{
+  int64 id = 1;
 }
 
 message GetNoticeListRequest{

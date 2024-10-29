@@ -12,7 +12,7 @@ import (
 func healthCheckRouters(engine *gin.Engine) {
 	engine.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
-			"code":    "ok",
+			"code":    "0",
 			"message": "health",
 		})
 	})
@@ -44,7 +44,6 @@ func questionRouters(engine *gin.Engine) {
 	problemRouter := engine.Group("/problem")
 	{
 		problemRouter.GET("/detail", controller.ProblemHandler{}.HandleDetail)
-		// 需要登录
 		problemRouter.POST("/submit", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleSubmit)
 		problemRouter.GET("/result", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleResult)
 	}
@@ -57,6 +56,9 @@ func questionRouters(engine *gin.Engine) {
 		commentRouter.POST("/get", controller.CommentHandler{}.HandleGet)
 		commentRouter.POST("/delete", controller.CommentHandler{}.HandleDelete)
 		commentRouter.POST("/like", controller.CommentHandler{}.HandleLike)
+
+		commentRouter.POST("/updateQuestion", middlewares.AuthLogin(), middlewares.Admin(), controller.AdminHandler{}.UpdateQuestion)
+		commentRouter.POST("/deleteQuestion", middlewares.AuthLogin(), middlewares.Admin(), controller.AdminHandler{}.DeleteQuestion)
 	}
 
 	// api/captcha
@@ -66,23 +68,12 @@ func questionRouters(engine *gin.Engine) {
 		captchaRouter.GET("/image", controller.CaptchaHandler{}.GetImageCode)
 		captchaRouter.POST("/sms", controller.CaptchaHandler{}.GetSmsCode)
 	}
-}
 
-// cmsRouters
-// cms路由
-func cmsRouters(engine *gin.Engine) {
-	cmsRouter := engine.Group("/cms")
-	// 需要管理员权限
-	cmsRouter.Use(middlewares.AuthLogin()).Use(middlewares.Admin())
-	cmsRouter.POST("/updateQuestion", controller.AdminHandler{}.UpdateQuestion)
-	cmsRouter.POST("/deleteQuestion", controller.AdminHandler{}.DeleteQuestion)
-}
-
-// noticeRouters
-// notice路由
-func noticeRouters(engine *gin.Engine) {
+	// api/notice
 	noticeRouter := engine.Group("/notice")
-	noticeRouter.GET("/noticeList", controller.NoticeHandler{}.HandleNoticeList)
-	noticeRouter.POST("/addNotice", middlewares.Admin(), controller.NoticeHandler{}.HandleAddNotice)
-	noticeRouter.POST("/deleteNotice", middlewares.Admin(), controller.NoticeHandler{}.HandleDeleteNotice)
+	{
+		noticeRouter.GET("/noticeList", controller.NoticeHandler{}.HandleNoticeList)
+		noticeRouter.POST("/addNotice", middlewares.AuthLogin(), middlewares.Admin(), controller.NoticeHandler{}.HandleAddNotice)
+		noticeRouter.DELETE("/delNotice", middlewares.AuthLogin(), middlewares.Admin(), controller.NoticeHandler{}.HandleDeleteNotice)
+	}
 }

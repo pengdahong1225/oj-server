@@ -16,6 +16,7 @@ func Admin() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		ctx.Set("uid", currentUser.Uid)
 		ctx.Next()
 	}
 }

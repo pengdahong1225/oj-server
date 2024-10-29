@@ -44,6 +44,27 @@ func (r NoticeHandler) HandleNoticeList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (r NoticeHandler) HandleAddNotice(ctx *gin.Context) {}
+func (r NoticeHandler) HandleAddNotice(ctx *gin.Context) {
+	form, ok := validate(ctx, models.NoticeForm{})
+	if !ok {
+		return
+	}
+	uid, _ := ctx.Get("uid")
+	res := r.logic.AppendNotice(form, uid.(int64))
+	ctx.JSON(http.StatusOK, res)
+}
 
-func (r NoticeHandler) HandleDeleteNotice(ctx *gin.Context) {}
+func (r NoticeHandler) HandleDeleteNotice(ctx *gin.Context) {
+	idStr := ctx.Query("id")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": "需要告示id",
+		})
+		ctx.Abort()
+		return
+	}
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	res := r.logic.DeleteNotice(id)
+	ctx.JSON(http.StatusOK, res)
+}

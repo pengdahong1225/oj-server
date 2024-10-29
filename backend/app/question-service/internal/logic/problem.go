@@ -52,11 +52,11 @@ func (receiver ProblemLogic) GetProblemList(params *models.QueryProblemListParam
 	return res
 }
 
-// HandleProblemSubmit
+// OnProblemSubmit
 // 判断“用户”是否处于判题状态？true就拒绝
 // 用户提交了题目就立刻返回，并给题目设置状态
 // 客户端通过其他接口轮询题目结果
-func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
+func (receiver ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -115,7 +115,7 @@ func (receiver ProblemLogic) HandleProblemSubmit(uid int64, form *models.SubmitF
 	}
 }
 
-func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Response {
+func (receiver ProblemLogic) GetProblemDetail(problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -147,7 +147,7 @@ func (receiver ProblemLogic) HandleProblemDetail(problemID int64) *models.Respon
 	return res
 }
 
-func (receiver ProblemLogic) HandleQueryResult(uid int64, problemID int64) *models.Response {
+func (receiver ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",

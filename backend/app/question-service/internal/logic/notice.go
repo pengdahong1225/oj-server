@@ -47,3 +47,64 @@ func (r NoticeLogic) GetNoticeList(params *models.QueryNoticeListParams) *models
 	res.Message = "OK"
 	return res
 }
+
+func (r NoticeLogic) AppendNotice(form *models.NoticeForm, uid int64) *models.Response {
+	res := &models.Response{
+		Code:    models.Success,
+		Message: "",
+		Data:    nil,
+	}
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+	client := pb.NewNoticeServiceClient(dbConn)
+	response, err := client.AppendNotice(context.Background(), &pb.AppendNoticeRequest{
+		Data: &pb.Notice{
+			Title:    form.Title,
+			Content:  form.Content,
+			Status:   1,
+			CreateBy: uid,
+		},
+	})
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		return res
+	}
+
+	res.Message = "OK"
+	res.Data = map[string]int64{
+		"id": response.Id,
+	}
+	return res
+}
+
+func (r NoticeLogic) DeleteNotice(id int64) *models.Response {
+	res := &models.Response{
+		Code:    models.Success,
+		Message: "",
+		Data:    nil,
+	}
+	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+	client := pb.NewNoticeServiceClient(dbConn)
+	_, err = client.DeleteNotice(context.Background(), &pb.DeleteNoticeRequest{Id: id})
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		return res
+	}
+	res.Message = "OK"
+	return res
+}
