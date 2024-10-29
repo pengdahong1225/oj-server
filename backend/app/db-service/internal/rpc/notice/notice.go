@@ -1,0 +1,58 @@
+package notice
+
+import (
+	"context"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
+	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
+
+type NoticeServer struct {
+	pb.UnimplementedNoticeServiceServer
+}
+
+func (r *NoticeServer) GetNoticeList(ctx context.Context, request *pb.GetNoticeListRequest) (*pb.GetNoticeListResponse, error) {
+	db := mysql.Instance()
+	rsp := &pb.GetNoticeListResponse{}
+	name := "%" + request.Keyword + "%"
+	offSet := int((request.Page - 1) * request.PageSize)
+
+	/*
+		select COUNT(*) AS count from notice
+		where title like '%name%';
+	*/
+	var count int64 = 0
+	result := db.Model(&mysql.Notice{}).Where("title LIKE ?", name).Count(&count)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.QueryFailed
+	}
+	rsp.Total = int32(count)
+
+	/*
+		select id,title,content,create_at,status from notice
+		where title like '%name%'
+		order by id
+		offset off_set
+		limit page_size;
+	*/
+	var noticeList []mysql.Notice
+	result = db.Select("id,title,content,create_at,status").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&noticeList)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.QueryFailed
+	}
+	for _, v := range noticeList {
+		rsp.Data = append(rsp.Data, &pb.Notice{
+			Id:       v.ID,
+			Title:    v.Title,
+			CreateAt: timestamppb.New(v.CreateAt),
+			Content:  v.Content,
+			Status:   v.Status,
+			CreateBy: v.CreateBy,
+		})
+	}
+	return rsp, nil
+}
