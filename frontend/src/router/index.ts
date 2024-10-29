@@ -11,8 +11,9 @@ const router = createRouter({
     {
       path: '/',
       component: () => import('@/views/layout/LayoutContainer.vue'),
-      redirect: '/problems',
+      redirect: '/home',
       children: [
+        { path: '/home', component: () => import('@/views/home/HomePage.vue') },
         { path: '/problems', component: () => import('@/views/problem/ProblemsPage.vue') },
         { path: '/problem/:id', component: () => import('@/views/problem/ProblemPage.vue') },
         { path: '/contest', component: () => import('@/views/contest/ContestPage.vue') },

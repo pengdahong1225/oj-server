@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
+import { User } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores'
 import { getUserInfoService } from '@/api/user'
 import avatar from '@/assets/default.png'
@@ -16,6 +17,13 @@ const getUserInfo = async () => {
     userStore.setUserInfo(res.data.data)
 }
 
+const onUpdateProfile = () => {
+    console.log('onUpdateProfile')
+}
+const onUpdateAvator = () => {
+    console.log('onUpdateAvator')
+}
+
 </script>
 
 <template>
@@ -28,7 +36,7 @@ const getUserInfo = async () => {
                 </template>
                 <!-- 表单 -->
                 <el-form :model="userStore.userInfo" :rules="rules" label-width="120px">
-                    <el-form-item label="ID" prop="uid" style="width: 500px;">
+                    <el-form-item label="ID"  prop="uid" style="width: 500px;">
                         <el-input v-model="userStore.userInfo.uid" disabled />
                     </el-form-item>
                     <el-form-item label="NickName" prop="nickname" style="width: 500px;">
@@ -49,11 +57,11 @@ const getUserInfo = async () => {
                     </el-form-item>
                     <el-form-item label="Gender" prop="gender" style="width: 500px;">
                         <el-radio-group v-model="userStore.userInfo.gender">
-                            <el-radio :label="0">male</el-radio>
-                            <el-radio :label="1">female</el-radio>
+                            <el-radio :label="1">male</el-radio>
+                            <el-radio :label="0">female</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                    <el-button type="primary">
+                    <el-button type="primary" @click="onUpdateProfile">
                         update
                     </el-button>
                 </el-form>
@@ -65,8 +73,9 @@ const getUserInfo = async () => {
                 <template #header>
                     <div style="text-align: left;"><strong>Avatar</strong></div>
                 </template>
-                <el-avatar shape="circle" :size="90" :src="userStore.userInfo.avatar_url || avatar" style="margin: 10px;" /><br>
-                <el-button type="primary">
+                <el-avatar shape="circle" :size="90" :src="userStore.userInfo.avatar_url || avatar"
+                    style="margin: 10px;" /><br>
+                <el-button type="primary" @click="onUpdateAvator">
                     update
                 </el-button>
             </el-card>

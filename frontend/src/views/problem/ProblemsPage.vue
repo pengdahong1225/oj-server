@@ -116,13 +116,21 @@ const onTagClick = (tag: string) => {
 
                 <el-table-column label="#" prop="id" width="80">
                     <template #default="{ row }">
-                        <el-link type="primary" :underline="false">{{ row.id }}</el-link>
+                        <el-link type="primary" :underline="false" @click="
+                            $router.push({
+                                path: `/problem/${row.id}`
+                            })
+                            ">{{ row.id }}</el-link>
                     </template>
                 </el-table-column>
 
                 <el-table-column label="Title" prop="title">
                     <template #default="{ row }">
-                        <el-link type="primary" :underline="false">{{ row.title }}</el-link>
+                        <el-link type="primary" :underline="false" @click="
+                            $router.push({
+                                path: `/problem/${row.id}`
+                            })
+                            ">{{ row.title }}</el-link>
                     </template>
                 </el-table-column>
                 <el-table-column label="Level" prop="level">
@@ -134,7 +142,8 @@ const onTagClick = (tag: string) => {
                 </el-table-column>
                 <el-table-column label="Tags">
                     <template #default="{ row }">
-                        <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag }}</el-tag>
+                        <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag
+                            }}</el-tag>
                     </template>
                 </el-table-column>
 
@@ -144,20 +153,13 @@ const onTagClick = (tag: string) => {
             </el-table>
 
             <!-- 分页 -->
-            <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size"
-                :total="total"
-                :background="true" layout="prev, pager, next, jumper"
-                @current-change="handleCurrentChange"
+            <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size" :total="total"
+                :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
                 style="margin-top: 20px; justify-content: flex-end;" />
         </el-card>
         <!-- 右侧tag池区域 -->
         <el-card class="tag-pool" shadow="hover" header="Tag Pool">
-            <el-button 
-                v-for="item in tag_list"
-                :key="item"
-                type="info" plain
-                round="true"
-                @click="onTagClick(item)">
+            <el-button v-for="item in tag_list" :key="item" type="info" plain round="true" @click="onTagClick(item)">
                 {{ item }}</el-button>
         </el-card>
     </div>
@@ -167,17 +169,20 @@ const onTagClick = (tag: string) => {
 .container {
     display: flex;
     width: 100%;
+    align-items: flex-start; /* 确保卡片顶部对齐，而不会拉伸高度 */
 
     .problem-list {
-        width: 75%; /* 占 70% 的宽度 */
+        width: 75%;
+        /* 占 70% 的宽度 */
         margin-right: 6px;
     }
 
     .tag-pool {
-        width: 25%; /* 占 30% 的宽度 */
+        width: 25%;
+        /* 占 30% 的宽度 */
         margin-left: 6px;
 
-        .el-button{
+        .el-button {
             margin: 5px;
         }
     }

@@ -46,6 +46,7 @@ const handleCommand = (command: string) => {
     <el-header class="top">
       <span class="logo">PGOJ</span>
       <el-menu mode="horizontal" :default-active="$route.path" router>
+        <el-menu-item index="/home">Home</el-menu-item>
         <el-menu-item index="/problems">Problems</el-menu-item>
         <el-menu-item index="/contest">Contests</el-menu-item>
         <el-menu-item index="/status">Status</el-menu-item>
