@@ -95,3 +95,10 @@ type UPSSParams struct {
 	Uid        int64   `json:"uid" form:"uid" binding:"required"`
 	ProblemIds []int64 `json:"problem_ids" form:"problem_ids" binding:"required"`
 }
+
+// QueryNoticeListParams 公告列表分页查询参数
+type QueryNoticeListParams struct {
+	Page     int32  `json:"page" form:"page" binding:"required"`
+	PageSize int32  `json:"page_size" form:"page_size" binding:"required"`
+	KeyWord  string `json:"keyword" form:"keyword"`
+}

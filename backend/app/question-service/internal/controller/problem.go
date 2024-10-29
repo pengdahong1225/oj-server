@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (
 	"encoding/json"
@@ -11,10 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ProblemHandler struct{}
+type ProblemHandler struct {
+	logic logic.ProblemLogic
+}
 
 // HandleProblemSet 题目列表
-func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
+func (r ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 	p := ctx.Query("params")
 	if p == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -43,11 +45,11 @@ func (receiver ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 		return
 	}
 
-	res := logic.ProblemLogic{}.GetProblemList(params)
+	res := r.logic.GetProblemList(params)
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (receiver ProblemHandler) HandleDetail(ctx *gin.Context) {
+func (r ProblemHandler) HandleDetail(ctx *gin.Context) {
 	// 查询参数
 	problemID := ctx.Query("problemID")
 	if problemID == "" {
@@ -63,7 +65,7 @@ func (receiver ProblemHandler) HandleDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (receiver ProblemHandler) HandleSubmit(ctx *gin.Context) {
+func (r ProblemHandler) HandleSubmit(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	// 表单验证
 	form, ret := validate(ctx, models.SubmitForm{})
@@ -76,7 +78,7 @@ func (receiver ProblemHandler) HandleSubmit(ctx *gin.Context) {
 }
 
 // 查询提交结果
-func (receiver ProblemHandler) HandleResult(ctx *gin.Context) {
+func (r ProblemHandler) HandleResult(ctx *gin.Context) {
 	// 查询参数
 	id := ctx.Query("problemID")
 	if id == "" {

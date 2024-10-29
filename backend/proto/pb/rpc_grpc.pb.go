@@ -974,3 +974,109 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "rpc.proto",
 }
+
+const (
+	NoticeService_GetNoticeList_FullMethodName = "/NoticeService/GetNoticeList"
+)
+
+// NoticeServiceClient is the client API for NoticeService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// notice接口
+type NoticeServiceClient interface {
+	GetNoticeList(ctx context.Context, in *GetNoticeListRequest, opts ...grpc.CallOption) (*GetNoticeListResponse, error)
+}
+
+type noticeServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewNoticeServiceClient(cc grpc.ClientConnInterface) NoticeServiceClient {
+	return &noticeServiceClient{cc}
+}
+
+func (c *noticeServiceClient) GetNoticeList(ctx context.Context, in *GetNoticeListRequest, opts ...grpc.CallOption) (*GetNoticeListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetNoticeListResponse)
+	err := c.cc.Invoke(ctx, NoticeService_GetNoticeList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NoticeServiceServer is the server API for NoticeService service.
+// All implementations must embed UnimplementedNoticeServiceServer
+// for forward compatibility.
+//
+// notice接口
+type NoticeServiceServer interface {
+	GetNoticeList(context.Context, *GetNoticeListRequest) (*GetNoticeListResponse, error)
+	mustEmbedUnimplementedNoticeServiceServer()
+}
+
+// UnimplementedNoticeServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedNoticeServiceServer struct{}
+
+func (UnimplementedNoticeServiceServer) GetNoticeList(context.Context, *GetNoticeListRequest) (*GetNoticeListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNoticeList not implemented")
+}
+func (UnimplementedNoticeServiceServer) mustEmbedUnimplementedNoticeServiceServer() {}
+func (UnimplementedNoticeServiceServer) testEmbeddedByValue()                       {}
+
+// UnsafeNoticeServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NoticeServiceServer will
+// result in compilation errors.
+type UnsafeNoticeServiceServer interface {
+	mustEmbedUnimplementedNoticeServiceServer()
+}
+
+func RegisterNoticeServiceServer(s grpc.ServiceRegistrar, srv NoticeServiceServer) {
+	// If the following call pancis, it indicates UnimplementedNoticeServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&NoticeService_ServiceDesc, srv)
+}
+
+func _NoticeService_GetNoticeList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNoticeListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NoticeServiceServer).GetNoticeList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NoticeService_GetNoticeList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NoticeServiceServer).GetNoticeList(ctx, req.(*GetNoticeListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// NoticeService_ServiceDesc is the grpc.ServiceDesc for NoticeService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var NoticeService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "NoticeService",
+	HandlerType: (*NoticeServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetNoticeList",
+			Handler:    _NoticeService_GetNoticeList_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "rpc.proto",
+}

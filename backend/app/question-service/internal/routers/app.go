@@ -21,9 +21,12 @@ func Router() *gin.Engine {
 
 	r := gin.Default()
 	r.Use(middlewares.Cors()) // 跨域处理
+
 	// 初始化路由
-	HealthCheckRouters(r)
-	QuestionRouters(r)
-	CmsRouters(r)
+	healthCheckRouters(r)
+	questionRouters(r)
+	cmsRouters(r)
+	noticeRouters(r)
+
 	return r
 }

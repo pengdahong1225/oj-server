@@ -4,7 +4,8 @@ option go_package = "./;pb";
 import "google/protobuf/empty.proto";
 import "user.proto";
 import "problem.proto";
-import  "comment.proto";
+import "comment.proto";
+import "notice.proto";
 
 // user接口
 service UserService{
@@ -26,7 +27,6 @@ service ProblemService{
   rpc GetProblemList(GetProblemListRequest) returns(GetProblemListResponse);
   rpc GetProblemHotData(GetProblemHotDataRequest) returns(GetProblemHotDataResponse);
 }
-
 // record
 service RecordService{
   rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
@@ -36,6 +36,20 @@ service RecordService{
 service CommentService{
   rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
   rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
+}
+// notice接口
+service NoticeService{
+  rpc GetNoticeList(GetNoticeListRequest) returns(GetNoticeListResponse);
+}
+
+message GetNoticeListRequest{
+  int32 page = 1;
+  int32 page_size = 2;
+  string keyword = 3;
+}
+message GetNoticeListResponse{
+  int32 total = 1;
+  repeated Notice data = 2;
 }
 
 message QueryUserSolvedListByProblemIdsRequest{
