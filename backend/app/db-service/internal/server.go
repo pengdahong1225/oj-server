@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/daemon"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/comment"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/notice"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/problem"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/record"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/user"
@@ -101,6 +102,8 @@ func (receiver *Server) rpcServerStart() {
 	pb.RegisterRecordServiceServer(grpcServer, &recordSrv)
 	commentSrv := comment.CommentServer{}
 	pb.RegisterCommentServiceServer(grpcServer, &commentSrv)
+	noticeSrv := notice.NoticeServer{}
+	pb.RegisterNoticeServiceServer(grpcServer, &noticeSrv)
 	if err = grpcServer.Serve(listener); err != nil {
 		panic(err)
 	}

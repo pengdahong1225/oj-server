@@ -38,7 +38,12 @@ func (r NoticeLogic) GetNoticeList(params *models.QueryNoticeListParams) *models
 		res.Message = err.Error()
 		return res
 	}
-	res.Data = response.Data
+	data := &models.NoticeRspData{
+		Total:      response.Total,
+		NoticeList: response.Data,
+	}
+
+	res.Data = data
 	res.Message = "OK"
 	return res
 }

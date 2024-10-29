@@ -6,7 +6,7 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"strconv"
 )
 
 type NoticeServer struct {
@@ -30,16 +30,17 @@ func (r *NoticeServer) GetNoticeList(ctx context.Context, request *pb.GetNoticeL
 		return nil, rpc.QueryFailed
 	}
 	rsp.Total = int32(count)
+	logrus.Debugln("count:", count)
 
 	/*
-		select id,title,content,create_at,status from notice
+		select id,title,content,create_at,status,create_by from notice
 		where title like '%name%'
 		order by id
 		offset off_set
 		limit page_size;
 	*/
 	var noticeList []mysql.Notice
-	result = db.Select("id,title,content,create_at,status").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&noticeList)
+	result = db.Select("id,title,content,create_at,status, create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&noticeList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
@@ -48,7 +49,7 @@ func (r *NoticeServer) GetNoticeList(ctx context.Context, request *pb.GetNoticeL
 		rsp.Data = append(rsp.Data, &pb.Notice{
 			Id:       v.ID,
 			Title:    v.Title,
-			CreateAt: timestamppb.New(v.CreateAt),
+			CreateAt: strconv.FormatInt(v.CreateAt.Unix(), 10),
 			Content:  v.Content,
 			Status:   v.Status,
 			CreateBy: v.CreateBy,

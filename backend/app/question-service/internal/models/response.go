@@ -1,5 +1,7 @@
 package models
 
+import "github.com/pengdahong1225/oj-server/backend/proto/pb"
+
 // Response 统一返回格式
 type Response struct {
 	Code    int    `json:"code"` // 业务状态码
@@ -27,4 +29,9 @@ type LoginRspData struct {
 	Role      int32  `json:"role"`
 	AvatarUrl string `json:"avatar_url"`
 	Token     string `json:"token"`
+}
+
+type NoticeRspData struct {
+	Total      int32        `json:"total"`
+	NoticeList []*pb.Notice `json:"noticeList"`
 }
