@@ -13,3 +13,10 @@ export interface Problem {
     tags: string[];
     status?: number;
 }
+
+export interface SubmitForm{
+    problem_id: number;
+    title: string;
+    lang: string;
+    code: string;
+}

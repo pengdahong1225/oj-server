@@ -2,11 +2,37 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService } from '@/api/problem'
-import type { Problem } from '@/types/problem'
+import type { Problem, SubmitForm } from '@/types/problem'
+import { VAceEditor } from 'vue3-ace-editor'
+import 'ace-builds/src-noconflict/mode-javascript'
+import 'ace-builds/src-noconflict/theme-github'
 
 onMounted(() => {
     getProblemDetail()
 })
+
+const form = ref<SubmitForm>({
+    code: '',
+    lang: 'C',  // 默认使用C
+    problem_id: 0,
+    title: ''
+})
+const lang_list = [
+    { label: 'C', value: 'C' },
+    { label: 'C++', value: 'C++' },
+    { label: 'Java', value: 'Java' },
+    { label: 'Python', value: 'Python' },
+    { label: 'Python3', value: 'Python3' },
+    { label: 'Go', value: 'Go' },
+    { label: 'C#', value: 'C#' },
+]
+const theme = ref('github');
+const editorOptions = ref({
+    fontSize: '24px',
+    showPrintMargin: false,
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
+});
 
 const route = useRoute()
 const problem = ref<Problem>({
@@ -26,6 +52,9 @@ const getProblemDetail = async () => {
     problem.value.tags = res.data.data.tags
     problem.value.status = res.data.data.status
 }
+const onReset = () => {
+    form.value.code = ''
+}
 
 </script>
 
@@ -35,12 +64,51 @@ const getProblemDetail = async () => {
         <div class="left">
             <el-card class="problem-description" shadow="hover">
                 <template #header>
-                    <strong>A+B</strong>
+                    <strong>{{ problem.title }}</strong>
                 </template>
 
-                <descriptionItem style="width: 100%;"></descriptionItem>
-
+                <div style="background: rgb(251, 251, 251); padding: 15px;">
+                    <descriptionItem class="descriptionItem" title="Description" :content="problem.description"
+                        style="width: 100%;">
+                    </descriptionItem>
+                    <descriptionItem class="descriptionItem" title="Input" :content="problem.description"
+                        style="width: 100%;">
+                    </descriptionItem>
+                    <descriptionItem class="descriptionItem" title="Output" :content="problem.description"
+                        style="width: 100%;">
+                    </descriptionItem>
+                    <descriptionItem class="descriptionItem" title="Sample Input" :content="problem.description"
+                        style="width: 100%;">
+                    </descriptionItem>
+                    <descriptionItem class="descriptionItem" title="Sample Output" :content="problem.description"
+                        style="width: 100%;">
+                    </descriptionItem>
+                    <descriptionItem class="descriptionItem" title="Hint" :content="problem.description"
+                        style="width: 100%;">
+                    </descriptionItem>
+                </div>
             </el-card>
+
+            <!-- 题目提交区域 -->
+            <el-card class="submit-area">
+                <template #header>
+                    <el-form inline class="form">
+                        <el-form-item style="margin-right: 10px;">
+                            <el-select size="large" v-model="form.lang" placeholder="Select" style="width: 240px">
+                                <el-option v-for="item in lang_list" :key="item.value" :label="item.label"
+                                    :value="item.value" />
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button size="large" @click="onReset">重置</el-button>
+                        </el-form-item>
+                    </el-form>
+                </template>
+
+                <VAceEditor v-model:value="form.code" :lang="form.lang" :theme="theme" :options="editorOptions"
+                    style="height: 500px; width: 100%;" />
+            </el-card>
+
         </div>
 
         <!-- 右边题目information区域 -->
@@ -75,8 +143,15 @@ const getProblemDetail = async () => {
     /* 确保卡片顶部对齐，而不会拉伸高度 */
     .left {
         width: 80%;
-        border: 1px solid #e42518;
         margin-right: 5px;
+
+        .descriptionItem {
+            margin-bottom: 20px;
+        }
+
+        .submit-area {
+            margin-top: 20px;
+        }
     }
 
     .right {

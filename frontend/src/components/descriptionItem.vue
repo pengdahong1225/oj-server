@@ -1,21 +1,25 @@
 <script lang="ts" setup>
 
+const props = defineProps({
+    title: String,
+    content: String,
+})
+
 </script>
 
 <template>
     <div class="container">
         <div class="d-title">
-            Description
+            {{ title }}
         </div>
         <div class="d-content">
-            输入一个正整数
+            {{ content }}
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
 .container {
-    background: rgb(251, 251, 251);
     width: 100%;
     display: flex;
     flex-direction: column; /* 竖直排列 */

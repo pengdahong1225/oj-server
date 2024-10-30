@@ -136,6 +136,13 @@
   dependencies:
     "@babel/types" "^7.25.8"
 
+"@babel/runtime@^7.10.2":
+  version "7.26.0"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.26.0.tgz#8600c2f595f277c60815256418b85356a65173c1"
+  integrity sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==
+  dependencies:
+    regenerator-runtime "^0.14.0"
+
 "@babel/standalone@^7.25.7":
   version "7.25.8"
   resolved "https://registry.yarnpkg.com/@babel/standalone/-/standalone-7.25.8.tgz#054a0c7c28275527f05cba4c17fe45cab8e9c638"
@@ -177,15 +184,221 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.2.0.tgz#3c63dcbb6ef4f6a9f587e3d412c08f9a8f5bcd00"
   integrity sha512-+imAQkHf7U/Rwvu0wk1XWgsP3WnpCWmK7B48f0XqSNzgk64+grljTKC7pnO/xBiEMUziF7vKRfbBnOQhg126qQ==
 
+"@calumk/editorjs-columns@^0.3.1":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@calumk/editorjs-columns/-/editorjs-columns-0.3.2.tgz#a93ce77e0049ff5dc23b55efbce11970187ac4b9"
+  integrity sha512-/2dIbuy3Kip7eEt6Z+qGU2js93b7ZtJqVCFCiYdPKuqeYLZlUveueTHvlbOECtZ1sDxUFrVaKbm0wPOR1W0ntw==
+  dependencies:
+    "@editorjs/editorjs" "^2.26.5"
+    sweetalert2 "^11.4.10"
+    uuid "^8.3.2"
+
+"@calumk/editorjs-nested-checklist@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@calumk/editorjs-nested-checklist/-/editorjs-nested-checklist-1.1.0.tgz#22eb7228ee2de7c480a8f33918eb83312df66de4"
+  integrity sha512-dNNQnpoP+gf+1hvkIl/MzrkVuVeIkT/R2pKfOkkLqUHgpan7UpKjaW43W0+tj2Ct85PzhoJV3wMIbTo1qVvFlg==
+
+"@codexteam/icons@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.0.2.tgz#9183996a38b75a93506890373a015e3a2a369264"
+  integrity sha512-KdeKj3TwaTHqM3IXd5YjeJP39PBUZTb+dtHjGlf5+b0VgsxYD4qzsZkb11lzopZbAuDsHaZJmAYQ8LFligIT6Q==
+
+"@codexteam/icons@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.0.4.tgz#8b72dcd3f3a1b0d880bdceb2abebd74b46d3ae13"
+  integrity sha512-V8N/TY2TGyas4wLrPIFq7bcow68b3gu8DfDt1+rrHPtXxcexadKauRJL6eQgfG7Z0LCrN4boLRawR4S9gjIh/Q==
+
+"@codexteam/icons@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.0.5.tgz#d17f39b6a0497c6439f57dd42711817a3dd3679c"
+  integrity sha512-s6H2KXhLz2rgbMZSkRm8dsMJvyUNZsEjxobBEg9ztdrb1B2H3pEzY6iTwI4XUPJWJ3c3qRKwV4TrO3J5jUdoQA==
+
+"@codexteam/icons@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.0.6.tgz#5553ada48dddf5940851ccc142cfe17835c36ad3"
+  integrity sha512-L7Q5PET8PjKcBT5wp7VR+FCjwCi5PUp7rd/XjsgQ0CI5FJz0DphyHGRILMuDUdCW2MQT9NHbVr4QP31vwAkS/A==
+
+"@codexteam/icons@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.0.8.tgz#25bc8ba083b179b958b0e133d3ee5c2475b02343"
+  integrity sha512-toTLbLPbrDFl2ZK2mtDC+P7sdrJaqOK6URsjFy6m54Pry8q4ckKeKJ1fOEwVcSGKiwdRhrRO3ZzSbL16DaIBJA==
+
+"@codexteam/icons@^0.3.0", "@codexteam/icons@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@codexteam/icons/-/icons-0.3.2.tgz#b7aed0ba7b344e07953101f5476cded570d4f150"
+  integrity sha512-P1ep2fHoy0tv4wx85eic+uee5plDnZQ1Qa6gDfv7eHPkCXorMtVqJhzMb75o1izogh6G7380PqmFDXV3bW3Pig==
+
 "@ctrl/tinycolor@^3.4.1":
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz#b6c75a56a1947cc916ea058772d666a2c8932f31"
   integrity sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==
 
+"@editorjs/checklist@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/checklist/-/checklist-1.6.0.tgz#f3e501b0422917ca78fd08cb51578098a26a1823"
+  integrity sha512-hRNP36DInr73mSK3noHBQeoQb7DA12ANfqTXufEkTgQzx+k4mRJ0HdeGukTIR4JbwjHJ9ecUBnnQqIEGnxCFEg==
+  dependencies:
+    "@codexteam/icons" "^0.3.0"
+
+"@editorjs/code@^2.8.0":
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/@editorjs/code/-/code-2.9.2.tgz#8773d726c6479366862cddf4193a235219ef6e32"
+  integrity sha512-KglaZMeL9fREMieyMJ5dWZR+eGPC/6qjWRc2EmwdwcuCsQVuQ1k7sgPzRL3phJWrtDqPvzNKJqjEji/OD7SF+Q==
+  dependencies:
+    "@codexteam/icons" "^0.3.2"
+
+"@editorjs/delimiter@^1.3.0":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@editorjs/delimiter/-/delimiter-1.4.2.tgz#3034ff16470bda5de88087fd5f92f5a2889528db"
+  integrity sha512-S8q2LpeYdYkVShLp7K8c4HLthDHBevLw+sT+iO0+SH0oMvFmld9SUon3DFzMQ2gG07EOdZGRZ958+sVxyvFjZw==
+  dependencies:
+    "@codexteam/icons" "^0.3.2"
+
+"@editorjs/dom@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@editorjs/dom/-/dom-0.0.5.tgz#768db5aa3c7413b5e55e831c350831271e8b1391"
+  integrity sha512-SZ78Gwpkp3EUhjBIp0lSojeQ35V9acF8SubJsMeOH/vlOUE40GOnvvwWZnF05lO7bIB0dOHhhJy4N7IIAWxP2w==
+  dependencies:
+    "@editorjs/helpers" "^0.0.4"
+
+"@editorjs/editorjs@^2.26.5", "@editorjs/editorjs@^2.28.2", "@editorjs/editorjs@^2.29.1":
+  version "2.30.6"
+  resolved "https://registry.yarnpkg.com/@editorjs/editorjs/-/editorjs-2.30.6.tgz#a77292da7433bc912e4beaf359b13812cab89c4d"
+  integrity sha512-6eQMc4Di3Hz9p4o+NGRgKaCeAF7eAk106m+bsDLc4eo94VGYO1M163OiGFdmanE+w503qTmXOzycWff5blEOAQ==
+
+"@editorjs/embed@^2.7.0":
+  version "2.7.6"
+  resolved "https://registry.yarnpkg.com/@editorjs/embed/-/embed-2.7.6.tgz#2bd3d5d22b3bc6290fc8121dc003c8e107dcfd24"
+  integrity sha512-L3agW/23mOI0L+oksUE9UOR5VSNCqapxLH5lma+5j+idjKCC31nxbx07x53MSJ4rlOTO1L7cFVhkqptEdOliJA==
+  dependencies:
+    "@editorjs/editorjs" "^2.29.1"
+
+"@editorjs/header@^2.8.1":
+  version "2.8.8"
+  resolved "https://registry.yarnpkg.com/@editorjs/header/-/header-2.8.8.tgz#43cff7949c44866da7716fdb562d68116d0a806a"
+  integrity sha512-bsMSs34u2hoi0UBuRoc5EGWXIFzJiwYgkFUYQGVm63y5FU+s8zPBmVx5Ip2sw1xgs0fqfDROqmteMvvmbCy62w==
+  dependencies:
+    "@codexteam/icons" "^0.0.5"
+    "@editorjs/editorjs" "^2.29.1"
+
+"@editorjs/helpers@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@editorjs/helpers/-/helpers-0.0.4.tgz#9351373f609e9f8333e0421f7b396c7c7fd41bfa"
+  integrity sha512-ieg3dzo2m1/ELze/RMNADiAiC5amXxIlVXoJ5vvXITOu/p/dPsrF+Oi3h5gBYvtGk9vg5LJUSG5YWU0tBUO1tw==
+
+"@editorjs/image@^2.8.2":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/image/-/image-2.10.0.tgz#e7b06e06b5d9441e4635e8939a6b874bd28a08ca"
+  integrity sha512-WkQtXE8gICUagnBfowI/4tiVqsPTkBju7IqDVigMgEMzmw6AFuKDSYpVL12uB9ByDikAZWOK/mdUzeVfVBnKwg==
+  dependencies:
+    "@codexteam/icons" "^0.3.0"
+
+"@editorjs/inline-code@^1.4.0":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@editorjs/inline-code/-/inline-code-1.5.1.tgz#482709fb75c1a92161ef001d65f468cbda67aa5d"
+  integrity sha512-XvKpqw9y1bOYgyuVUHGDuu7KlNWCYIXD5uU1Lpc4s4LJ8VN4TjWFGKJ3sS+LR7zzasWe8hu2ffR1JC6MHIS0EQ==
+  dependencies:
+    "@codexteam/icons" "^0.3.2"
+
+"@editorjs/link-autocomplete@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/link-autocomplete/-/link-autocomplete-0.1.0.tgz#acd51517cd1acba16efc11b4f6cc4a97ea479390"
+  integrity sha512-Suij3TwZZREAUB2aNASrxPSsCwNN3gBAkQGL2N6rnrxwr2RI6KWw98QC/GFCTP2/hTctfNvXRbxnFi2fsJldZA==
+  dependencies:
+    "@codexteam/icons" "^0.0.5"
+
+"@editorjs/link@^2.6.2":
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/@editorjs/link/-/link-2.6.2.tgz#d9c17e01ecc3518ae4be61e0a024f7f225e09e5a"
+  integrity sha512-3cPx6M4ZvwDDvsi0E0fvMR3rvveAV/C0GRo1JLeZJ9cG9QgyoNolj4eu5Eqx3/r1XTC/he54qYEIZ/Dc4Lr4Ow==
+  dependencies:
+    "@babel/runtime" "^7.10.2"
+    "@codexteam/icons" "^0.0.4"
+
+"@editorjs/list@^1.9.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/list/-/list-1.10.0.tgz#5292ccc44d07effb2bca5e3206e7a647bf1fcbc1"
+  integrity sha512-zXCHaNcIscpefnteBOS3x+98f/qBgEVsv+OvtKoTDZipMNqck2uVG+X2qMQr8xcwtJrj9ySX54lUac9FDlAHnA==
+  dependencies:
+    "@codexteam/icons" "^0.0.4"
+
+"@editorjs/marker@^1.3.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/marker/-/marker-1.4.0.tgz#c5553c54ced70d28502fb47f2dbc7d50c53fc88e"
+  integrity sha512-5ipEXfL44jTTRzgNp/p/YjMO7jT08S5z4V8qA3FFJTfdhKgQyM3mvP1zpdYKw47ZZpVWMCncvk5Nto3BxihEtg==
+  dependencies:
+    "@codexteam/icons" "^0.0.5"
+
+"@editorjs/nested-list@^1.4.2":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@editorjs/nested-list/-/nested-list-1.4.3.tgz#4e36658789346b7dcfd0f53cd55921894999dd57"
+  integrity sha512-3jTJd6H2Zwe8SeiI9li9AolkCxFVitEnCpJjDI6+la/HslSJC827fHivc9hue6JmC8esA4yri0KCMyp8N4ykww==
+  dependencies:
+    "@codexteam/icons" "^0.0.2"
+
+"@editorjs/paragraph@^2.11.3":
+  version "2.11.6"
+  resolved "https://registry.yarnpkg.com/@editorjs/paragraph/-/paragraph-2.11.6.tgz#011444187a74dc603201dce37d2fc6d054022407"
+  integrity sha512-i9B50Ylvh+0ZzUGWIba09PfUXsA00Y//zFZMwqsyaXXKxMluSIJ6ADFJbbK0zaV9Ijx49Xocrlg+CEPRqATk9w==
+  dependencies:
+    "@codexteam/icons" "^0.0.4"
+
+"@editorjs/quote@^2.5.0":
+  version "2.7.2"
+  resolved "https://registry.yarnpkg.com/@editorjs/quote/-/quote-2.7.2.tgz#505e26a7d8b160f84010820ab347ed51d00233dd"
+  integrity sha512-C2yB6TdBJsmfcwe2rirSjPMCQ3jTz8oOwOPbOFeLDcvUgxECEIws8kZOkuxXePdWua68QwIpUFH7yWf338lwUQ==
+  dependencies:
+    "@codexteam/icons" "^0.3.2"
+    "@editorjs/dom" "^0.0.5"
+
+"@editorjs/raw@^2.4.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/raw/-/raw-2.5.0.tgz#8620e983a16ef3cc97ad32ab8af99313d0a6f92e"
+  integrity sha512-ZOYKgR/sutOXHQ4uaWg8KzZ6yFJZCMTndezlN257GGsQ3Sa3ERcK9wZHKgAMNXaDhdKx9fDuojxRRcYvz6l9aQ==
+  dependencies:
+    "@codexteam/icons" "^0.0.4"
+
+"@editorjs/simple-image@^1.5.1":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/simple-image/-/simple-image-1.6.0.tgz#711c3900e17845331d6667cf0fe91793a5557f84"
+  integrity sha512-WvdGfQPlozwZd3PXQrJnRXk6gEYbv1U2vRupYJ6lTd3/UsLInXYUX5jSFcnGB5ZMH3bd0JDZfcb4d4Sv1/1big==
+  dependencies:
+    "@codexteam/icons" "^0.0.6"
+
+"@editorjs/table@^2.3.0":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@editorjs/table/-/table-2.4.2.tgz#99a2b3f9ea8f39c9ca4df80b8e63bff6e21d0193"
+  integrity sha512-zGmwLCarsaTgOfccxR3Lc6oC3QTX0JdoK0O3+8TE/VCR/xnW92VO7rAcu4cqTwtbFMQErYl8id9a5hM23vyFng==
+  dependencies:
+    "@codexteam/icons" "^0.0.6"
+
+"@editorjs/underline@^1.1.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@editorjs/underline/-/underline-1.2.1.tgz#72ad63e9821b2ebca17f25536682b53b7a2c90df"
+  integrity sha512-LjJ01ia6Pj0Z/elifycp9+T1bQs0eXNnIcEYKOlk0sGHLy88DPcBOh9oz1i+uWarZ4AjGsvSMaptpWe+yQNsjQ==
+  dependencies:
+    "@codexteam/icons" "^0.3.2"
+
+"@editorjs/warning@^1.3.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@editorjs/warning/-/warning-1.4.0.tgz#6f7d6f5c82224e3ff7ad71aa1a2b53fa9830e5e2"
+  integrity sha512-JMYm3hrmN4/S6aHBHzKsJab9+8AJRPaPh9wDGE6QrVF3dj2fCo/DZcc0MaT5TN4YI5Hu4GKBH52wOKFGOyAuoA==
+  dependencies:
+    "@codexteam/icons" "^0.0.4"
+
 "@element-plus/icons-vue@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@element-plus/icons-vue/-/icons-vue-2.3.1.tgz#1f635ad5fdd5c85ed936481525570e82b5a8307a"
   integrity sha512-XxVUZv48RZAd87ucGS48jPf6pKu0yV5UCg9f4FFwtrYxXOwWuVJo6wOvSLKEoMQKjv8GsX/mhP6UsC1lRwbUWg==
+
+"@element-plus/utils@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@element-plus/utils/-/utils-0.0.5.tgz#7e9b6b13ae1b24c5a4d898a12f4f91da46ed9bcb"
+  integrity sha512-te1xzcbDbLZlA3qNvbvK7ARIQWsgWUvxpdNwe2z6KV4llFMg6/yCRY36c1B4uwq6tGEEheruWxwSLQjDVvhtrw==
+  dependencies:
+    lodash "^4.17.20"
+    normalize-wheel "^1.0.1"
+    resize-observer-polyfill "^1.5.1"
 
 "@esbuild/aix-ppc64@0.21.5":
   version "0.21.5"
@@ -518,6 +731,13 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/merge-streams/-/merge-streams-2.3.0.tgz#719df7fb41766bc143369eaa0dd56d8dc87c9958"
   integrity sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==
 
+"@sotaproject/strikethrough@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@sotaproject/strikethrough/-/strikethrough-1.0.1.tgz#7ea490dd7a1dc00b672631fbef59d541c15eb49b"
+  integrity sha512-tgfYXrg+lY6lCh2ZXyoPfe8rxpe+orRgiI2mOSyu1z/+gb9xIjOGhIXNgC6ehOmZUzqtoWzi9SrIEALCYfQpjA==
+  dependencies:
+    "@codexteam/icons" "^0.0.8"
+
 "@tsconfig/node20@^20.1.4":
   version "20.1.4"
   resolved "https://registry.yarnpkg.com/@tsconfig/node20/-/node20-20.1.4.tgz#3457d42eddf12d3bde3976186ab0cd22b85df928"
@@ -711,6 +931,11 @@
   integrity sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==
   dependencies:
     vue-demi "*"
+
+ace-builds@^1.36.3:
+  version "1.36.3"
+  resolved "https://registry.yarnpkg.com/ace-builds/-/ace-builds-1.36.3.tgz#b6d172e89597a3be769045d0432e2d09a9f59000"
+  integrity sha512-YcdwV2IIaJSfjkWAR1NEYN5IxBiXefTgwXsJ//UlaFrjXDX5hQpvPFvEePHz2ZBUfvO54RjHeRUQGX8MS5HaMQ==
 
 acorn@^8.12.1, acorn@^8.8.2:
   version "8.13.0"
@@ -965,6 +1190,126 @@ dotenv@^16.4.5:
   version "16.4.5"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
   integrity sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==
+
+editor-js-component@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/editor-js-component/-/editor-js-component-0.0.3.tgz#e047317d4d1916097fce0f7506aa20c05ae7204b"
+  integrity sha512-gCixwVh2RkuFfdAntZ2ehSnWO1NcJF5hgdNxiZV1EAkyXud20NBrlb7tLdgzSjCM5LRaagLgeKVyf4FlW3F0+Q==
+  dependencies:
+    "@calumk/editorjs-columns" "^0.3.1"
+    "@calumk/editorjs-nested-checklist" "^1.1.0"
+    "@codexteam/icons" "^0.3.0"
+    "@editorjs/checklist" "^1.6.0"
+    "@editorjs/code" "^2.8.0"
+    "@editorjs/delimiter" "^1.3.0"
+    "@editorjs/editorjs" "^2.28.2"
+    "@editorjs/embed" "^2.7.0"
+    "@editorjs/header" "^2.8.1"
+    "@editorjs/image" "^2.8.2"
+    "@editorjs/inline-code" "^1.4.0"
+    "@editorjs/link" "^2.6.2"
+    "@editorjs/link-autocomplete" "^0.1.0"
+    "@editorjs/list" "^1.9.0"
+    "@editorjs/marker" "^1.3.0"
+    "@editorjs/nested-list" "^1.4.2"
+    "@editorjs/paragraph" "^2.11.3"
+    "@editorjs/quote" "^2.5.0"
+    "@editorjs/raw" "^2.4.0"
+    "@editorjs/simple-image" "^1.5.1"
+    "@editorjs/table" "^2.3.0"
+    "@editorjs/underline" "^1.1.0"
+    "@editorjs/warning" "^1.3.0"
+    "@element-plus/utils" "^0.0.5"
+    "@sotaproject/strikethrough" "^1.0.1"
+    editorjs-alert "^1.1.3"
+    editorjs-button "^1.0.4"
+    editorjs-change-case "^0.0.3"
+    editorjs-drag-drop "^1.1.13"
+    editorjs-html "^3.4.3"
+    editorjs-hyperlink "^1.0.6"
+    editorjs-style "^3.0.3"
+    editorjs-table "^1.4.10"
+    editorjs-text-alignment-blocktune "^1.0.3"
+    editorjs-text-color-plugin "^2.0.4"
+    editorjs-toggle-block "^0.3.14"
+    editorjs-tooltip "^1.1.15"
+    editorjs-undo "^2.0.26"
+
+editorjs-alert@^1.1.3:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/editorjs-alert/-/editorjs-alert-1.1.4.tgz#62f808ba5383cb739d635b0bda614a76fbde4705"
+  integrity sha512-m6w/cRxnFucC3dyfrB+DTNXw70SnJNv05AX6P3bZ8qkbzB1OAJTuaFrEKZBdN0YvEvTe1zvg3S344EkPAveemQ==
+
+editorjs-button@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/editorjs-button/-/editorjs-button-1.0.4.tgz#14fa4750f420278f9963177d38ea618c1997bfbb"
+  integrity sha512-3wn8VrcGgil0gCTrgJNktiYnsC8YdS1TueNOyWr2geZLSUE9KPSVyQpPAduCdVEy+wbWQqrftczENNdLpxDGsQ==
+
+editorjs-change-case@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/editorjs-change-case/-/editorjs-change-case-0.0.3.tgz#05169afe0fa5aff679eef045377c6553dd7ff502"
+  integrity sha512-1g5RueRFLGsvKNiKdpq9nLgn0xeHylXmXJLMqqobAhB7uNJ7N978vN1mKGgMSThxi4y6mU45aNYhBJy9xQFrZA==
+
+editorjs-component-vue@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/editorjs-component-vue/-/editorjs-component-vue-0.0.3.tgz#548f521395178bcc2c02927e718a9fa5b066c954"
+  integrity sha512-rB0TypuehHnPtJbu6Z2KmbPvhUpKLYWLxakcyKiTiYZnaRll8y4nw8cseAU3pGSYqq5zrM/C6fWEbIkEN1AnYg==
+  dependencies:
+    editor-js-component "^0.0.3"
+
+editorjs-drag-drop@^1.1.13:
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/editorjs-drag-drop/-/editorjs-drag-drop-1.1.16.tgz#428f44520272260e3d0e1ec7b7676ddf4a78d3a0"
+  integrity sha512-yOyKZqqZepkdbDQbAw1bZr3mQewkT4a9QgufWW3Aoy1qcTka8uHR01T/dGHqrpyYrF56ykyidPyp0LX79LEHHQ==
+
+editorjs-html@^3.4.3:
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/editorjs-html/-/editorjs-html-3.4.3.tgz#81c089ba69df3a702a7535ec34ee276a6444668e"
+  integrity sha512-HMqQ3BCE98uhSpJsbfH0c3CoMctUMCHlap2Eq/7/VjaHas+g3IJqyf+ERtMByoQCzvcW22ISYaZEeE7rGkd8Xg==
+
+editorjs-hyperlink@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/editorjs-hyperlink/-/editorjs-hyperlink-1.0.6.tgz#f75ba7d3e8dab4527993ed165fd44cbfcae3a672"
+  integrity sha512-E8UZA9AM3jPwMTE40ul4eGCFzH3+XoUR5YRCy5O1+Yrl5UZQXeJppZ0IHHKaNmHAikDN9dUbKGLabxXZkPRi9w==
+
+editorjs-style@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/editorjs-style/-/editorjs-style-3.0.3.tgz#2a758e4ef39fbb5f7756611986405713dde744dd"
+  integrity sha512-Ur+lAu5g3oaGKzWh7oJx+DsjaUNAwKouHGJDbE6+ZCF6QTxNj8EjE22DQXjtX26qL1YHt54ku2sC3lhVhm8MKQ==
+
+editorjs-table@^1.4.10:
+  version "1.4.10"
+  resolved "https://registry.yarnpkg.com/editorjs-table/-/editorjs-table-1.4.10.tgz#2714d91054732fc827087c705ceb2641a16d3ed2"
+  integrity sha512-jRpgqnimReXXtMLhjXWQ2M+qkOLNqCvKfoiExpZtzPThTFNtSPrE6WZ/HhTsOA2BMkZSejoLcf4KUYvRa5dZYw==
+
+editorjs-text-alignment-blocktune@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/editorjs-text-alignment-blocktune/-/editorjs-text-alignment-blocktune-1.0.3.tgz#7942fe2d3fbdbd7fcfd10fbb9b341c97ec3eb84f"
+  integrity sha512-DAJ2LJP+WjETvU4lVOJCqZ1kZkKHp0GkujkqZgza9DRv7bO46m1M/s2d5Ba5hPFdmqk1vA/ci++MQXgWD7mWYw==
+
+editorjs-text-color-plugin@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/editorjs-text-color-plugin/-/editorjs-text-color-plugin-2.0.4.tgz#6e143c9507abe59da54ca0f8d6f9ffb14447c29d"
+  integrity sha512-QpibTkOxs3ndlKNOLT8ZlC4ktc3/eKIajiLO0Jm/hh9AJug/CrM1/rAvHy+ldfUKavbWeI+YZvgjad0YTyoyGw==
+
+editorjs-toggle-block@^0.3.14:
+  version "0.3.16"
+  resolved "https://registry.yarnpkg.com/editorjs-toggle-block/-/editorjs-toggle-block-0.3.16.tgz#3f881c5d9dd59116dd4e3388afb8a8891460e548"
+  integrity sha512-vjLE0bTF2HcQ7gQdgQ4c+Dl0n2o+oA0JICseJSYkQluDIE+LA9oHfTAE8ziJr03oeya7iVQ/b+d21Ez5hKsVsw==
+  dependencies:
+    uuid "^9.0.0"
+
+editorjs-tooltip@^1.1.15:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/editorjs-tooltip/-/editorjs-tooltip-1.2.2.tgz#dad3b3127728189df07d321e441cd407129b1b13"
+  integrity sha512-V6T+TPX48pUCLwTs5eSbS+jqZJ018qR4nKua4LF/T6wLNN+a+exqJFXAq+4MsVS9zwlHZKiyIsf5P5qhILMMng==
+
+editorjs-undo@^2.0.26:
+  version "2.0.28"
+  resolved "https://registry.yarnpkg.com/editorjs-undo/-/editorjs-undo-2.0.28.tgz#94ba953b800442fa84cea2b93139e38b8623fb16"
+  integrity sha512-7MiLdjIsPOXn8+cHDeAt2HapVklg4vcLWWkd2eMMlGI6UVtwYSjdQquDSv9752B/fOEP1C3NMF2sdiCoZV3tTA==
+  dependencies:
+    vanilla-caret-js "^1.0.1"
 
 electron-to-chromium@^1.5.41:
   version "1.5.42"
@@ -1355,7 +1700,7 @@ lodash-unified@^1.0.2:
   resolved "https://registry.yarnpkg.com/lodash-unified/-/lodash-unified-1.0.3.tgz#80b1eac10ed2eb02ed189f08614a29c27d07c894"
   integrity sha512-WK9qSozxXOD7ZJQlpSqOT+om2ZfcT4yO+03FuzAHD0wF6S0l0090LRPDx3vhTTLZ8cFKpBn+IOcVXK6qOcIlfQ==
 
-lodash@^4.17.21:
+lodash@^4.17.20, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -1521,6 +1866,11 @@ normalize-wheel-es@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/normalize-wheel-es/-/normalize-wheel-es-1.2.0.tgz#0fa2593d619f7245a541652619105ab076acf09e"
   integrity sha512-Wj7+EJQ8mSuXr2iWfnujrimU35R2W4FAErEyTmJoJ7ucwTn2hOUSsRehMb5RSYkxXGTM7Y9QpvPmp++w5ftoJw==
+
+normalize-wheel@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/normalize-wheel/-/normalize-wheel-1.0.1.tgz#aec886affdb045070d856447df62ecf86146ec45"
+  integrity sha512-1OnlAPZ3zgrk8B91HyRj+eVv+kS5u+Z0SCsak6Xil/kmgEia50ga7zfkumayonZrImffAxPU/5WcyGhzetHNPA==
 
 npm-normalize-package-bin@^3.0.0:
   version "3.0.1"
@@ -1700,6 +2050,16 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+regenerator-runtime@^0.14.0:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.1.tgz#356ade10263f685dda125100cd862c1db895327f"
+  integrity sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==
+
+resize-observer-polyfill@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
+  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 reusify@^1.0.4:
   version "1.0.4"
@@ -1977,6 +2337,11 @@ supports-color@^8.1.1:
   dependencies:
     has-flag "^4.0.0"
 
+sweetalert2@^11.4.10:
+  version "11.14.4"
+  resolved "https://registry.yarnpkg.com/sweetalert2/-/sweetalert2-11.14.4.tgz#0186439674ea4f15991e41cea3af203ee497853c"
+  integrity sha512-8QMzjxCuinwm18EK5AtYvuhP+lRMRxTWVXy8om9wGlULsXSI4TD29kyih3VYrSXMMBlD4EShFvNC7slhTC7j0w==
+
 tar@^6.2.0:
   version "6.2.1"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.2.1.tgz#717549c541bc3c2af15751bea94b1dd068d4b03a"
@@ -2119,6 +2484,21 @@ update-browserslist-db@^1.1.1:
     escalade "^3.2.0"
     picocolors "^1.1.0"
 
+uuid@^8.3.2:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9.0.0:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
+
+vanilla-caret-js@^1.0.1:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/vanilla-caret-js/-/vanilla-caret-js-1.1.0.tgz#851acd7be81998223ce69ae1b62e03f472fa4e90"
+  integrity sha512-vl3R4Xjqb+xnM0gYyg+wcqWGYwKKnkz58Yj29/FQB+w+yP7R8IR1DGoJnDIs05moEZiGlQUTabPMoEtnQNcrpQ==
+
 varint@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/varint/-/varint-6.0.0.tgz#9881eb0ce8feaea6512439d19ddf84bf551661d0"
@@ -2160,6 +2540,13 @@ vue-tsc@^2.1.6:
     "@volar/typescript" "~2.4.1"
     "@vue/language-core" "2.1.6"
     semver "^7.5.4"
+
+vue3-ace-editor@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/vue3-ace-editor/-/vue3-ace-editor-2.2.4.tgz#1f2a787f91cf7979f27fab29e0e0604bb3ee1c17"
+  integrity sha512-FZkEyfpbH068BwjhMyNROxfEI8135Sc+x8ouxkMdCNkuj/Tuw83VP/gStFQqZHqljyX9/VfMTCdTqtOnJZGN8g==
+  dependencies:
+    resize-observer-polyfill "^1.5.1"
 
 vue@^3.5.12:
   version "3.5.12"
