@@ -2,6 +2,7 @@ package problem
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
@@ -10,7 +11,7 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"strconv"
 )
 
 type ProblemServer struct {
@@ -25,10 +26,16 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 		logrus.Errorln(err.Error())
 		return nil, rpc.InsertFailed
 	}
+	tags, err := json.Marshal(request.Data.Tags)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, rpc.InsertFailed
+	}
+
 	problem := &mysql.Problem{
 		Title:       request.Data.Title,
 		Level:       request.Data.Level,
-		Tags:        request.Data.Tags,
+		Tags:        tags,
 		Description: request.Data.Description,
 		CreateBy:    request.Data.CreateBy,
 		Config:      config,
@@ -67,8 +74,15 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	db := mysql.Instance()
 
+	/*
+		SELECT * FROM `problem`
+		where id = ?;
+	*/
 	var problem mysql.Problem
-	result := db.Where("id = ?", request.Id).Find(&problem)
+
+	fmt.Println(db.Debug().First(&problem, "id = ?", request.Id).Statement.SQL.String())
+
+	result := db.Where("id = ?", request.Id).First(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
@@ -84,13 +98,20 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 		return nil, rpc.QueryFailed
 	}
 
+	var tags []string
+	err = json.Unmarshal(problem.Tags, &tags)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, rpc.QueryFailed
+	}
+
 	data := &pb.Problem{
 		Id:          problem.ID,
-		CreateAt:    timestamppb.New(problem.CreateAt),
+		CreateAt:    strconv.FormatInt(problem.CreateAt.Unix(), 10),
 		Title:       problem.Title,
 		Description: problem.Description,
 		Level:       problem.Level,
-		Tags:        problem.Tags,
+		Tags:        tags,
 		CreateBy:    problem.CreateBy,
 		Config:      config,
 	}
@@ -163,12 +184,13 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 		return nil, rpc.QueryFailed
 	}
 	for _, problem := range problemList {
-		rsp.Data = append(rsp.Data, &pb.Problem{
+		p := &pb.Problem{
 			Id:    problem.ID,
 			Title: problem.Title,
 			Level: problem.Level,
-			Tags:  problem.Tags,
-		})
+		}
+		json.Unmarshal(problem.Tags, &p.Tags)
+		rsp.Data = append(rsp.Data, p)
 	}
 	return rsp, nil
 }

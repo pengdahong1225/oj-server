@@ -1,8 +1,32 @@
 <script lang="ts" setup>
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { queryProblemDetailService } from '@/api/problem'
+import type { Problem } from '@/types/problem'
+
+onMounted(() => {
+    getProblemDetail()
+})
 
 const route = useRoute()
-console.log(route.params)
+const problem = ref<Problem>({
+    id: 0,
+    title: '',
+    description: '',
+    level: 0,
+    tags: [],
+    status: 1
+})
+const getProblemDetail = async () => {
+    const res = await queryProblemDetailService(Number(route.params.id))
+    problem.value.id = res.data.data.id
+    problem.value.title = res.data.data.title
+    problem.value.description = res.data.data.description
+    problem.value.level = res.data.data.level
+    problem.value.tags = res.data.data.tags
+    problem.value.status = res.data.data.status
+}
+
 </script>
 
 <template>
@@ -14,12 +38,8 @@ console.log(route.params)
                     <strong>A+B</strong>
                 </template>
 
-                <div class="title">
-                    Description
-                </div>
-                <div class="content">
-                    输入一个正整数
-                </div>
+                <descriptionItem style="width: 100%;"></descriptionItem>
+
             </el-card>
         </div>
 
@@ -54,20 +74,13 @@ console.log(route.params)
 
     /* 确保卡片顶部对齐，而不会拉伸高度 */
     .left {
-        width: 85%;
+        width: 80%;
         border: 1px solid #e42518;
         margin-right: 5px;
-
-        .title {
-            font-size: 21px;
-            font-weight: 500;
-            line-height: 30px;
-            padding: 5px 10px;
-        }
     }
 
     .right {
-        width: 15%;
+        width: 20%;
         margin-left: 5px;
     }
 }

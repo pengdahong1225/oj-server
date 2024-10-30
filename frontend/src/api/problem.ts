@@ -6,5 +6,8 @@ export const queryProblemListService = (params: QueryProblemListParams) => {
 }
 
 export const queryProblemDetailService = (id: number) => {
-  return request.get(`/problem/${id}`)
+  const params = {
+    "problemID": id
+  }
+  return request.get(`/problem/detail`, {params})
 }

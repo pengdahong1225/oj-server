@@ -1,12 +1,10 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-import "google/protobuf/timestamp.proto";
-
 message Problem{
   int64 id = 1;
-  google.protobuf.Timestamp create_at = 2;
-  google.protobuf.Timestamp delete_at = 3;
+  string create_at = 2;
+  string delete_at = 3;
 
   string title = 4;
   string description = 5;
