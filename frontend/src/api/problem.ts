@@ -16,6 +16,6 @@ export const submitProblemService = (data: SubmitForm) => {
   return request.post('/problem/submit', data)
 }
 
-export const addProblemService = (data: Problem) => {
+export const updateProblemService = (data: Problem) => {
   return request.post('/problem/update', data)
 }
