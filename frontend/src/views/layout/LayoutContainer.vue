@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import {
   User,
-  Crop,
+  Position,
   EditPen,
   SwitchButton,
   CaretBottom
@@ -35,6 +35,9 @@ const handleCommand = (command: string) => {
         router.push('/login')
       }).catch(() => { })
       break
+    case 'manage':
+      router.push('/manage')
+      break
   }
 }
 
@@ -65,6 +68,7 @@ const handleCommand = (command: string) => {
             <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
             <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
             <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
+            <el-dropdown-item v-if="userStore.userInfo.role === 1" command="manage" :icon="Position">To CMS</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
