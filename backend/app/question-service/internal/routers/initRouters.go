@@ -46,6 +46,8 @@ func questionRouters(engine *gin.Engine) {
 		problemRouter.GET("/detail", controller.ProblemHandler{}.HandleDetail)
 		problemRouter.POST("/submit", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleSubmit)
 		problemRouter.GET("/result", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleResult)
+		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.UpdateQuestion)
+		problemRouter.POST("/delete", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.DeleteQuestion)
 	}
 
 	// api/comment
@@ -56,9 +58,6 @@ func questionRouters(engine *gin.Engine) {
 		commentRouter.POST("/get", controller.CommentHandler{}.HandleGet)
 		commentRouter.POST("/delete", controller.CommentHandler{}.HandleDelete)
 		commentRouter.POST("/like", controller.CommentHandler{}.HandleLike)
-
-		commentRouter.POST("/updateQuestion", middlewares.AuthLogin(), middlewares.Admin(), controller.AdminHandler{}.UpdateQuestion)
-		commentRouter.POST("/deleteQuestion", middlewares.AuthLogin(), middlewares.Admin(), controller.AdminHandler{}.DeleteQuestion)
 	}
 
 	// api/captcha

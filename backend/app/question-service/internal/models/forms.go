@@ -28,8 +28,8 @@ type SubmitForm struct {
 	Code      string `json:"code" form:"code" binding:"required"`
 }
 
-// AddProblemForm 添加、修改题目表单
-type AddProblemForm struct {
+// UpdateProblemForm 添加、修改题目表单
+type UpdateProblemForm struct {
 	Title  string        `json:"title" form:"title" binding:"required"`
 	Level  int32         `json:"level" form:"level" binding:"required"`
 	Tags   []string      `json:"tags" form:"tags" binding:"required"`
