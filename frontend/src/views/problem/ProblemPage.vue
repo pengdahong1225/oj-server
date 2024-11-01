@@ -27,6 +27,7 @@ const problem = ref<Problem>({
 })
 const getProblemDetail = async () => {
     const res = await queryProblemDetailService(Number(route.params.id))
+    console.log(res)
     problem.value.id = res.data.data.id
     problem.value.title = res.data.data.title
     problem.value.description = res.data.data.description
@@ -133,7 +134,9 @@ const editorOptions = ref({
                     style="height: 500px; width: 100%;" />
 
                 <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
-                    <el-icon><UploadFilled /></el-icon>Submit
+                    <el-icon>
+                        <UploadFilled />
+                    </el-icon>Submit
                 </el-button>
             </el-card>
 
@@ -146,14 +149,18 @@ const editorOptions = ref({
                     <strong>Information</strong>
                 </template>
                 <el-descriptions :column="1" border>
-                    <el-descriptions-item label="ID">1</el-descriptions-item>
+                    <el-descriptions-item label="ID">{{ problem.id }}</el-descriptions-item>
                     <el-descriptions-item label="Time Limit">18100000000</el-descriptions-item>
                     <el-descriptions-item label="Memory Limit">Suzhou</el-descriptions-item>
-                    <el-descriptions-item label="IO Mode">Suzhou</el-descriptions-item>
-                    <el-descriptions-item label="Created By">Suzhou</el-descriptions-item>
-                    <el-descriptions-item label="Level">Suzhou</el-descriptions-item>
+                    <el-descriptions-item label="IO Mode">IO</el-descriptions-item>
+                    <el-descriptions-item label="Created By">{{ problem.create_by }}</el-descriptions-item>
+                    <el-descriptions-item label="Level">
+                        <el-tag v-if="problem.level === 1" type="primary">简单</el-tag>
+                        <el-tag v-else-if="problem.level === 2" type="warning">中等</el-tag>
+                        <el-tag v-else type="danger">困难</el-tag>
+                    </el-descriptions-item>
                     <el-descriptions-item label="Tags">
-                        <el-tag size="small">School</el-tag>
+                        <el-tag size="small">{{ problem.tags }}</el-tag>
                     </el-descriptions-item>
                 </el-descriptions>
             </el-card>
@@ -180,7 +187,8 @@ const editorOptions = ref({
         .submit-area {
             margin-top: 20px;
             width: 100%;
-            .submit-btn{
+
+            .submit-btn {
                 margin: 5px 0 5px 5px;
                 // 靠右
                 float: right;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { updateProblemService } from '@/api/problem.ts'
+import { updateProblemService, queryProblemDetailService } from '@/api/problem'
 import type { Problem } from '@/types/problem.ts'
 
 const level_list = [
@@ -10,56 +10,66 @@ const level_list = [
 ]
 const drawerVisible = ref(false)
 const formRef = ref()
-const props = defineProps({
-    formModel: {
-        type: Object as () => Problem,
-        default: () => ({
-            title: '',
-            description: '',
-            tags: [],
-            level: 0
-        })
-    }
+
+const formModel = ref<Problem>({
+    title: '',
+    description: '',
+    level: 0,
+    tags: [],
 })
 const emit = defineEmits(['success'])
-const rules = {}
 const onSubmit = async () => {
     await formRef.value.validate()
     const isEdit = false
     if (isEdit) {
-        // await artEditChannelService(formModel.value)
-        // ElMessage.success('编辑成功')
+        const res = await updateProblemService(formModel.value)
+        console.log(res)
+        ElMessage.success('编辑成功')
     } else {
-        // await artAddChannelService(formModel.value)
-        // ElMessage.success('添加成功')
+        const res = await updateProblemService(formModel.value)
+        console.log(res)
+        ElMessage.success('添加成功')
     }
     drawerVisible.value = false
     emit('success', !isEdit)
 }
 
-// 组件对外暴露一个方法 open，基于open传来的参数，区分添加还是编辑
-// open({})  => 表单无需渲染，说明是添加
-// open({ id, cate_name, ... })  => 表单需要渲染，说明是编辑
-// open调用后，可以打开弹窗
 const open = (row: Problem) => {
     drawerVisible.value = true
-    //   formModel.value = row
+    formModel.value = row
+    if (formModel.value.id) {
+        getProblemDetail(formModel.value.id)
+    }
 }
-
-// 向外暴露方法
 defineExpose({
     open
 })
+
+const getProblemDetail = async (id: number) => {
+    const res = await queryProblemDetailService(id)
+    console.log(res)
+    formModel.value.id = res.data.data.id
+    formModel.value.title = res.data.data.title
+    formModel.value.description = res.data.data.description
+    formModel.value.level = res.data.data.level
+    formModel.value.tags = res.data.data.tags
+    formModel.value.status = res.data.data.status
+    formModel.value.config = JSON.stringify(res.data.data.config)
+}
+
+const tag_list = ref([
+    'Java', 'Python', 'C++', 'JavaScript', 'TypeScript', 'Go', 'Rust', 'Swift', 'Kotlin', 'PHP', 'Ruby', 'C#', 'SQL', 'HTML', 'CSS', 'Dart', 'Objective-C', 'R', 'Matlab', 'Lua', 'Vue', 'React', 'Angular', 'Node.js', 'Express', 'Flask', 'Django', 'Spring', 'Hibernate'
+])
 </script>
 
 <template>
     <el-drawer v-model="drawerVisible" size="45%">
         <template #header>
-            <strong>{{ formModel?.id ? '编辑题目' : '添加题目' }}</strong>
+            <strong>{{ formModel.id ? '编辑题目' : '添加题目' }}</strong>
         </template>
 
         <template #default>
-            <el-form class="form" ref="formRef" :model="formModel" :rules="rules" label-width="150px" size="large">
+            <el-form class="form" ref="formRef" :model="formModel" label-width="150px" size="large">
                 <el-form-item label="标题" prop="title">
                     <el-input v-model="formModel.title" placeholder="请输入题目标题" style="width: 50%"></el-input>
                 </el-form-item>
@@ -69,18 +79,17 @@ defineExpose({
                             :value="item.value" />
                     </el-select>
                 </el-form-item>
+                <el-form-item label="标签" prop="tags">
+                    <el-select v-model="formModel.tags" multiple placeholder="Select" style="width: 240px">
+                        <el-option v-for="item in tag_list" :key="item" :label="item" :value="item" />
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="题目详情" prop="description">
                     <el-input type="textarea" :rows="10" resize="none" v-model="formModel.description"
                         placeholder="请描述题目详情" style="width: 100%"></el-input>
                 </el-form-item>
-                <el-form-item label="Sample Input" prop="sample_input">
-                    <el-input v-model="formModel.description" placeholder="输入样例"></el-input>
-                </el-form-item>
-                <el-form-item label="Sample Output" prop="sample_output">
-                    <el-input v-model="formModel.description" placeholder="输出样例"></el-input>
-                </el-form-item>
-                <el-form-item label="Hint" prop="hint">
-                    <el-input type="textarea" :rows="10" v-model="formModel.description" placeholder="代码示例"
+                <el-form-item label="题目配置" prop="config">
+                    <el-input type="textarea" :rows="10" resize="none" v-model="formModel.config" placeholder="请提供题目配置"
                         style="width: 100%"></el-input>
                 </el-form-item>
                 <el-form-item style="">

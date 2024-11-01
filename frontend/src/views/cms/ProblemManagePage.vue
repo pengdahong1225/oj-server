@@ -8,7 +8,7 @@ import { formatTime } from '@/utils/format'
 import ProblemEdit from '@/components/problemEdit.vue'
 
 onMounted(() => {
-    // getProblemList()
+    getProblemList()
 })
 
 const loading = ref(false)
@@ -28,8 +28,8 @@ const getProblemList = async () => {
     loading.value = true
     const res = await queryProblemListService(params.value)
     console.log(res)
-    total.value = res.data.total
-    problemList.value = res.data.data
+    total.value = res.data.data.total
+    problemList.value = res.data.data.data
     loading.value = false
 }
 const handleCurrentChange = (page: number) => {
@@ -49,7 +49,7 @@ const onReset = () => {
 
 const problemEditRef = ref()
 const onAddProblem = () => {
-    problemEditRef.value.open(null)
+    problemEditRef.value.open({})
 }
 const onEdit = (row: Problem) => {
     problemEditRef.value.open(row)
@@ -59,14 +59,17 @@ const onDelete = (row: Problem) => {
 }
 // 添加或者编辑 成功的回调
 const onSuccess = (isAdd: boolean) => {
-  if (isAdd) {
-    // 如果是添加，最好渲染最后一页
-    const lastPage = Math.ceil((total.value + 1) / params.value.page_size)
-    // 更新成最大页码数，再渲染
-    params.value.page = lastPage
-  }
+    if (isAdd) {
+        // 如果是添加，最好渲染最后一页
+        const lastPage = Math.ceil((total.value + 1) / params.value.page_size)
+        // 更新成最大页码数，再渲染
+        params.value.page = lastPage
+        ElMessage.success('添加成功')
+    } else {
+        ElMessage.success('更新成功')
+    }
 
-  getProblemList()
+    getProblemList()
 }
 
 </script>
@@ -93,21 +96,13 @@ const onSuccess = (isAdd: boolean) => {
         <el-table v-loading="loading" :data="problemList">
             <el-table-column label="#" prop="id" width="80">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="
-                        $router.push({
-                            path: `/problem/${row.id}`
-                        })
-                        ">{{ row.id }}</el-link>
+                    {{ row.id }}
                 </template>
             </el-table-column>
 
             <el-table-column label="Title" prop="title">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="
-                        $router.push({
-                            path: `/problem/${row.id}`
-                        })
-                        ">{{ row.title }}</el-link>
+                    {{ row.title }}
                 </template>
             </el-table-column>
             <el-table-column label="Level" prop="level">
@@ -125,12 +120,12 @@ const onSuccess = (isAdd: boolean) => {
             </el-table-column>
             <el-table-column label="Created At">
                 <template #default="{ row }">
-                    {{ formatTime(row.created_at) }}
+                    {{ formatTime(row.create_at) }}
                 </template>
             </el-table-column>
             <el-table-column label="Created By">
                 <template #default="{ row }">
-                    {{ row.created_by }}
+                    {{ row.create_by }}
                 </template>
             </el-table-column>
             <el-table-column label="操作">

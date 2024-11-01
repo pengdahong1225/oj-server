@@ -19,3 +19,7 @@ export const submitProblemService = (data: SubmitForm) => {
 export const updateProblemService = (data: Problem) => {
   return request.post('/problem/update', data)
 }
+
+export const getProblemTagListService = () => {
+  return request.get('/problem/tagList')
+}

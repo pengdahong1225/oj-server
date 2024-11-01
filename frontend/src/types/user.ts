@@ -18,8 +18,3 @@ export interface LoginForm {
     mobile: string; // 用户名
     password: string; // 密码
 }
-
-export interface UPSSParams{
-    uid : number;
-    problem_ids: number[];
-}

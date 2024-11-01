@@ -13,20 +13,19 @@ export interface SubmitForm {
 }
 
 export interface Problem {
-    id: number;
     title: string;
     description: string;
     level: number;
     tags: string[];
+
+    id?: number;
     status?: number;
     create_at?: string;
     create_by?: number;
-    sample_input?: string;
-    sample_output?: string;
-    hint?: string;
+    config?: string;
 }
 
-export interface ProblemConfig {
+interface ProblemConfig {
     testCases: TestCase[];
     compileLimit: Limit;
     runLimit: Limit;
