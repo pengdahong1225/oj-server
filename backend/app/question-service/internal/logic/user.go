@@ -260,18 +260,11 @@ func (r User) GetUserSolvedList(uid int64) *models.Response {
 	return res
 }
 
-func (r User) QueryUserSolvedListByProblemList(params *models.UPSSParams) *models.Response {
-	res := &models.Response{
-		Code:    models.Success,
-		Message: "",
-		Data:    nil,
-	}
+func (r User) queryUserSolvedListByProblemList(params *models.UPSSParams) ([]int64, error) {
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
 		logrus.Errorf("db服务连接失败:%s\n", err.Error())
-		return res
+		return nil, err
 	}
 	defer dbConn.Close()
 
@@ -281,12 +274,8 @@ func (r User) QueryUserSolvedListByProblemList(params *models.UPSSParams) *model
 		ProblemIds: params.ProblemIds,
 	})
 	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		return res
+		return nil, err
 	}
-	res.Message = "ok"
-	res.Data = response
 
-	return res
+	return response.SolvedProblemIds, nil
 }

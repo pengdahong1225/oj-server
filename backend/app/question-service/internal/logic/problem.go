@@ -12,12 +12,13 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"slices"
 )
 
 type ProblemLogic struct {
 }
 
-func (r ProblemLogic) HandleUpdateQuestion(uid int64, form *models.UpdateProblemForm) *models.Response {
+func (r ProblemLogic) UpdateQuestion(uid int64, form *models.UpdateProblemForm, config *models.ProblemConfig) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -42,22 +43,22 @@ func (r ProblemLogic) HandleUpdateQuestion(uid int64, form *models.UpdateProblem
 		Config: &pb.ProblemConfig{
 			TestCases: nil,
 			CompileLimit: &pb.Limit{
-				CpuLimit:    form.Config.CompileLimit.CpuLimit,
-				ClockLimit:  form.Config.CompileLimit.ClockLimit,
-				MemoryLimit: form.Config.CompileLimit.MemoryLimit,
-				StackLimit:  form.Config.CompileLimit.StackLimit,
-				ProcLimit:   form.Config.CompileLimit.ProcLimit,
+				CpuLimit:    config.CompileLimit.CpuLimit,
+				ClockLimit:  config.CompileLimit.ClockLimit,
+				MemoryLimit: config.CompileLimit.MemoryLimit,
+				StackLimit:  config.CompileLimit.StackLimit,
+				ProcLimit:   config.CompileLimit.ProcLimit,
 			},
 			RunLimit: &pb.Limit{
-				CpuLimit:    form.Config.RunLimit.CpuLimit,
-				ClockLimit:  form.Config.RunLimit.ClockLimit,
-				MemoryLimit: form.Config.RunLimit.MemoryLimit,
-				StackLimit:  form.Config.RunLimit.StackLimit,
-				ProcLimit:   form.Config.RunLimit.ProcLimit,
+				CpuLimit:    config.RunLimit.CpuLimit,
+				ClockLimit:  config.RunLimit.ClockLimit,
+				MemoryLimit: config.RunLimit.MemoryLimit,
+				StackLimit:  config.RunLimit.StackLimit,
+				ProcLimit:   config.RunLimit.ProcLimit,
 			},
 		},
 	}}
-	for _, test := range form.Config.TestCases {
+	for _, test := range config.TestCases {
 		request.Data.Config.TestCases = append(request.Data.Config.TestCases, &pb.TestCase{
 			Input:  test.Input,
 			Output: test.Output,
@@ -76,7 +77,7 @@ func (r ProblemLogic) HandleUpdateQuestion(uid int64, form *models.UpdateProblem
 	return res
 }
 
-func (r ProblemLogic) HandleDelQuestion(problemID int64) *models.Response {
+func (r ProblemLogic) DeleteQuestion(problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -102,7 +103,7 @@ func (r ProblemLogic) HandleDelQuestion(problemID int64) *models.Response {
 	return res
 }
 
-func (r ProblemLogic) GetProblemList(params *models.QueryProblemListParams) *models.Response {
+func (r ProblemLogic) GetProblemList(params *models.QueryProblemListParams, uid int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -130,6 +131,24 @@ func (r ProblemLogic) GetProblemList(params *models.QueryProblemListParams) *mod
 		res.Message = "获取题目列表失败"
 		logrus.Debugf("获取题目列表失败:%s\n", err.Error())
 		return res
+	}
+
+	if uid > 0 {
+		param := &models.UPSSParams{}
+		param.Uid = uid
+		for _, v := range response.Data {
+			param.ProblemIds = append(param.ProblemIds, v.Id)
+		}
+		list, err := User{}.queryUserSolvedListByProblemList(param)
+		if err != nil {
+			logrus.Errorln(err.Error())
+		} else {
+			for _, v := range response.Data {
+				if slices.Contains(list, v.Id) {
+					v.Status = 1
+				}
+			}
+		}
 	}
 
 	res.Message = "OK"
