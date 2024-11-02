@@ -11,13 +11,16 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "ace-builds": "^1.36.3",
     "axios": "^1.7.7",
+    "editorjs-component-vue": "^0.0.3",
     "element-plus": "^2.8.6",
     "less": "^4.2.0",
     "pinia": "^2.2.4",
     "pinia-plugin-persistedstate": "^4.1.1",
     "vue": "^3.5.12",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue3-ace-editor": "^2.2.4"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",

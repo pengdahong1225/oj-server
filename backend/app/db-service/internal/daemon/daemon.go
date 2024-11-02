@@ -57,7 +57,7 @@ func syncHandle(data []byte) bool {
 }
 
 // 排行榜
-func (receiver Daemon) LoopRank() {
+func (receiver Daemon) RankList() {
 	db := mysql.Instance()
 	var orderList []mysql.Statistics
 

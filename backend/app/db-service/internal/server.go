@@ -47,7 +47,7 @@ func (receiver *Server) Start() {
 		panic(err)
 	}
 
-	// 排行榜
+	// 排行榜 - 定时器触发
 	daemonServer := daemon.Daemon{}
 	wg.Add(1)
 	err = goroutinePool.Instance().Submit(func() {
@@ -57,7 +57,7 @@ func (receiver *Server) Start() {
 		for {
 			select {
 			case <-ticker.C:
-				daemonServer.LoopRank()
+				daemonServer.RankList()
 			}
 		}
 	})

@@ -5,7 +5,7 @@ import (
 )
 
 type Comment struct {
-	ID            int64     `gorm:"primarykey"`
+	ID            int64     `gorm:"primary_key"`
 	CreateAt      time.Time `gorm:"column:create_at" json:"create_at"`
 	UpdateAt      time.Time `gorm:"column:update_at" json:"update_at"`
 	DeletedAt     time.Time `gorm:"column:delete_at" json:"delete_at"`

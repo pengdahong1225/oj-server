@@ -10,7 +10,7 @@ const router = createRouter({
     { path: '/login', component: () => import('@/views/login/LoginPage.vue') },
     {
       path: '/',
-      component: () => import('@/views/layout/LayoutContainer.vue'),
+      component: () => import('@/views/layout/LayoutContainer.vue'), // 一级页面
       redirect: '/home',
       children: [
         { path: '/home', component: () => import('@/views/home/HomePage.vue') },
@@ -19,16 +19,34 @@ const router = createRouter({
         { path: '/contest', component: () => import('@/views/contest/ContestPage.vue') },
         { path: '/status', component: () => import('@/views/status/StatusPage.vue') },
         { path: '/user/profile', component: () => import('@/views/user/UserProfilePage.vue') },
-        { path: '/user/password', component: () => import('@/views/user/UserPasswordPage.vue') },
+        { path: '/user/password', component: () => import('@/views/user/UserPasswordPage.vue') }
       ]
-    }
+    },
+    {
+      path: '/manage',
+      component: () => import('@/views/cms/CmsContainer.vue'), // 一级页面
+      redirect: '/manage/user',
+      children: [
+        { path: '/manage/user', component: () => import('@/views/cms/UserManagePage.vue') },
+        { path: '/manage/problem', component: () => import('@/views/cms/ProblemManagePage.vue') },
+        { path: '/manage/contest', component: () => import('@/views/cms/ContestManagePage.vue') },
+        { path: '/manage/template', component: () => import('@/views/cms/TemplateManagePage.vue') },
+        { path: '/manage/notice', component: () => import('@/views/cms/NoticeManagePage.vue') },
+      ]
+    },
   ]
 })
 
 // 登录访问拦截
 router.beforeEach((to) => {
   const userStore = useUserStore()
-  if (!userStore.token && to.path !== '/login') return '/login'
+  if (!userStore.token && to.path !== '/login') {
+    return '/login'
+  }
+  if (to.path === '/manage' && userStore.userInfo.role !== 1) {
+    ElMessage.error('权限不足')
+    return '/'
+  }
 })
 
 

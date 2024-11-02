@@ -11,7 +11,8 @@ func Admin() gin.HandlerFunc {
 		currentUser := claims.(*UserClaims)
 		if currentUser.Authority == 0 {
 			ctx.JSON(http.StatusForbidden, gin.H{
-				"msg": "无权限",
+				"code":    1,
+				"message": "无权限",
 			})
 			ctx.Abort()
 			return

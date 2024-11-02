@@ -15,5 +15,6 @@ create table if not exists problem
 
     config BLOB comment '题目配置',
 
-    PRIMARY KEY(id)
+    PRIMARY KEY(id),
+    UNIQUE INDEX idx_title(title)
 )engine = InnoDB charset = utf8mb4;

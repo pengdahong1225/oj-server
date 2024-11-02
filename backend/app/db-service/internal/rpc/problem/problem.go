@@ -2,6 +2,7 @@ package problem
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
@@ -10,7 +11,8 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"gorm.io/gorm"
+	"strconv"
 )
 
 type ProblemServer struct {
@@ -25,10 +27,16 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 		logrus.Errorln(err.Error())
 		return nil, rpc.InsertFailed
 	}
+	tags, err := json.Marshal(request.Data.Tags)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, rpc.InsertFailed
+	}
+
 	problem := &mysql.Problem{
 		Title:       request.Data.Title,
 		Level:       request.Data.Level,
-		Tags:        request.Data.Tags,
+		Tags:        tags,
 		Description: request.Data.Description,
 		CreateBy:    request.Data.CreateBy,
 		Config:      config,
@@ -67,8 +75,15 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	db := mysql.Instance()
 
+	/*
+		SELECT * FROM `problem`
+		where id = ?;
+	*/
 	var problem mysql.Problem
-	result := db.Where("id = ?", request.Id).Find(&problem)
+
+	fmt.Println(db.Debug().First(&problem, "id = ?", request.Id).Statement.SQL.String())
+
+	result := db.Where("id = ?", request.Id).First(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
@@ -84,13 +99,20 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 		return nil, rpc.QueryFailed
 	}
 
+	var tags []string
+	err = json.Unmarshal(problem.Tags, &tags)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, rpc.QueryFailed
+	}
+
 	data := &pb.Problem{
 		Id:          problem.ID,
-		CreateAt:    timestamppb.New(problem.CreateAt),
+		CreateAt:    strconv.FormatInt(problem.CreateAt.Unix(), 10),
 		Title:       problem.Title,
 		Description: problem.Description,
 		Level:       problem.Level,
-		Tags:        problem.Tags,
+		Tags:        tags,
 		CreateBy:    problem.CreateBy,
 		Config:      config,
 	}
@@ -135,40 +157,58 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 	name := "%" + request.Keyword + "%"
 	offSet := int((request.Page - 1) * request.PageSize)
 	query := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, request.Tag)
-	logrus.Debugln("query conditions: %s", query)
+	logrus.Debugf("query conditions: %s\n", query)
 
+	var result *gorm.DB
 	/*
 		select COUNT(*) AS count from problem
 		where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表"');
 	*/
 	var count int64 = 0
-	result := db.Model(&mysql.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
+	if request.Tag == "" {
+		result = db.Model(&mysql.Problem{}).Where("title LIKE ?", name).Count(&count)
+	} else {
+		result = db.Model(&mysql.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
+	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
 	}
 	rsp.Total = int32(count)
+	logrus.Debugln("count:", count)
 
 	/*
-		select id,title,level,tags from problem
+		select id,title,level,tags,create_at,create_by from problem
 		where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表')
 		order by id
 		offset off_set
 		limit page_size;
 	*/
 	var problemList []mysql.Problem
-	result = db.Select("id,title,level,tags").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&problemList)
+	if request.Tag == "" {
+		result = db.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&problemList)
+	} else {
+		result = db.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&problemList)
+	}
+
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
 	}
 	for _, problem := range problemList {
-		rsp.Data = append(rsp.Data, &pb.Problem{
-			Id:    problem.ID,
-			Title: problem.Title,
-			Level: problem.Level,
-			Tags:  problem.Tags,
-		})
+		p := &pb.Problem{
+			Id:       problem.ID,
+			Title:    problem.Title,
+			Level:    problem.Level,
+			CreateAt: strconv.FormatInt(problem.CreateAt.Unix(), 10),
+			CreateBy: problem.CreateBy,
+		}
+		err := json.Unmarshal(problem.Tags, &p.Tags)
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return nil, rpc.QueryFailed
+		}
+		rsp.Data = append(rsp.Data, p)
 	}
 	return rsp, nil
 }
