@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-// import default_banner from '@/assets/default_banner.jpg'
+import default_banner from '@/assets/default_banner.jpg'
 import { Search } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
 import { queryNoticeListService } from '@/api/notice'
