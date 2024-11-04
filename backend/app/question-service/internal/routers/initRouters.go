@@ -21,6 +21,7 @@ func healthCheckRouters(engine *gin.Engine) {
 // questionRouters
 // 题目服务相关路由
 func questionRouters(engine *gin.Engine) {
+	engine.Use(middlewares.CheckIsExpiration())
 	// api/
 	{
 		engine.GET("/problemSet", controller.ProblemHandler{}.HandleProblemSet)
@@ -36,7 +37,6 @@ func questionRouters(engine *gin.Engine) {
 		userRouter.Use(middlewares.AuthLogin())
 		userRouter.GET("/profile", controller.User{}.HandleUserProfile)
 		userRouter.GET("/submitRecord", controller.User{}.HandleSubmitRecord)
-		userRouter.GET("/upss", controller.User{}.HandleUPSS)
 		userRouter.GET("/solvedList", controller.User{}.HandleSolvedList)
 	}
 
@@ -46,6 +46,9 @@ func questionRouters(engine *gin.Engine) {
 		problemRouter.GET("/detail", controller.ProblemHandler{}.HandleDetail)
 		problemRouter.POST("/submit", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleSubmit)
 		problemRouter.GET("/result", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleResult)
+		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleUpdate)
+		problemRouter.POST("/delete", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleDelete)
+		problemRouter.GET("/tagList", controller.ProblemHandler{}.HandleTagList)
 	}
 
 	// api/comment
@@ -56,9 +59,6 @@ func questionRouters(engine *gin.Engine) {
 		commentRouter.POST("/get", controller.CommentHandler{}.HandleGet)
 		commentRouter.POST("/delete", controller.CommentHandler{}.HandleDelete)
 		commentRouter.POST("/like", controller.CommentHandler{}.HandleLike)
-
-		commentRouter.POST("/updateQuestion", middlewares.AuthLogin(), middlewares.Admin(), controller.AdminHandler{}.UpdateQuestion)
-		commentRouter.POST("/deleteQuestion", middlewares.AuthLogin(), middlewares.Admin(), controller.AdminHandler{}.DeleteQuestion)
 	}
 
 	// api/captcha

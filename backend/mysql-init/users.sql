@@ -98,4 +98,3 @@ INSERT INTO user_info (mobile, password, nickname, email, gender, role) VALUES (
 INSERT INTO user_info (mobile, password, nickname, email, gender, role) VALUES (18048155098, "6ecf763ff6e7cef7b47e6611e1bf76fe2608a2e32a97b2d88b083ae1d8d02c82", 'wanrong', 'wanrong98@example.com', 0, 0);
 INSERT INTO user_info (mobile, password, nickname, email, gender, role) VALUES (18048155099, "6ecf763ff6e7cef7b47e6611e1bf76fe2608a2e32a97b2d88b083ae1d8d02c82", 'yizhen', 'yizhen99@example.com', 1, 0);
 INSERT INTO user_info (mobile, password, nickname, email, gender, role) VALUES (18048155100, "6ecf763ff6e7cef7b47e6611e1bf76fe2608a2e32a97b2d88b083ae1d8d02c82", 'lianhua', 'lianhua100@example.com', 0, 0);
-, password "6ecf763ff6e7cef7b47e6611e1bf76fe2608a2e32a97b2d88b083ae1d8d02c82",

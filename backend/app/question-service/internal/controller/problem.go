@@ -2,9 +2,11 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"net/http"
 	"strconv"
 
@@ -15,37 +17,76 @@ type ProblemHandler struct {
 	logic logic.ProblemLogic
 }
 
-// HandleProblemSet 题目列表
-func (r ProblemHandler) HandleProblemSet(ctx *gin.Context) {
-	p := ctx.Query("params")
+func (r ProblemHandler) HandleUpdate(ctx *gin.Context) {
+	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	form, ret := validate(ctx, models.UpdateProblemForm{})
+	if !ret {
+		return
+	}
+
+	config := models.ProblemConfig{}
+	err := json.Unmarshal([]byte(form.Config), &config)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": "config json 解析失败，格式错误",
+		})
+		return
+	}
+
+	res := r.logic.UpdateQuestion(claims.Uid, form, &config)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (r ProblemHandler) HandleDelete(ctx *gin.Context) {
+	p := ctx.GetString("problem_id")
 	if p == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
 			"message": "参数错误",
 		})
-		ctx.Abort()
 		return
 	}
-	params := &models.QueryProblemListParams{}
-	err := json.Unmarshal([]byte(p), params)
-	if err != nil {
+	problemID, _ := strconv.ParseInt(p, 10, 64)
+	res := r.logic.DeleteQuestion(problemID)
+	ctx.JSON(http.StatusOK, res)
+}
+
+// HandleProblemSet 题目列表
+func (r ProblemHandler) HandleProblemSet(ctx *gin.Context) {
+	pageStr := ctx.Query("page")
+	pageSizeStr := ctx.Query("page_size")
+	keyWord := ctx.Query("keyword")
+	tag := ctx.Query("tag")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
-			"message": err.Error(),
+			"message": "页码参数错误",
 		})
 		ctx.Abort()
 		return
 	}
-	if params.Page <= 0 || params.PageSize <= 0 {
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize <= 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
-			"message": "参数错误",
+			"message": "页大小参数错误",
 		})
 		ctx.Abort()
 		return
+	}
+	params := &models.QueryProblemListParams{
+		Page:     int32(page),
+		PageSize: int32(pageSize),
+		Keyword:  keyWord,
+		Tag:      tag,
 	}
 
-	res := r.logic.GetProblemList(params)
+	c, _ := ctx.Get("claims")
+	claim := c.(*middlewares.UserClaims)
+
+	res := r.logic.GetProblemList(params, claim.Uid)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -92,4 +133,20 @@ func (r ProblemHandler) HandleResult(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	res := r.logic.QueryResult(claims.Uid, problemID)
 	ctx.JSON(http.StatusOK, res)
+}
+
+func (r ProblemHandler) HandleTagList(ctx *gin.Context) {
+	tags, err := cache.GetTagList()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":    models.Failed,
+			"message": fmt.Sprintf("获取标签列表失败:%s", err),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    models.Success,
+		"message": "OK",
+		"data":    tags,
+	})
 }

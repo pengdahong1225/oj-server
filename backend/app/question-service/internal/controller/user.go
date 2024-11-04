@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
@@ -105,28 +104,4 @@ func (r User) HandleSolvedList(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 	res := r.logic.GetUserSolvedList(claims.Uid)
 	ctx.JSON(http.StatusOK, res)
-}
-
-func (r User) HandleUPSS(ctx *gin.Context) {
-	p := ctx.Query("params")
-	if p == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    models.Failed,
-			"message": "参数错误",
-		})
-		ctx.Abort()
-		return
-	}
-
-	params := &models.UPSSParams{}
-	err := json.Unmarshal([]byte(p), params)
-	if err != nil || len(params.ProblemIds) <= 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    models.Failed,
-			"message": err.Error(),
-		})
-		ctx.Abort()
-		return
-	}
-	ctx.JSON(http.StatusOK, r.logic.QueryUserSolvedListByProblemList(params))
 }

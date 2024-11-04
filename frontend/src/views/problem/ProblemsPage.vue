@@ -2,41 +2,12 @@
 import { ref, onMounted } from "vue"
 import { Search, Select } from '@element-plus/icons-vue'
 import type { Problem, QueryProblemListParams } from '@/types/problem'
-import type { UPSSParams } from '@/types/user'
-import { queryProblemListService } from '@/api/problem'
-import { upssService } from '@/api/user'
+import { queryProblemListService, getProblemTagListService } from '@/api/problem'
 
 const loading = ref(false)
 const total = ref(0)
-const problemList = ref<Problem[]>([
-    {
-        id: 1,
-        title: 'Hello World',
-        description: 'Hello World',
-        level: 1,
-        tags: ['Java', 'Python'],
-        status: 1
-    },
-    {
-        id: 2,
-        title: 'tow sum',
-        description: 'tow sum',
-        level: 2,
-        tags: ['Java', 'Python'],
-        status: 0,
-    },
-    {
-        id: 3,
-        title: '接雨水',
-        description: '接雨水',
-        level: 3,
-        tags: ['Java', 'Python'],
-        status: 0
-    }
-])
-const tag_list = ref([
-    'Java', 'Python', 'C++', 'JavaScript', 'TypeScript', 'Go', 'Rust', 'Swift', 'Kotlin', 'PHP', 'Ruby', 'C#', 'SQL', 'HTML', 'CSS', 'Dart', 'Objective-C', 'R', 'Matlab', 'Lua', 'Vue', 'React', 'Angular', 'Node.js', 'Express', 'Flask', 'Django', 'Spring', 'Hibernate'
-])
+const problemList = ref<Problem[]>([])
+const tag_list = ref<string[]>([])
 const params = ref(<QueryProblemListParams>{
     page: 1,
     page_size: 10, // page_size默认为10
@@ -44,36 +15,27 @@ const params = ref(<QueryProblemListParams>{
     tag: ''
 })
 onMounted(() => {
-    // getProblemList()
-    // getUpss()
+    getProblemList()
+    getProblemTagList()
 })
 const getProblemList = async () => {
     loading.value = true
     const res = await queryProblemListService(params.value)
     console.log(res)
-    total.value = res.data.total
-    problemList.value = res.data.data
+    total.value = res.data.data.total
+    problemList.value = res.data.data.data
     loading.value = false
 }
-const getUpss = async () => {
-    if (problemList.value.length === 0) {
-        return
-    }
-
-    let params = <UPSSParams>({
-        uid: 1
-    })
-    problemList.value.forEach((item) => {
-        params.problem_ids.push(item.id)
-    })
-
-    const res = await upssService(params)
+const getProblemTagList = async () => {
+    const res = await getProblemTagListService()
     console.log(res)
+    if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+        tag_list.value = res.data.data
+    }
 }
 const handleCurrentChange = (page: number) => {
     params.value.page = page
     getProblemList()
-    getUpss()
 }
 const onSearch = () => {
     params.value.page = 1
@@ -108,7 +70,7 @@ const onTagClick = (tag: string) => {
 
             <!-- 表格区域 -->
             <el-table v-loading="loading" :data="problemList">
-                <el-table-column label="Status" width="80" align="center">
+                <el-table-column label="Status" prop="status" width="80" align="center">
                     <template #default="{ row }">
                         <el-icon v-if="row.status === 1" color="green" size="18"><Select /></el-icon>
                     </template>
@@ -169,7 +131,8 @@ const onTagClick = (tag: string) => {
 .container {
     display: flex;
     width: 100%;
-    align-items: flex-start; /* 确保卡片顶部对齐，而不会拉伸高度 */
+    align-items: flex-start;
+    /* 确保卡片顶部对齐，而不会拉伸高度 */
 
     .problem-list {
         width: 75%;
