@@ -21,7 +21,7 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 		(?, ?, ?, ?, ?);
 	*/
 	db := mysql.Instance()
-	record := &mysql.SubMitRecord{
+	record := &mysql.SubmitRecord{
 		Uid:       request.UserId,
 		ProblemID: request.ProblemId,
 		Code:      request.Code,
@@ -50,12 +50,12 @@ func (receiver *RecordServer) GetUserSubmitRecord(ctx context.Context, request *
 		where uid = ? and stamp = ?;
 	*/
 	db := mysql.Instance()
-	r := &mysql.SubMitRecord{}
+	r := &mysql.SubmitRecord{}
 	if !db.Migrator().HasTable(r.TableName(request.Stamp)) {
 		return nil, rpc.NotFound
 	}
 
-	var records []mysql.SubMitRecord
+	var records []mysql.SubmitRecord
 	result := db.Where("uid = ?", request.UserId).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())

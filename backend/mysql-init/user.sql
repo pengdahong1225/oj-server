@@ -43,7 +43,7 @@ create table if not exists user_submit_record
     delete_at TIMESTAMP,
 
     code TEXT NOT null comment '提交的代码',
-    result TEXT NOT null comment '运行结果集', -- json
+    result blob NOT null comment '运行结果集',
     lang VARCHAR(64) DEFAULT '' comment '语言',
 
     PRIMARY KEY(uid),

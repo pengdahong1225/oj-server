@@ -11,16 +11,17 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"strconv"
+	"time"
 )
 
-func SetJudgeResult(uid int64, problemID int64, result string) error {
+func SetJudgeResult(uid int64, problemID int64, result []byte) error {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
-	return rdb.SetEx(context.Background(), key, result, 60*10).Err()
+	return rdb.SetEx(context.Background(), key, result, 60*10*time.Second).Err()
 }
 
 func SetUPState(uid int64, problemID int64, state int) error {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "state")
-	return rdb.SetEx(context.Background(), key, state, 60*10).Err()
+	return rdb.SetEx(context.Background(), key, state, 60*10*time.Second).Err()
 }
 
 func GetProblemConfig(problemID int64) (*pb.ProblemConfig, error) {

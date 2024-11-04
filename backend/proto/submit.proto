@@ -1,5 +1,6 @@
 syntax = "proto3";
 option go_package = "./;pb";
+import 'problem.proto';
 
 // “提交”状态枚举，如果没有查询到状态，就意味着最近没有提交题目or题目提交过期了
 enum SubmitState{
@@ -15,4 +16,20 @@ message SubmitForm{
   string lang = 3;
   string code = 4;
   int64 uid = 5;
+}
+
+message JudgeResult{
+  string status = 1;
+  string error = 2;                  // 详细错误信息
+  int64 exitStatus = 3;              // 程序返回值
+  int64 time = 4;                    // 程序运行 CPU 时间，单位纳秒
+  int64 memory = 5;                  // 程序运行内存，单位 byte
+  int64 runTime = 6;                 // 程序运行现实时间，单位纳秒
+  map<string, string> files = 7;     // copyOut 和 pipeCollector 指定的文件内容
+  map<string, string> fileIds = 8;   // copyFileCached 指定的文件 id
+  repeated string fileError = 9;     // 文件错误详细信息
+
+  // 以下字段不属于判题服务的返回字段
+  string content = 10;
+  TestCase testCase = 11;
 }

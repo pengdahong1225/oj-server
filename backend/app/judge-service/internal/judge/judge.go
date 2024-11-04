@@ -17,7 +17,7 @@ import (
 
 var (
 	baseUrl    string
-	runResults chan types.SubmitResult // 运行结果
+	runResults chan *pb.JudgeResult // 运行结果
 	once       sync.Once
 )
 
@@ -25,7 +25,7 @@ func Init() {
 	once.Do(func() {
 		sanbox := settings.Instance().SandBox
 		baseUrl = fmt.Sprintf("http://%s:%d", sanbox.Host, sanbox.Port)
-		runResults = make(chan types.SubmitResult, 256)
+		runResults = make(chan *pb.JudgeResult, 256)
 	})
 }
 
@@ -54,12 +54,12 @@ func Handle(form *pb.SubmitForm) {
 	start := time.Now()
 	res := doAction(param)
 	duration := time.Now().Sub(start).Milliseconds()
-	logrus.Infoln("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms", form.Uid, form.ProblemId, duration)
+	logrus.Infof("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms\n", form.Uid, form.ProblemId, duration)
 
 	// 解锁用户
 	//cache.UnLockUser(form.Uid)
 
-	// 记录
+	// 记录结果
 	data, err := json.Marshal(res)
 	if err != nil {
 		logrus.Errorln(err.Error())
@@ -81,7 +81,7 @@ func saveResult(param *types.Param, data []byte) {
 		UserId:    param.Uid,
 		ProblemId: param.ProblemID,
 		Code:      param.Code,
-		Result:    string(data),
+		Result:    data,
 		Lang:      param.Language,
 		Stamp:     time.Now().Unix(),
 	}
@@ -91,7 +91,7 @@ func saveResult(param *types.Param, data []byte) {
 		logrus.Errorln(err.Error())
 	}
 
-	if err := cache.SetJudgeResult(param.Uid, param.ProblemID, string(data)); err != nil {
+	if err := cache.SetJudgeResult(param.Uid, param.ProblemID, data); err != nil {
 		logrus.Errorln(err.Error())
 	}
 }
@@ -120,9 +120,9 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 // 2.编译结果
 // 3.运行结果
 // 4.评判结果
-func doAction(param *types.Param) []types.SubmitResult {
+func doAction(param *types.Param) []*pb.JudgeResult {
 	handler := &Handler{}
-	results := make([]types.SubmitResult, 0)
+	results := make([]*pb.JudgeResult, 0)
 	// 设置题目状态[编译]
 	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling)); err != nil {
 		logrus.Errorln(err.Error())
@@ -132,9 +132,11 @@ func doAction(param *types.Param) []types.SubmitResult {
 		logrus.Errorln(err.Error())
 		return nil
 	}
+	logrus.Debugln("编译结果:", compileResult)
+
 	if compileResult.Status != "Accepted" {
 		compileResult.Content = "编译失败"
-		results = append(results, *compileResult)
+		results = append(results, compileResult)
 		// 更新状态
 		if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited)); err != nil {
 			logrus.Errorln(err.Error())
@@ -143,7 +145,7 @@ func doAction(param *types.Param) []types.SubmitResult {
 		return results
 	}
 	compileResult.Content = "编译成功"
-	results = append(results, *compileResult)
+	results = append(results, compileResult)
 
 	// 保存可执行文件的文件ID
 	param.FileIds = compileResult.FileIds

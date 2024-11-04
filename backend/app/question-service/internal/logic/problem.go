@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"slices"
+	"time"
 )
 
 type ProblemLogic struct {
@@ -167,7 +168,7 @@ func (r ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *model
 		Data:    nil,
 	}
 
-	ok, err := cache.LockUser(uid, 60)
+	ok, err := cache.LockUser(uid, 60*time.Second)
 	if err != nil {
 		logrus.Errorln("lock user err:", err.Error())
 		res.Code = models.Failed
@@ -184,6 +185,7 @@ func (r ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *model
 	// 异步处理
 	// protobuf序列化
 	pbForm := pb.SubmitForm{
+		Uid:       uid,
 		ProblemId: form.ProblemID,
 		Title:     form.Title,
 		Lang:      form.Lang,
@@ -201,8 +203,8 @@ func (r ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *model
 	productor := mq.NewProducer(
 		consts.RabbitMqExchangeKind,
 		consts.RabbitMqExchangeName,
-		consts.RabbitMqCommentQueue,
-		consts.RabbitMqCommentKey,
+		consts.RabbitMqJudgeQueue,
+		consts.RabbitMqJudgeKey,
 	)
 	if !productor.Publish(data) {
 		res.Code = models.Failed
@@ -286,7 +288,7 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 		return res
 	}
 	// 解析
-	var results []models.SubmitResult
+	var results []*pb.JudgeResult
 	if err := json.Unmarshal([]byte(result), &results); err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
