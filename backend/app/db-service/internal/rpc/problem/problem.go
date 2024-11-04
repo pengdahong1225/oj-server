@@ -66,6 +66,10 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 	if err = redis.CacheProblemConfig(problem.ID, config); err != nil {
 		logrus.Errorln(err.Error())
 	}
+	// 缓存标签
+	if err = redis.UpdateTagList(request.Data.Tags); err != nil {
+		logrus.Errorln(err.Error())
+	}
 
 	return &pb.UpdateProblemResponse{
 		Id: problem.ID,

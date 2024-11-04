@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/comment"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/redis"
@@ -16,6 +17,7 @@ import (
 type Daemon struct {
 }
 
+// CommentSaveConsumer
 // comment消费者
 func (receiver Daemon) CommentSaveConsumer() {
 	consumer := mq.NewConsumer(
@@ -56,7 +58,8 @@ func syncHandle(data []byte) bool {
 	return true
 }
 
-// 排行榜
+// RankList
+// 排行榜维护
 func (receiver Daemon) RankList() {
 	db := mysql.Instance()
 	var orderList []mysql.Statistics
@@ -86,5 +89,35 @@ func (receiver Daemon) RankList() {
 
 	if err := redis.UpdateRankList(orderList); err != nil {
 		logrus.Errorln("更新排行榜失败", err.Error())
+	}
+}
+
+// ReadTagList
+// 提取tag list
+func (receiver Daemon) ReadTagList() {
+	db := mysql.Instance()
+	var list [][]byte
+	var tags []string
+
+	/*
+		SELECT tags FROM problem;
+	*/
+	result := db.Model(&mysql.Problem{}).Select("tags").Scan(&list)
+	if result.Error != nil {
+		logrus.Errorln("获取tag list失败", result.Error.Error())
+		return
+	}
+
+	for _, val := range list {
+		var temp []string
+		if err := json.Unmarshal(val, &temp); err != nil {
+			logrus.Errorln("解析tag list失败", err.Error())
+			return
+		}
+		tags = append(tags, temp...)
+	}
+	if err := redis.UpdateTagList(tags); err != nil {
+		logrus.Errorln("更新tag list失败", err.Error())
+		return
 	}
 }

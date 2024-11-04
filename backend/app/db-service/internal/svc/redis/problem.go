@@ -23,7 +23,15 @@ func UpdateRankList(orderList []mysql.Statistics) error {
 	return nil
 }
 
-// CacheProblemConfig 缓存题目热点数据
+// CacheProblemConfig
+// 缓存题目热点数据
 func CacheProblemConfig(problemID int64, data []byte) error {
 	return rdb.HSet(context.Background(), strconv.FormatInt(problemID, 10), "hotData", data).Err()
+}
+
+// UpdateTagList
+// 更新标签列表
+func UpdateTagList(list []string) error {
+	key := "tag_list"
+	return rdb.SAdd(context.Background(), key, list).Err()
 }

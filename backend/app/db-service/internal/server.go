@@ -72,6 +72,13 @@ func (receiver *Server) Start() {
 		daemonServer.CommentSaveConsumer()
 	})
 
+	// 初始化任务
+	wg.Add(1)
+	err = goroutinePool.Instance().Submit(func() {
+		defer wg.Done()
+		daemonServer.ReadTagList()
+	})
+
 	// 注册服务节点
 	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
 	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port, receiver.UUID); err != nil {
