@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
@@ -203,30 +204,51 @@ func (r User) GetRankList() *models.Response {
 	return res
 }
 
-func (r User) GetSubmitRecord(uid int64, stamp int64) *models.Response {
+func (r User) GetSubmitRecord(uid, problemID, stamp int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
+	// 查询结果
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
-		logrus.Errorf("db服务连接失败:%s\n", err.Error())
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return res
 	}
 	defer dbConn.Close()
-
 	client := pb.NewRecordServiceClient(dbConn)
-	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{UserId: uid, Stamp: stamp})
+	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{
+		UserId: uid,
+		Stamp:  stamp,
+	})
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
+		logrus.Errorln(err.Error())
 		return res
 	}
+
+	var data models.QuerySubmitResponse
+	data.Uid = uid
+	data.ProblemID = problemID
+	data.Stamp = stamp
+	for _, record := range response.Data {
+		r := models.SubmitRecord{
+			Code: record.Code,
+			Lang: record.Lang,
+		}
+		err := json.Unmarshal(record.Result, &r.Result)
+		if err != nil {
+			logrus.Errorln(err.Error())
+		}
+		data.Records = append(data.Records, r)
+	}
+
 	res.Message = "OK"
-	res.Data = response.Data
+	res.Data = data
 	return res
 }
 

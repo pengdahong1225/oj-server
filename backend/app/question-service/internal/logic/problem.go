@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/consts"
@@ -253,7 +252,7 @@ func (r ProblemLogic) GetProblemDetail(problemID int64) *models.Response {
 	return res
 }
 
-func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
+func (r ProblemLogic) QueryResult(uid int64, problemID int64, stamp int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -278,25 +277,6 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 		res.Message = "running"
 		return res
 	}
-
-	// 查询结果
-	result, err := cache.QueryJudgeResult(uid, problemID)
-	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		logrus.Errorln(err.Error())
-		return res
-	}
-	// 解析
-	var results []*pb.JudgeResult
-	if err := json.Unmarshal([]byte(result), &results); err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		logrus.Errorln(err.Error())
-		return res
-	}
-
-	res.Message = "OK"
-	res.Data = results
-	return res
+	
+	return nil
 }

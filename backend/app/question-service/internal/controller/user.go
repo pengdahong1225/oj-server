@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 type User struct {
@@ -86,17 +87,26 @@ func (r User) HandleRankList(ctx *gin.Context) {
 }
 
 func (r User) HandleSubmitRecord(ctx *gin.Context) {
-	t, ok := ctx.GetQuery("stamp")
-	if !ok {
+	// 查询参数
+	problemIDStr := ctx.Query("problemID")
+	if problemIDStr == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
 			"message": "参数错误",
 		})
 		return
 	}
+	problemID, _ := strconv.ParseInt(problemIDStr, 10, 64)
+	stampStr := ctx.Query("stamp")
+
+	var stamp int64 = 0
+	if stampStr == "" {
+		stamp = time.Now().Unix()
+	} else {
+		stamp, _ = strconv.ParseInt(stampStr, 10, 64)
+	}
 	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	stamp, _ := strconv.ParseInt(t, 10, 64)
-	res := r.logic.GetSubmitRecord(claims.Uid, stamp)
+	res := r.logic.GetSubmitRecord(claims.Uid, problemID, stamp)
 	ctx.JSON(http.StatusOK, res)
 }
 

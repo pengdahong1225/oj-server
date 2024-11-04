@@ -31,11 +31,6 @@ func QueryUPState(uid int64, problemID int64) (int32, error) {
 	return int32(state), nil
 }
 
-func QueryJudgeResult(uid int64, problemID int64) (string, error) {
-	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
-	return Rdb.Get(context.Background(), key).Result()
-}
-
 func GetTagList() ([]string, error) {
 	key := "tag_list"
 	return Rdb.SMembers(context.Background(), key).Result()

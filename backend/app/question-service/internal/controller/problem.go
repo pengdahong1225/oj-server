@@ -3,14 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 type ProblemHandler struct {
@@ -120,19 +119,7 @@ func (r ProblemHandler) HandleSubmit(ctx *gin.Context) {
 
 // 查询提交结果
 func (r ProblemHandler) HandleResult(ctx *gin.Context) {
-	// 查询参数
-	id := ctx.Query("problemID")
-	if id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    models.Failed,
-			"message": "参数错误",
-		})
-		return
-	}
-	problemID, _ := strconv.ParseInt(id, 10, 64)
-	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := r.logic.QueryResult(claims.Uid, problemID)
-	ctx.JSON(http.StatusOK, res)
+
 }
 
 func (r ProblemHandler) HandleTagList(ctx *gin.Context) {

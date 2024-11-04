@@ -44,10 +44,15 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 	return &empty.Empty{}, nil
 }
 
+// GetUserSubmitRecord
+// 查询用户的提交记录
+// @uid
+// @problem id
+// stamp
 func (receiver *RecordServer) GetUserSubmitRecord(ctx context.Context, request *pb.GetUserSubmitRecordRequest) (*pb.GetUserSubmitRecordResponse, error) {
 	/*
 		select * from user_submit_record_xx
-		where uid = ? and stamp = ?;
+		where uid = ?;
 	*/
 	db := mysql.Instance()
 	r := &mysql.SubmitRecord{}
@@ -56,7 +61,7 @@ func (receiver *RecordServer) GetUserSubmitRecord(ctx context.Context, request *
 	}
 
 	var records []mysql.SubmitRecord
-	result := db.Where("uid = ?", request.UserId).Find(&records)
+	result := db.Table(r.TableName(request.Stamp)).Where("uid = ?", request.UserId).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
