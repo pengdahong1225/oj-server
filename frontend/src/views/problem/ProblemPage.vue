@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService } from '@/api/problem'
+import {querySubmitRecordService} from '@/api/user'
 import type { Problem, SubmitForm } from '@/types/problem'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
@@ -54,6 +55,19 @@ const onSubmit = async () => {
     const res = await submitProblemService(form.value)
     console.log(res)
     loading.value = false
+
+    // 轮训判题结果
+    // timer = setInterval(() => {
+    //     checkResult()
+    // }, 500)
+}
+
+// 轮训判题结果
+let timer = 0
+const checkResult = async () => {
+    const res = await querySubmitRecordService(Number(route.params.id))
+    console.log(res)
+    // clearInterval(timer)
 }
 
 // ACE主题和配置
@@ -96,18 +110,6 @@ const editorOptions = ref({
                     <descriptionItem class="descriptionItem" title="Description" :content="problem.description"
                         style="width: 100%;">
                     </descriptionItem>
-                    <descriptionItem class="descriptionItem" title="Input" :content="problem.description"
-                        style="width: 100%;">
-                    </descriptionItem>
-                    <descriptionItem class="descriptionItem" title="Output" :content="problem.description"
-                        style="width: 100%;">
-                    </descriptionItem>
-                    <descriptionItem class="descriptionItem" title="Sample Input" :content="problem.description"
-                        style="width: 100%;">
-                    </descriptionItem>
-                    <descriptionItem class="descriptionItem" title="Sample Output" :content="problem.description"
-                        style="width: 100%;">
-                    </descriptionItem>
                     <descriptionItem class="descriptionItem" title="Hint" :content="problem.description"
                         style="width: 100%;">
                     </descriptionItem>
@@ -133,7 +135,7 @@ const editorOptions = ref({
                 <VAceEditor v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"
                     style="height: 500px; width: 100%;" />
 
-                <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
+                <el-button class="submit-btn" type="warning" :loading="loading" @click="checkResult">
                     <el-icon>
                         <UploadFilled />
                     </el-icon>Submit

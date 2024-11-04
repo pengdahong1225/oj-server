@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { updateProblemService, queryProblemDetailService } from '@/api/problem'
+import { updateProblemService, queryProblemDetailService, getProblemTagListService } from '@/api/problem'
 import type { Problem } from '@/types/problem.ts'
 
 const level_list = [
@@ -12,6 +12,7 @@ const drawerVisible = ref(false)
 const formRef = ref()
 
 const formModel = ref<Problem>({
+    id: 0,
     title: '',
     description: '',
     level: 0,
@@ -37,9 +38,10 @@ const onSubmit = async () => {
 const open = (row: Problem) => {
     drawerVisible.value = true
     formModel.value = row
-    if (formModel.value.id) {
+    if (formModel.value.id > 0) {
         getProblemDetail(formModel.value.id)
     }
+    getProblemTagList()
 }
 defineExpose({
     open
@@ -57,9 +59,14 @@ const getProblemDetail = async (id: number) => {
     formModel.value.config = JSON.stringify(res.data.data.config)
 }
 
-const tag_list = ref([
-    'Java', 'Python', 'C++', 'JavaScript', 'TypeScript', 'Go', 'Rust', 'Swift', 'Kotlin', 'PHP', 'Ruby', 'C#', 'SQL', 'HTML', 'CSS', 'Dart', 'Objective-C', 'R', 'Matlab', 'Lua', 'Vue', 'React', 'Angular', 'Node.js', 'Express', 'Flask', 'Django', 'Spring', 'Hibernate'
-])
+const tag_list = ref<string[]>([])
+const getProblemTagList = async () => {
+    const res = await getProblemTagListService()
+    console.log(res)
+    if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+        tag_list.value = res.data.data
+    }
+}
 </script>
 
 <template>
@@ -80,7 +87,8 @@ const tag_list = ref([
                     </el-select>
                 </el-form-item>
                 <el-form-item label="标签" prop="tags">
-                    <el-select v-model="formModel.tags" multiple placeholder="Select" style="width: 240px">
+                    <el-select v-model="formModel.tags" multiple filterable allow-create default-first-option
+                        placeholder="Select" style="width: 240px">
                         <el-option v-for="item in tag_list" :key="item" :label="item" :value="item" />
                     </el-select>
                 </el-form-item>

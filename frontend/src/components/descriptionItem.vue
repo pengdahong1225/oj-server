@@ -12,7 +12,7 @@ const props = defineProps({
         <div class="d-title">
             {{ title }}
         </div>
-        <div class="d-content">
+        <div class="d-content" style="white-space: pre-line; ">
             {{ content }}
         </div>
     </div>

@@ -23,3 +23,4 @@ export const updateProblemService = (data: Problem) => {
 export const getProblemTagListService = () => {
   return request.get('/problem/tagList')
 }
+

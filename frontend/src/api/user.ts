@@ -13,3 +13,11 @@ export const userLoginService = (form: LoginForm) => {
 export const getUserInfoService = (uid: number) => {
     return request.get(`/user/profile?uid=${uid}`)
 }
+
+// 查询用户提交记录
+export const querySubmitRecordService = (id: number) => {
+    const params = {
+        "problemID": id
+    }
+    return request.get('/user/submitRecord', { params })
+}

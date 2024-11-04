@@ -18,7 +18,7 @@ export interface Problem {
     level: number;
     tags: string[];
 
-    id?: number;
+    id: number;
     status?: number;
     create_at?: string;
     create_by?: number;
