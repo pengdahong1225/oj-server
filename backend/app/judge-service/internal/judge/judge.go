@@ -21,15 +21,18 @@ var (
 	once       sync.Once
 )
 
-func init() {
+func Init() {
 	once.Do(func() {
-		baseUrl = fmt.Sprintf("http://%s:%d", "localhost", 5050)
+		sanbox := settings.Instance().SandBox
+		baseUrl = fmt.Sprintf("http://%s:%d", sanbox.Host, sanbox.Port)
 		runResults = make(chan types.SubmitResult, 256)
 	})
 }
 
 // Handle 判题服务入口
 func Handle(form *pb.SubmitForm) {
+	Init()
+
 	// 退出之后，需要将"提交"状态置为UPStateExited
 	defer func() {
 		if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited)); err != nil {
