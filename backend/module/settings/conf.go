@@ -5,6 +5,7 @@ import "errors"
 // 从viper反射到数据模型，需要设置`mapstructure`反射字段
 type AppConfig struct {
 	SystemConfigs   []SystemConfig `mapstructure:"system"`
+	*SandBox        `mapstructure:"sandbox"`
 	*MysqlConfig    `mapstructure:"mysql"`
 	*RedisConfig    `mapstructure:"redis"`
 	*LogConfig      `mapstructure:"log"`
@@ -18,6 +19,11 @@ type SystemConfig struct {
 	Name string `mapstructure:"name"`
 	Port int    `mapstructure:"port"`
 	UUID string `mapstructure:"uuid"`
+}
+
+type SandBox struct {
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
 }
 
 type MysqlConfig struct {
