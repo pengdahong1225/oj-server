@@ -21,6 +21,7 @@ func (UserInfo) TableName() string {
 }
 
 type UserSolution struct {
+	ID        int64     `gorm:"<-:false;primary_key;autoIncrement;column:id" json:"id"`
 	Uid       int64     `gorm:"column:uid" json:"uid"`
 	ProblemID int64     `gorm:"column:problem_id" json:"problem_id"`
 	CreateAt  time.Time `gorm:"<-:false;column:create_at" json:"createAt"`

@@ -60,15 +60,17 @@ func Handle(form *pb.SubmitForm) {
 	// 解锁用户
 	//cache.UnLockUser(form.Uid)
 
-	analyzeResult(param, res)
+	if res != nil {
+		analyzeResult(param, res)
 
-	// 记录结果
-	data, err := json.Marshal(res)
-	if err != nil {
-		logrus.Errorln(err.Error())
-		return
+		// 记录结果
+		data, err := json.Marshal(res)
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return
+		}
+		saveResult(param, data)
 	}
-	saveResult(param, data)
 }
 
 func analyzeResult(param *types.Param, results []*pb.JudgeResult) {
@@ -182,7 +184,7 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 	// 读取题目配置
 	problemConfig, err := cache.GetProblemConfig(form.ProblemId)
 	if err != nil {
-		logrus.Errorln("预处理失败:%s", err.Error())
+		logrus.Errorln(err.Error())
 		return false, nil
 	}
 

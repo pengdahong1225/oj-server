@@ -33,33 +33,28 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 		return nil, rpc.InsertFailed
 	}
 
-	problem := &mysql.Problem{
-		Title:       request.Data.Title,
-		Level:       request.Data.Level,
-		Tags:        tags,
-		Description: request.Data.Description,
-		CreateBy:    request.Data.CreateBy,
-		Config:      config,
-	}
-	result := db.Where("title = ?", problem.Title)
+	problem := mysql.Problem{}
+	result := db.Where("title = ?", request.Data.Title).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
 	}
 
-	// 不存在就新增，存在就修改
+	problem.Title = request.Data.Title
+	problem.Level = request.Data.Level
+	problem.Tags = tags
+	problem.Description = request.Data.Description
+	problem.CreateBy = request.Data.CreateBy
+	problem.Config = config
+
 	if result.RowsAffected == 0 {
-		result = db.Create(problem)
-		if result.Error != nil {
-			logrus.Errorln(result.Error.Error())
-			return nil, rpc.InsertFailed
-		}
+		result = db.Create(&problem)
 	} else {
-		result = db.Updates(problem)
-		if result.Error != nil {
-			logrus.Errorln(result.Error.Error())
-			return nil, rpc.UpdateFailed
-		}
+		result = db.Updates(&problem)
+	}
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.UpdateFailed
 	}
 
 	// 缓存题目配置
@@ -84,8 +79,6 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 		where id = ?;
 	*/
 	var problem mysql.Problem
-
-	fmt.Println(db.Debug().First(&problem, "id = ?", request.Id).Statement.SQL.String())
 
 	result := db.Where("id = ?", request.Id).First(&problem)
 	if result.Error != nil {

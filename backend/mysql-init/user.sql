@@ -38,13 +38,14 @@ create table if not exists user_submit_record
 -- 用户解题表
 create table if not exists user_solution
 (
+    id BIGINT AUTO_INCREMENT,
     uid BIGINT NOT NULL COMMENT '用户id',
     problem_id BIGINT NOT NULL comment '题目id',
 
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
-    PRIMARY KEY(uid),
+    PRIMARY KEY(id),
     INDEX idx_uid(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
 

@@ -254,14 +254,13 @@ func (r *UserServer) UpdateUserAcProblemData(ctx context.Context, request *pb.Up
 		insert into user_solution(uid,problem_id)
 		values(?,?)
 	*/
-	data := mysql.UserSolution{
-		Uid:       request.Uid,
-		ProblemID: request.ProblemId,
-	}
-	result := db.Find(&data)
+	data := mysql.UserSolution{}
+	result := db.Where("uid=? and problem_id=?", request.Uid, request.ProblemId).Find(&data)
 	if result.RowsAffected != 0 {
 		return nil, rpc.AlreadyExists
 	}
+	data.Uid = request.Uid
+	data.ProblemID = request.ProblemId
 
 	result = db.Create(&data)
 	if result.Error != nil {
@@ -289,7 +288,7 @@ func (r *UserServer) UpdateUserDoProblemStatistics(ctx context.Context, request 
 		data.EasyProblemCount += request.EasyCountIncr
 		data.MediumProblemCount += request.MediumCountIncr
 		data.HardProblemCount += request.HardCountIncr
-		result = db.Save(&data)
+		result = db.Where("uid=?", data.Uid).Save(&data)
 		if result.Error != nil {
 			logrus.Errorln(result.Error.Error())
 			return nil, rpc.UpdateFailed
