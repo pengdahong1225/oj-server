@@ -5,6 +5,8 @@ import (
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
 	"os"
+	"path"
+	"runtime"
 	"time"
 )
 
@@ -60,18 +62,18 @@ func (hook FileHook) write(entry *logrus.Entry) {
 	}
 }
 
-// 初始化日志
-func InitLog(appName, path, level string) error {
+// InitLog 初始化日志
+func InitLog(appName, filePath, level string) error {
 	timer := time.Now().Format("2006-01-02")
-	err := os.MkdirAll(path, os.ModePerm)
+	err := os.MkdirAll(filePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	// 日志文件
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", path, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	hook := &FileHook{
 		errFile:   errFile,
@@ -79,7 +81,7 @@ func InitLog(appName, path, level string) error {
 		debugFile: debugFile,
 		fileDate:  timer,
 		appName:   appName,
-		filePath:  path,
+		filePath:  filePath,
 	}
 	logrus.AddHook(hook)
 	if level == "info" {
@@ -94,7 +96,13 @@ func InitLog(appName, path, level string) error {
 		TimestampFormat: "2006-01-02 15:04:05",
 		ShowFullLevel:   true,
 		CallerFirst:     true,
+		CustomCallerFormatter: func(f *runtime.Frame) string {
+			filename := path.Base(f.File)
+			funcname := path.Base(f.Function)
+			return fmt.Sprintf(" [%s:%d %s]", filename, f.Line, funcname)
+		},
 	}
+
 	logrus.SetFormatter(format)
 	logrus.SetOutput(os.Stdout)
 	logrus.SetReportCaller(true)
