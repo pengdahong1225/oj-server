@@ -232,6 +232,6 @@ func (receiver *ProblemServer) GetProblemHotData(ctx context.Context, request *p
 		logrus.Errorln(err.Error())
 	}
 
-	response := &pb.GetProblemHotDataResponse{Data: string(problem.Config)}
+	response := &pb.GetProblemHotDataResponse{Data: problem.Config}
 	return response, nil
 }

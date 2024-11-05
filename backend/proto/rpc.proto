@@ -211,7 +211,7 @@ message GetProblemHotDataRequest{
   int64 problem_id = 1;
 }
 message GetProblemHotDataResponse{
-  string data = 1;
+  bytes data = 1;
 }
 
 message ResetUserPasswordRequest{

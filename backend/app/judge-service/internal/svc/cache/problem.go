@@ -55,8 +55,7 @@ func onGetProblemConfig(problemID int64) ([]byte, error) {
 			logrus.Errorln(err.Error())
 			return nil, err
 		}
-		data = []byte(res.Data)
-		return data, nil
+		return res.Data, nil
 	}
 	return nil, err
 }
