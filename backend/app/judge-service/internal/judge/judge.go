@@ -36,13 +36,13 @@ func Handle(form *pb.SubmitForm) {
 
 	// 退出之后，需要将"提交"状态置为UPStateExited
 	defer func() {
-		if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited)); err != nil {
+		if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited), 60*2*time.Second); err != nil {
 			logrus.Errorln(err.Error())
 		}
 	}()
 
 	// 设置“提交”状态
-	if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateNormal)); err != nil {
+	if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateNormal), 60*2*time.Second); err != nil {
 		logrus.Errorln(err.Error())
 		return
 	}
@@ -207,7 +207,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 	handler := &Handler{}
 	results := make([]*pb.JudgeResult, 0)
 	// 设置题目状态[编译]
-	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling)); err != nil {
+	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling), 60*2*time.Second); err != nil {
 		logrus.Errorln(err.Error())
 	}
 	compileResult, err := handler.compile(param)
@@ -221,7 +221,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 		compileResult.Content = "编译失败"
 		results = append(results, compileResult)
 		// 更新状态
-		if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited)); err != nil {
+		if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited), 60*2*time.Second); err != nil {
 			logrus.Errorln(err.Error())
 			return nil
 		}
@@ -233,7 +233,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 	// 保存可执行文件的文件ID
 	param.FileIds = compileResult.FileIds
 	// 设置题目状态[判题中]
-	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateJudging)); err != nil {
+	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateJudging), 60*2*time.Second); err != nil {
 		logrus.Errorln(err.Error())
 	}
 	wgRun := new(sync.WaitGroup)

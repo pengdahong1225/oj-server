@@ -19,9 +19,9 @@ func SetJudgeResult(uid int64, problemID int64, result []byte, expire time.Durat
 	return rdb.SetEx(context.Background(), key, result, expire).Err()
 }
 
-func SetUPState(uid int64, problemID int64, state int) error {
+func SetUPState(uid int64, problemID int64, state int, expire time.Duration) error {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "state")
-	return rdb.SetEx(context.Background(), key, state, 60*10*time.Second).Err()
+	return rdb.SetEx(context.Background(), key, state, expire).Err()
 }
 
 func GetProblemConfig(problemID int64) (*pb.ProblemConfig, error) {
