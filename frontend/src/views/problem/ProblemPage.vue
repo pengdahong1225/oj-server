@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problem'
-import type { Problem, SubmitForm } from '@/types/problem'
+import type { Problem, SubmitForm, SubmitResult } from '@/types/problem'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/mode-c_cpp'
@@ -71,7 +71,33 @@ const checkResult = async () => {
     if (res.data.data.message !== 'OK') {
         clearInterval(timer)
         running.value = false
+
+        result.value.problem_id = res.data.data.problem_id
+        result.value.results = res.data.data.result
+        console.log(result.value)
     }
+}
+const result = ref<SubmitResult>({
+    problem_id: 0,
+    results: []
+})
+const btype = computed(() => {
+    if (result.value.results.every(item => item.status === 'Accepted')) {
+        return 'success'
+    } else {
+        return 'danger'
+    }
+})
+const bmsg = computed(() => {
+    if (result.value.results.every(item => item.status === 'Accepted')) {
+        return 'Accepted'
+    } else {
+        return 'Wrong Answer'
+    }
+})
+const showed = ref(false)
+const showResult = () => {
+    showed.value = true
 }
 
 // ACE主题和配置
@@ -139,11 +165,20 @@ const editorOptions = ref({
                 <VAceEditor v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"
                     style="height: 500px; width: 100%;" />
 
-                <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
-                    <el-icon>
-                        <UploadFilled />
-                    </el-icon>Submit
-                </el-button>
+                <div>
+                    <div v-if="result.results.length > 0" class="result">
+                        <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
+                            {{ bmsg }}
+                        </el-button>
+                        <span v-else>You have solved the problem</span>
+                    </div>
+
+                    <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
+                        <el-icon>
+                            <UploadFilled />
+                        </el-icon>Submit
+                    </el-button>
+                </div>
             </el-card>
 
         </div>

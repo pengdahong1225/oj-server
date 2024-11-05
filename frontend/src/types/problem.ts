@@ -25,6 +25,16 @@ export interface Problem {
     config?: string;
 }
 
+export interface SubmitResult{
+    problem_id: number;
+    results: Result[];
+}
+interface Result{
+    memory: number;
+    runTime: number;
+    status: string;
+}
+
 interface ProblemConfig {
     testCases: TestCase[];
     compileLimit: Limit;
@@ -43,3 +53,4 @@ interface Limit {
     stackLimit: number;
     procLimit: number;
 }
+
