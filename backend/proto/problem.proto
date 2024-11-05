@@ -21,6 +21,7 @@ message ProblemConfig{
   repeated TestCase test_cases = 1;
   Limit compile_limit = 2;
   Limit run_limit = 3;
+  int32 level = 4;
 }
 
 message TestCase{

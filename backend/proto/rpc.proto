@@ -15,9 +15,12 @@ service UserService{
   rpc UpdateUserData(UpdateUserRequest) returns(google.protobuf.Empty);
   rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
-  rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
   rpc ResetUserPassword(ResetUserPasswordRequest) returns(google.protobuf.Empty);
+
+  rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
   rpc QueryUserSolvedListByProblemIds(QueryUserSolvedListByProblemIdsRequest) returns(QueryUserSolvedListByProblemIdsResponse);
+  rpc UpdateUserAcProblemData(UpdateUserACDataRequest) returns(google.protobuf.Empty);
+  rpc UpdateUserDoProblemStatistics(UpdateUserDoProblemStatisticsRequest) returns(google.protobuf.Empty);
 }
 // problem接口
 service ProblemService{
@@ -42,6 +45,20 @@ service NoticeService{
   rpc GetNoticeList(GetNoticeListRequest) returns(GetNoticeListResponse);
   rpc AppendNotice(AppendNoticeRequest) returns(AppendNoticeResponse);
   rpc DeleteNotice(DeleteNoticeRequest) returns(google.protobuf.Empty);
+}
+
+message UpdateUserDoProblemStatisticsRequest{
+  int64 uid = 1;
+  int32 submit_count_incr = 2;
+  int32 ac_count_incr = 3;
+  int32 easy_count_incr = 4;
+  int32 medium_count_incr = 5;
+  int32 hard_count_incr = 6;
+}
+
+message UpdateUserACDataRequest{
+  int64 uid = 1;
+  int64 problem_id = 2;
 }
 
 message DeleteNoticeRequest{

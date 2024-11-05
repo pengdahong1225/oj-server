@@ -19,21 +19,6 @@ create table if not exists user_info
     UNIQUE INDEX idx_mobile(mobile)
 )engine = InnoDB charset = utf8mb4;
 
--- 做题信息表
-create table if not exists user_problem_statistics(
-    uid BIGINT not null comment '用户id',
-    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    delete_at TIMESTAMP,
-
-    submit_count BIGINT DEFAULT 0 comment '题目提交数量',
-    accomplish_count BIGINT DEFAULT 0 comment '题目通过数量',
-    easy_problem_count BIGINT DEFAULT 0 comment '通过的简单题目数量',
-    medium_problem_count BIGINT DEFAULT 0 comment '通过的中等题目数量',
-    hard_problem_count BIGINT DEFAULT 0 comment '通过的困难题目数量',
-
-    PRIMARY KEY(uid)
-)engine = InnoDB charset = utf8mb4;
-
 -- 用户提交记录表
 create table if not exists user_submit_record
 (
@@ -61,4 +46,19 @@ create table if not exists user_solution
 
     PRIMARY KEY(uid),
     INDEX idx_uid(uid, problem_id)
+)engine = InnoDB charset = utf8mb4;
+
+-- 用户解题统计表
+create table if not exists user_problem_statistics(
+    uid BIGINT not null comment '用户id',
+    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delete_at TIMESTAMP,
+
+    submit_count BIGINT DEFAULT 0 comment '题目提交数量',
+    accomplish_count BIGINT DEFAULT 0 comment '题目通过数量',
+    easy_problem_count BIGINT DEFAULT 0 comment '通过的简单题目数量',
+    medium_problem_count BIGINT DEFAULT 0 comment '通过的中等题目数量',
+    hard_problem_count BIGINT DEFAULT 0 comment '通过的困难题目数量',
+
+    PRIMARY KEY(uid)
 )engine = InnoDB charset = utf8mb4;

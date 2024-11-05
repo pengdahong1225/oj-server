@@ -26,9 +26,11 @@ const (
 	UserService_UpdateUserData_FullMethodName                  = "/UserService/UpdateUserData"
 	UserService_DeleteUserData_FullMethodName                  = "/UserService/DeleteUserData"
 	UserService_GetUserList_FullMethodName                     = "/UserService/GetUserList"
-	UserService_GetUserSolvedList_FullMethodName               = "/UserService/GetUserSolvedList"
 	UserService_ResetUserPassword_FullMethodName               = "/UserService/ResetUserPassword"
+	UserService_GetUserSolvedList_FullMethodName               = "/UserService/GetUserSolvedList"
 	UserService_QueryUserSolvedListByProblemIds_FullMethodName = "/UserService/QueryUserSolvedListByProblemIds"
+	UserService_UpdateUserAcProblemData_FullMethodName         = "/UserService/UpdateUserAcProblemData"
+	UserService_UpdateUserDoProblemStatistics_FullMethodName   = "/UserService/UpdateUserDoProblemStatistics"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -43,9 +45,11 @@ type UserServiceClient interface {
 	UpdateUserData(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteUserData(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
-	GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error)
 	ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error)
 	QueryUserSolvedListByProblemIds(ctx context.Context, in *QueryUserSolvedListByProblemIdsRequest, opts ...grpc.CallOption) (*QueryUserSolvedListByProblemIdsResponse, error)
+	UpdateUserAcProblemData(ctx context.Context, in *UpdateUserACDataRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateUserDoProblemStatistics(ctx context.Context, in *UpdateUserDoProblemStatisticsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type userServiceClient struct {
@@ -116,16 +120,6 @@ func (c *userServiceClient) GetUserList(ctx context.Context, in *GetUserListRequ
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserSolvedListResponse)
-	err := c.cc.Invoke(ctx, UserService_GetUserSolvedList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *userServiceClient) ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
@@ -136,10 +130,40 @@ func (c *userServiceClient) ResetUserPassword(ctx context.Context, in *ResetUser
 	return out, nil
 }
 
+func (c *userServiceClient) GetUserSolvedList(ctx context.Context, in *GetUserSolvedListRequest, opts ...grpc.CallOption) (*GetUserSolvedListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserSolvedListResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserSolvedList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) QueryUserSolvedListByProblemIds(ctx context.Context, in *QueryUserSolvedListByProblemIdsRequest, opts ...grpc.CallOption) (*QueryUserSolvedListByProblemIdsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(QueryUserSolvedListByProblemIdsResponse)
 	err := c.cc.Invoke(ctx, UserService_QueryUserSolvedListByProblemIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateUserAcProblemData(ctx context.Context, in *UpdateUserACDataRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, UserService_UpdateUserAcProblemData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateUserDoProblemStatistics(ctx context.Context, in *UpdateUserDoProblemStatisticsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, UserService_UpdateUserDoProblemStatistics_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -158,9 +182,11 @@ type UserServiceServer interface {
 	UpdateUserData(context.Context, *UpdateUserRequest) (*emptypb.Empty, error)
 	DeleteUserData(context.Context, *DeleteUserRequest) (*emptypb.Empty, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
-	GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*emptypb.Empty, error)
+	GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error)
 	QueryUserSolvedListByProblemIds(context.Context, *QueryUserSolvedListByProblemIdsRequest) (*QueryUserSolvedListByProblemIdsResponse, error)
+	UpdateUserAcProblemData(context.Context, *UpdateUserACDataRequest) (*emptypb.Empty, error)
+	UpdateUserDoProblemStatistics(context.Context, *UpdateUserDoProblemStatisticsRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -189,14 +215,20 @@ func (UnimplementedUserServiceServer) DeleteUserData(context.Context, *DeleteUse
 func (UnimplementedUserServiceServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
 }
-func (UnimplementedUserServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserSolvedList not implemented")
-}
 func (UnimplementedUserServiceServer) ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetUserPassword not implemented")
 }
+func (UnimplementedUserServiceServer) GetUserSolvedList(context.Context, *GetUserSolvedListRequest) (*GetUserSolvedListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSolvedList not implemented")
+}
 func (UnimplementedUserServiceServer) QueryUserSolvedListByProblemIds(context.Context, *QueryUserSolvedListByProblemIdsRequest) (*QueryUserSolvedListByProblemIdsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryUserSolvedListByProblemIds not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateUserAcProblemData(context.Context, *UpdateUserACDataRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserAcProblemData not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateUserDoProblemStatistics(context.Context, *UpdateUserDoProblemStatisticsRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserDoProblemStatistics not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -327,24 +359,6 @@ func _UserService_GetUserList_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_GetUserSolvedList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserSolvedListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserSolvedList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetUserSolvedList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserSolvedList(ctx, req.(*GetUserSolvedListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _UserService_ResetUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResetUserPasswordRequest)
 	if err := dec(in); err != nil {
@@ -363,6 +377,24 @@ func _UserService_ResetUserPassword_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUserSolvedList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserSolvedListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserSolvedList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserSolvedList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserSolvedList(ctx, req.(*GetUserSolvedListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_QueryUserSolvedListByProblemIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryUserSolvedListByProblemIdsRequest)
 	if err := dec(in); err != nil {
@@ -377,6 +409,42 @@ func _UserService_QueryUserSolvedListByProblemIds_Handler(srv interface{}, ctx c
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).QueryUserSolvedListByProblemIds(ctx, req.(*QueryUserSolvedListByProblemIdsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateUserAcProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserACDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateUserAcProblemData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateUserAcProblemData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateUserAcProblemData(ctx, req.(*UpdateUserACDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateUserDoProblemStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserDoProblemStatisticsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateUserDoProblemStatistics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateUserDoProblemStatistics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateUserDoProblemStatistics(ctx, req.(*UpdateUserDoProblemStatisticsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -413,16 +481,24 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_GetUserList_Handler,
 		},
 		{
-			MethodName: "GetUserSolvedList",
-			Handler:    _UserService_GetUserSolvedList_Handler,
-		},
-		{
 			MethodName: "ResetUserPassword",
 			Handler:    _UserService_ResetUserPassword_Handler,
 		},
 		{
+			MethodName: "GetUserSolvedList",
+			Handler:    _UserService_GetUserSolvedList_Handler,
+		},
+		{
 			MethodName: "QueryUserSolvedListByProblemIds",
 			Handler:    _UserService_QueryUserSolvedListByProblemIds_Handler,
+		},
+		{
+			MethodName: "UpdateUserAcProblemData",
+			Handler:    _UserService_UpdateUserAcProblemData_Handler,
+		},
+		{
+			MethodName: "UpdateUserDoProblemStatistics",
+			Handler:    _UserService_UpdateUserDoProblemStatistics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
