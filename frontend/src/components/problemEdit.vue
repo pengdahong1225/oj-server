@@ -25,11 +25,9 @@ const onSubmit = async () => {
     if (isEdit) {
         const res = await updateProblemService(formModel.value)
         console.log(res)
-        ElMessage.success('编辑成功')
     } else {
         const res = await updateProblemService(formModel.value)
         console.log(res)
-        ElMessage.success('添加成功')
     }
     drawerVisible.value = false
     emit('success', !isEdit)

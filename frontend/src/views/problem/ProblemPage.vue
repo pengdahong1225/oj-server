@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { queryProblemDetailService, submitProblemService } from '@/api/problem'
-import {querySubmitRecordService} from '@/api/user'
+import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problem'
 import type { Problem, SubmitForm } from '@/types/problem'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
@@ -57,17 +56,22 @@ const onSubmit = async () => {
     loading.value = false
 
     // 轮训判题结果
-    // timer = setInterval(() => {
-    //     checkResult()
-    // }, 500)
+    running.value = true
+    timer = setInterval(() => {
+        checkResult()
+    }, 500)
 }
 
 // 轮训判题结果
 let timer = 0
+const running = ref(false)
 const checkResult = async () => {
-    const res = await querySubmitRecordService(Number(route.params.id))
+    const res = await queryResultService(Number(route.params.id))
     console.log(res)
-    // clearInterval(timer)
+    if (res.data.data.message !== 'OK') {
+        clearInterval(timer)
+        running.value = false
+    }
 }
 
 // ACE主题和配置
@@ -117,7 +121,7 @@ const editorOptions = ref({
             </el-card>
 
             <!-- 题目提交区域 -->
-            <el-card class="submit-area" shadow="hover">
+            <el-card class="submit-area" shadow="hover" v-loading="running">
                 <template #header>
                     <el-form inline class="form">
                         <el-form-item style="margin-right: 10px;">
@@ -135,7 +139,7 @@ const editorOptions = ref({
                 <VAceEditor v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"
                     style="height: 500px; width: 100%;" />
 
-                <el-button class="submit-btn" type="warning" :loading="loading" @click="checkResult">
+                <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
                     <el-icon>
                         <UploadFilled />
                     </el-icon>Submit

@@ -16,6 +16,10 @@ export const submitProblemService = (data: SubmitForm) => {
   return request.post('/problem/submit', data)
 }
 
+export const queryResultService = (id: number) => {
+  return request.get('/problem/result', { params: { "problemID": id } })
+}
+
 export const updateProblemService = (data: Problem) => {
   return request.post('/problem/update', data)
 }
