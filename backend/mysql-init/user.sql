@@ -54,11 +54,11 @@ create table if not exists user_problem_statistics(
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
 
-    submit_count BIGINT DEFAULT 0 comment '题目提交数量',
-    accomplish_count BIGINT DEFAULT 0 comment '题目通过数量',
-    easy_problem_count BIGINT DEFAULT 0 comment '通过的简单题目数量',
-    medium_problem_count BIGINT DEFAULT 0 comment '通过的中等题目数量',
-    hard_problem_count BIGINT DEFAULT 0 comment '通过的困难题目数量',
+    submit_count INT DEFAULT 0 comment '题目提交数量',
+    accomplish_count INT DEFAULT 0 comment '题目通过数量',
+    easy_problem_count INT DEFAULT 0 comment '通过的简单题目数量',
+    medium_problem_count INT DEFAULT 0 comment '通过的中等题目数量',
+    hard_problem_count INT DEFAULT 0 comment '通过的困难题目数量',
 
     PRIMARY KEY(uid)
 )engine = InnoDB charset = utf8mb4;
