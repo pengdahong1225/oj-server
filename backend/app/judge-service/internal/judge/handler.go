@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
@@ -15,9 +16,17 @@ import (
 )
 
 type Handler struct {
+	baseUrl    string
+	runResults chan *pb.JudgeResult // 运行结果
 }
 
-func (receiver *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
+func NewHandler(host string, port int) *Handler {
+	return &Handler{
+		baseUrl:    fmt.Sprintf("http://%s:%d", host, port),
+		runResults: make(chan *pb.JudgeResult, 100),
+	}
+}
+func (r *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
 	// POST请求
 	body := map[string]any{
 		"cmd": []map[string]any{
@@ -49,7 +58,7 @@ func (receiver *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
 		logrus.Errorln("Error marshalling JSON:", err.Error())
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", baseUrl+"/run", bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", r.baseUrl+"/run", bytes.NewBuffer(data))
 	if err != nil {
 		logrus.Errorln("Error creating request:", err.Error())
 		return nil, err
@@ -86,7 +95,7 @@ func (receiver *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
 	}
 }
 
-func (receiver *Handler) run(param *types.Param) {
+func (r *Handler) run(param *types.Param) {
 	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 
@@ -123,7 +132,7 @@ func (receiver *Handler) run(param *types.Param) {
 			}
 			// POST请求
 			client := &http.Client{}
-			req, err := http.NewRequest("POST", baseUrl+"/run", bytes.NewBuffer(data))
+			req, err := http.NewRequest("POST", r.baseUrl+"/run", bytes.NewBuffer(data))
 			if err != nil {
 				logrus.Errorln("Error creating request:", err)
 				return
@@ -154,7 +163,7 @@ func (receiver *Handler) run(param *types.Param) {
 
 			if len(result) > 0 {
 				result[0].TestCase = test
-				runResults <- result[0]
+				r.runResults <- result[0]
 			}
 		})
 	}
@@ -163,9 +172,9 @@ func (receiver *Handler) run(param *types.Param) {
 
 // 1.检查结果状态，只judge结果状态为Accepted的
 // 2.如果结果状态为其他，不judge直接缓存
-func (receiver *Handler) judge() []*pb.JudgeResult {
+func (r *Handler) judge() []*pb.JudgeResult {
 	var results []*pb.JudgeResult
-	for runResult := range runResults {
+	for runResult := range r.runResults {
 		if runResult.Status != "Accepted" {
 			runResult.Content = "可执行程序运行错误"
 			results = append(results, runResult)
@@ -173,7 +182,7 @@ func (receiver *Handler) judge() []*pb.JudgeResult {
 		}
 		// 判断output是否满足预期
 		// 不满足结果的状态为Wrong Answer
-		if !receiver.analyzeAnswer(runResult.Files["stdout"], runResult.TestCase.Output) {
+		if !r.analyzeAnswer(runResult.Files["stdout"], runResult.TestCase.Output) {
 			runResult.Status = "Wrong Answer"
 			runResult.Content = "运行结果错误"
 			results = append(results, runResult)
@@ -185,7 +194,7 @@ func (receiver *Handler) judge() []*pb.JudgeResult {
 	return results
 }
 
-func (receiver *Handler) analyzeAnswer(X string, Y string) bool {
+func (r *Handler) analyzeAnswer(X string, Y string) bool {
 	X = strings.Replace(X, " ", "", -1)
 	X = strings.Replace(X, "\n", "", -1)
 	return X == Y

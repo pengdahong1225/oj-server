@@ -3,7 +3,6 @@ package judge
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
@@ -16,32 +15,16 @@ import (
 	"time"
 )
 
-var (
-	baseUrl    string
-	runResults chan *pb.JudgeResult // 运行结果
-	once       sync.Once
-)
-
-func Init() {
-	once.Do(func() {
-		sanbox := settings.Instance().SandBox
-		baseUrl = fmt.Sprintf("http://%s:%d", sanbox.Host, sanbox.Port)
-		runResults = make(chan *pb.JudgeResult, 256)
-	})
-}
-
 // Handle 判题服务入口
 func Handle(form *pb.SubmitForm) {
-	Init()
-
-	// 退出之后，需要将"提交"状态置为UPStateExited
+	// 退出之后，需要将本次提交的状态置为UPStateExited
 	defer func() {
 		if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited), 60*2*time.Second); err != nil {
 			logrus.Errorln(err.Error())
 		}
 	}()
 
-	// 设置“提交”状态
+	// 设置状态
 	if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateNormal), 60*2*time.Second); err != nil {
 		logrus.Errorln(err.Error())
 		return
@@ -204,7 +187,8 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 // 3.运行结果
 // 4.评判结果
 func doAction(param *types.Param) []*pb.JudgeResult {
-	handler := &Handler{}
+	handler := NewHandler(settings.Instance().SandBox.Host, settings.Instance().SandBox.Port)
+
 	results := make([]*pb.JudgeResult, 0)
 	// 设置题目状态[编译]
 	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling), 60*2*time.Second); err != nil {
@@ -252,7 +236,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 
 	wgRun.Wait()
 	// 关闭管道，触发后续goroutine结束
-	close(runResults)
+	close(handler.runResults)
 	wgJudge.Wait()
 
 	return results

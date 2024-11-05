@@ -275,7 +275,7 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 		return res
 	}
 	if state != int32(pb.SubmitState_UPStateExited) {
-		res.Code = models.Failed
+		res.Code = models.Success
 		res.Message = "running..."
 		return res
 	}
