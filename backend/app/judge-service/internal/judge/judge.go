@@ -69,6 +69,13 @@ func Handle(form *pb.SubmitForm) {
 }
 
 func saveResult(param *types.Param, data []byte) {
+	// 保存本次提交结果 2min过期
+	err := cache.SetJudgeResult(param.Uid, param.ProblemID, data, 60*2*time.Second)
+	if err != nil {
+		logrus.Errorln(err.Error())
+	}
+
+	// 保存提交记录 record
 	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
 	if err != nil {
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
@@ -88,10 +95,6 @@ func saveResult(param *types.Param, data []byte) {
 
 	_, err = client.SaveUserSubmitRecord(context.Background(), request)
 	if err != nil {
-		logrus.Errorln(err.Error())
-	}
-
-	if err := cache.SetJudgeResult(param.Uid, param.ProblemID, data); err != nil {
 		logrus.Errorln(err.Error())
 	}
 }

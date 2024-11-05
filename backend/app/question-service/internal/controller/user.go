@@ -86,6 +86,9 @@ func (r User) HandleRankList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// HandleSubmitRecord 历史提交记录
+// @problemID 题目ID
+// @stamp 时间
 func (r User) HandleSubmitRecord(ctx *gin.Context) {
 	// 查询参数
 	problemIDStr := ctx.Query("problemID")

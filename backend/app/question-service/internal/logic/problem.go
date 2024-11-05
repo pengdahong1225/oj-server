@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/consts"
@@ -252,7 +253,7 @@ func (r ProblemLogic) GetProblemDetail(problemID int64) *models.Response {
 	return res
 }
 
-func (r ProblemLogic) QueryResult(uid int64, problemID int64, stamp int64) *models.Response {
+func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -274,9 +275,32 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64, stamp int64) *mode
 	}
 	if state != int32(pb.SubmitState_UPStateExited) {
 		res.Code = models.Failed
-		res.Message = "running"
+		res.Message = "running..."
 		return res
 	}
-	
-	return nil
+
+	// 当state == SubmitState_UPStateExited时，从缓存中提取结果
+	bys, err := cache.GetJudgeResult(uid, problemID)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("获取结果failed: %s\n", err.Error())
+		return res
+	}
+	data := models.QuerySubmitResultResponse{
+		Uid:       uid,
+		ProblemID: problemID,
+		Result:    nil,
+	}
+	err = json.Unmarshal([]byte(bys), &data.Result)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("反序列化失败: %s\n", err.Error())
+		return res
+	}
+
+	res.Message = "OK"
+	res.Data = data
+	return res
 }

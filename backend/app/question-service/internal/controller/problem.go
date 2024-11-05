@@ -117,9 +117,23 @@ func (r ProblemHandler) HandleSubmit(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-// 查询提交结果
+// HandleResult 查询提交结果
+// @problemID 题目ID
 func (r ProblemHandler) HandleResult(ctx *gin.Context) {
+	// 查询参数
+	idStr := ctx.Query("problemID")
+	if idStr == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": "参数错误",
+		})
+		return
+	}
+	problemID, _ := strconv.ParseInt(idStr, 10, 64)
+	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
 
+	res := r.logic.QueryResult(claims.Uid, problemID)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (r ProblemHandler) HandleTagList(ctx *gin.Context) {

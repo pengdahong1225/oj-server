@@ -36,7 +36,7 @@ func questionRouters(engine *gin.Engine) {
 	{
 		userRouter.Use(middlewares.AuthLogin())
 		userRouter.GET("/profile", controller.User{}.HandleUserProfile)
-		userRouter.GET("/submitRecord", controller.User{}.HandleSubmitRecord)
+		userRouter.GET("/submitRecord", controller.User{}.HandleSubmitRecord) // 历史提交记录
 		userRouter.GET("/solvedList", controller.User{}.HandleSolvedList)
 	}
 
@@ -45,7 +45,7 @@ func questionRouters(engine *gin.Engine) {
 	{
 		problemRouter.GET("/detail", controller.ProblemHandler{}.HandleDetail)
 		problemRouter.POST("/submit", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleSubmit)
-		problemRouter.GET("/result", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleResult)
+		problemRouter.GET("/result", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleResult) // 本次提交的结果
 		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleUpdate)
 		problemRouter.POST("/delete", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleDelete)
 		problemRouter.GET("/tagList", controller.ProblemHandler{}.HandleTagList)

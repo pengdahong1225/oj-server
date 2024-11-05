@@ -14,9 +14,9 @@ import (
 	"time"
 )
 
-func SetJudgeResult(uid int64, problemID int64, result []byte) error {
+func SetJudgeResult(uid int64, problemID int64, result []byte, expire time.Duration) error {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
-	return rdb.SetEx(context.Background(), key, result, 60*10*time.Second).Err()
+	return rdb.SetEx(context.Background(), key, result, expire).Err()
 }
 
 func SetUPState(uid int64, problemID int64, state int) error {

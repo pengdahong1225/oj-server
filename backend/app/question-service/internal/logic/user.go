@@ -231,7 +231,7 @@ func (r User) GetSubmitRecord(uid, problemID, stamp int64) *models.Response {
 		return res
 	}
 
-	var data models.QuerySubmitResponse
+	var data models.QueryRecordResponse
 	data.Uid = uid
 	data.ProblemID = problemID
 	data.Stamp = stamp
