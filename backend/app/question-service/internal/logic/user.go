@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
@@ -204,7 +203,7 @@ func (r User) GetRankList() *models.Response {
 	return res
 }
 
-func (r User) GetSubmitRecord(uid, problemID, stamp int64) *models.Response {
+func (r User) GetRecordList(uid int64, page, pageSize int) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -220,9 +219,10 @@ func (r User) GetSubmitRecord(uid, problemID, stamp int64) *models.Response {
 	}
 	defer dbConn.Close()
 	client := pb.NewRecordServiceClient(dbConn)
-	response, err := client.GetUserSubmitRecord(context.Background(), &pb.GetUserSubmitRecordRequest{
-		UserId: uid,
-		Stamp:  stamp,
+	response, err := client.GetUserRecordList(context.Background(), &pb.GetUserRecordListRequest{
+		Uid:      uid,
+		Page:     int32(page),
+		PageSize: int32(pageSize),
 	})
 	if err != nil {
 		res.Code = models.Failed
@@ -231,25 +231,13 @@ func (r User) GetSubmitRecord(uid, problemID, stamp int64) *models.Response {
 		return res
 	}
 
-	var data models.QueryRecordResponse
-	data.Uid = uid
-	data.ProblemID = problemID
-	data.Stamp = stamp
-	for _, record := range response.Data {
-		r := models.SubmitRecord{
-			Code: record.Code,
-			Lang: record.Lang,
-		}
-		err := json.Unmarshal(record.Result, &r.Result)
-		if err != nil {
-			logrus.Errorln(err.Error())
-		}
-		data.Records = append(data.Records, r)
-	}
-
 	res.Message = "OK"
-	res.Data = data
+	res.Data = response.Data
 	return res
+}
+
+func (r User) GetRecord(id int64) *models.Response {
+	return nil
 }
 
 // GetUserSolvedList 获取用户解决了哪些题目

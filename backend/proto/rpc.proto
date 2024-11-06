@@ -32,7 +32,8 @@ service ProblemService{
 }
 // record
 service RecordService{
-  rpc GetUserSubmitRecord(GetUserSubmitRecordRequest) returns(GetUserSubmitRecordResponse);
+  rpc GetUserRecordList(GetUserRecordListRequest) returns(GetUserRecordListResponse);
+  rpc GetUserRecord(GetUserRecordRequest) returns(GetUserRecordResponse);
   rpc SaveUserSubmitRecord(SaveUserSubmitRecordRequest) returns(google.protobuf.Empty);
 }
 // comment接口
@@ -190,21 +191,24 @@ message GetProblemListResponse{
   repeated Problem data = 2;
 }
 
-message GetUserSubmitRecordRequest{
-  int64 user_id = 1;
-  int64 stamp = 2;
+message GetUserRecordListRequest{
+  int64 uid = 1;
+  int32 page = 2;
+  int32 page_size = 3;
 }
-message GetUserSubmitRecordResponse{
+message GetUserRecordListResponse{
   repeated UserSubmitRecord data = 1;
 }
 
+message GetUserRecordRequest{
+  int64 id = 1;
+}
+message GetUserRecordResponse{
+  UserSubmitRecord data = 1;
+}
+
 message SaveUserSubmitRecordRequest{
-  int64 user_id = 1;
-  int64 problem_id = 2;
-  string code = 3;
-  bytes result = 4;
-  string lang = 5;
-  int64 stamp = 6;
+    UserSubmitRecord data = 1;
 }
 
 message GetProblemHotDataRequest{

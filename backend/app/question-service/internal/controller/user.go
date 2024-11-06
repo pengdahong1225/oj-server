@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"time"
 )
 
 type User struct {
@@ -76,33 +75,35 @@ func (r User) HandleRankList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-// HandleSubmitRecord 历史提交记录
-// @problemID 题目ID
-// @stamp 时间
-func (r User) HandleSubmitRecord(ctx *gin.Context) {
-	// 查询参数
-	problemIDStr := ctx.Query("problemID")
-	if problemIDStr == "" {
+// HandleRecordList 历史提交记录
+func (r User) HandleRecordList(ctx *gin.Context) {
+	pageStr := ctx.Query("page")
+	pageSizeStr := ctx.Query("page_size")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
-			"message": "参数错误",
+			"message": "页码参数错误",
 		})
+		ctx.Abort()
 		return
 	}
-	problemID, _ := strconv.ParseInt(problemIDStr, 10, 64)
-	stampStr := ctx.Query("stamp")
-
-	var stamp int64 = 0
-	if stampStr == "" {
-		stamp = time.Now().Unix()
-	} else {
-		stamp, _ = strconv.ParseInt(stampStr, 10, 64)
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": "页大小参数错误",
+		})
+		ctx.Abort()
+		return
 	}
 
 	uid := ctx.GetInt64("uid")
-	res := r.logic.GetSubmitRecord(uid, problemID, stamp)
+	res := r.logic.GetRecordList(uid, page, pageSize)
 	ctx.JSON(http.StatusOK, res)
 }
+
+func (r User) HandleRecord(ctx *gin.Context) {}
 
 func (r User) HandleSolvedList(ctx *gin.Context) {
 	uid := ctx.GetInt64("uid")

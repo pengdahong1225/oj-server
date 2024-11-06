@@ -29,7 +29,8 @@ func questionRouters(engine *gin.Engine) {
 		userRouter.POST("/register", controller.User{}.HandleRegister)
 		userRouter.POST("/reset_password", controller.User{}.HandleResetPassword)
 		userRouter.GET("/profile", middlewares.AuthLogin(), controller.User{}.HandleUserProfile)
-		userRouter.GET("/submit_record", middlewares.AuthLogin(), controller.User{}.HandleSubmitRecord) // 历史提交记录
+		userRouter.GET("/record_list", middlewares.AuthLogin(), controller.User{}.HandleRecordList) // 历史提交记录列表
+		userRouter.GET("/record", middlewares.AuthLogin(), controller.User{}.HandleRecord)
 		userRouter.GET("/solved_list", middlewares.AuthLogin(), controller.User{}.HandleSolvedList)
 	}
 
