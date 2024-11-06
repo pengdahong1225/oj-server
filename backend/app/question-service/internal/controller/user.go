@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"net/http"
 	"regexp"
@@ -67,17 +66,8 @@ func (r User) HandleResetPassword(ctx *gin.Context) {
 }
 
 func (r User) HandleUserProfile(ctx *gin.Context) {
-	uid, ok := ctx.GetQuery("uid")
-	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    models.Failed,
-			"message": "参数错误",
-		})
-		return
-	}
-
-	uidInt, _ := strconv.ParseInt(uid, 10, 64)
-	res := r.logic.GetUserProfile(uidInt)
+	uid := ctx.GetInt64("uid")
+	res := r.logic.GetUserProfile(uid)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -108,13 +98,14 @@ func (r User) HandleSubmitRecord(ctx *gin.Context) {
 	} else {
 		stamp, _ = strconv.ParseInt(stampStr, 10, 64)
 	}
-	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := r.logic.GetSubmitRecord(claims.Uid, problemID, stamp)
+
+	uid := ctx.GetInt64("uid")
+	res := r.logic.GetSubmitRecord(uid, problemID, stamp)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (r User) HandleSolvedList(ctx *gin.Context) {
-	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
-	res := r.logic.GetUserSolvedList(claims.Uid)
+	uid := ctx.GetInt64("uid")
+	res := r.logic.GetUserSolvedList(uid)
 	ctx.JSON(http.StatusOK, res)
 }

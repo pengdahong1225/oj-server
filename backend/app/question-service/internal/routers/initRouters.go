@@ -20,48 +20,45 @@ func healthCheckRouters(engine *gin.Engine) {
 
 // questionRouters
 // 题目服务相关路由
+// api/
 func questionRouters(engine *gin.Engine) {
-	engine.Use(middlewares.CheckIsExpiration())
-	// api/
-	{
-		engine.GET("/problemSet", controller.ProblemHandler{}.HandleProblemSet)
-		engine.GET("/rankList", middlewares.AuthLogin(), controller.User{}.HandleRankList)
-		engine.POST("/login", controller.User{}.HandleLogin)
-		engine.POST("/register", controller.User{}.HandleRegister)
-		engine.POST("/resetPassword", controller.User{}.HandleResetPassword)
-	}
-
-	// api/user
+	// 用户相关
 	userRouter := engine.Group("/user")
 	{
-		userRouter.Use(middlewares.AuthLogin())
-		userRouter.GET("/profile", controller.User{}.HandleUserProfile)
-		userRouter.GET("/submitRecord", controller.User{}.HandleSubmitRecord) // 历史提交记录
-		userRouter.GET("/solvedList", controller.User{}.HandleSolvedList)
+		userRouter.POST("/login", controller.User{}.HandleLogin)
+		userRouter.POST("/register", controller.User{}.HandleRegister)
+		userRouter.POST("/reset_password", controller.User{}.HandleResetPassword)
+		userRouter.GET("/profile", middlewares.AuthLogin(), controller.User{}.HandleUserProfile)
+		userRouter.GET("/submit_record", middlewares.AuthLogin(), controller.User{}.HandleSubmitRecord) // 历史提交记录
+		userRouter.GET("/solved_list", middlewares.AuthLogin(), controller.User{}.HandleSolvedList)
 	}
 
-	// api/problem
+	// 题目相关
 	problemRouter := engine.Group("/problem")
 	{
+		problemRouter.GET("/tag_list", controller.ProblemHandler{}.HandleTagList)
+		problemRouter.GET("/list", controller.ProblemHandler{}.HandleProblemList)
 		problemRouter.GET("/detail", controller.ProblemHandler{}.HandleDetail)
 		problemRouter.POST("/submit", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleSubmit)
 		problemRouter.GET("/result", middlewares.AuthLogin(), controller.ProblemHandler{}.HandleResult) // 本次提交的结果
 		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleUpdate)
-		problemRouter.POST("/delete", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleDelete)
-		problemRouter.GET("/tagList", controller.ProblemHandler{}.HandleTagList)
+		problemRouter.DELETE("", middlewares.AuthLogin(), middlewares.Admin(), controller.ProblemHandler{}.HandleDelete)
 	}
 
-	// api/comment
+	// 排行榜
+	engine.GET("/ranking_list", middlewares.AuthLogin(), controller.User{}.HandleRankList)
+
+	// 评论
 	commentRouter := engine.Group("/comment")
 	commentRouter.Use(middlewares.AuthLogin())
 	{
+		commentRouter.POST("/query", controller.CommentHandler{}.HandleGet)
+		commentRouter.DELETE("", controller.CommentHandler{}.HandleDelete)
 		commentRouter.POST("/add", controller.CommentHandler{}.HandleAdd)
-		commentRouter.POST("/get", controller.CommentHandler{}.HandleGet)
-		commentRouter.POST("/delete", controller.CommentHandler{}.HandleDelete)
 		commentRouter.POST("/like", controller.CommentHandler{}.HandleLike)
 	}
 
-	// api/captcha
+	// 验证码
 	captchaRouter := engine.Group("/captcha")
 	captchaRouter.Use(middlewares.RateLimitMiddleware(2*time.Second, 50))
 	{
@@ -69,11 +66,11 @@ func questionRouters(engine *gin.Engine) {
 		captchaRouter.POST("/sms", controller.CaptchaHandler{}.GetSmsCode)
 	}
 
-	// api/notice
+	// 公告
 	noticeRouter := engine.Group("/notice")
 	{
-		noticeRouter.GET("/noticeList", controller.NoticeHandler{}.HandleNoticeList)
-		noticeRouter.POST("/addNotice", middlewares.AuthLogin(), middlewares.Admin(), controller.NoticeHandler{}.HandleAddNotice)
-		noticeRouter.DELETE("/delNotice", middlewares.AuthLogin(), middlewares.Admin(), controller.NoticeHandler{}.HandleDeleteNotice)
+		noticeRouter.GET("/list", controller.NoticeHandler{}.HandleNoticeList)
+		noticeRouter.POST("/add", middlewares.AuthLogin(), middlewares.Admin(), controller.NoticeHandler{}.HandleAddNotice)
+		noticeRouter.DELETE("", middlewares.AuthLogin(), middlewares.Admin(), controller.NoticeHandler{}.HandleDeleteNotice)
 	}
 }

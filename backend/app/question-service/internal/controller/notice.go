@@ -49,8 +49,8 @@ func (r NoticeHandler) HandleAddNotice(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	uid, _ := ctx.Get("uid")
-	res := r.logic.AppendNotice(form, uid.(int64))
+	uid := ctx.GetInt64("uid")
+	res := r.logic.AppendNotice(form, uid)
 	ctx.JSON(http.StatusOK, res)
 }
 

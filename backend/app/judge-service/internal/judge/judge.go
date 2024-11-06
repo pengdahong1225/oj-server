@@ -41,7 +41,7 @@ func Handle(form *pb.SubmitForm) {
 	logrus.Infof("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms\n", form.Uid, form.ProblemId, duration)
 
 	// 解锁用户
-	//cache.UnLockUser(form.Uid)
+	cache.UnLockUser(form.Uid)
 
 	if res != nil {
 		analyzeResult(param, res)

@@ -14,6 +14,11 @@ import (
 	"time"
 )
 
+func UnLockUser(uid int64) error {
+	key := fmt.Sprintf("lock:%d", uid)
+	return rdb.Del(context.Background(), key).Err()
+}
+
 func SetJudgeResult(uid int64, problemID int64, result []byte, expire time.Duration) error {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
 	return rdb.SetEx(context.Background(), key, result, expire).Err()

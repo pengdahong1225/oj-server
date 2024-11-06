@@ -79,7 +79,7 @@ func (r ProblemLogic) UpdateQuestion(uid int64, form *models.UpdateProblemForm, 
 	return res
 }
 
-func (r ProblemLogic) DeleteQuestion(problemID int64) *models.Response {
+func (r ProblemLogic) DeleteProblem(problemID int64) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",

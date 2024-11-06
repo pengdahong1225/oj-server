@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"net/http"
@@ -17,7 +16,7 @@ type ProblemHandler struct {
 }
 
 func (r ProblemHandler) HandleUpdate(ctx *gin.Context) {
-	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	uid := ctx.GetInt64("uid")
 	form, ret := validate(ctx, models.UpdateProblemForm{})
 	if !ret {
 		return
@@ -33,12 +32,12 @@ func (r ProblemHandler) HandleUpdate(ctx *gin.Context) {
 		return
 	}
 
-	res := r.logic.UpdateQuestion(claims.Uid, form, &config)
+	res := r.logic.UpdateQuestion(uid, form, &config)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (r ProblemHandler) HandleDelete(ctx *gin.Context) {
-	p := ctx.GetString("problem_id")
+	p := ctx.Query("problem_id")
 	if p == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
@@ -47,17 +46,19 @@ func (r ProblemHandler) HandleDelete(ctx *gin.Context) {
 		return
 	}
 	problemID, _ := strconv.ParseInt(p, 10, 64)
-	res := r.logic.DeleteQuestion(problemID)
+	res := r.logic.DeleteProblem(problemID)
 	ctx.JSON(http.StatusOK, res)
 }
 
-// HandleProblemSet 题目列表
-func (r ProblemHandler) HandleProblemSet(ctx *gin.Context) {
+// HandleProblemList
+// 题目列表
+func (r ProblemHandler) HandleProblemList(ctx *gin.Context) {
 	pageStr := ctx.Query("page")
 	pageSizeStr := ctx.Query("page_size")
 	keyWord := ctx.Query("keyword")
 	tag := ctx.Query("tag")
 	page, err := strconv.Atoi(pageStr)
+	uidStr := ctx.DefaultQuery("uid", "")
 	if err != nil || page <= 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
@@ -82,16 +83,14 @@ func (r ProblemHandler) HandleProblemSet(ctx *gin.Context) {
 		Tag:      tag,
 	}
 
-	c, _ := ctx.Get("claims")
-	claim := c.(*middlewares.UserClaims)
-
-	res := r.logic.GetProblemList(params, claim.Uid)
+	uid, _ := strconv.ParseInt(uidStr, 10, 64)
+	res := r.logic.GetProblemList(params, uid)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (r ProblemHandler) HandleDetail(ctx *gin.Context) {
 	// 查询参数
-	idStr := ctx.Query("problemID")
+	idStr := ctx.Query("problem_id")
 	if idStr == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
@@ -106,14 +105,14 @@ func (r ProblemHandler) HandleDetail(ctx *gin.Context) {
 }
 
 func (r ProblemHandler) HandleSubmit(ctx *gin.Context) {
-	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	uid := ctx.GetInt64("uid")
 	// 表单验证
 	form, ret := validate(ctx, models.SubmitForm{})
 	if !ret {
 		return
 	}
 
-	res := r.logic.OnProblemSubmit(claims.Uid, form)
+	res := r.logic.OnProblemSubmit(uid, form)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -121,7 +120,7 @@ func (r ProblemHandler) HandleSubmit(ctx *gin.Context) {
 // @problemID 题目ID
 func (r ProblemHandler) HandleResult(ctx *gin.Context) {
 	// 查询参数
-	idStr := ctx.Query("problemID")
+	idStr := ctx.Query("problem_id")
 	if idStr == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    models.Failed,
@@ -130,9 +129,9 @@ func (r ProblemHandler) HandleResult(ctx *gin.Context) {
 		return
 	}
 	problemID, _ := strconv.ParseInt(idStr, 10, 64)
-	claims := ctx.MustGet("claims").(*middlewares.UserClaims)
+	uid := ctx.GetInt64("uid")
 
-	res := r.logic.QueryResult(claims.Uid, problemID)
+	res := r.logic.QueryResult(uid, problemID)
 	ctx.JSON(http.StatusOK, res)
 }
 
