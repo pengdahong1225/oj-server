@@ -233,8 +233,8 @@ type UserSubmitRecord struct {
 	Uid         int64  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	ProblemId   int64  `protobuf:"varint,2,opt,name=problem_id,json=problemId,proto3" json:"problem_id,omitempty"`
 	ProblemName string `protobuf:"bytes,3,opt,name=problem_name,json=problemName,proto3" json:"problem_name,omitempty"`
-	Status      int32  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
-	Result      []byte `protobuf:"bytes,5,opt,name=result,proto3" json:"result,omitempty"`
+	Status      int32  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"` // 0:Accepted 1:Compile Error 2:Wrong Answer
+	Result      []byte `protobuf:"bytes,5,opt,name=result,proto3" json:"result,omitempty"`  // []JudgeResult 二进制数据
 	Code        string `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
 	Lang        string `protobuf:"bytes,7,opt,name=lang,proto3" json:"lang,omitempty"`
 	Id          int64  `protobuf:"varint,8,opt,name=id,proto3" json:"id,omitempty"`

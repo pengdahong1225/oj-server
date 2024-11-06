@@ -176,7 +176,7 @@ func (r *Handler) judge() []*pb.JudgeResult {
 	var results []*pb.JudgeResult
 	for runResult := range r.runResults {
 		if runResult.Status != "Accepted" {
-			runResult.Content = "可执行程序运行错误"
+			runResult.Content = "Run Error"
 			results = append(results, runResult)
 			continue
 		}
@@ -184,10 +184,11 @@ func (r *Handler) judge() []*pb.JudgeResult {
 		// 不满足结果的状态为Wrong Answer
 		if !r.analyzeAnswer(runResult.Files["stdout"], runResult.TestCase.Output) {
 			runResult.Status = "Wrong Answer"
-			runResult.Content = "运行结果错误"
+			runResult.Content = "Wrong Answer"
 			results = append(results, runResult)
 		} else {
-			runResult.Content = "运行结果正确"
+			runResult.Status = "Accepted"
+			runResult.Content = "Accepted"
 			results = append(results, runResult)
 		}
 	}

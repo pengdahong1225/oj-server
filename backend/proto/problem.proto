@@ -22,6 +22,7 @@ message ProblemConfig{
   Limit compile_limit = 2;
   Limit run_limit = 3;
   int32 level = 4;
+  string name = 5;
 }
 
 message TestCase{

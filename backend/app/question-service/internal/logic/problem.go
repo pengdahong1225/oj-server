@@ -58,6 +58,7 @@ func (r ProblemLogic) UpdateQuestion(uid int64, form *models.UpdateProblemForm, 
 				ProcLimit:   config.RunLimit.ProcLimit,
 			},
 			Level: form.Level,
+			Name:  form.Title,
 		},
 	}}
 	for _, test := range config.TestCases {

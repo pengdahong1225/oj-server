@@ -56,11 +56,14 @@ func Handle(form *pb.SubmitForm) {
 	}
 }
 
+// 分析结果
 func analyzeResult(param *types.Param, results []*pb.JudgeResult) {
-	param.Ac = true
+	param.Accepted = true
+	param.Message = "Accepted"
 	for _, res := range results {
 		if res.Status != "Accepted" {
-			param.Ac = false
+			param.Accepted = false
+			param.Message = res.Content
 			break
 		}
 	}
@@ -68,7 +71,7 @@ func analyzeResult(param *types.Param, results []*pb.JudgeResult) {
 
 func saveResult(param *types.Param, data []byte) {
 	// 保存本次提交结果 2min过期
-	err := cache.SetJudgeResult(param.Uid, param.ProblemID, data, 60*2*time.Second)
+	err := cache.SetJudgeResult(param.Uid, param.ProblemID, param.Message, 60*2*time.Second)
 	if err != nil {
 		logrus.Errorln(err.Error())
 	}
@@ -100,12 +103,14 @@ func saveResult(param *types.Param, data []byte) {
 func updateUserSubmitRecord(param *types.Param, data []byte, conn *grpc.ClientConn) error {
 	client := pb.NewRecordServiceClient(conn)
 	request := &pb.SaveUserSubmitRecordRequest{
-		UserId:    param.Uid,
-		ProblemId: param.ProblemID,
-		Code:      param.Code,
-		Result:    data,
-		Lang:      param.Language,
-		Stamp:     time.Now().Unix(),
+		Data: &pb.UserSubmitRecord{
+			Uid:         param.Uid,
+			ProblemId:   param.ProblemID,
+			ProblemName: param.ProblemConfig.Name,
+			Status:      msg2status(param.Message),
+			Result:      data,
+			Lang:        param.Language,
+		},
 	}
 
 	_, err := client.SaveUserSubmitRecord(context.Background(), request)
@@ -128,9 +133,9 @@ func updateUserDoProblemStatistics(param *types.Param, conn *grpc.ClientConn) er
 		SubmitCountIncr: 1,
 	}
 
-	if param.Ac {
+	if param.Accepted {
 		request.AcCountIncr = 1
-		switch param.Level {
+		switch param.ProblemConfig.Level {
 		case 1:
 			request.EasyCountIncr = 1
 		case 2:
@@ -138,11 +143,24 @@ func updateUserDoProblemStatistics(param *types.Param, conn *grpc.ClientConn) er
 		case 3:
 			request.HardCountIncr = 1
 		default:
-			logrus.Infof("未知的题目难度:%d", param.Level)
+			logrus.Infof("未知的题目难度:%d", param.ProblemConfig.Level)
 		}
 	}
 	_, err := client.UpdateUserDoProblemStatistics(context.Background(), request)
 	return err
+}
+
+func msg2status(msg string) int32 {
+	switch msg {
+	case "Accepted":
+		return 0
+	case "Compile Error":
+		return 1
+	case "Wrong Answer":
+		return 2
+	default:
+		return -1
+	}
 }
 
 func loadProblemDetail(problemID int64) (*pb.Problem, error) {
@@ -176,7 +194,6 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 	param.Code = form.Code
 	param.Language = form.Lang
 	param.ProblemConfig = problemConfig
-	param.Level = problemConfig.Level
 	return true, param
 }
 
@@ -202,7 +219,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 	logrus.Debugln("编译结果:", compileResult)
 
 	if compileResult.Status != "Accepted" {
-		compileResult.Content = "编译失败"
+		compileResult.Content = "Compile Error"
 		results = append(results, compileResult)
 		// 更新状态
 		if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited), 60*2*time.Second); err != nil {
@@ -211,7 +228,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 		}
 		return results
 	}
-	compileResult.Content = "编译成功"
+	compileResult.Content = "Compile Success"
 	results = append(results, compileResult)
 
 	// 保存可执行文件的文件ID

@@ -1,5 +1,6 @@
 import request from '@/utils/request'
-import type { RegisterForm, LoginForm, QueryRecordListParams } from '@/types/user'
+import type { RegisterForm, LoginForm } from '@/types/user'
+import type { QueryRecordListParams } from '@/types/record'
 
 // 注册接口
 export const userRegisterService = (form: RegisterForm) => {

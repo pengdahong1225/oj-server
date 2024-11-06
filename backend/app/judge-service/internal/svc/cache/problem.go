@@ -19,7 +19,7 @@ func UnLockUser(uid int64) error {
 	return rdb.Del(context.Background(), key).Err()
 }
 
-func SetJudgeResult(uid int64, problemID int64, result []byte, expire time.Duration) error {
+func SetJudgeResult(uid int64, problemID int64, result string, expire time.Duration) error {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
 	return rdb.SetEx(context.Background(), key, result, expire).Err()
 }
