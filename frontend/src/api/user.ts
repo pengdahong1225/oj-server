@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { RegisterForm, LoginForm } from '@/types/user'
+import type { RegisterForm, LoginForm, QueryRecordListParams } from '@/types/user'
 
 // 注册接口
 export const userRegisterService = (form: RegisterForm) => {
@@ -15,9 +15,9 @@ export const getUserInfoService = (uid: number) => {
 }
 
 // 查询用户提交记录
-export const querySubmitRecordService = (id: number) => {
-    const params = {
-        "problem_id": id
-    }
-    return request.get('/user/submit_record', { params })
+export const queryRecordListService = (params: QueryRecordListParams) => {
+    return request.get('/user/record_list', { params })
+}
+export const queryRecordService = (id: number) => {
+    return request.get(`/user/record?id=${id}`)
 }

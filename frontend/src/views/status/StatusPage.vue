@@ -1,13 +1,20 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
+import type { QueryRecordListParams } from '@/types/record'
 
-
+const loading = ref(false)
+const params = ref<QueryRecordListParams>({
+    page: 1,
+    page_size: 10
+})
+const 
 
 </script>
 
 <template>
     <el-card class="status-list" shadow="hover">
         <!-- 表单区域 -->
-        <el-form inline class="form">
+        <!-- <el-form inline class="form">
             <el-form-item style="margin-right: 15px;">
                 <el-input v-model="params.keyword" style="width: 240px" placeholder="problem name"
                     :suffix-icon="Search" />
@@ -16,7 +23,7 @@
                 <el-button @click="onSearch" type="primary">搜索</el-button>
                 <el-button @click="onReset">重置</el-button>
             </el-form-item>
-        </el-form>
+        </el-form> -->
 
         <!-- 表格区域 -->
         <el-table v-loading="loading" :data="problemList">
@@ -71,5 +78,4 @@
     </el-card>
 </template>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
