@@ -3,6 +3,7 @@ export interface QueryProblemListParams {
     page_size: number;
     keyword: string;
     tag: string;
+    uid?: number;
 }
 
 export interface SubmitForm {
@@ -29,7 +30,7 @@ export interface SubmitResult{
     problem_id: number;
     results: Result[];
 }
-interface Result{
+export interface Result{
     memory: number;
     runTime: number;
     status: string;

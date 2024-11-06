@@ -92,12 +92,20 @@ const bmsg = computed(() => {
     if (result.value.results.every(item => item.status === 'Accepted')) {
         return 'Accepted'
     } else {
-        return 'Wrong Answer'
+        return 'failed'
+    }
+})
+const tmsg = computed(() => {
+    if (result.value.results.every(item => item.status === 'Accepted')) {
+        return 'You have solved the problem'
+    } else {
+        return 'failed'
     }
 })
 const showed = ref(false)
 const showResult = () => {
     showed.value = true
+    // 跳转status
 }
 
 // ACE主题和配置
@@ -165,19 +173,27 @@ const editorOptions = ref({
                 <VAceEditor v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"
                     style="height: 500px; width: 100%;" />
 
-                <div>
-                    <div v-if="result.results.length > 0" class="result">
-                        <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
-                            {{ bmsg }}
-                        </el-button>
-                        <span v-else>You have solved the problem</span>
+                <div class="submit-area-foot">
+                    <div class="result-area">
+                        <div v-if="result.results.length > 0">
+                            <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
+                                {{ bmsg }}
+                            </el-button>
+                            <el-tag v-else :type="btype" size="large">
+                                <template #default>
+                                    <strong>{{ tmsg }}</strong>
+                                </template>
+                            </el-tag>
+                        </div>
                     </div>
 
-                    <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
-                        <el-icon>
-                            <UploadFilled />
-                        </el-icon>Submit
-                    </el-button>
+                    <div class="submit-btn-area">
+                        <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
+                            <el-icon>
+                                <UploadFilled />
+                            </el-icon>Submit
+                        </el-button>
+                    </div>
                 </div>
             </el-card>
 
@@ -229,10 +245,23 @@ const editorOptions = ref({
             margin-top: 20px;
             width: 100%;
 
-            .submit-btn {
-                margin: 5px 0 5px 5px;
-                // 靠右
-                float: right;
+            .submit-area-foot {
+                margin: auto;
+                margin-top: 10px;
+                width: 95%;
+                display: flex;
+
+                .result-area {
+                    width: 50%;
+                }
+
+                .submit-btn-area {
+                    width: 50%;
+
+                    .submit-btn {
+                        float: right;
+                    }
+                }
             }
         }
     }

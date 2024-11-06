@@ -3,7 +3,9 @@ import { ref, onMounted } from "vue"
 import { Search, Select } from '@element-plus/icons-vue'
 import type { Problem, QueryProblemListParams } from '@/types/problem'
 import { queryProblemListService, getProblemTagListService } from '@/api/problem'
+import { useUserStore } from '@/stores'
 
+const userStore = useUserStore()
 const loading = ref(false)
 const total = ref(0)
 const problemList = ref<Problem[]>([])
@@ -19,6 +21,9 @@ onMounted(() => {
     getProblemTagList()
 })
 const getProblemList = async () => {
+    if (userStore.userInfo.uid > 0) {
+        params.value.uid = userStore.userInfo.uid
+    }
     loading.value = true
     const res = await queryProblemListService(params.value)
     console.log(res)

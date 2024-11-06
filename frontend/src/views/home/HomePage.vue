@@ -41,6 +41,12 @@ const queryNoticeList = async () => {
     loading.value = false
 }
 
+const dialogRef = ref()
+const onClick = (index: number) => {
+    console.log(index)
+    dialogRef.value.open(notice_list.value[index])
+}
+
 </script>
 
 <template>
@@ -63,21 +69,13 @@ const queryNoticeList = async () => {
 
                 <el-table v-loading="loading" :data="notice_list">
                     <el-table-column label="#" prop="id" width="80">
-                        <template #default="{ row }">
-                            <el-link type="primary" :underline="false" @click="
-                                $router.push({
-                                    path: `/problem/${row.id}`
-                                })
-                                ">{{ row.id }}</el-link>
+                        <template #default="{ $index, row }">
+                            <el-link type="primary" :underline="false" @click="onClick($index)">{{ row.id }}</el-link>
                         </template>
                     </el-table-column>
                     <el-table-column label="Title" prop="title">
-                        <template #default="{ row }">
-                            <el-link type="primary" :underline="false" @click="
-                                $router.push({
-                                    path: `/problem/${row.id}`
-                                })
-                                ">{{ row.title }}</el-link>
+                        <template #default="{ $index, row }">
+                            <el-link type="primary" :underline="false" @click="onClick($index)">{{ row.title }}</el-link>
                         </template>
                     </el-table-column>
                     <el-table-column label="Time" prop="create_at">
@@ -101,14 +99,14 @@ const queryNoticeList = async () => {
                     <strong>Search</strong>
                 </template>
                 <div class="search-input">
-                    <el-input v-model="params.keyword" placeholder="key word"
-                        :prefix-icon="Search" />
+                    <el-input v-model="params.keyword" placeholder="key word" :prefix-icon="Search" />
                     <el-button type="primary" style="margin-left: 10px;" @click="handleSearch">搜索</el-button>
                     <el-button style="margin-left: 5px;" @click="handleReset">重置</el-button>
                 </div>
             </el-card>
         </div>
 
+        <notice-dialog ref="dialogRef"></notice-dialog>
     </div>
 </template>
 
@@ -138,7 +136,8 @@ const queryNoticeList = async () => {
         .search {
             width: 30%;
             margin-left: 6px;
-            .search-input{
+
+            .search-input {
                 width: 100%;
                 display: flex;
             }
