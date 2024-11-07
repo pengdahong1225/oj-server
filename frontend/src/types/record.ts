@@ -1,17 +1,18 @@
 export interface QueryRecordListParams{
     page: number;
     page_size: number;
+    status: string;
 }
 
 export interface Record {
-    create_at: string;
-    create_by: number;
+    created_at: string;
+    created_by: number;
     id: number;
     lang: string;
     memory: number;
     problem_id: number;
     run_time: number;
-    status: string;
+    status: number;
     title: string;
     uid: number;
 }

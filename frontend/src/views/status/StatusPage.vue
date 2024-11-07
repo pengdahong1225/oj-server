@@ -1,81 +1,64 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import type { QueryRecordListParams } from '@/types/record'
-
-const loading = ref(false)
-const params = ref<QueryRecordListParams>({
-    page: 1,
-    page_size: 10
-})
-const 
-
+import { SuccessFilled } from '@element-plus/icons-vue'
 </script>
 
 <template>
-    <el-card class="status-list" shadow="hover">
-        <!-- 表单区域 -->
-        <!-- <el-form inline class="form">
-            <el-form-item style="margin-right: 15px;">
-                <el-input v-model="params.keyword" style="width: 240px" placeholder="problem name"
-                    :suffix-icon="Search" />
-            </el-form-item>
-            <el-form-item>
-                <el-button @click="onSearch" type="primary">搜索</el-button>
-                <el-button @click="onReset">重置</el-button>
-            </el-form-item>
-        </el-form> -->
-
-        <!-- 表格区域 -->
-        <el-table v-loading="loading" :data="problemList">
-            <el-table-column label="Status" prop="status" width="80" align="center">
-                <template #default="{ row }">
-                    <el-icon v-if="row.status === 1" color="green" size="18"><Select /></el-icon>
+    <div class="container">
+        <div class="result-container">
+            <el-descriptions size="large">
+                <template #title>
+                    <div class="icon-box">
+                        <el-icon color="#19be6b">
+                            <SuccessFilled />
+                        </el-icon>
+                        Accepted
+                    </div>
                 </template>
-            </el-table-column>
+                <el-descriptions-item label="Username">kooriookami</el-descriptions-item>
+                <el-descriptions-item label="Telephone">18100000000</el-descriptions-item>
+                <el-descriptions-item label="Place">Suzhou</el-descriptions-item>
+                <el-descriptions-item label="Remarks">
+                    <el-tag size="small">School</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="Address">
+                    No.1188, Wuzhong Avenue, Wuzhong District, Suzhou, Jiangsu Province
+                </el-descriptions-item>
+            </el-descriptions>
+        </div>
 
-            <el-table-column label="#" prop="id" width="80">
-                <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="
-                        $router.push({
-                            path: `/problem/${row.id}`
-                        })
-                        ">{{ row.id }}</el-link>
-                </template>
-            </el-table-column>
-
-            <el-table-column label="Title" prop="title">
-                <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="
-                        $router.push({
-                            path: `/problem/${row.id}`
-                        })
-                        ">{{ row.title }}</el-link>
-                </template>
-            </el-table-column>
-            <el-table-column label="Level" prop="level">
-                <template #default="{ row }">
-                    <el-tag v-if="row.level === 1" type="primary">简单</el-tag>
-                    <el-tag v-else-if="row.level === 2" type="warning">中等</el-tag>
-                    <el-tag v-else type="danger">困难</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column label="Tags">
-                <template #default="{ row }">
-                    <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag
-                        }}</el-tag>
-                </template>
-            </el-table-column>
-
-            <template #empty>
-                <el-empty description="没有数据"></el-empty>
-            </template>
-        </el-table>
-
-        <!-- 分页 -->
-        <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size" :total="total"
-            :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
-            style="margin-top: 20px; justify-content: flex-end;" />
-    </el-card>
+        <div class="code-container">
+            source code
+        </div>
+    </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+    display: block;
+    justify-content: space-between;
+    width: 70%;
+    margin: auto;
+
+    .result-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        background-color: #e8f9f0;
+        border: 1px solid #d1f2e1;
+
+        .icon-box {
+            justify-content: space-between;
+            font-size: 35px;
+            display: flex;
+            align-items: center;
+            margin: auto;
+        }
+    }
+
+    .code-container {
+        margin-top: 30px;
+        border: 1px solid #00ffea;
+    }
+}
+</style>

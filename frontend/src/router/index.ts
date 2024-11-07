@@ -17,7 +17,8 @@ const router = createRouter({
         { path: '/problems', component: () => import('@/views/problem/ProblemsPage.vue') },
         { path: '/problem/:id', component: () => import('@/views/problem/ProblemPage.vue') },
         { path: '/contest', component: () => import('@/views/contest/ContestPage.vue') },
-        { path: '/status', component: () => import('@/views/status/StatusPage.vue') },
+        { path: '/status', component: () => import('@/views/status/StatusListPage.vue') },
+        { path: '/status/:id', component: () => import('@/views/status/StatusPage.vue') },
         { path: '/user/profile', component: () => import('@/views/user/UserProfilePage.vue') },
         { path: '/user/password', component: () => import('@/views/user/UserPasswordPage.vue') }
       ]

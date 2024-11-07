@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problem'
-import type { Problem, SubmitForm, SubmitResult } from '@/types/problem'
+import type { Problem, SubmitForm } from '@/types/problem'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/mode-c_cpp'
@@ -72,31 +72,20 @@ const checkResult = async () => {
         clearInterval(timer)
         running.value = false
 
-        result.value.problem_id = res.data.data.problem_id
-        result.value.results = res.data.data.result
+        result.value = res.data.data
         console.log(result.value)
     }
 }
-const result = ref<SubmitResult>({
-    problem_id: 0,
-    results: []
-})
+const result = ref('')
 const btype = computed(() => {
-    if (result.value.results.every(item => item.status === 'Accepted')) {
+    if (result.value === 'Accepted') {
         return 'success'
     } else {
         return 'danger'
     }
 })
-const bmsg = computed(() => {
-    if (result.value.results.every(item => item.status === 'Accepted')) {
-        return 'Accepted'
-    } else {
-        return 'failed'
-    }
-})
 const tmsg = computed(() => {
-    if (result.value.results.every(item => item.status === 'Accepted')) {
+    if (result.value === 'Accepted') {
         return 'You have solved the problem'
     } else {
         return 'failed'
@@ -171,13 +160,13 @@ const editorOptions = ref({
                 </template>
 
                 <VAceEditor v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"
-                    style="height: 500px; width: 100%;" />
+                    style="height: 350px; width: 100%;" />
 
                 <div class="submit-area-foot">
                     <div class="result-area">
-                        <div v-if="result.results.length > 0">
+                        <div v-if="result !== ''">
                             <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
-                                {{ bmsg }}
+                                {{ result }}
                             </el-button>
                             <el-tag v-else :type="btype" size="large">
                                 <template #default>

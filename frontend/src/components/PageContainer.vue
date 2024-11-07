@@ -11,8 +11,8 @@ defineProps({
 <template>
     <el-card class="page-container">
         <template #header>
-            <div class="header"> 
-                <span>{{ title }}</span>
+            <div class="header">
+                <span><strong>{{ title }}</strong></span>
                 <div class="extra">
                     <slot name="extra"></slot>
                 </div>
@@ -27,7 +27,8 @@ defineProps({
 .page-container {
     min-height: 100%;
     box-sizing: border-box;
-    .header{
+
+    .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
