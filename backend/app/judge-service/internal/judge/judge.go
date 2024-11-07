@@ -10,7 +10,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"sync"
 	"time"
 )
@@ -76,107 +75,36 @@ func saveResult(param *types.Param, data []byte) {
 		logrus.Errorln(err.Error())
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
-	if err != nil {
-		logrus.Errorf("db服连接失败:%s\n", err.Error())
-		return
-	}
-	defer dbConn.Close()
-
 	// 更新用户提交记录
-	err = updateUserSubmitRecord(param, data, dbConn)
-	if err != nil {
-		logrus.Errorln(err.Error())
-	}
-	// 更新用户AC记录
-	err = updateUserAcProblemData(param, dbConn)
-	if err != nil {
-		logrus.Errorln(err.Error())
-	}
-	// 更新用户解题统计数据
-	err = updateUserDoProblemStatistics(param, dbConn)
+	err = updateUserSubmitRecord(param, data)
 	if err != nil {
 		logrus.Errorln(err.Error())
 	}
 }
 
-func updateUserSubmitRecord(param *types.Param, data []byte, conn *grpc.ClientConn) error {
+func updateUserSubmitRecord(param *types.Param, data []byte) error {
+	conn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	if err != nil {
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return err
+	}
+	defer conn.Close()
 	client := pb.NewRecordServiceClient(conn)
 	request := &pb.SaveUserSubmitRecordRequest{
 		Data: &pb.UserSubmitRecord{
-			Uid:         param.Uid,
-			ProblemId:   param.ProblemID,
-			ProblemName: param.ProblemConfig.Name,
-			Status:      msg2status(param.Message),
-			Result:      data,
-			Lang:        param.Language,
+			Uid:          param.Uid,
+			ProblemId:    param.ProblemID,
+			ProblemName:  param.ProblemConfig.Name,
+			Status:       param.Message,
+			Result:       data,
+			Lang:         param.Language,
+			ProblemLevel: param.ProblemConfig.Level,
+			Code:         param.Code,
 		},
 	}
 
-	_, err := client.SaveUserSubmitRecord(context.Background(), request)
+	_, err = client.SaveUserSubmitRecord(context.Background(), request)
 	return err
-}
-func updateUserAcProblemData(param *types.Param, conn *grpc.ClientConn) error {
-	client := pb.NewUserServiceClient(conn)
-	request := &pb.UpdateUserACDataRequest{
-		Uid:       param.Uid,
-		ProblemId: param.ProblemID,
-	}
-
-	_, err := client.UpdateUserAcProblemData(context.Background(), request)
-	return err
-}
-func updateUserDoProblemStatistics(param *types.Param, conn *grpc.ClientConn) error {
-	client := pb.NewUserServiceClient(conn)
-	request := &pb.UpdateUserDoProblemStatisticsRequest{
-		Uid:             param.Uid,
-		SubmitCountIncr: 1,
-	}
-
-	if param.Accepted {
-		request.AcCountIncr = 1
-		switch param.ProblemConfig.Level {
-		case 1:
-			request.EasyCountIncr = 1
-		case 2:
-			request.MediumCountIncr = 1
-		case 3:
-			request.HardCountIncr = 1
-		default:
-			logrus.Infof("未知的题目难度:%d", param.ProblemConfig.Level)
-		}
-	}
-	_, err := client.UpdateUserDoProblemStatistics(context.Background(), request)
-	return err
-}
-
-func msg2status(msg string) int32 {
-	switch msg {
-	case "Accepted":
-		return 0
-	case "Compile Error":
-		return 1
-	case "Wrong Answer":
-		return 2
-	default:
-		return -1
-	}
-}
-
-func loadProblemDetail(problemID int64) (*pb.Problem, error) {
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
-	if err != nil {
-		logrus.Errorf("db服连接失败:%s\n", err.Error())
-		return nil, err
-	}
-	defer dbConn.Close()
-
-	client := pb.NewProblemServiceClient(dbConn)
-	response, err := client.GetProblemData(context.Background(), &pb.GetProblemRequest{Id: problemID})
-	if err != nil {
-		return nil, err
-	}
-	return response.Data, nil
 }
 
 func preAction(form *pb.SubmitForm) (bool, *types.Param) {
@@ -218,6 +146,7 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 	}
 	logrus.Debugln("编译结果:", compileResult)
 
+	// 编译失败的status统一为Compile Error
 	if compileResult.Status != "Accepted" {
 		compileResult.Content = "Compile Error"
 		results = append(results, compileResult)

@@ -13,14 +13,24 @@ type RecordServer struct {
 	pb.UnimplementedRecordServiceServer
 }
 
+// SaveUserSubmitRecord
+// 1.更新用户提交记录表
+// 2.更新(用户,题目)AC表
+// 3.更新用户解题情况统计表
 func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request *pb.SaveUserSubmitRecordRequest) (*empty.Empty, error) {
+	tx := mysql.Instance().Begin()
+	if tx.Error != nil {
+		logrus.Errorln(tx.Error.Error())
+		return nil, tx.Error
+	}
+
+	// todo 更新用户提交记录表
 	/*
 		insert into user_submit_record
 		(uid, problem_id, problem_name, status, code, result, lang)
 		values
 		(?, ?, ?, ?, ?, ?, ?);
 	*/
-	db := mysql.Instance()
 	record := &mysql.SubmitRecord{
 		Uid:         request.Data.Uid,
 		ProblemID:   request.Data.ProblemId,
@@ -30,23 +40,70 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 		Result:      request.Data.Result,
 		Lang:        request.Data.Lang,
 	}
-	//if !db.Migrator().HasTable(record.TableName(request.Stamp)) {
-	//	err := db.Table(record.TableName(request.Stamp)).AutoMigrate(record)
-	//	if err != nil {
-	//		logrus.Errorln(err.Error())
-	//		return nil, rpc.InsertFailed
-	//	}
-	//}
-	result := db.Create(record)
+	result := tx.Create(record)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
+		tx.Rollback()
 		return nil, rpc.InsertFailed
 	}
 
+	// todo 更新(用户,题目)AC表
+	/*
+		insert into user_solution(uid,problem_id)
+		values(?,?)
+	*/
+	var repeatedAc = true
+	if request.Data.Status == "Accepted" {
+		data := mysql.UserSolution{}
+		result = tx.Where("uid=? and problem_id=?", request.Data.Uid, request.Data.ProblemId).Find(&data)
+		if result.RowsAffected == 0 {
+			repeatedAc = false
+
+			data.Uid = request.Data.Uid
+			data.ProblemID = request.Data.ProblemId
+
+			result = tx.Create(&data)
+			if result.Error != nil {
+				logrus.Errorln(result.Error.Error())
+				tx.Rollback()
+				return nil, rpc.InsertFailed
+			}
+		}
+	}
+
+	// todo 更新用户解题情况统计表
+	data := mysql.Statistics{
+		Uid: request.Data.Uid,
+	}
+	result = tx.FirstOrCreate(&data)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.QueryFailed
+	}
+	data.SubmitCount += 1
+	if !repeatedAc && request.Data.Status == "Accepted" {
+		data.AccomplishCount += 1
+		switch request.Data.ProblemLevel {
+		case 1:
+			data.EasyProblemCount += 1
+		case 2:
+			data.MediumProblemCount += 1
+		case 3:
+			data.HardProblemCount += 1
+		}
+	}
+	result = tx.Where("uid=?", data.Uid).Save(&data)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		tx.Rollback()
+		return nil, rpc.UpdateFailed
+	}
+
+	tx.Commit()
 	return &empty.Empty{}, nil
 }
 
-// GetUserSubmitRecord
+// GetUserRecordList
 // 分页查询用户的提交记录
 // @uid
 // @page
@@ -61,9 +118,21 @@ func (receiver *RecordServer) GetUserRecordList(ctx context.Context, request *pb
 	*/
 	db := mysql.Instance()
 	offSet := int((request.Page - 1) * request.PageSize)
+	rsp := &pb.GetUserRecordListResponse{}
+
+	var count int64 = 0
+	result := db.Model(&mysql.SubmitRecord{}).Where("uid = ?", request.Uid).Count(&count)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, rpc.QueryFailed
+	}
+	rsp.Total = int32(count)
+	if count == 0 {
+		return rsp, nil
+	}
 
 	var records []mysql.SubmitRecord
-	result := db.Where("uid = ?", request.Uid).Order("created_at desc").Offset(offSet).Limit(int(request.PageSize)).Find(&records)
+	result = db.Where("uid = ?", request.Uid).Order("created_at desc").Offset(offSet).Limit(int(request.PageSize)).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, rpc.QueryFailed
@@ -72,9 +141,8 @@ func (receiver *RecordServer) GetUserRecordList(ctx context.Context, request *pb
 		return nil, rpc.NotFound
 	}
 
-	list := make([]*pb.UserSubmitRecord, 0, len(records))
 	for _, record := range records {
-		list = append(list, &pb.UserSubmitRecord{
+		rsp.Data = append(rsp.Data, &pb.UserSubmitRecord{
 			Id:          int64(record.ID),
 			CreatedAt:   record.CreatedAt.Unix(),
 			ProblemName: record.ProblemName,
@@ -83,7 +151,7 @@ func (receiver *RecordServer) GetUserRecordList(ctx context.Context, request *pb
 		})
 	}
 
-	return &pb.GetUserRecordListResponse{Data: list}, nil
+	return rsp, nil
 }
 
 func (receiver *RecordServer) GetUserRecord(ctx context.Context, request *pb.GetUserRecordRequest) (*pb.GetUserRecordResponse, error) {

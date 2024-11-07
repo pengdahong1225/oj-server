@@ -232,7 +232,7 @@ func (r User) GetRecordList(uid int64, page, pageSize int) *models.Response {
 	}
 
 	res.Message = "OK"
-	res.Data = response.Data
+	res.Data = response
 	return res
 }
 

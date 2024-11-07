@@ -7,7 +7,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type UserServer struct {
@@ -242,68 +241,4 @@ func (r *UserServer) QueryUserSolvedListByProblemIds(ctx context.Context, reques
 		SolvedProblemIds: ids,
 		Uid:              request.Uid,
 	}, nil
-}
-
-// UpdateUserAcProblemData
-// 更新用户AC题目数据
-// @uid
-// @problem_ids
-func (r *UserServer) UpdateUserAcProblemData(ctx context.Context, request *pb.UpdateUserACDataRequest) (*emptypb.Empty, error) {
-	db := mysql.Instance()
-	/*
-		insert into user_solution(uid,problem_id)
-		values(?,?)
-	*/
-	data := mysql.UserSolution{}
-	result := db.Where("uid=? and problem_id=?", request.Uid, request.ProblemId).Find(&data)
-	if result.RowsAffected != 0 {
-		return nil, rpc.AlreadyExists
-	}
-	data.Uid = request.Uid
-	data.ProblemID = request.ProblemId
-
-	result = db.Create(&data)
-	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
-		return nil, rpc.InsertFailed
-	}
-	return &emptypb.Empty{}, nil
-}
-
-// UpdateUserDoProblemStatistics
-// 更新用户做题统计数据
-func (r *UserServer) UpdateUserDoProblemStatistics(ctx context.Context, request *pb.UpdateUserDoProblemStatisticsRequest) (*emptypb.Empty, error) {
-	db := mysql.Instance()
-	data := mysql.Statistics{
-		Uid: request.Uid,
-	}
-	result := db.Find(&data)
-	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
-	}
-	if result.RowsAffected > 0 {
-		data.SubmitCount += request.SubmitCountIncr
-		data.AccomplishCount += request.AcCountIncr
-		data.EasyProblemCount += request.EasyCountIncr
-		data.MediumProblemCount += request.MediumCountIncr
-		data.HardProblemCount += request.HardCountIncr
-		result = db.Where("uid=?", data.Uid).Save(&data)
-		if result.Error != nil {
-			logrus.Errorln(result.Error.Error())
-			return nil, rpc.UpdateFailed
-		}
-	} else {
-		data.SubmitCount = request.SubmitCountIncr
-		data.AccomplishCount = request.AcCountIncr
-		data.EasyProblemCount = request.EasyCountIncr
-		data.MediumProblemCount = request.MediumCountIncr
-		data.HardProblemCount = request.HardCountIncr
-		result = db.Create(&data)
-		if result.Error != nil {
-			logrus.Errorln(result.Error.Error())
-			return nil, rpc.InsertFailed
-		}
-	}
-	return &emptypb.Empty{}, nil
 }

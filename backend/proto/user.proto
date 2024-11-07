@@ -32,11 +32,12 @@ message UserSubmitRecord{
   int64 uid = 1;
   int64 problem_id = 2;
   string problem_name = 3;
-  int32 status = 4; // 0:Accepted 1:Compile Error 2:Wrong Answer
+  string status = 4;
   bytes result = 5; // []JudgeResult 二进制数据
   string code = 6;
   string lang = 7;
 
   int64 id = 8;
   int64 created_at = 9;
+  int32 problem_level = 10;
 }

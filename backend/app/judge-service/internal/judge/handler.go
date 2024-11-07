@@ -170,19 +170,18 @@ func (r *Handler) run(param *types.Param) {
 	wg.Wait()
 }
 
-// 1.检查结果状态，只judge结果状态为Accepted的
-// 2.如果结果状态为其他，不judge直接缓存
+// 检查结果状态，只check结果状态为Accepted的
 func (r *Handler) judge() []*pb.JudgeResult {
 	var results []*pb.JudgeResult
 	for runResult := range r.runResults {
 		if runResult.Status != "Accepted" {
-			runResult.Content = "Run Error"
+			runResult.Content = runResult.Status
 			results = append(results, runResult)
 			continue
 		}
 		// 判断output是否满足预期
 		// 不满足结果的状态为Wrong Answer
-		if !r.analyzeAnswer(runResult.Files["stdout"], runResult.TestCase.Output) {
+		if !r.checkAnswer(runResult.Files["stdout"], runResult.TestCase.Output) {
 			runResult.Status = "Wrong Answer"
 			runResult.Content = "Wrong Answer"
 			results = append(results, runResult)
@@ -195,7 +194,7 @@ func (r *Handler) judge() []*pb.JudgeResult {
 	return results
 }
 
-func (r *Handler) analyzeAnswer(X string, Y string) bool {
+func (r *Handler) checkAnswer(X string, Y string) bool {
 	X = strings.Replace(X, " ", "", -1)
 	X = strings.Replace(X, "\n", "", -1)
 	return X == Y

@@ -9,9 +9,9 @@ type SubmitRecord struct {
 	Uid         int64  `gorm:"column:uid;index:idx_uid" json:"uid"`
 	ProblemID   int64  `gorm:"column:problem_id" json:"problem_id"`
 	ProblemName string `gorm:"column:problem_name" json:"problem_name"`
-	Status      int32  `gorm:"column:status" json:"status"`
+	Status      string `gorm:"column:status" json:"status"`
 	Code        string `gorm:"column:code" json:"code"`
-	Result      []byte `gorm:"column:result type:blob" json:"result"`
+	Result      []byte `gorm:"column:result" json:"result"`
 	Lang        string `gorm:"column:lang" json:"lang"`
 }
 

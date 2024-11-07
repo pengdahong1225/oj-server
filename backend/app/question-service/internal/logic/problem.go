@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/consts"
@@ -282,27 +281,15 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 	}
 
 	// 当state == SubmitState_UPStateExited时，从缓存中提取结果
-	bys, err := cache.GetJudgeResult(uid, problemID)
+	result, err := cache.GetJudgeResult(uid, problemID)
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
 		logrus.Errorf("获取结果failed: %s\n", err.Error())
 		return res
 	}
-	data := models.QuerySubmitResultResponse{
-		Uid:       uid,
-		ProblemID: problemID,
-		Result:    nil,
-	}
-	err = json.Unmarshal([]byte(bys), &data.Result)
-	if err != nil {
-		res.Code = models.Failed
-		res.Message = err.Error()
-		logrus.Errorf("反序列化失败: %s\n", err.Error())
-		return res
-	}
 
 	res.Message = "OK"
-	res.Data = data
+	res.Data = result
 	return res
 }

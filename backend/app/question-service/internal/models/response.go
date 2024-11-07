@@ -35,10 +35,3 @@ type NoticeRspData struct {
 	Total      int32        `json:"total"`
 	NoticeList []*pb.Notice `json:"noticeList"`
 }
-
-// QuerySubmitResultResponse 查询提交结果响应格式
-type QuerySubmitResultResponse struct {
-	Uid       int64             `json:"uid"`
-	ProblemID int64             `json:"problem_id"`
-	Result    []*pb.JudgeResult `json:"result"` // 判题结果集
-}

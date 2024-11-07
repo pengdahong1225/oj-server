@@ -30,7 +30,7 @@ create table if not exists user_submit_record
     uid BIGINT not null comment '用户id',
     problem_id BIGINT not null comment '题目id',
     problem_name VARCHAR(64) not null comment '题目名称',
-    status tinyint not null comment '0:Accepted 1:Compile Error 2:Wrong Answer',
+    status VARCHAR(64) not null comment '状态',
     code TEXT NOT null comment '提交的代码',
     result blob NOT null comment '运行结果集',
     lang VARCHAR(64) DEFAULT '' comment '语言',
