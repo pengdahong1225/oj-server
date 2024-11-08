@@ -57,8 +57,8 @@ const onUpdateAvator = () => {
                     </el-form-item>
                     <el-form-item label="Gender" prop="gender" style="width: 500px;">
                         <el-radio-group v-model="userStore.userInfo.gender">
-                            <el-radio :label="1">male</el-radio>
-                            <el-radio :label="0">female</el-radio>
+                            <el-radio :value ="1">male</el-radio>
+                            <el-radio :value ="0">female</el-radio>
                         </el-radio-group>
                     </el-form-item>
                     <el-button type="primary" @click="onUpdateProfile">

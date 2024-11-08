@@ -5,6 +5,34 @@ import router from '@/router'
 // const baseURL = 'http://192.168.201.128/api'
 const baseURL = 'http://localhost:9020'
 
+const useStore = useUserStore()
+let isRefreshing = false;
+let requests: Array<(token: string | null) => void> = [];
+
+function processQueue(error: any, token: string | null = null) {
+  requests.forEach(callback => {
+    if (error) {
+      callback(error);
+    } else {
+      callback(token);
+    }
+  });
+  requests = [];
+}
+function refreshToken() {
+  return new Promise<string>((resolve, reject) => {
+    instance.post('/user/refresh_token').then(res => {
+      if (res.data.code === 0) {
+        resolve(res.data.token);
+      } else {
+        reject(res.data.message);
+      }
+    }).catch(error => {
+      reject(error);
+    });
+  });
+}
+
 /**
  * axios
  * 请求拦截器
@@ -18,7 +46,6 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     // 携带token
-    const useStore = useUserStore()
     if (useStore.token) {
       config.headers.Authorization = useStore.token
       config.headers['token'] = useStore.token
@@ -38,12 +65,39 @@ instance.interceptors.response.use(
     return Promise.reject(res.data)
   },
   (err) => {
-    // 错误的特殊情况 => 401 权限不足 或 token 过期 => 拦截到登录
-    if (err.response?.status === 401) {
-      router.push('/login')
-    }
+    // 错误的特殊情况 => 401 权限不足 或 token 过期
+    // if (err.response?.status === 401) {
+    //   router.push('/login')
+    // }
 
-    // 错误的默认情况 => 只要给提示
+    const { config, response } = err;
+    const originalRequest = config;
+    if (response && response.status === 401) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        return refreshToken().then(newToken => {
+          useStore.token = newToken;
+          originalRequest.headers['token'] = newToken;
+          processQueue(null, newToken);
+          return instance(originalRequest);
+        }).catch(err => {
+          processQueue(err, null);
+          useStore.clearUserInfo()
+          router.push('/login');
+          return Promise.reject(err);
+        }).finally(() => {
+          isRefreshing = false;
+        });
+      } else {
+        return new Promise((resolve, reject) => {
+          requests.push((token) => {
+            originalRequest.headers['token'] = token;
+            resolve(instance(originalRequest));
+          });
+        });
+      }
+    }
+    
     ElMessage.error(err.response.data.message || '服务异常')
     return Promise.reject(err)
   }
