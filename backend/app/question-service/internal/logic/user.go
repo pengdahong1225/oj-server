@@ -6,18 +6,13 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/utils"
+	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
-)
-
-// 签名过期时间
-var (
-	jwtTimeOut int64 = 60 * 60 * 24 * 7
-	issuer           = "Messi"
 )
 
 type User struct {
@@ -105,9 +100,9 @@ func (r User) OnUserLogin(form *models.LoginFrom) *models.Response {
 		Mobile:    response.Data.Mobile,
 		Authority: response.Data.Role,
 		StandardClaims: jwt.StandardClaims{
-			NotBefore: time.Now().Unix(),              // 签名生效时间
-			ExpiresAt: time.Now().Unix() + jwtTimeOut, // 7天过期
-			Issuer:    issuer,                         // 签名机构
+			NotBefore: time.Now().Unix(),                       // 签名生效时间
+			ExpiresAt: time.Now().Unix() + consts.TokenTimeOut, // 7天过期
+			Issuer:    consts.Issuer,                           // 签名机构
 		},
 	}
 	token, err := j.CreateToken(claims)

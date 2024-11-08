@@ -3,7 +3,9 @@ package middlewares
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
+	"time"
 )
 
 func AuthLogin() gin.HandlerFunc {
@@ -38,6 +40,10 @@ func AuthLogin() gin.HandlerFunc {
 				return
 			}
 		}
+
+		// 剩余时间
+		remain := claims.ExpiresAt - time.Now().Unix()
+		logrus.Debugf("剩余：%v, [%v天]\n", remain, remain/86400)
 
 		// token通过
 		ctx.Set("claims", claims)

@@ -3,6 +3,7 @@ package middlewares
 import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"time"
 )
@@ -65,18 +66,16 @@ func (receiver *JWT) ParseToken(tokenString string) (*UserClaims, error) {
 }
 
 func (receiver *JWT) RefreshToken(tokenString string) (string, error) {
-	jwt.TimeFunc = func() time.Time {
-		return time.Unix(0, 0)
-	}
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return receiver.SigningKey, nil
 	})
 	if err != nil {
 		return "", err
 	}
+
 	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
 		jwt.TimeFunc = time.Now
-		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
+		claims.StandardClaims.ExpiresAt = time.Now().Unix() + consts.TokenTimeOut
 		return receiver.CreateToken(claims)
 	}
 	return "", err

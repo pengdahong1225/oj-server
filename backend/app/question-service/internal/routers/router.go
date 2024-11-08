@@ -32,6 +32,7 @@ func questionRouters(engine *gin.Engine) {
 		userRouter.GET("/record_list", middlewares.AuthLogin(), controller.User{}.HandleRecordList) // 历史提交记录列表
 		userRouter.GET("/record", middlewares.AuthLogin(), controller.User{}.HandleRecord)
 		userRouter.GET("/solved_list", middlewares.AuthLogin(), controller.User{}.HandleSolvedList)
+		userRouter.POST("/refresh_token", controller.User{}.HandleRefreshToken)
 	}
 
 	// 题目相关

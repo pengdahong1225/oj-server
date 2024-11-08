@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"net/http"
 	"regexp"
@@ -73,6 +74,31 @@ func (r User) HandleUserProfile(ctx *gin.Context) {
 func (r User) HandleRankList(ctx *gin.Context) {
 	res := r.logic.GetRankList()
 	ctx.JSON(http.StatusOK, res)
+}
+
+func (r User) HandleRefreshToken(ctx *gin.Context) {
+	token := ctx.Request.Header.Get("token")
+	if token == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"code":    models.Failed,
+			"message": "未登录",
+		})
+		return
+	}
+	j := middlewares.NewJWT()
+	newToken, err := j.RefreshToken(token)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"code":    models.Failed,
+			"message": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    models.Success,
+		"message": "OK",
+		"token":   newToken,
+	})
 }
 
 // HandleRecordList 历史提交记录
