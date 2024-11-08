@@ -66,17 +66,29 @@ func (receiver *JWT) ParseToken(tokenString string) (*UserClaims, error) {
 }
 
 func (receiver *JWT) RefreshToken(tokenString string) (string, error) {
+	refresh := func(token *jwt.Token) (string, error) {
+		claims, _ := token.Claims.(*UserClaims)
+		claims.StandardClaims.ExpiresAt = time.Now().Unix() + consts.TokenTimeOut
+		return receiver.CreateToken(claims)
+	}
+
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return receiver.SigningKey, nil
 	})
 	if err != nil {
-		return "", err
+		var ve *jwt.ValidationError
+		if errors.As(err, &ve) {
+			// 可用-已过期
+			if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				return refresh(token)
+			} else {
+				return "", err
+			}
+		}
+	} else {
+		// 可用-没过期
+		return refresh(token)
 	}
 
-	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
-		jwt.TimeFunc = time.Now
-		claims.StandardClaims.ExpiresAt = time.Now().Unix() + consts.TokenTimeOut
-		return receiver.CreateToken(claims)
-	}
 	return "", err
 }
