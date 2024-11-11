@@ -46,6 +46,6 @@ func (receiver *Producer) Publish(msg []byte) bool {
 		logrus.Errorf("发送消息失败:%s", err.Error())
 		return false
 	}
-	logrus.Infof("发送消息成功:%s", msg)
+	logrus.Infof("发送消息成功:%s", string(msg))
 	return true
 }
