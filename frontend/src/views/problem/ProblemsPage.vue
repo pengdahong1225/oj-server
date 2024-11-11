@@ -53,7 +53,8 @@ const onReset = () => {
     getProblemList()
 }
 const onTagClick = (tag: string) => {
-    console.log(tag)
+    params.value.tag = tag
+    getProblemList()
 }
 </script>
 
