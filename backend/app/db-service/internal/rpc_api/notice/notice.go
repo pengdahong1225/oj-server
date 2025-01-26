@@ -2,7 +2,6 @@ package notice
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -27,7 +26,7 @@ func (r *NoticeServer) GetNoticeList(ctx context.Context, request *pb.GetNoticeL
 	result := db.Model(&mysql.Notice{}).Where("title LIKE ?", name).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	rsp.Total = int32(count)
 	logrus.Debugln("count:", count)
@@ -43,7 +42,7 @@ func (r *NoticeServer) GetNoticeList(ctx context.Context, request *pb.GetNoticeL
 	result = db.Select("id,title,content,create_at,status, create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(int(request.PageSize)).Find(&noticeList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	for _, v := range noticeList {
 		rsp.Data = append(rsp.Data, &pb.Notice{

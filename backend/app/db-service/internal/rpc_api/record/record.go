@@ -3,7 +3,6 @@ package record
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -44,7 +43,7 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		tx.Rollback()
-		return nil, rpc.InsertFailed
+		return nil, rpc_api.InsertFailed
 	}
 
 	// todo 更新(用户,题目)AC表
@@ -66,7 +65,7 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 			if result.Error != nil {
 				logrus.Errorln(result.Error.Error())
 				tx.Rollback()
-				return nil, rpc.InsertFailed
+				return nil, rpc_api.InsertFailed
 			}
 		}
 	}
@@ -78,7 +77,7 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 	result = tx.FirstOrCreate(&data)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	data.SubmitCount += 1
 	if !repeatedAc && request.Data.Status == "Accepted" {
@@ -96,7 +95,7 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		tx.Rollback()
-		return nil, rpc.UpdateFailed
+		return nil, rpc_api.UpdateFailed
 	}
 
 	tx.Commit()
@@ -124,7 +123,7 @@ func (receiver *RecordServer) GetUserRecordList(ctx context.Context, request *pb
 	result := db.Model(&mysql.SubmitRecord{}).Where("uid = ?", request.Uid).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	rsp.Total = int32(count)
 	if count == 0 {
@@ -135,10 +134,10 @@ func (receiver *RecordServer) GetUserRecordList(ctx context.Context, request *pb
 	result = db.Where("uid = ?", request.Uid).Order("created_at desc").Offset(offSet).Limit(int(request.PageSize)).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	for _, record := range records {
@@ -160,10 +159,10 @@ func (receiver *RecordServer) GetUserRecord(ctx context.Context, request *pb.Get
 	result := db.Where("id = ?", request.Id).First(&record)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 	return &pb.GetUserRecordResponse{Data: &pb.UserSubmitRecord{
 		Id:        int64(record.ID),

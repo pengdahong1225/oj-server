@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -19,10 +18,10 @@ func (r *UserServer) GetUserDataByMobile(ctx context.Context, request *pb.GetUse
 	result := db.Where("mobile=?", request.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	userInfo := &pb.UserInfo{
@@ -47,10 +46,10 @@ func (r *UserServer) GetUserDataByUid(ctx context.Context, request *pb.GetUserDa
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	userInfo := &pb.UserInfo{
@@ -74,7 +73,7 @@ func (r *UserServer) CreateUserData(ctx context.Context, request *pb.CreateUserR
 	var user mysql.UserInfo
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.RowsAffected > 0 {
-		return nil, rpc.AlreadyExists
+		return nil, rpc_api.AlreadyExists
 	}
 
 	user.Mobile = request.Data.Mobile
@@ -88,7 +87,7 @@ func (r *UserServer) CreateUserData(ctx context.Context, request *pb.CreateUserR
 	result = db.Create(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.InsertFailed
+		return nil, rpc_api.InsertFailed
 	}
 
 	return &pb.CreateUserResponse{Id: user.ID}, nil
@@ -100,10 +99,10 @@ func (r *UserServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserR
 	result := db.Where("mobile=?", request.Data.Mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	// 更新
@@ -116,7 +115,7 @@ func (r *UserServer) UpdateUserData(ctx context.Context, request *pb.UpdateUserR
 	result = db.Save(&user) // gorm在事务执行(可重复读)，innodb自动加写锁
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.InsertFailed
+		return nil, rpc_api.InsertFailed
 	}
 	return &empty.Empty{}, nil
 }
@@ -127,17 +126,17 @@ func (r *UserServer) DeleteUserData(ctx context.Context, request *pb.DeleteUserR
 	result := db.Where("id=?", request.Id).Find(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	// 软删除
 	result = db.Delete(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.DeleteFailed
+		return nil, rpc_api.DeleteFailed
 	}
 	// 永久删除
 	// result = global.DBInstance.Unscoped().Delete(&user)
@@ -190,10 +189,10 @@ func (r *UserServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserS
 	result := db.Where("uid=?", request.Uid).Find(&userSolutionList)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	var rsp = new(pb.GetUserSolvedListResponse)
@@ -213,10 +212,10 @@ func (r *UserServer) ResetUserPassword(ctx context.Context, request *pb.ResetUse
 	result := db.Model(&mysql.UserInfo{}).Where("id=?", request.Id).Update("password", request.Password)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.UpdateFailed
+		return nil, rpc_api.UpdateFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 	return &empty.Empty{}, nil
 }
@@ -235,7 +234,7 @@ func (r *UserServer) QueryUserSolvedListByProblemIds(ctx context.Context, reques
 	result := db.Select("problem_id").Model(&mysql.UserSolution{}).Where("uid=?", request.Uid).Where("problem_id in (?)", request.ProblemIds).Find(&ids)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	return &pb.QueryUserSolvedListByProblemIdsResponse{
 		SolvedProblemIds: ids,

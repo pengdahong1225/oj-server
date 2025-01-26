@@ -3,11 +3,11 @@ package internal
 import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/daemon"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/comment"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/notice"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/problem"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/record"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc/user"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/comment"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/notice"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/problem"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/record"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/user"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
@@ -18,7 +18,6 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"sync"
-	"time"
 )
 
 type Server struct {
@@ -47,37 +46,16 @@ func (receiver *Server) Start() {
 		panic(err)
 	}
 
-	// 排行榜 - 定时器触发
+	// 后台服务
 	daemonServer := daemon.Daemon{}
 	wg.Add(1)
 	err = goroutinePool.Instance().Submit(func() {
 		defer wg.Done()
-		ticker := time.NewTicker(time.Hour * 24)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				daemonServer.RankList()
-			}
-		}
+		daemonServer.Start()
 	})
 	if err != nil {
 		panic(err)
 	}
-
-	// mq消费者
-	wg.Add(1)
-	err = goroutinePool.Instance().Submit(func() {
-		defer wg.Done()
-		daemonServer.CommentSaveConsumer()
-	})
-
-	// 初始化任务
-	wg.Add(1)
-	err = goroutinePool.Instance().Submit(func() {
-		defer wg.Done()
-		daemonServer.ReadTagList()
-	})
 
 	// 注册服务节点
 	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)

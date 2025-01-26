@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/redis"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
@@ -25,19 +24,19 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 	config, err := proto.Marshal(request.Data.Config)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, rpc.InsertFailed
+		return nil, rpc_api.InsertFailed
 	}
 	tags, err := json.Marshal(request.Data.Tags)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, rpc.InsertFailed
+		return nil, rpc_api.InsertFailed
 	}
 
 	problem := mysql.Problem{}
 	result := db.Where("title = ?", request.Data.Title).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 
 	problem.Title = request.Data.Title
@@ -54,7 +53,7 @@ func (receiver *ProblemServer) UpdateProblemData(ctx context.Context, request *p
 	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.UpdateFailed
+		return nil, rpc_api.UpdateFailed
 	}
 
 	// 缓存题目配置
@@ -83,24 +82,24 @@ func (receiver *ProblemServer) GetProblemData(ctx context.Context, request *pb.G
 	result := db.Where("id = ?", request.Id).First(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	config := &pb.ProblemConfig{}
 	err := proto.Unmarshal(problem.Config, config)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 
 	var tags []string
 	err = json.Unmarshal(problem.Tags, &tags)
 	if err != nil {
 		logrus.Errorln(err.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 
 	data := &pb.Problem{
@@ -125,17 +124,17 @@ func (receiver *ProblemServer) DeleteProblemData(ctx context.Context, request *p
 	result := db.Where("id = ?", request.Id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	// 软删除
 	result = db.Delete(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.DeleteFailed
+		return nil, rpc_api.DeleteFailed
 	}
 	// 永久删除
 	// result = db.Unscoped().Delete(&user)
@@ -169,7 +168,7 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	rsp.Total = int32(count)
 	logrus.Debugln("count:", count)
@@ -190,7 +189,7 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	for _, problem := range problemList {
 		p := &pb.Problem{
@@ -203,7 +202,7 @@ func (receiver *ProblemServer) GetProblemList(ctx context.Context, request *pb.G
 		err := json.Unmarshal(problem.Tags, &p.Tags)
 		if err != nil {
 			logrus.Errorln(err.Error())
-			return nil, rpc.QueryFailed
+			return nil, rpc_api.QueryFailed
 		}
 		rsp.Data = append(rsp.Data, p)
 	}
@@ -221,10 +220,10 @@ func (receiver *ProblemServer) GetProblemHotData(ctx context.Context, request *p
 	result := db.Select("config").Where("id = ?", request.ProblemId).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if result.RowsAffected == 0 {
-		return nil, rpc.NotFound
+		return nil, rpc_api.NotFound
 	}
 
 	err := redis.CacheProblemConfig(problem.ID, problem.Config)

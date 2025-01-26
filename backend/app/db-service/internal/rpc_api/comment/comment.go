@@ -2,7 +2,7 @@ package comment
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/svc/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -21,15 +21,15 @@ func (receiver *CommentServer) QueryComment(ctx context.Context, request *pb.Que
 	checker := commentChecker{}
 	if !checker.assertObj(request.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", request.ObjId)
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if request.RootId > 0 && request.RootCommentId > 0 && !checker.assertRoot(request.RootCommentId, request.RootId) {
 		logrus.Errorf("root comment[%d] assert failed", request.RootCommentId)
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 	if request.ReplyId > 0 && request.ReplyCommentId > 0 && !checker.assertReply(request.ReplyCommentId, request.ReplyId) {
 		logrus.Errorf("reply comment[%d] assert failed", request.ReplyCommentId)
-		return nil, rpc.QueryFailed
+		return nil, rpc_api.QueryFailed
 	}
 
 	response := &pb.QueryCommentResponse{}
