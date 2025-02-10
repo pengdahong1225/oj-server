@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { User } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores'
-import { getUserInfoService } from '@/api/user'
+import { getUserInfoService } from '@/api/userController'
 import avatar from '@/assets/default.png'
 
 const userStore = useUserStore()

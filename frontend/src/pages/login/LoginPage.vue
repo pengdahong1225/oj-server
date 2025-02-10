@@ -2,18 +2,17 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
-import { userRegisterService, userLoginService } from '@/api/user'
-import type { RegisterForm, LoginForm, UserProfile } from '@/types/user'
+import { userRegisterService, userLoginService } from '@/api/userController'
 import { useUserStore } from '@/stores'
 
 const isRegister = ref(false)
 const form = ref()
-const register_form = ref(<RegisterForm>{
+const register_form = ref(<API.RegisterForm>{
   mobile: '',
   password: '',
   repassword: ''
 })
-const login_form = ref(<LoginForm>{
+const login_form = ref(<API.LoginForm>{
   mobile: '',
   password: ''
 })
@@ -90,7 +89,7 @@ const login = async () => {
   const res = await userLoginService(login_form.value)
   console.log(res)
   ElMessage.success('登录成功')
-  const user = <UserProfile>{
+  const user = <API.UserProfile>{
     uid: res.data.data.uid,
     mobile: res.data.data.mobile,
     nickname: res.data.data.nickname,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { updateProblemService, queryProblemDetailService, getProblemTagListService } from '@/api/problem'
+import { updateProblemService, queryProblemDetailService, getProblemTagListService } from '@/api/problemController'
 import type { Problem } from '@/types/problem.ts'
 
 const level_list = [

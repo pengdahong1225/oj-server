@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { onMounted, ref, watch } from 'vue'
-import { queryProblemListService } from '@/api/problem'
+import { queryProblemListService } from '@/api/problemController'
 
-import type { Problem, QueryProblemListParams } from '@/types/problem'
 import { formatTime } from '@/utils/format'
 import ProblemEdit from '@/components/problemEdit.vue'
 
@@ -15,9 +14,9 @@ const loading = ref(false)
 // 总数
 const total = ref(0)
 // 文章列表数据
-const problemList = ref<Problem[]>([])
+const problemList = ref<API.Problem[]>([])
 // 分页请求参数
-const params = ref(<QueryProblemListParams>{
+const params = ref(<API.QueryProblemListParams>{
     page: 1,
     page_size: 10, // page_size默认为10
     keyword: '',
@@ -51,10 +50,10 @@ const problemEditRef = ref()
 const onAddProblem = () => {
     problemEditRef.value.open({})
 }
-const onEdit = (row: Problem) => {
+const onEdit = (row: API.Problem) => {
     problemEditRef.value.open(row)
 }
-const onDelete = (row: Problem) => {
+const onDelete = (row: API.Problem) => {
     console.log(row)
 }
 // 添加或者编辑 成功的回调

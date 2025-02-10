@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problem'
+import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problemController'
 import type { Problem, SubmitForm } from '@/types/problem'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import type { QueryRecordListParams, Record } from '@/types/record'
-import { queryRecordListService } from '@/api/user'
+import { queryRecordListService } from '@/api/userController'
 import { formatTime } from '@/utils/format'
 
 onMounted(() => {
@@ -11,12 +10,12 @@ onMounted(() => {
 const all_status = ['Accepted', 'Compile Error', 'Wrong Answer',
     'Memory Limit Exceeded', 'Time Limit Exceeded', 'Output Limit Exceeded', 'File Error', 'Nonzero Exit Status', 'Signalled', 'Internal Error']
 const loading = ref(false)
-const params = ref<QueryRecordListParams>({
+const params = ref<API.QueryRecordListParams>({
     page: 1,
     page_size: 10,
     status: ''
 })
-const record_list = ref<Record[]>([])
+const record_list = ref<API.Record[]>([])
 const total = ref(0)
 const getRecordList = async () => {
     loading.value = true

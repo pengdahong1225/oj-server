@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { UserProfile } from '@/types/user'
 
 /**
  * 用户模块
@@ -8,7 +7,7 @@ import type { UserProfile } from '@/types/user'
  */
 export const useUserStore = defineStore('user', () => {
     const token = ref('')
-    const userInfo = ref<UserProfile>({
+    const userInfo = ref<API.UserProfile>({
         uid: 0,
         nickname: '',
         avatar_url: '',
@@ -17,7 +16,7 @@ export const useUserStore = defineStore('user', () => {
         role: 0,
         gender: 0
     })
-    const setUserInfo = (value: UserProfile) => {
+    const setUserInfo = (value: API.UserProfile) => {
         userInfo.value = value
     }
     const setToken = (value: string) => {

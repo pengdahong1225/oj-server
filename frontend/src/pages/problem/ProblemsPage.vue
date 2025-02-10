@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue"
 import { Search, Select } from '@element-plus/icons-vue'
 import type { Problem, QueryProblemListParams } from '@/types/problem'
-import { queryProblemListService, getProblemTagListService } from '@/api/problem'
+import { queryProblemListService, getProblemTagListService } from '@/api/problemController'
 import { useUserStore } from '@/stores'
 
 const userStore = useUserStore()

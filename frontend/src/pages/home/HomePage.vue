@@ -3,17 +3,16 @@ import { onMounted, ref } from 'vue'
 // import default_banner from '@/assets/default_banner.jpg'
 import { Search } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
-import { queryNoticeListService } from '@/api/notice'
-import type { QueryNoticeListParams, Notice } from '@/types/notice'
+import { queryNoticeListService } from '@/api/noticeController'
 
 onMounted(() => {
     queryNoticeList()
 })
 
 const loading = ref(false)
-const notice_list = ref(<Notice[]>[])
+const notice_list = ref(<API.Notice[]>[])
 const total = ref(0)
-const params = ref(<QueryNoticeListParams>{
+const params = ref(<API.QueryNoticeListParams>{
     page: 1,
     page_size: 10, // page_size默认为10
     keyword: '',
