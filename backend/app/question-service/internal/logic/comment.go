@@ -6,7 +6,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -99,7 +98,7 @@ func (receiver CommentLogic) OnQueryComment(form *models.QueryCommentForm) *mode
 		ReplyId:        form.ReplyId,
 		Cursor:         form.CurSor,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()

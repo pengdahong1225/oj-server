@@ -1,0 +1,213 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+import "google/protobuf/empty.proto";
+import "user.proto";
+import "problem.proto";
+import "comment.proto";
+import "notice.proto";
+
+// user接口
+service UserService{
+  rpc GetUserDataByMobile(GetUserDataByMobileRequest) returns(GetUserResponse);
+  rpc GetUserDataByUid(GetUserDataByUidRequest) returns(GetUserResponse);
+  rpc CreateUserData(CreateUserRequest) returns(CreateUserResponse);
+  rpc UpdateUserData(UpdateUserRequest) returns(google.protobuf.Empty);
+  rpc DeleteUserData(DeleteUserRequest) returns(google.protobuf.Empty);
+  rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
+  rpc ResetUserPassword(ResetUserPasswordRequest) returns(google.protobuf.Empty);
+
+  rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
+  rpc QueryUserSolvedListByProblemIds(QueryUserSolvedListByProblemIdsRequest) returns(QueryUserSolvedListByProblemIdsResponse);
+}
+// problem接口
+service ProblemService{
+  rpc GetProblemData(GetProblemRequest) returns(GetProblemResponse);
+  rpc UpdateProblemData(UpdateProblemRequest) returns(UpdateProblemResponse);
+  rpc DeleteProblemData(DeleteProblemRequest) returns(google.protobuf.Empty);
+  rpc GetProblemList(GetProblemListRequest) returns(GetProblemListResponse);
+  rpc GetProblemHotData(GetProblemHotDataRequest) returns(GetProblemHotDataResponse);
+}
+// record
+service RecordService{
+  rpc GetUserRecordList(GetUserRecordListRequest) returns(GetUserRecordListResponse);
+  rpc GetUserRecord(GetUserRecordRequest) returns(GetUserRecordResponse);
+  rpc SaveUserSubmitRecord(SaveUserSubmitRecordRequest) returns(google.protobuf.Empty);
+}
+// comment接口
+service CommentService{
+  rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
+  rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
+  rpc SaveComment(SaveCommentRequest) returns(google.protobuf.Empty);
+}
+// notice接口
+service NoticeService{
+  rpc GetNoticeList(GetNoticeListRequest) returns(GetNoticeListResponse);
+  rpc AppendNotice(AppendNoticeRequest) returns(AppendNoticeResponse);
+  rpc DeleteNotice(DeleteNoticeRequest) returns(google.protobuf.Empty);
+}
+
+message DeleteNoticeRequest{
+  int64 id = 1;
+}
+message AppendNoticeRequest{
+    Notice data = 1;
+}
+message AppendNoticeResponse{
+  int64 id = 1;
+}
+
+message GetNoticeListRequest{
+  int32 page = 1;
+  int32 page_size = 2;
+  string keyword = 3;
+}
+message GetNoticeListResponse{
+  int32 total = 1;
+  repeated Notice data = 2;
+}
+
+message QueryUserSolvedListByProblemIdsRequest{
+  int64 uid = 1;
+  repeated int64 problem_ids = 2;
+}
+message QueryUserSolvedListByProblemIdsResponse{
+  int64 uid = 1;
+  repeated int64 solved_problem_ids = 2;
+}
+
+// 评论接口
+message QueryCommentRequest{
+  int64  obj_id = 1;  // 指定评论区
+
+  // 指定楼主，未指定楼主就是查询第一层，否则查询第二层
+  int64  root_id = 2;
+  int64 root_comment_id = 3;
+  // 指定回复目标
+  int64 reply_id = 4;
+  int64 reply_comment_id = 5;
+
+  int64 cursor = 6;   // next_id
+}
+message QueryCommentResponse{
+  repeated Comment data = 1;
+}
+message DeleteCommentRequest{
+  int64  obj_id = 1;
+  int64  user_id = 2;
+  int64  root_id = 3;
+  int64 reply_id = 4;
+}
+message SaveCommentRequest{
+  Comment data = 1;
+}
+
+// 获取用户信息
+message GetUserDataByMobileRequest{
+  int64 mobile = 1;
+}
+message GetUserDataByUidRequest{
+  int64 id = 1;
+}
+message GetUserResponse{
+  UserInfo data = 1;
+}
+
+message GetUserSolvedListRequest {
+  int64 uid = 1;
+}
+message GetUserSolvedListResponse {
+  repeated int64 problem_solved_list = 1;
+}
+
+// 创建
+message CreateUserRequest{
+  UserInfo data = 1;
+}
+message CreateUserResponse{
+  int64 id = 1;
+}
+
+// 更新
+message UpdateUserRequest{
+  UserInfo data = 1;
+}
+
+// 删除
+message DeleteUserRequest{
+  int64 id = 1;
+}
+
+// 用户列表分页参数
+message GetUserListRequest{
+  int32 cursor = 1; // next_id
+}
+
+message GetUserListResponse{
+  int32 total = 1;
+  repeated UserInfo data = 2;
+  int32 cursor = 3; // next_id
+}
+
+message GetProblemRequest{
+  int64 id = 1;
+}
+message GetProblemResponse{
+  Problem data = 1;
+}
+
+message UpdateProblemRequest{
+  Problem data = 1;
+}
+message UpdateProblemResponse{
+  int64 id = 1;
+}
+
+message DeleteProblemRequest{
+  int64 id = 1;
+}
+
+// 题目列表分页参数
+message GetProblemListRequest{
+  int32 page = 1;
+  int32 page_size = 2;
+  string keyword = 3;
+  string tag = 4;
+}
+message GetProblemListResponse{
+  int32 total = 1;
+  repeated Problem data = 2;
+}
+
+message GetUserRecordListRequest{
+  int64 uid = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+message GetUserRecordListResponse{
+  repeated UserSubmitRecord data = 1;
+  int32 total = 2;
+}
+
+message GetUserRecordRequest{
+  int64 id = 1;
+}
+message GetUserRecordResponse{
+  UserSubmitRecord data = 1;
+}
+
+message SaveUserSubmitRecordRequest{
+    UserSubmitRecord data = 1;
+}
+
+message GetProblemHotDataRequest{
+  int64 problem_id = 1;
+}
+message GetProblemHotDataResponse{
+  bytes data = 1;
+}
+
+message ResetUserPasswordRequest{
+  int64 id = 1;
+  string password = 2;
+}

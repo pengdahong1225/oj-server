@@ -1,0 +1,52 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+message EtcdConfig{
+  repeated EtcdConfigItem items = 1;
+}
+message EtcdConfigItem{
+  string host = 1;
+  int32 port = 2;
+}
+
+message RemoteConfig{
+  MysqlConfig mysql_config = 1;
+  RedisConfig redis_config = 2;
+  RabbitmqConfig rabbitmq_config = 3;
+  JwtConfig jwt_config = 4;
+  SmsConfig sms_config = 5;
+  SandboxConfig sandbox_config = 6;
+}
+message MysqlConfig{
+  string host = 1;
+  int32 port = 2;
+  string user = 3;
+  string password = 4;
+  string database = 5;
+}
+message RedisConfig{
+  string host = 1;
+  int32 port = 2;
+  string password = 3;
+}
+message RabbitmqConfig{
+  string host = 1;
+  int32 port = 2;
+  string user = 3;
+  string password = 4;
+  string vhost = 5;
+}
+message JwtConfig{
+  string key = 1;
+}
+message SmsConfig{
+  string accessKeyId = 1;
+  string accessKeySecret = 2;
+  string endpoint = 3;
+  string signName = 4;
+  string templateCode = 5;
+}
+message SandboxConfig{
+  string host = 1;
+  int32 port = 2;
+}

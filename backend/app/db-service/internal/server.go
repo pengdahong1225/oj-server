@@ -2,73 +2,25 @@ package internal
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/daemon"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/comment"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/notice"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/problem"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/record"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/rpc_api/user"
-	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
-	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
+	ServerBase "github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/comment"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/notice"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/problem"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/record"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/user"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"sync"
 )
 
 type Server struct {
-	Name string
-	IP   string
-	Port int
-	UUID string
+	ServerBase.Server
 }
 
 func (receiver *Server) Start() {
-	defer func() {
-		if err := recover(); err != nil {
-			logrus.Errorln(err)
-		}
-	}()
-
-	wg := new(sync.WaitGroup)
-
-	// DB rpc服务
-	wg.Add(1)
-	err := goroutinePool.Instance().Submit(func() {
-		defer wg.Done()
-		receiver.rpcServerStart()
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// 后台服务
-	daemonServer := daemon.Daemon{}
-	wg.Add(1)
-	err = goroutinePool.Instance().Submit(func() {
-		defer wg.Done()
-		daemonServer.Start()
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// 注册服务节点
-	register, _ := registry.NewRegistry(settings.Instance().RegistryConfig)
-	if err := register.RegisterServiceWithGrpc(receiver.Name, receiver.IP, receiver.Port, receiver.UUID); err != nil {
-		panic(err)
-	}
-
-	wg.Wait()
-}
-
-func (receiver *Server) rpcServerStart() {
-	// 监听端口
-	netAddr := fmt.Sprintf("%s:%d", receiver.IP, receiver.Port)
+	netAddr := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
 		panic(err)
@@ -76,8 +28,6 @@ func (receiver *Server) rpcServerStart() {
 	defer listener.Close()
 
 	grpcServer := grpc.NewServer()
-
-	// 启动rpc服务
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	userSrv := user.UserServer{}
 	pb.RegisterUserServiceServer(grpcServer, &userSrv)
@@ -89,7 +39,18 @@ func (receiver *Server) rpcServerStart() {
 	pb.RegisterCommentServiceServer(grpcServer, &commentSrv)
 	noticeSrv := notice.NoticeServer{}
 	pb.RegisterNoticeServiceServer(grpcServer, &noticeSrv)
-	if err = grpcServer.Serve(listener); err != nil {
+
+	go func() {
+		err = grpcServer.Serve(listener)
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	err = receiver.Register()
+	if err != nil {
 		panic(err)
 	}
+
+	select {}
 }

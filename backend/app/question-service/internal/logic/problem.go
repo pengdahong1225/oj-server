@@ -7,7 +7,6 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -24,7 +23,7 @@ func (r ProblemLogic) UpdateQuestion(uid int64, form *models.UpdateProblemForm, 
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -85,7 +84,7 @@ func (r ProblemLogic) DeleteProblem(problemID int64) *models.Response {
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -111,7 +110,7 @@ func (r ProblemLogic) GetProblemList(params *models.QueryProblemListParams, uid 
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -228,7 +227,7 @@ func (r ProblemLogic) GetProblemDetail(problemID int64) *models.Response {
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()

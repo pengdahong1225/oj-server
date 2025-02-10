@@ -1,14 +1,11 @@
 package settings
 
-import "errors"
-
 // 从viper反射到数据模型，需要设置`mapstructure`反射字段
 type AppConfig struct {
 	SystemConfigs   []SystemConfig `mapstructure:"system"`
 	*SandBox        `mapstructure:"sandbox"`
 	*MysqlConfig    `mapstructure:"mysql"`
 	*RedisConfig    `mapstructure:"redis"`
-	*LogConfig      `mapstructure:"log"`
 	*RegistryConfig `mapstructure:"registry"`
 	*MqConfig       `mapstructure:"rabbitmq"`
 	*JwtConfig      `mapstructure:"jwt"`
@@ -56,24 +53,10 @@ type RegistryConfig struct {
 	Port int    `mapstructure:"port"`
 }
 
-type LogConfig struct {
-	Path  string `mapstructure:"path"`
-	Level string `mapstructure:"level"`
-}
-
 type MqConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	PassWord string `mapstructure:"password"`
 	VHost    string `mapstructure:"vhost"`
-}
-
-func (receiver *AppConfig) GetSystemConf(name string) (*SystemConfig, error) {
-	for _, v := range receiver.SystemConfigs {
-		if v.Name == name {
-			return &v, nil
-		}
-	}
-	return nil, errors.New("system config not found")
 }

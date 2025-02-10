@@ -4,7 +4,7 @@ import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
-	"github.com/pengdahong1225/oj-server/backend/module/signal"
+	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -13,8 +13,9 @@ type Registry struct {
 	client *consulapi.Client
 }
 
-func NewRegistry(cfg *settings.RegistryConfig) (*Registry, error) {
+func NewRegistry() (*Registry, error) {
 	// 配置中心地址
+	cfg := settings.Instance().RegistryConfig
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	consulConf := consulapi.DefaultConfig()
 	consulConf.Address = dsn
@@ -26,17 +27,17 @@ func NewRegistry(cfg *settings.RegistryConfig) (*Registry, error) {
 	return &Registry{client: c}, nil
 }
 
-// RegisterService 注册service节点
-func (receiver *Registry) RegisterServiceWithGrpc(serviceName string, ip string, port int, uuid string) error {
+func (receiver *Registry) RegisterServiceWithGrpc(info *pb.PBNodeInfo) error {
+	id := fmt.Sprintf("%d:%d", info.NodeType, info.NodeId)
 	srv := &consulapi.AgentServiceRegistration{
-		ID:      uuid,        // 服务唯一ID
-		Name:    serviceName, // 服务名称
-		Tags:    []string{serviceName},
-		Port:    port,
-		Address: ip,
+		ID:      id,        // 服务唯一ID
+		Name:    info.Name, // 服务名称
+		Tags:    []string{info.Name},
+		Port:    int(info.Port),
+		Address: info.Ip,
 		Check: &consulapi.AgentServiceCheck{
-			CheckID:                        uuid,
-			GRPC:                           fmt.Sprintf("%s:%d", ip, port),
+			CheckID:                        id,
+			GRPC:                           fmt.Sprintf("%s:%d", info.Ip, info.Port),
 			Interval:                       "5s",  // 每5秒检测一次
 			Timeout:                        "5s",  // 5秒超时
 			DeregisterCriticalServiceAfter: "10s", // 超时10秒注销节点
@@ -46,21 +47,19 @@ func (receiver *Registry) RegisterServiceWithGrpc(serviceName string, ip string,
 	if err != nil {
 		return err
 	}
-	go signal.SignalListen(func() {
-		receiver.client.Agent().ServiceDeregister(uuid)
-	})
 	return nil
 }
-func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string, port int, uuid string) error {
+func (receiver *Registry) RegisterServiceWithHttp(info *pb.PBNodeInfo) error {
+	id := fmt.Sprintf("%d:%d", info.NodeType, info.NodeId)
 	srv := &consulapi.AgentServiceRegistration{
-		ID:      uuid,        // 服务唯一ID
-		Name:    serviceName, // 服务名称
-		Tags:    []string{serviceName},
-		Port:    port,
-		Address: ip,
+		ID:      id,        // 服务唯一ID
+		Name:    info.Name, // 服务名称
+		Tags:    []string{info.Name},
+		Port:    int(info.Port),
+		Address: info.Ip,
 		Check: &consulapi.AgentServiceCheck{
-			CheckID:                        uuid,
-			HTTP:                           fmt.Sprintf("http://%s:%d/%s", ip, port, "health"),
+			CheckID:                        id,
+			HTTP:                           fmt.Sprintf("http://%s:%d/%s", info.Ip, info.Port, "health"),
 			Interval:                       "5s",  // 每5秒检测一次
 			Timeout:                        "5s",  // 5秒超时
 			DeregisterCriticalServiceAfter: "10s", // 超时10秒注销节点
@@ -70,15 +69,13 @@ func (receiver *Registry) RegisterServiceWithHttp(serviceName string, ip string,
 	if err != nil {
 		return err
 	}
-	go signal.SignalListen(func() {
-		receiver.client.Agent().ServiceDeregister(uuid)
-	})
 	return nil
 }
 
 // NewDBConnection db服务连接
-func NewDBConnection(cfg *settings.RegistryConfig) (*grpc.ClientConn, error) {
-	register, err := NewRegistry(cfg)
+// 注意需要后续手动close
+func NewDBConnection() (*grpc.ClientConn, error) {
+	register, err := NewRegistry()
 	if err != nil {
 		return nil, err
 	}
@@ -92,9 +89,8 @@ func NewDBConnection(cfg *settings.RegistryConfig) (*grpc.ClientConn, error) {
 	return grpc.NewClient(dsn, grpc.WithTransportCredentials(insecure.NewCredentials())) // 不安全连接
 }
 
-// NewJudgeConnection judge服务连接
 func GetJudgeServerDsn(cfg *settings.RegistryConfig) (string, error) {
-	register, err := NewRegistry(cfg)
+	register, err := NewRegistry()
 	if err != nil {
 		return "", err
 	}

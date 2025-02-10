@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 )
@@ -18,7 +17,7 @@ func (r NoticeLogic) GetNoticeList(params *models.QueryNoticeListParams) *models
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -54,7 +53,7 @@ func (r NoticeLogic) AppendNotice(form *models.NoticeForm, uid int64) *models.Re
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -90,7 +89,7 @@ func (r NoticeLogic) DeleteNotice(id int64) *models.Response {
 		Message: "",
 		Data:    nil,
 	}
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()

@@ -5,10 +5,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
+	"github.com/pengdahong1225/oj-server/backend/module/utils"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -29,7 +28,7 @@ func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 	// todo 密码加密
 	hash := utils.HashPassword(form.PassWord)
 
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -65,7 +64,7 @@ func (r User) OnUserLogin(form *models.LoginFrom) *models.Response {
 
 	mobile, _ := strconv.ParseInt(form.Mobile, 10, 64)
 
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -134,7 +133,7 @@ func (r User) GetUserProfile(uid int64) *models.Response {
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -205,7 +204,7 @@ func (r User) GetRecordList(uid int64, page, pageSize int) *models.Response {
 		Data:    nil,
 	}
 	// 查询结果
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -243,7 +242,7 @@ func (r User) GetUserSolvedList(uid int64) *models.Response {
 		Data:    nil,
 	}
 
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -266,7 +265,7 @@ func (r User) GetUserSolvedList(uid int64) *models.Response {
 }
 
 func (r User) queryUserSolvedListByProblemList(params *models.UPSSParams) ([]int64, error) {
-	dbConn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		logrus.Errorf("db服务连接失败:%s\n", err.Error())
 		return nil, err

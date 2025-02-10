@@ -2,12 +2,11 @@ package internal
 
 import (
 	"fmt"
+	ServerBase "github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/judge"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
-	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -15,38 +14,20 @@ import (
 )
 
 type Server struct {
-	Name string
-	IP   string
-	Port int
-	UUID string
-}
-
-func (receiver *Server) register() error {
-	register, err := registry.NewRegistry(settings.Instance().RegistryConfig)
-	if err != nil {
-		return err
-	}
-	if err = register.RegisterServiceWithHttp(receiver.Name, receiver.IP, receiver.Port, receiver.UUID); err != nil {
-		return err
-	}
-	return nil
+	ServerBase.Server
 }
 
 func (receiver *Server) Start() {
 	goroutinePool.Instance().Submit(func() {
-		dsn := fmt.Sprintf("%s:%d", receiver.IP, receiver.Port)
+		dsn := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
 		http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
 			if req.Method == "GET" {
 				res.Write([]byte("ok"))
 			}
 		})
 		http.ListenAndServe(dsn, nil)
-		logrus.Infoln("健康检查线程退出")
+		logrus.Errorf("健康检查线程退出")
 	})
-
-	if err := receiver.register(); err != nil {
-		panic(err)
-	}
 
 	consumer := mq.NewConsumer(
 		consts.RabbitMqExchangeKind,

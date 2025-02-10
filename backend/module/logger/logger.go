@@ -15,7 +15,6 @@ type FileHook struct {
 	infoFile  *os.File
 	debugFile *os.File
 	fileDate  string
-	appName   string
 	filePath  string
 }
 
@@ -38,9 +37,9 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log.%s", hook.filePath, hook.appName, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	hook.errFile = errFile
 	hook.infoFile = infoFile
@@ -62,8 +61,8 @@ func (hook FileHook) write(entry *logrus.Entry) {
 	}
 }
 
-// InitLog 初始化日志
-func InitLog(appName, filePath, level string) error {
+// Init 初始化日志
+func Init(filePath, level string) error {
 	timer := time.Now().Format("2006-01-02")
 	err := os.MkdirAll(filePath, os.ModePerm)
 	if err != nil {
@@ -80,7 +79,6 @@ func InitLog(appName, filePath, level string) error {
 		infoFile:  infoFile,
 		debugFile: debugFile,
 		fileDate:  timer,
-		appName:   appName,
 		filePath:  filePath,
 	}
 	logrus.AddHook(hook)

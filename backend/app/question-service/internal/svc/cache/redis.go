@@ -1,22 +1,14 @@
 package cache
 
 import (
-	"fmt"
+	"github.com/pengdahong1225/oj-server/backend/module/db"
 	"github.com/redis/go-redis/v9"
-	"sync"
 )
 
 var (
-	Rdb  *redis.Client
-	once sync.Once
+	rdb *redis.Client
 )
 
-func Init(ip string, port int) {
-	once.Do(func() {
-		dsn := fmt.Sprintf("%s:%d", ip, port)
-		Rdb = redis.NewClient(&redis.Options{
-			Network: "tcp",
-			Addr:    dsn,
-		})
-	})
+func init() {
+	rdb = db.NewRedisClient()
 }

@@ -10,7 +10,7 @@ func TestWorker_InitLog(t *testing.T) {
 	path := "./"
 	level := "debug"
 
-	if err := InitLog(appName, path, level); err != nil {
+	if err := Init(appName, path, level); err != nil {
 		t.Error(err.Error())
 		return
 	}

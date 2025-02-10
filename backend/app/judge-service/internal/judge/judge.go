@@ -3,7 +3,7 @@ package judge
 import (
 	"context"
 	"encoding/json"
-	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/svc/cache"
+	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
@@ -83,7 +83,7 @@ func saveResult(param *types.Param, data []byte) {
 }
 
 func updateUserSubmitRecord(param *types.Param, data []byte) error {
-	conn, err := registry.NewDBConnection(settings.Instance().RegistryConfig)
+	conn, err := registry.NewDBConnection()
 	if err != nil {
 		logrus.Errorf("db服连接失败:%s\n", err.Error())
 		return err

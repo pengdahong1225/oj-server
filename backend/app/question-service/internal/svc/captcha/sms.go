@@ -7,8 +7,8 @@ import (
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/utils"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
+	"github.com/pengdahong1225/oj-server/backend/module/utils"
 	"github.com/sirupsen/logrus"
 	"os"
 )

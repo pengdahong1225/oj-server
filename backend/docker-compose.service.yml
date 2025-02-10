@@ -33,6 +33,10 @@ services:
       - "9000"
     networks:
       - net
+    command:
+      - "--node_type:1"
+      - "--node_id:1"
+      - "--node_port:9000"
 
   judge-service:
     container_name: judge-service
@@ -47,6 +51,10 @@ services:
       - "9010"
     networks:
       - net
+    command:
+      - "--node_type:2"
+      - "--node_id:1"
+      - "--node_port:9010"
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - db-service
       - sandbox
@@ -64,6 +72,10 @@ services:
       - "9020:9020"
     networks:
       - net
+    command:
+      - "--node_type:3"
+      - "--node_id:1"
+      - "--node_port:9020"
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - db-service
       - judge-service

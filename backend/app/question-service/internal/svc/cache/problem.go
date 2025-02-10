@@ -11,12 +11,12 @@ import (
 
 // QueryRankList 获取排行榜信息
 func QueryRankList() []string {
-	return Rdb.ZRange(context.Background(), "rank", 0, -1).Val()
+	return rdb.ZRange(context.Background(), "rank", 0, -1).Val()
 }
 
 func QueryUPState(uid int64, problemID int64) (int32, error) {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "state")
-	val, err := Rdb.Get(context.Background(), key).Result()
+	val, err := rdb.Get(context.Background(), key).Result()
 	switch {
 	case errors.Is(err, redis.Nil):
 		logrus.Infoln("key[%s]不存在", key)
@@ -33,10 +33,10 @@ func QueryUPState(uid int64, problemID int64) (int32, error) {
 
 func GetTagList() ([]string, error) {
 	key := "tag_list"
-	return Rdb.SMembers(context.Background(), key).Result()
+	return rdb.SMembers(context.Background(), key).Result()
 }
 
 func GetJudgeResult(uid int64, problemID int64) (string, error) {
 	key := fmt.Sprintf("%d:%d:%s", uid, problemID, "result")
-	return Rdb.Get(context.Background(), key).Result()
+	return rdb.Get(context.Background(), key).Result()
 }
