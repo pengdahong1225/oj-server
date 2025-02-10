@@ -32,7 +32,7 @@ import { SuccessFilled } from '@element-plus/icons-vue'
     </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .container {
     display: block;
     justify-content: space-between;

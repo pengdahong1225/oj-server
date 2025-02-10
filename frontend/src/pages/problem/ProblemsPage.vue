@@ -133,7 +133,7 @@ const onTagClick = (tag: string) => {
     </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .container {
     display: flex;
     width: 100%;

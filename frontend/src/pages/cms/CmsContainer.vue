@@ -136,7 +136,7 @@ const handleCommand = (command: string) => {
     </el-container>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .layout-container {
     height: 100vh;
 

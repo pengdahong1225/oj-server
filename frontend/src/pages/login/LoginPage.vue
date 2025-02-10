@@ -233,7 +233,7 @@ const login = async () => {
 
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .login-page {
   height: 100vh;
   background-color: #fff;

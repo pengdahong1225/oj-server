@@ -149,4 +149,4 @@ const onSuccess = (isAdd: boolean) => {
     </page-container>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="less" scoped></style>

@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-// import default_banner from '@/assets/default_banner.jpg'
+import xiaoyixian from '@/assets/banner/xiaoyixian.jpg'
+import jiuba from '@/assets/banner/98.png'
+import HongKong from '@/assets/banner/HongKong.png'
 import { Search } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
 import { queryNoticeListService } from '@/api/noticeController'
@@ -46,15 +48,20 @@ const onClick = (index: number) => {
     dialogRef.value.open(notice_list.value[index])
 }
 
+// banner
+const bannerList = [
+    xiaoyixian, jiuba, HongKong
+]
+
 </script>
 
 <template>
     <div class="container">
         <!-- 轮播图区域 -->
         <div class="banner">
-            <el-carousel height="400px">
-                <el-carousel-item v-for="item in 1" :key="item">
-                    <img :src="default_banner" alt="" height="400px" width="100%" />
+            <el-carousel height="600px">
+                <el-carousel-item v-for="item in bannerList" :key="item">
+                    <img :src="item" alt="" height="600px" width="100%" />
                 </el-carousel-item>
             </el-carousel>
         </div>
@@ -109,7 +116,7 @@ const onClick = (index: number) => {
     </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .container {
     display: block;
     width: 70%;
