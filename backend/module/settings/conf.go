@@ -2,7 +2,6 @@ package settings
 
 // 从viper反射到数据模型，需要设置`mapstructure`反射字段
 type AppConfig struct {
-	SystemConfigs   []SystemConfig `mapstructure:"system"`
 	*SandBox        `mapstructure:"sandbox"`
 	*MysqlConfig    `mapstructure:"mysql"`
 	*RedisConfig    `mapstructure:"redis"`
@@ -10,12 +9,6 @@ type AppConfig struct {
 	*MqConfig       `mapstructure:"rabbitmq"`
 	*JwtConfig      `mapstructure:"jwt"`
 	*SmsConfig      `mapstructure:"sms"`
-}
-
-type SystemConfig struct {
-	Name string `mapstructure:"name"`
-	Port int    `mapstructure:"port"`
-	UUID string `mapstructure:"uuid"`
 }
 
 type SandBox struct {

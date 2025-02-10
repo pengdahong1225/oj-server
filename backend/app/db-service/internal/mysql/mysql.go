@@ -10,9 +10,10 @@ var (
 	err       error
 )
 
-func init() {
+func Init() error {
 	DBSession, err = db.NewMysqlSession()
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }

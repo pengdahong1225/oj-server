@@ -8,6 +8,8 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/problem"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/record"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/api/user"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/cache"
+	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -17,6 +19,23 @@ import (
 
 type Server struct {
 	ServerBase.Server
+}
+
+func (receiver *Server) Init() error {
+	err := receiver.Initialize()
+	if err != nil {
+		return err
+	}
+	err = mysql.Init()
+	if err != nil {
+		return err
+	}
+	err = cache.Init()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (receiver *Server) Start() {

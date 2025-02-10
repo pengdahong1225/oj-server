@@ -8,10 +8,12 @@ import (
 
 var rdb *redis.Client
 
-func init() {
+func Init() error {
 	rdb = db.NewRedisClient()
 	st := rdb.Ping(context.Background())
 	if st.Err() != nil {
-		panic(st.Err())
+		return st.Err()
 	}
+
+	return nil
 }

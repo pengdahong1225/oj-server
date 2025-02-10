@@ -20,7 +20,7 @@ type Server struct {
 	SrvType  string // grpc | http
 }
 
-func (receiver *Server) Init() error {
+func (receiver *Server) Initialize() error {
 	err := logger.Init("./log", "debug")
 	if err != nil {
 		return err
@@ -32,12 +32,13 @@ func (receiver *Server) Init() error {
 	flag.IntVar(&receiver.Port, "port", 0, "port")
 	flag.StringVar(&receiver.Name, "name", "", "name")
 	flag.Parse()
-	logrus.Debugf("--------------- name:%v, node_type:%v, node_id:%v, host:%v, port:%v ---------------", receiver.Name, receiver.NodeType, receiver.NodeId, receiver.Host, receiver.Port)
 
 	receiver.Host, err = utils.GetOutboundIPString()
 	if err != nil {
 		return err
 	}
+
+	logrus.Debugf("--------------- name:%v, node_type:%v, node_id:%v, host:%v, port:%v ---------------", receiver.Name, receiver.NodeType, receiver.NodeId, receiver.Host, receiver.Port)
 
 	// 读取配置
 	err = settings.Instance().LoadConfig()
