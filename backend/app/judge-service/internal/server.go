@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	ServerBase "github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
+	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/judge"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
@@ -17,18 +18,36 @@ type Server struct {
 	ServerBase.Server
 }
 
-func (receiver *Server) Start() {
-	goroutinePool.Instance().Submit(func() {
-		dsn := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
-		http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
-			if req.Method == "GET" {
-				res.Write([]byte("ok"))
-			}
-		})
-		http.ListenAndServe(dsn, nil)
-		logrus.Errorf("健康检查线程退出")
-	})
+func (receiver *Server) Init() error {
+	err := receiver.Initialize()
+	if err != nil {
+		return err
+	}
+	err = cache.Init()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
+func (receiver *Server) Start() {
+	go startConsume()
+
+	err := receiver.Register()
+	if err != nil {
+		panic(err)
+	}
+
+	dsn := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
+	http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
+		if req.Method == "GET" {
+			res.Write([]byte("ok"))
+		}
+	})
+	http.ListenAndServe(dsn, nil)
+}
+
+func startConsume() {
 	consumer := mq.NewConsumer(
 		consts.RabbitMqExchangeKind,
 		consts.RabbitMqExchangeName,
