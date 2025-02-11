@@ -183,6 +183,30 @@ const editorOptions = ref({
                         </div>
                     </div>
                 </div>
+
+                <!-- 评论区 -->
+                <div class="comment-area">
+                    <!-- 输入评论 -->
+                    <div class="comment-input">
+                        <input type="text">
+                    </div>
+                    <!-- 评论列表 -->
+                    <div class="comment-list">
+                        <el-card shadow="never">
+                            <!-- 评论区规则 -->
+                            <template #header>
+                                <div class="card-header">
+                                    <span>💡评论区规则</span>
+                                    <p>1. 请不要在评论区发表题解！</p>
+                                    <p>2. 评论区可以发表关于对翻译的建议、对题目的疑问及其延伸讨论。</p>
+                                    <p>3. 如果你需要整理题解思路，获得反馈从而进阶提升，可以去题解区进行。</p>
+                                </div>
+                            </template>
+                            <!-- 评论列表 -->
+                            <p v-for="o in 4" :key="o" class="text item">{{ 'List item ' + o }}</p>
+                        </el-card>
+                    </div>
+                </div>
             </el-card>
         </div>
 
