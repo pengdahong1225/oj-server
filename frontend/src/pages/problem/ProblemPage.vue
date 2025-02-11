@@ -2,7 +2,6 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problemController'
-import type { Problem, SubmitForm } from '@/types/problem'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/mode-c_cpp'
@@ -40,7 +39,7 @@ const getProblemDetail = async () => {
 const loading = ref(false)
 const form = ref<SubmitForm>({
     code: '',
-    lang: 'C',  // 默认使用C
+    lang: 'c',  // 默认使用c
     problem_id: 0,
     title: ''
 })
@@ -67,13 +66,19 @@ let timer = 0
 const running = ref(false)
 const checkResult = async () => {
     const res = await queryResultService(Number(route.params.id))
-    console.log(res)
-    if (res.data.data.message !== 'OK') {
-        clearInterval(timer)
-        running.value = false
-
-        result.value = res.data.data
-        console.log(result.value)
+    switch (res.data.message) {
+        case 'running...':
+            break
+        case 'OK':
+            clearInterval(timer)
+            running.value = false
+            result.value = res.data.data
+            break
+        default:
+            clearInterval(timer)
+            running.value = false
+            console.log(res.data.message)
+            break
     }
 }
 const result = ref('')
@@ -86,7 +91,7 @@ const btype = computed(() => {
 })
 const tmsg = computed(() => {
     if (result.value === 'Accepted') {
-        return 'You have solved the problem'
+        return 'You have solved this problem'
     } else {
         return 'failed'
     }
@@ -94,7 +99,7 @@ const tmsg = computed(() => {
 const showed = ref(false)
 const showResult = () => {
     showed.value = true
-    // 跳转status
+    // 跳转
 }
 
 // ACE主题和配置
@@ -118,34 +123,29 @@ const editorOptions = ref({
     showPrintMargin: false,
     enableBasicAutocompletion: true,
     enableLiveAutocompletion: true,
-    highlightActiveLine: true,
+    highlightActiveLine: false,
     enableSnippets: true,
+    wrap: true, // 自动换行
+    showGutter: true, // 显示行号
 });
 
 </script>
 
 <template>
-    <div class="container">
+    <div class="container" v-loading="running">
         <!-- 左边题目描述和编辑区域 -->
         <div class="left">
-            <el-card class="problem-description" shadow="hover">
+            <el-card class="problem_card" shadow="hover">
+                <!-- 题目标题 -->
                 <template #header>
                     <strong>{{ problem.title }}</strong>
                 </template>
 
-                <div style="background: rgb(251, 251, 251); padding: 15px;">
-                    <descriptionItem class="descriptionItem" title="Description" :content="problem.description"
-                        style="width: 100%;">
-                    </descriptionItem>
-                    <descriptionItem class="descriptionItem" title="Hint" :content="problem.description"
-                        style="width: 100%;">
-                    </descriptionItem>
-                </div>
-            </el-card>
+                <!-- 题目介绍和案例 -->
+                <div class="description" v-html="problem.description"></div>
 
-            <!-- 题目提交区域 -->
-            <el-card class="submit-area" shadow="hover" v-loading="running">
-                <template #header>
+                <!-- 题目编辑与提交 -->
+                <div class="edit_submit">
                     <el-form inline class="form">
                         <el-form-item style="margin-right: 10px;">
                             <el-select size="large" v-model="form.lang" placeholder="Select" style="width: 240px">
@@ -157,35 +157,33 @@ const editorOptions = ref({
                             <el-button size="large" @click="onReset">重置</el-button>
                         </el-form-item>
                     </el-form>
-                </template>
 
-                <VAceEditor v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"
-                    style="height: 350px; width: 100%;" />
+                    <VAceEditor class="editor" v-model:value="form.code" :lang="lang_computed" :theme="theme" :options="editorOptions"/>
 
-                <div class="submit-area-foot">
-                    <div class="result-area">
-                        <div v-if="result !== ''">
-                            <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
-                                {{ result }}
-                            </el-button>
-                            <el-tag v-else :type="btype" size="large">
-                                <template #default>
-                                    <strong>{{ tmsg }}</strong>
-                                </template>
-                            </el-tag>
+                    <div class="submit-area-foot">
+                        <div class="result-area">
+                            <div v-if="result !== ''">
+                                <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
+                                    {{ result }}
+                                </el-button>
+                                <el-tag v-else :type="btype" size="large">
+                                    <template #default>
+                                        <strong>{{ tmsg }}</strong>
+                                    </template>
+                                </el-tag>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="submit-btn-area">
-                        <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
-                            <el-icon>
-                                <UploadFilled />
-                            </el-icon>Submit
-                        </el-button>
+                        <div class="submit-btn-area">
+                            <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
+                                <el-icon>
+                                    <UploadFilled />
+                                </el-icon>Submit
+                            </el-button>
+                        </div>
                     </div>
                 </div>
             </el-card>
-
         </div>
 
         <!-- 右边题目information区域 -->
@@ -223,17 +221,25 @@ const editorOptions = ref({
 
     /* 确保卡片顶部对齐，而不会拉伸高度 */
     .left {
-        width: 80%;
+        width: 75%;
         margin-right: 5px;
-
-        .descriptionItem {
+        .description {
+            padding: 15px;
+            align-items: flex-start; /* 左对齐 */
             margin-bottom: 20px;
+            font-size: 17px;
         }
-
-        .submit-area {
+        .edit_submit {
             margin-top: 20px;
             width: 100%;
-
+            .editor{
+                height: 350px;
+                width: 100%;
+                .border {
+                    border: 5px solid #040811;
+                    border-radius: 5px;
+                }
+            }
             .submit-area-foot {
                 margin: auto;
                 margin-top: 10px;
@@ -243,10 +249,8 @@ const editorOptions = ref({
                 .result-area {
                     width: 50%;
                 }
-
                 .submit-btn-area {
                     width: 50%;
-
                     .submit-btn {
                         float: right;
                     }

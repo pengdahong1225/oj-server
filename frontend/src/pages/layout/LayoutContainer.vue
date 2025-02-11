@@ -35,8 +35,8 @@ const handleCommand = (command: string) => {
         router.push('/login')
       }).catch(() => { })
       break
-    case 'manage':
-      router.push('/manage')
+    case 'admin':
+      router.push('/admin')
       break
   }
 }
@@ -47,7 +47,10 @@ const handleCommand = (command: string) => {
   <el-container class="layout-container">
     <!-- 头部菜单栏 -->
     <el-header class="top">
+      <!-- logo -->
       <span class="logo">PGOJ</span>
+
+      <!-- 菜单栏 -->
       <el-menu mode="horizontal" :default-active="$route.path" router>
         <el-menu-item index="/home">Home</el-menu-item>
         <el-menu-item index="/problems">Problems</el-menu-item>
@@ -55,6 +58,7 @@ const handleCommand = (command: string) => {
         <el-menu-item index="/status">Status</el-menu-item>
       </el-menu>
 
+      <!-- 下拉 -->
       <el-dropdown placement="bottom-end" @command="handleCommand">
         <span class="el-dropdown__box">
           <el-avatar :src="avatar" />
@@ -68,7 +72,7 @@ const handleCommand = (command: string) => {
             <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
             <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
             <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
-            <el-dropdown-item v-if="userStore.userInfo.role === 1" command="manage" :icon="Position">To CMS</el-dropdown-item>
+            <el-dropdown-item v-if="userStore.userInfo.role === 1" command="admin" :icon="Position">To CMS</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>

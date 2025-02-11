@@ -24,15 +24,15 @@ const router = createRouter({
             ]
         },
         {
-            path: '/manage',
+            path: '/admin',
             component: () => import('@/pages/cms/CmsContainer.vue'), // 一级页面
-            redirect: '/manage/user',
+            redirect: '/admin/user',
             children: [
-                { path: '/manage/user', component: () => import('@/pages/cms/UserManagePage.vue') },
-                { path: '/manage/problem', component: () => import('@/pages/cms/ProblemManagePage.vue') },
-                { path: '/manage/contest', component: () => import('@/pages/cms/ContestManagePage.vue') },
-                { path: '/manage/template', component: () => import('@/pages/cms/TemplateManagePage.vue') },
-                { path: '/manage/notice', component: () => import('@/pages/cms/NoticeManagePage.vue') },
+                { path: '/admin/user', component: () => import('@/pages/cms/UserManagePage.vue') },
+                { path: '/admin/problem', component: () => import('@/pages/cms/ProblemManagePage.vue') },
+                { path: '/admin/contest', component: () => import('@/pages/cms/ContestManagePage.vue') },
+                { path: '/admin/template', component: () => import('@/pages/cms/TemplateManagePage.vue') },
+                { path: '/admin/notice', component: () => import('@/pages/cms/NoticeManagePage.vue') },
             ]
         },
     ]
@@ -47,7 +47,7 @@ router.beforeEach((to) => {
     if (!userStore.token && to.path !== '/login') {
         return '/login'
     }
-    if (to.path === '/manage' && userStore.userInfo.role !== 1) {
+    if (to.path === '/admin' && userStore.userInfo.role !== 1) {
         ElMessage.error('权限不足')
         return '/'
     }

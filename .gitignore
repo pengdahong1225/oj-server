@@ -1,5 +1,6 @@
 .idea/
 *.exe
+*.exe~
 bin
 log
 cmake-build-*
@@ -7,6 +8,6 @@ cmake-build-*
 *.log.*
 *.o
 config/
-hall/app/db-service/service
-hall/app/judge-service/service
-hall/app/question-service/service
+/app/db-service/service
+/app/judge-service/service
+/app/question-service/service

@@ -23,7 +23,7 @@ defineProps({
     </el-card>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .page-container {
     min-height: 100%;
     box-sizing: border-box;

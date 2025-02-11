@@ -123,7 +123,7 @@ const bannerList = [
     margin: auto;
 
     .banner {
-        border: 1px solid #00c853;
+        border: 1px solid #ffffff;
         margin-bottom: 20px;
         border-radius: 8px;
     }

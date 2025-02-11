@@ -24,7 +24,7 @@ onMounted(() => {
 const handleCommand = (command: string) => {
     switch (command) {
         case 'profile':
-            router.push(`/manage/${command}`)
+            router.push(`/admin/${command}`)
             break
         case 'password':
             console.log('重置密码')
@@ -66,31 +66,31 @@ const handleCommand = (command: string) => {
             <div class="el-aside__logo"></div>
             <el-menu active-text-color="#ffd04b" background-color="rgb(81, 90, 110)" :default-active="$route.path"
                 text-color="#fff" router>
-                <el-menu-item index="/manage/user">
+                <el-menu-item index="/admin/user">
                     <el-icon>
                         <UserFilled />
                     </el-icon>
                     <span>User</span>
                 </el-menu-item>
-                <el-menu-item index="/manage/problem">
+                <el-menu-item index="/admin/problem">
                     <el-icon>
                         <Management />
                     </el-icon>
                     <span>Problem</span>
                 </el-menu-item>
-                <el-menu-item index="/manage/contest">
+                <el-menu-item index="/admin/contest">
                     <el-icon>
                         <Flag />
                     </el-icon>
                     <span>Contest</span>
                 </el-menu-item>
-                <el-menu-item index="/manage/template">
+                <el-menu-item index="/admin/template">
                     <el-icon>
                         <List />
                     </el-icon>
                     <span>Judge Template</span>
                 </el-menu-item>
-                <el-menu-item index="/manage/notice">
+                <el-menu-item index="/admin/notice">
                     <el-icon>
                         <BellFilled />
                     </el-icon>

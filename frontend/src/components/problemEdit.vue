@@ -107,7 +107,7 @@ const getProblemTagList = async () => {
     </el-drawer>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .form {
     width: 100%;
 
