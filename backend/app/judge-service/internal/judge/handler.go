@@ -27,37 +27,35 @@ func NewHandler(host string, port int) *Handler {
 	}
 }
 func (r *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
-	// POST请求
-	body := map[string]any{
-		"cmd": []map[string]any{
-			{
-				// 资源限制
-				"cpuLimit":    param.ProblemConfig.CompileLimit.CpuLimit,
-				"memoryLimit": param.ProblemConfig.CompileLimit.MemoryLimit,
-				"procLimit":   param.ProblemConfig.CompileLimit.ProcLimit,
-				// 程序命令行参数
-				"args": []string{"/usr/bin/g++", "main.cc", "-o", "main"},
-				// 程序环境变量
-				"env": []string{"PATH=/usr/bin:/bin"},
-				// 指定 标准输入、标准输出和标准错误的文件 (null 是为了 pipe 的使用情况准备的，而且必须被 pipeMapping 的 in / out 指定)
-				"files": []map[string]any{
-					{"content": ""},
-					{"name": "stdout", "max": 10240},
-					{"name": "stderr", "max": 10240},
-				},
-				// 在执行程序之前复制进容器的文件列表
-				"copyIn": map[string]map[string]string{"main.cc": {"content": param.Code}},
-				// 在执行程序后从容器文件系统中复制出来的文件列表(不返回结果的内容，返回一个文件id)
-				"copyOut":       []string{"stdout", "stderr"},
-				"copyOutCached": []string{"main"},
-			},
-		},
+	form := types.SandBoxApiForm{
+		CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
+		ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
+		MemoryLimit: param.ProblemConfig.CompileLimit.MemoryLimit,
+		StackLimit:  param.ProblemConfig.CompileLimit.StackLimit,
+		ProcLimit:   param.ProblemConfig.CompileLimit.ProcLimit,
+		Args:        []string{"/usr/bin/g++", "main.cc", "-o", "main"},
+		Env:         []string{"PATH=/usr/bin:/bin"},
 	}
+	form.Files = []map[string]any{
+		{"content": ""},
+		{"name": "stdout", "max": 10240},
+		{"name": "stderr", "max": 10240},
+	}
+	form.CopyIn = map[string]map[string]string{
+		"main.cc": {"content": param.Code},
+	}
+	form.CopyOut = []string{"stdout", "stderr"}
+	form.CopyOutCached = []string{"main"}
+
+	// 构造body
+	body := types.Body{}
+	body.Cmd = append(body.Cmd, form)
 	data, err := json.Marshal(body)
 	if err != nil {
 		logrus.Errorln("Error marshalling JSON:", err.Error())
 		return nil, err
 	}
+	// POST请求
 	req, err := http.NewRequest("POST", r.baseUrl+"/run", bytes.NewBuffer(data))
 	if err != nil {
 		logrus.Errorln("Error creating request:", err.Error())
@@ -96,7 +94,7 @@ func (r *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
 }
 
 func (r *Handler) run(param *types.Param) {
-	// 循环调用(协程池并发地发送多个请求，并等待所有请求完成)
+	// 循环调用(并发地发送多个测试用例的运行请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 
 	for _, test := range param.ProblemConfig.TestCases {
@@ -104,27 +102,25 @@ func (r *Handler) run(param *types.Param) {
 		goroutinePool.Instance().Submit(func() {
 			defer wg.Done()
 
-			body := map[string]any{
-				"cmd": []map[string]any{
-					{
-						// 资源限制
-						"cpuLimit":    param.ProblemConfig.RunLimit.CpuLimit,
-						"memoryLimit": param.ProblemConfig.RunLimit.MemoryLimit,
-						"procLimit":   param.ProblemConfig.RunLimit.ProcLimit,
-						// 程序命令行参数
-						"args": []string{"main"},
-						// 程序环境变量
-						"env": []string{"PATH=/usr/bin:/bin"},
-						// 指定 标准输入、标准输出和标准错误的文件 (null 是为了 pipe 的使用情况准备的，而且必须被 pipeMapping 的 in / out 指定)
-						"files": []map[string]any{
-							{"content": test.Input},
-							{"name": "stdout", "max": 10240},
-							{"name": "stderr", "max": 10240}},
-						// 在执行程序之前复制进容器的文件列表（这个缓存文件的 ID 来自上一个请求返回的 fileIds）
-						"copyIn": map[string]map[string]string{"main": {"fileId": param.FileIds["main"]}},
-					},
-				},
+			form := types.SandBoxApiForm{
+				CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
+				ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
+				MemoryLimit: param.ProblemConfig.CompileLimit.MemoryLimit,
+				StackLimit:  param.ProblemConfig.CompileLimit.StackLimit,
+				ProcLimit:   param.ProblemConfig.CompileLimit.ProcLimit,
+				Args:        []string{"main"},
+				Env:         []string{"PATH=/usr/bin:/bin"},
 			}
+			form.Files = []map[string]any{
+				{"content": test.Input},
+				{"name": "stdout", "max": 10240},
+				{"name": "stderr", "max": 10240}}
+			form.CopyIn = map[string]map[string]string{
+				"main": {"fileId": param.FileIds["main"]},
+			}
+
+			body := types.Body{}
+			body.Cmd = append(body.Cmd, form)
 			data, err := json.Marshal(body)
 			if err != nil {
 				logrus.Errorln("Error marshalling JSON:", err)
