@@ -53,3 +53,42 @@ type SandBoxApiForm struct {
 type Body struct {
 	Cmd []SandBoxApiForm `json:"cmd"`
 }
+
+const (
+	Accepted            = "Accepted"              // 正常情况
+	MemoryLimitExceeded = "Memory Limit Exceeded" // 内存超限
+	TimeLimitExceeded   = "Time Limit Exceeded"   // 时间超限
+	OutputLimitExceeded = "Output Limit Exceeded" // 输出超限
+	FileErr             = "File Error"            // 文件错误
+	NonzeroExitStatus   = "Nonzero Exit Status"   // 非 0 退出值
+	Signalled           = "Signalled"             // 进程被信号终止
+	InternalError       = "Internal Error"        // 内部错误
+
+	WrongAnswer = "Wrong Answer" //结果错误
+)
+
+type SandBoxApiResponse struct {
+	Status     string `json:"status,omitempty"`
+	ErrMsg     string `json:"error,omitempty"`      // 详细错误信息
+	ExitStatus int64  `json:"exitStatus,omitempty"` // 程序返回值
+	Time       int64  `json:"time,omitempty"`       // 程序运行 CPU 时间，单位纳秒
+	Memory     int64  `json:"memory,omitempty"`     // 程序运行内存，单位 byte
+	RunTime    int64  `json:"runTime,omitempty"`    // 程序运行现实时间，单位纳秒
+
+	// copyOut 和 pipeCollector 指定的文件内容
+	Files map[string]string `json:"files,omitempty"`
+	// copyFileCached 指定的文件 id
+	FileIds map[string]string `json:"fileIds,omitempty"`
+	// 文件错误详细信息
+	FileErrs []FileError `json:"fileError,omitempty"`
+}
+type FileError struct {
+	Name    string `json:"name,omitempty"`    // 错误文件名称
+	Type    string `json:"type,omitempty"`    // 错误代码
+	Message string `json:"message,omitempty"` // 错误信息
+}
+
+type RunResultInChan struct {
+	Result *SandBoxApiResponse
+	Case   *pb.TestCase
+}

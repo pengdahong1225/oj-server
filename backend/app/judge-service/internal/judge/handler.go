@@ -17,16 +17,16 @@ import (
 
 type Handler struct {
 	baseUrl    string
-	runResults chan *pb.JudgeResult // 运行结果
+	runResults chan *types.RunResultInChan // 运行结果
 }
 
 func NewHandler(host string, port int) *Handler {
 	return &Handler{
 		baseUrl:    fmt.Sprintf("http://%s:%d", host, port),
-		runResults: make(chan *pb.JudgeResult, 100),
+		runResults: make(chan *types.RunResultInChan, 100),
 	}
 }
-func (r *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
+func (r *Handler) compile(param *types.Param) (*types.SandBoxApiResponse, error) {
 	form := types.SandBoxApiForm{
 		CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
 		ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
@@ -72,20 +72,21 @@ func (r *Handler) compile(param *types.Param) (*pb.JudgeResult, error) {
 	defer resp.Body.Close()
 
 	// 读取响应
-	bodyResp, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logrus.Errorln("Error reading response:", err)
 		return nil, err
 	}
 	logrus.Debugln("Response Status:", resp.Status)
-	logrus.Debugln("Response Body:", string(bodyResp))
+	logrus.Debugln("Response Body:", string(respBody))
 
-	var result []*pb.JudgeResult
-	if err := json.Unmarshal(bodyResp, &result); err != nil {
+	var result []*types.SandBoxApiResponse
+	if err := json.Unmarshal(respBody, &result); err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
 	}
 	if len(result) > 0 {
+		// 编译结果就取第一条
 		return result[0], nil
 	} else {
 		logrus.Errorln("result len = 0")
@@ -142,24 +143,25 @@ func (r *Handler) run(param *types.Param) {
 			defer resp.Body.Close()
 
 			// 读取响应
-			bodyResp, err := io.ReadAll(resp.Body)
+			respBody, err := io.ReadAll(resp.Body)
 			if err != nil {
 				logrus.Errorln("Error reading response:", err)
 				return
 			}
 			logrus.Debugln("Response Status:", resp.Status)
-			logrus.Debugln("Response Body:", string(bodyResp))
+			logrus.Debugln("Response Body:", string(respBody))
 
 			// 将结果放入管道
-			var result []*pb.JudgeResult
-			if err := json.Unmarshal(bodyResp, &result); err != nil {
+			var results []*types.SandBoxApiResponse
+			if err := json.Unmarshal(respBody, &results); err != nil {
 				logrus.Errorln("Error unmarshalling JSON:", err)
 				return
 			}
-
-			if len(result) > 0 {
-				result[0].TestCase = test
-				r.runResults <- result[0]
+			if len(results) > 0 {
+				r.runResults <- &types.RunResultInChan{
+					Result: results[0],
+					Case:   test,
+				}
 			}
 		})
 	}
@@ -167,24 +169,26 @@ func (r *Handler) run(param *types.Param) {
 }
 
 // 检查结果状态，只check结果状态为Accepted的
-func (r *Handler) judge() []*pb.JudgeResult {
-	var results []*pb.JudgeResult
+func (r *Handler) judge() []*pb.PBResult {
+	var results []*pb.PBResult
 	for runResult := range r.runResults {
-		if runResult.Status != "Accepted" {
-			runResult.Content = runResult.Status
-			results = append(results, runResult)
+		pbResult := translatePBResult(runResult.Result)
+		// status不为Accepted的，不用检测结果
+		if runResult.Result.Status != types.Accepted {
+			pbResult.Content = "Run Error"
+			results = append(results, pbResult)
 			continue
 		}
 		// 判断output是否满足预期
 		// 不满足结果的状态为Wrong Answer
-		if !r.checkAnswer(runResult.Files["stdout"], runResult.TestCase.Output) {
-			runResult.Status = "Wrong Answer"
-			runResult.Content = "Wrong Answer"
-			results = append(results, runResult)
+		if !r.checkAnswer(runResult.Result.Files["stdout"], runResult.Case.Output) {
+			pbResult.Status = types.WrongAnswer
+			pbResult.Content = "答案错误"
+			results = append(results, pbResult)
 		} else {
-			runResult.Status = "Accepted"
-			runResult.Content = "Accepted"
-			results = append(results, runResult)
+			pbResult.Status = types.Accepted
+			pbResult.Content = "通过"
+			results = append(results, pbResult)
 		}
 	}
 	return results

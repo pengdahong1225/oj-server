@@ -35,42 +35,44 @@ func Handle(form *pb.SubmitForm) {
 	}
 
 	start := time.Now()
-	res := doAction(param)
+	results := doAction(param)
 	duration := time.Now().Sub(start).Milliseconds()
 	logrus.Infof("---judge.Handle--- uid:%d, problemID:%d, total-cost:%d ms\n", form.Uid, form.ProblemId, duration)
 
 	// 解锁用户
 	cache.UnLockUser(form.Uid)
 
-	if res != nil {
-		analyzeResult(param, res)
+	if results != nil {
+		analyzeResult(param, results)
 
 		// 记录结果
-		data, err := json.Marshal(res)
+		data, err := json.Marshal(results)
 		if err != nil {
 			logrus.Errorln(err.Error())
 			return
 		}
 		saveResult(param, data)
+	} else {
+		logrus.Errorf("results is nil")
 	}
 }
 
 // 分析结果
-func analyzeResult(param *types.Param, results []*pb.JudgeResult) {
+func analyzeResult(param *types.Param, results []*pb.PBResult) {
 	param.Accepted = true
-	param.Message = "Accepted"
-	for _, res := range results {
-		if res.Status != "Accepted" {
+	param.Message = types.Accepted
+	for _, result := range results {
+		if result.Status != types.Accepted {
 			param.Accepted = false
-			param.Message = res.Content
+			param.Message = result.Content
 			break
 		}
 	}
 }
 
 func saveResult(param *types.Param, data []byte) {
-	// 保存本次提交结果 2min过期
-	err := cache.SetJudgeResult(param.Uid, param.ProblemID, param.Message, 60*2*time.Second)
+	// 保存本次提交结果 1min过期
+	err := cache.SetJudgeResult(param.Uid, param.ProblemID, param.Message, 60*1*time.Second)
 	if err != nil {
 		logrus.Errorln(err.Error())
 	}
@@ -131,10 +133,10 @@ func preAction(form *pb.SubmitForm) (bool, *types.Param) {
 // 2.编译结果
 // 3.运行结果
 // 4.评判结果
-func doAction(param *types.Param) []*pb.JudgeResult {
+func doAction(param *types.Param) []*pb.PBResult {
 	handler := NewHandler(settings.Instance().SandBox.Host, settings.Instance().SandBox.Port)
 
-	results := make([]*pb.JudgeResult, 0)
+	results := make([]*pb.PBResult, 0)
 	// 设置题目状态[编译]
 	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateCompiling), 60*2*time.Second); err != nil {
 		logrus.Errorln(err.Error())
@@ -144,12 +146,13 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 		logrus.Errorln(err.Error())
 		return nil
 	}
-	logrus.Debugln("编译结果:", compileResult)
+	logrus.Debugln("编译结果:", *compileResult)
 
-	// 编译失败的status统一为Compile Error
-	if compileResult.Status != "Accepted" {
-		compileResult.Content = "Compile Error"
-		results = append(results, compileResult)
+	// 需要将result类型转换为pb.PBResult
+	pbResult := translatePBResult(compileResult)
+	if compileResult.Status != types.Accepted {
+		pbResult.Content = "Compile Error"
+		results = append(results, pbResult)
 		// 更新状态
 		if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateExited), 60*2*time.Second); err != nil {
 			logrus.Errorln(err.Error())
@@ -157,11 +160,12 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 		}
 		return results
 	}
-	compileResult.Content = "Compile Success"
-	results = append(results, compileResult)
+	pbResult.Content = "Compile Success"
+	results = append(results, pbResult)
 
 	// 保存可执行文件的文件ID
 	param.FileIds = compileResult.FileIds
+
 	// 设置题目状态[判题中]
 	if err := cache.SetUPState(param.Uid, param.ProblemID, int(pb.SubmitState_UPStateJudging), 60*2*time.Second); err != nil {
 		logrus.Errorln(err.Error())
@@ -186,4 +190,15 @@ func doAction(param *types.Param) []*pb.JudgeResult {
 	wgJudge.Wait()
 
 	return results
+}
+
+func translatePBResult(resp *types.SandBoxApiResponse) *pb.PBResult {
+	return &pb.PBResult{
+		Status:     resp.Status,
+		Content:    resp.ErrMsg,
+		Memory:     resp.Memory,
+		RunTime:    resp.RunTime,
+		Time:       resp.Time,
+		ExitStatus: resp.ExitStatus,
+	}
 }
