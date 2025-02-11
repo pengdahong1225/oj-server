@@ -8,6 +8,7 @@ import (
 )
 
 type CommentHandler struct {
+	logic logic.CommentLogic
 }
 
 func (r CommentHandler) HandleAdd(ctx *gin.Context) {
@@ -15,7 +16,7 @@ func (r CommentHandler) HandleAdd(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	res := logic.CommentLogic{}.OnAddComment(form)
+	res := r.logic.OnAddComment(form)
 	ctx.JSON(http.StatusOK, res)
 }
 func (r CommentHandler) HandleGet(ctx *gin.Context) {
@@ -23,7 +24,7 @@ func (r CommentHandler) HandleGet(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	res := logic.CommentLogic{}.OnQueryComment(form)
+	res := r.logic.OnQueryComment(form)
 	ctx.JSON(http.StatusOK, res)
 }
 
