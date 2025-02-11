@@ -19,10 +19,10 @@ func QueryUPState(uid int64, problemID int64) (int32, error) {
 	val, err := rdb.Get(context.Background(), key).Result()
 	switch {
 	case errors.Is(err, redis.Nil):
-		logrus.Infoln("key[%s]不存在", key)
+		logrus.Infof("key[%s]不存在", key)
 		return -1, err
 	case err != nil:
-		logrus.Infoln("key[%s]查询错误:%s", key, err.Error())
+		logrus.Infof("key[%s]查询错误:%s", key, err.Error())
 		return -1, err
 	case val == "":
 		return -1, nil
