@@ -69,7 +69,7 @@ type AddCommentForm struct {
 	ReplyId        int64 `json:"reply_id" form:"reply_id"`
 	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id"`
 }
-type QueryCommentForm struct {
+type QueryCommentParams struct {
 	ObjId int64 `json:"obj_id" form:"obj_id" binding:"required"`
 
 	RootId        int64 `json:"root_id" form:"root_id"`

@@ -83,7 +83,7 @@ func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm) *models.R
 	}
 }
 
-func (receiver CommentLogic) OnQueryComment(form *models.QueryCommentForm) *models.Response {
+func (receiver CommentLogic) OnQueryComment(params *models.QueryCommentParams) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -91,12 +91,12 @@ func (receiver CommentLogic) OnQueryComment(form *models.QueryCommentForm) *mode
 	}
 
 	request := &pb.QueryCommentRequest{
-		ObjId:          form.ObjId,
-		RootCommentId:  form.RootCommentId,
-		RootId:         form.RootId,
-		ReplyCommentId: form.ReplyCommentId,
-		ReplyId:        form.ReplyId,
-		Cursor:         form.CurSor,
+		ObjId:          params.ObjId,
+		RootCommentId:  params.RootCommentId,
+		RootId:         params.RootId,
+		ReplyCommentId: params.ReplyCommentId,
+		ReplyId:        params.ReplyId,
+		Cursor:         params.CurSor,
 	}
 	dbConn, err := registry.NewDBConnection()
 	if err != nil {

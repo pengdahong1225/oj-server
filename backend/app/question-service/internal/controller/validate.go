@@ -10,7 +10,7 @@ import (
 // 表单类型集
 type formTyper interface {
 	models.RegisterForm | models.LoginFrom | models.GetSmsCodeForm | models.SubmitForm | models.UpdateProblemForm |
-		models.AddCommentForm | models.QueryCommentForm | models.NoticeForm
+		models.AddCommentForm | models.NoticeForm
 }
 
 // validate 通用表单验证
