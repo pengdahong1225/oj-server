@@ -89,7 +89,7 @@ const handleCommand = (command: string) => {
 
 <style lang="less" scoped>
 .layout-container {
-  height: 100vh;
+  height: auto;
   background-color: #fff;
 
   .top {

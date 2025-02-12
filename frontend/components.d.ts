@@ -21,6 +21,7 @@ declare module 'vue' {
     ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
     ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
     ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElDivider: typeof import('element-plus/es')['ElDivider']
     ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
@@ -49,8 +50,10 @@ declare module 'vue' {
     NoticeDialog: typeof import('./src/components/noticeDialog.vue')['default']
     PageContainer: typeof import('./src/components/PageContainer.vue')['default']
     ProblemEdit: typeof import('./src/components/problemEdit.vue')['default']
+    RootCommentItem: typeof import('./src/components/RootCommentItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SecondCommentItem: typeof import('./src/components/SecondCommentItem.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
