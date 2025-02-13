@@ -1,16 +1,15 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue"
 import { Search, Select } from '@element-plus/icons-vue'
-import type { Problem, QueryProblemListParams } from '@/types/problem'
 import { queryProblemListService, getProblemTagListService } from '@/api/problemController'
 import { useUserStore } from '@/stores'
 
 const userStore = useUserStore()
 const loading = ref(false)
 const total = ref(0)
-const problemList = ref<Problem[]>([])
+const problemList = ref<API.Problem[]>([])
 const tag_list = ref<string[]>([])
-const params = ref(<QueryProblemListParams>{
+const params = ref(<API.QueryProblemListParams>{
     page: 1,
     page_size: 10, // page_size默认为10
     keyword: '',

@@ -21,14 +21,11 @@ namespace API {
         reply_comment_id: number;
     }
 
-    // 评论列表查询参数
-    type QueryCommentListParams = {
+    // 顶层评论列表查询参数
+    type QueryRootCommentListParams = {
         obj_id: number;
-        root_id: number;
-        root_comment_id: number;
-        reply_id: number;
-        reply_comment_id: number;
 
-        cursor: number; // 分页参数
+        page: number;
+        page_size: number;
     }
 }

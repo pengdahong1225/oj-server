@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ref, computed, defineProps } from 'vue'
-// import type { Comment } from '@/api/interfaces/comment'
+import { computed, defineProps } from 'vue'
+import { formatTime } from '@/utils/format'
 
 const props = defineProps<{
     comment_data: API.Comment
@@ -8,7 +8,7 @@ const props = defineProps<{
 
 // 跳转链接
 const user_href = computed(() => {
-    return `/user/${comment_data.value.user_id}`
+    return `/user/${props.comment_data.user_id}`
 })
 
 // 默认头像
@@ -21,17 +21,17 @@ const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
         <div class="header-area">
             <!-- 头像 -->
             <a class="avatar-link" :href="user_href" target="_blank">
-                <img :src="comment_data.user_avatar_url || circleUrl" class="avatar-image" />
+                <img :src="comment_data.user_avatar_url || defaultAvatar" class="avatar-image" />
             </a>
             <!-- 用户名及发布情况 -->
             <div class="user-pub">
-                <div class="user-name">用户名</div>
-                <div class="public-info">发布于 四川 2025.01.05</div>
+                <div class="user-name">{{ comment_data.user_name }}</div>
+                <div class="public-info">发布于 {{ comment_data.pub_region }} {{ formatTime(comment_data.pub_stamp) }}</div>
             </div>
         </div>
         <!-- 内容区域 -->
         <div class="content-area">
-            0123456789
+            {{ comment_data.content }}
         </div>
     </div>
 </template>
@@ -74,8 +74,6 @@ const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
         width: 100%;
         margin: auto;
         margin-top: 10px;
-        border-style: solid;
-        border-color: rgb(141, 0, 0);
     }
 }
 </style>

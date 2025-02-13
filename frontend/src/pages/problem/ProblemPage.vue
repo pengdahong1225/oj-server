@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problemController'
-import { getCommentListService } from '@/api/commentController'
+import { getRootCommentListService } from '@/api/commentController'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/mode-c_cpp'
@@ -19,7 +19,7 @@ onMounted(() => {
     getProblemDetail()
 })
 const route = useRoute()
-const problem = ref<Problem>({
+const problem = ref<API.Problem>({
     id: 0,
     title: '',
     description: '',
@@ -48,7 +48,7 @@ const bdescription = computed(() => {
 
 // 题目提交表单
 const loading = ref(false)
-const form = ref<SubmitForm>({
+const form = ref<API.SubmitForm>({
     code: '',
     lang: 'c',  // 默认使用c
     problem_id: 0,
@@ -141,15 +141,23 @@ const editorOptions = ref({
 });
 
 // 评论区数据
-const comment_query_params = <API.QueryCommentListParams>{}
+const root_comment_query_params = ref(<API.QueryRootCommentListParams>{
+    page: 1,
+    page_size: 5,
+})
 const comment_text = ref('')
 const root_comment_list = ref<API.Comment[]>([])
+const root_comment_count = ref(0)
 const getCommentList = async () => {
-    comment_query_params.obj_id = problem.value.id
-    comment_query_params.cursor = 0
+    root_comment_query_params.value.obj_id = problem.value.id
 
-    const res = await getCommentListService(comment_query_params)
-    console.log(res)
+    const res = await getRootCommentListService(root_comment_query_params.value)
+    root_comment_list.value = res.data.data.data
+    root_comment_count.value = res.data.data.total
+}
+const handleCurrentChange = (page: number) => {
+    root_comment_query_params.value.page = page
+    getCommentList()
 }
 
 </script>
@@ -255,7 +263,13 @@ const getCommentList = async () => {
                 <!-- 评论列表 -->
                 <div class="comment-list">
                     <!-- 顶层评论 -->
-                    <!-- <RootCommentItem></RootCommentItem> -->
+                    <div class="comment-item" v-for="item in root_comment_list" :key="item.id">
+                        <RootCommentItem :comment_data="item"></RootCommentItem>
+                    </div>
+                    <!-- 分页 -->
+                    <el-pagination v-model:current-page="root_comment_query_params.page" v-model:page-size="root_comment_query_params.page_size"
+                        :total="root_comment_count" :background="true" layout="prev, pager, next, jumper"
+                        @current-change="handleCurrentChange" style="margin-top: 20px; justify-content: flex-end;" />
                 </div>
             </el-card>
         </div>
@@ -347,6 +361,20 @@ const getCommentList = async () => {
         .comment-list {
             margin-left: 0px;
             margin-right: 0px;
+
+            .comment-item {
+                margin-top: 10px;
+
+                &:first-child {
+                    margin-top: 0px;
+                }
+
+                margin-bottom: 10px;
+
+                &:last-child {
+                    margin-bottom: 0px;
+                }
+            }
         }
     }
 }
