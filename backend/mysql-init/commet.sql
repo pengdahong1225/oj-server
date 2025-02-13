@@ -29,3 +29,9 @@ create table if not exists comment(
     INDEX idx_reply_id(reply_id),
     INDEX idx_like_count(like_count)
 )engine = InnoDB charset = utf8mb4;
+
+alter table comment
+change stamp pub_stamp BIGINT NOT NULL COMMENT '时间戳';
+
+alter table comment
+add pub_region VARCHAR(64) DEFAULT '' COMMENT '发布地区';

@@ -13,11 +13,13 @@ message Comment{
   int32 reply_count = 8;
   int32 like_count = 9;
   int32 child_count = 10;
-  int64  stamp = 11;
+  int64  pub_stamp = 11;
+  string pub_region = 12;
 
-  int32 is_root = 12;
-  int64  root_id = 13;
-  int64 root_comment_id = 14;
-  int64 reply_id = 15;
-  int64 reply_comment_id = 16;
+  int32 is_root = 13;
+  int64  root_id = 14;
+  int64 root_comment_id = 15;
+  int64 reply_id = 16;
+  int64 reply_comment_id = 17;
 }
+
