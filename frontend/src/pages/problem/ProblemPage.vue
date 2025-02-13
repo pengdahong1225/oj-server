@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problemController'
-import { getRootCommentListService } from '@/api/commentController'
+import { getRootCommentListService, addCommentService } from '@/api/commentController'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { VAceEditor } from 'vue3-ace-editor'
 import 'ace-builds/src-noconflict/mode-c_cpp'
@@ -12,6 +12,9 @@ import 'ace-builds/src-noconflict/mode-java'
 import 'ace-builds/src-noconflict/theme-github'
 import 'ace-builds/src-noconflict/theme-xcode'
 import { marked } from 'marked'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
 
 // 题目详细信息
 onMounted(() => {
@@ -140,12 +143,31 @@ const editorOptions = ref({
     showGutter: true, // 显示行号
 });
 
-// 评论区数据
+// 评论区
+const place = computed(() => {
+    if (userStore.userInfo.uid === 0) {
+        return '请先登录...'
+    } else {
+        return '请输入评论...'
+    }
+})
+const new_comment = ref('')
+const onSubmitComment = async () => {
+    const form = <API.AddCommentForm>{
+        obj_id: problem.value.id,
+        user_id: userStore.userInfo.uid,
+        user_name: userStore.userInfo.nickname,
+        user_avatar_url: userStore.userInfo.avatar_url,
+        content: new_comment.value
+    }
+    const res = await addCommentService(form)
+    console.log(res)
+}
+
 const root_comment_query_params = ref(<API.QueryRootCommentListParams>{
     page: 1,
     page_size: 5,
 })
-const comment_text = ref('')
 const root_comment_list = ref<API.Comment[]>([])
 const root_comment_count = ref(0)
 const getCommentList = async () => {
@@ -242,12 +264,12 @@ const handleCurrentChange = (page: number) => {
         <div class="comment-area">
             <!-- 输入评论 -->
             <div class="comment-input">
-                <el-input v-model="comment_text" type="textarea" show-word-limit="true" placeholder="请输入评论..."
+                <el-input v-model="new_comment" type="textarea" show-word-limit :placeholder="place"
                     resize="none" :autosize="{ minRows: 5 }" maxlength="1000"
                     input-style="font-size: 18px; border: none; outline: none; overflow: hidden;" />
                 <div style="display: flex; justify-content: flex-end;">
-                    <el-button type="success" :disabled="!comment_text" auto-insert-space
-                        style="margin-top: 5px;">评论</el-button>
+                    <el-button type="success" :disabled="!userStore.userInfo.uid || !new_comment" auto-insert-space
+                        style="margin-top: 5px;" @click="onSubmitComment">评论</el-button>
                 </div>
             </div>
             <el-card shadow="never">

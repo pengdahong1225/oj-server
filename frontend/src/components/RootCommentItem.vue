@@ -26,7 +26,7 @@ const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
             <!-- 用户名及发布情况 -->
             <div class="user-pub">
                 <div class="user-name">{{ comment_data.user_name }}</div>
-                <div class="public-info">发布于 {{ comment_data.pub_region }} {{ formatTime(comment_data.pub_stamp) }}</div>
+                <div class="public-info">发布于 {{ comment_data.pub_region || '未知地区' }} {{ formatTime(comment_data.pub_stamp) }}</div>
             </div>
         </div>
         <!-- 内容区域 -->

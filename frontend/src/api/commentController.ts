@@ -12,3 +12,17 @@ export async function getRootCommentListService(params: API.QueryRootCommentList
         }
     })
 }
+
+/**
+ * 提交评论接口
+ * POST /comment/add
+ */
+export async function addCommentService(form: API.AddCommentForm) {
+    return request('/comment/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: form
+    })
+}

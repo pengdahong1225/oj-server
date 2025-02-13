@@ -28,4 +28,18 @@ namespace API {
         page: number;
         page_size: number;
     }
+    // 提交评论接口参数
+    type AddCommentForm = {
+        obj_id: number;
+        user_id: number;
+        user_name: string;
+        user_avatar_url: string;
+        content: string;
+
+        // 非顶层评论需要以下字段
+        root_id: number;
+        root_comment_id: number;
+        reply_id: number;
+        reply_comment_id: number;
+    }
 }
