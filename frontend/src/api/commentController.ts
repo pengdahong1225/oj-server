@@ -14,11 +14,38 @@ export async function getRootCommentListService(params: API.QueryRootCommentList
 }
 
 /**
+ * 获取二层评论列表接口
+ * GET /comment/child_list
+ */
+export async function getChildCommentListService(params: API.QueryChildCommentListParams) {
+    return request('/comment/child_list', {
+        method: 'GET',
+        params: {
+            ...params
+        }
+    })
+}
+
+/**
  * 提交评论接口
  * POST /comment/add
  */
 export async function addCommentService(form: API.AddCommentForm) {
     return request('/comment/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: form
+    })
+}
+
+/** 
+ * 评论点赞接口
+ * POST /comment/like
+ */
+export async function likeCommentService(form: API.CommentLikeForm) {
+    return request('/comment/like', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

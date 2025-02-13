@@ -28,6 +28,17 @@ namespace API {
         page: number;
         page_size: number;
     }
+    // 二层评论列表查询参数
+    type QueryChildCommentListParams = {
+        obj_id: number;
+        root_id: number;
+        root_comment_id: number;
+        reply_id: number;
+        reply_comment_id: number;
+
+        cursor: number;
+    }
+
     // 提交评论接口参数
     type AddCommentForm = {
         obj_id: number;
@@ -41,5 +52,10 @@ namespace API {
         root_comment_id: number;
         reply_id: number;
         reply_comment_id: number;
+    }
+    // 评论点赞接口表单
+    type CommentLikeForm = {
+        obj_id: number;
+        comment_id: number;
     }
 }

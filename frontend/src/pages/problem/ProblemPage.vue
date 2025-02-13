@@ -286,7 +286,7 @@ const handleCurrentChange = (page: number) => {
                 <div class="comment-list">
                     <!-- 顶层评论 -->
                     <div class="comment-item" v-for="item in root_comment_list" :key="item.id">
-                        <RootCommentItem :comment_data="item"></RootCommentItem>
+                        <RootCommentItem :comment_data="item" :obj_id="problem.id"></RootCommentItem>
                     </div>
                     <!-- 分页 -->
                     <el-pagination v-model:current-page="root_comment_query_params.page" v-model:page-size="root_comment_query_params.page_size"
@@ -385,13 +385,13 @@ const handleCurrentChange = (page: number) => {
             margin-right: 0px;
 
             .comment-item {
-                margin-top: 10px;
+                margin-top: 15px;
 
                 &:first-child {
                     margin-top: 0px;
                 }
 
-                margin-bottom: 10px;
+                margin-bottom: 15px;
 
                 &:last-child {
                     margin-bottom: 0px;
