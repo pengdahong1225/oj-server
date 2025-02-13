@@ -115,3 +115,73 @@ func (receiver CommentLogic) OnQueryRootCommentList(params *models.RootCommentLi
 	res.Data = response
 	return res
 }
+
+func (receiver CommentLogic) OnQueryChildCommentList(params *models.ChildCommentListQueryParams) *models.Response {
+	res := &models.Response{
+		Code:    models.Success,
+		Message: "",
+		Data:    nil,
+	}
+
+	request := &pb.QueryChildCommentRequest{
+		ObjId:          params.ObjId,
+		RootId:         params.RootId,
+		RootCommentId:  params.RootCommentId,
+		ReplyId:        params.ReplyId,
+		ReplyCommentId: params.ReplyCommentId,
+		Cursor:         params.Cursor,
+	}
+	dbConn, err := registry.NewDBConnection()
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+	client := pb.NewCommentServiceClient(dbConn)
+
+	response, err := client.QueryChildComment(context.Background(), request)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+	res.Message = "OK"
+	res.Data = response
+	return res
+}
+
+func (receiver CommentLogic) OnCommentLike(form *models.CommentLikeForm) *models.Response {
+	res := &models.Response{
+		Code:    models.Success,
+		Message: "",
+		Data:    nil,
+	}
+
+	request := &pb.CommentLikeRequest{
+		CommentId: form.CommentId,
+		ObjId:     form.ObjId,
+	}
+	dbConn, err := registry.NewDBConnection()
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("db服连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+	client := pb.NewCommentServiceClient(dbConn)
+
+	_, err = client.CommentLike(context.Background(), request)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+
+	res.Message = "OK"
+	return res
+}

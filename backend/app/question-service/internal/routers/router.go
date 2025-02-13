@@ -55,6 +55,7 @@ func questionRouters(engine *gin.Engine) {
 	commentRouter.Use(middlewares.AuthLogin())
 	{
 		commentRouter.GET("/root_list", controller.CommentHandler{}.HandleGetRootList)
+		commentRouter.GET("/child_list", controller.CommentHandler{}.HandleGetChildList)
 		commentRouter.DELETE("", controller.CommentHandler{}.HandleDelete)
 		commentRouter.POST("/add", controller.CommentHandler{}.HandleAdd)
 		commentRouter.POST("/like", controller.CommentHandler{}.HandleLike)

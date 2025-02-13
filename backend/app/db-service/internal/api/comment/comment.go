@@ -2,6 +2,7 @@ package comment
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pengdahong1225/oj-server/backend/app/common/errs"
 	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/mysql"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
@@ -9,6 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"gorm.io/gorm"
 )
 
 type CommentServer struct {
@@ -64,6 +66,17 @@ func (c *CommentServer) QueryChildComment(ctx context.Context, in *pb.QueryChild
 	}
 
 	response := &pb.QueryChildCommentResponse{}
+
+	// 查询总量
+	db := mysql.DBSession
+	var count int64 = 0
+	result := db.Model(&mysql.Comment{}).Where("obj_id = ?", in.ObjId).Where("is_root = ?", 0).Where("root_id = ?", in.RootId).Where("root_comment_id = ?", in.RootCommentId).Count(&count)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, errs.QueryFailed
+	}
+	response.Total = int32(count)
+
 	comments := c.querier.onChildComment(in.ObjId, in.RootId, in.RootCommentId, in.Cursor)
 	for _, comment := range comments {
 		response.Data = append(response.Data, translateComment(&comment))
@@ -111,4 +124,27 @@ func translateComment(comment *mysql.Comment) *pb.Comment {
 		ReplyId:        comment.ReplyId,
 		ReplyCommentId: comment.ReplyCommentId,
 	}
+}
+
+// CommentLike 评论点赞
+func (c *CommentServer) CommentLike(ctx context.Context, in *pb.CommentLikeRequest) (*emptypb.Empty, error) {
+	// 校验
+	if !c.checker.assertObj(in.ObjId) {
+		logrus.Errorf("obj[%d] assert failed", in.ObjId)
+		return nil, errs.QueryFailed
+	}
+
+	/*
+		update comment set like=like+1 where id=?
+	*/
+	db := mysql.DBSession
+	result := db.Model(&mysql.Comment{}).Where("obj_id = ?", in.ObjId).Where("id = ?", in.CommentId).Update("like_count", gorm.Expr("like_count + ?", 1))
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, errs.UpdateFailed
+	}
+	if result.RowsAffected == 0 {
+		return nil, errs.NotFound
+	}
+	return &empty.Empty{}, nil
 }

@@ -874,6 +874,7 @@ const (
 	CommentService_QueryChildComment_FullMethodName = "/CommentService/QueryChildComment"
 	CommentService_DeleteComment_FullMethodName     = "/CommentService/DeleteComment"
 	CommentService_SaveComment_FullMethodName       = "/CommentService/SaveComment"
+	CommentService_CommentLike_FullMethodName       = "/CommentService/CommentLike"
 )
 
 // CommentServiceClient is the client API for CommentService service.
@@ -886,6 +887,7 @@ type CommentServiceClient interface {
 	QueryChildComment(ctx context.Context, in *QueryChildCommentRequest, opts ...grpc.CallOption) (*QueryChildCommentResponse, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	SaveComment(ctx context.Context, in *SaveCommentRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	CommentLike(ctx context.Context, in *CommentLikeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type commentServiceClient struct {
@@ -936,6 +938,16 @@ func (c *commentServiceClient) SaveComment(ctx context.Context, in *SaveCommentR
 	return out, nil
 }
 
+func (c *commentServiceClient) CommentLike(ctx context.Context, in *CommentLikeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, CommentService_CommentLike_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommentServiceServer is the server API for CommentService service.
 // All implementations must embed UnimplementedCommentServiceServer
 // for forward compatibility.
@@ -946,6 +958,7 @@ type CommentServiceServer interface {
 	QueryChildComment(context.Context, *QueryChildCommentRequest) (*QueryChildCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*empty.Empty, error)
 	SaveComment(context.Context, *SaveCommentRequest) (*empty.Empty, error)
+	CommentLike(context.Context, *CommentLikeRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedCommentServiceServer()
 }
 
@@ -967,6 +980,9 @@ func (UnimplementedCommentServiceServer) DeleteComment(context.Context, *DeleteC
 }
 func (UnimplementedCommentServiceServer) SaveComment(context.Context, *SaveCommentRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveComment not implemented")
+}
+func (UnimplementedCommentServiceServer) CommentLike(context.Context, *CommentLikeRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommentLike not implemented")
 }
 func (UnimplementedCommentServiceServer) mustEmbedUnimplementedCommentServiceServer() {}
 func (UnimplementedCommentServiceServer) testEmbeddedByValue()                        {}
@@ -1061,6 +1077,24 @@ func _CommentService_SaveComment_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CommentService_CommentLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentLikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).CommentLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommentService_CommentLike_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).CommentLike(ctx, req.(*CommentLikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CommentService_ServiceDesc is the grpc.ServiceDesc for CommentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1083,6 +1117,10 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveComment",
 			Handler:    _CommentService_SaveComment_Handler,
+		},
+		{
+			MethodName: "CommentLike",
+			Handler:    _CommentService_CommentLike_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
