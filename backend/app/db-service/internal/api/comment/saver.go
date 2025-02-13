@@ -169,7 +169,7 @@ func (s *Saver) updateRootCommentChildCount(tx *gorm.DB, id int64, diff int) boo
 	if count < 0 {
 		count = 0
 	}
-	result = tx.Model(&comment).Update("child_count", count)
+	result = tx.Model(&comment).Where("id = ?", id).Update("child_count", count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
@@ -203,7 +203,7 @@ func (s *Saver) updateReplyCommentReplyCount(tx *gorm.DB, id int64, diff int) bo
 	if count < 0 {
 		count = 0
 	}
-	result = tx.Model(&comment).Update("reply_count", count)
+	result = tx.Model(&comment).Where("id=?", id).Update("reply_count", count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
