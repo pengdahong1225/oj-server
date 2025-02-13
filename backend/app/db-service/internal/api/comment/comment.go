@@ -18,13 +18,43 @@ type CommentServer struct {
 	querier Querier
 }
 
-func (c *CommentServer) QueryComment(ctx context.Context, in *pb.QueryCommentRequest) (*pb.QueryCommentResponse, error) {
+// QueryRootComment
+// 查询顶层评论列表，采用偏移量分页
+func (c *CommentServer) QueryRootComment(ctx context.Context, in *pb.QueryRootCommentRequest) (*pb.QueryRootCommentResponse, error) {
 	// 校验
 	if !c.checker.assertObj(in.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", in.ObjId)
 		return nil, errs.QueryFailed
 	}
-	if in.RootId > 0 && in.RootCommentId > 0 && !c.checker.assertRoot(in.RootCommentId, in.RootId) {
+
+	response := &pb.QueryRootCommentResponse{}
+
+	// 查询总量
+	db := mysql.DBSession
+	var count int64 = 0
+	result := db.Model(&mysql.Comment{}).Where("obj_id = ?", in.ObjId).Where("is_root = ?", 1).Count(&count)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, errs.QueryFailed
+	}
+	response.Total = int32(count)
+
+	comments := c.querier.onRootComment(in.ObjId, in.Page, in.PageSize)
+	for _, comment := range comments {
+		response.Data = append(response.Data, translateComment(&comment))
+	}
+	return response, nil
+}
+
+// QueryChildComment
+// 查询第二层评论，采用游标分页
+func (c *CommentServer) QueryChildComment(ctx context.Context, in *pb.QueryChildCommentRequest) (*pb.QueryChildCommentResponse, error) {
+	// 校验
+	if !c.checker.assertObj(in.ObjId) {
+		logrus.Errorf("obj[%d] assert failed", in.ObjId)
+		return nil, errs.QueryFailed
+	}
+	if !c.checker.assertRoot(in.RootCommentId, in.RootId) {
 		logrus.Errorf("root comment[%d] assert failed", in.RootCommentId)
 		return nil, errs.QueryFailed
 	}
@@ -33,24 +63,12 @@ func (c *CommentServer) QueryComment(ctx context.Context, in *pb.QueryCommentReq
 		return nil, errs.QueryFailed
 	}
 
-	response := &pb.QueryCommentResponse{}
-	cursor := in.Cursor
-	if cursor < 0 {
-		cursor = 0
+	response := &pb.QueryChildCommentResponse{}
+	comments := c.querier.onChildComment(in.ObjId, in.RootId, in.RootCommentId, in.Cursor)
+	for _, comment := range comments {
+		response.Data = append(response.Data, translateComment(&comment))
 	}
-	if in.RootId == 0 || in.RootCommentId == 0 {
-		comments := c.querier.onRootComment(in.ObjId, in.Cursor)
-		for _, comment := range comments {
-			response.Data = append(response.Data, translateComment(&comment))
-		}
-		return response, nil
-	} else {
-		comments := c.querier.onChildComment(in.ObjId, in.Cursor)
-		for _, comment := range comments {
-			response.Data = append(response.Data, translateComment(&comment))
-		}
-		return response, nil
-	}
+	return response, nil
 }
 
 func (c *CommentServer) DeleteComment(ctx context.Context, in *pb.DeleteCommentRequest) (*emptypb.Empty, error) {

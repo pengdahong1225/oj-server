@@ -36,7 +36,8 @@ service RecordService{
 }
 // comment接口
 service CommentService{
-  rpc QueryComment(QueryCommentRequest) returns(QueryCommentResponse);
+  rpc QueryRootComment(QueryRootCommentRequest) returns(QueryRootCommentResponse);
+  rpc QueryChildComment(QueryChildCommentRequest) returns(QueryChildCommentResponse);
   rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
   rpc SaveComment(SaveCommentRequest) returns(google.protobuf.Empty);
 }
@@ -77,19 +78,30 @@ message QueryUserSolvedListByProblemIdsResponse{
 }
 
 // 评论接口
-message QueryCommentRequest{
+message QueryRootCommentRequest{
   int64  obj_id = 1;  // 指定评论区
 
-  // 指定楼主，未指定楼主就是查询第一层，否则查询第二层
+  // 偏移量分页
+  int32 page = 2;
+  int32 page_size = 3;
+}
+message QueryRootCommentResponse{
+  repeated Comment data = 1;
+  int32 total = 2;
+}
+message QueryChildCommentRequest{
+  int64  obj_id = 1;  // 指定评论区
+  // 指定楼主，因为要查询第二层，必须要指定
   int64  root_id = 2;
   int64 root_comment_id = 3;
-  // 指定回复目标
+  // 指定回复目标，不指定则默认回复楼主
   int64 reply_id = 4;
   int64 reply_comment_id = 5;
 
-  int64 cursor = 6;   // next_id
+  // 游标分页
+  int32 cursor = 6;
 }
-message QueryCommentResponse{
+message QueryChildCommentResponse{
   repeated Comment data = 1;
 }
 message DeleteCommentRequest{

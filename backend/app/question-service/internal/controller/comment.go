@@ -34,9 +34,11 @@ func (r CommentHandler) HandleAdd(ctx *gin.Context) {
 	res := r.logic.OnAddComment(form, info)
 	ctx.JSON(http.StatusOK, res)
 }
-func (r CommentHandler) HandleGet(ctx *gin.Context) {
+
+// HandleGetRootList 顶层评论查询
+func (r CommentHandler) HandleGetRootList(ctx *gin.Context) {
 	// 查询参数校验
-	params := &models.QueryCommentParams{}
+	params := &models.RootCommentListQueryParams{}
 	err := ctx.ShouldBindQuery(params)
 	if err != nil {
 		var errs validator.ValidationErrors
@@ -56,7 +58,7 @@ func (r CommentHandler) HandleGet(ctx *gin.Context) {
 		return
 	}
 
-	res := r.logic.OnQueryComment(params)
+	res := r.logic.OnQueryRootCommentList(params)
 	ctx.JSON(http.StatusOK, res)
 }
 

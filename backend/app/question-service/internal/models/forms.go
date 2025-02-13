@@ -69,7 +69,9 @@ type AddCommentForm struct {
 	ReplyId        int64 `json:"reply_id" form:"reply_id"`
 	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id"`
 }
-type QueryCommentParams struct {
+
+// 顶层评论列表查询参数
+type RootCommentListQueryParams struct {
 	ObjId int64 `json:"obj_id" form:"obj_id" binding:"required"`
 
 	RootId        int64 `json:"root_id" form:"root_id"`
@@ -78,7 +80,8 @@ type QueryCommentParams struct {
 	ReplyId        int64 `json:"reply_id" form:"reply_id"`
 	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id"`
 
-	CurSor int64 `json:"cur_cursor" form:"cur_cursor"`
+	Page     int32 `json:"page" form:"page" binding:"required"`
+	PageSize int32 `json:"page_size" form:"page_size" binding:"required"`
 }
 
 // QueryProblemListParams 题目列表分页查询参数

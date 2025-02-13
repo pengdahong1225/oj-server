@@ -870,9 +870,10 @@ var RecordService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	CommentService_QueryComment_FullMethodName  = "/CommentService/QueryComment"
-	CommentService_DeleteComment_FullMethodName = "/CommentService/DeleteComment"
-	CommentService_SaveComment_FullMethodName   = "/CommentService/SaveComment"
+	CommentService_QueryRootComment_FullMethodName  = "/CommentService/QueryRootComment"
+	CommentService_QueryChildComment_FullMethodName = "/CommentService/QueryChildComment"
+	CommentService_DeleteComment_FullMethodName     = "/CommentService/DeleteComment"
+	CommentService_SaveComment_FullMethodName       = "/CommentService/SaveComment"
 )
 
 // CommentServiceClient is the client API for CommentService service.
@@ -881,7 +882,8 @@ const (
 //
 // comment接口
 type CommentServiceClient interface {
-	QueryComment(ctx context.Context, in *QueryCommentRequest, opts ...grpc.CallOption) (*QueryCommentResponse, error)
+	QueryRootComment(ctx context.Context, in *QueryRootCommentRequest, opts ...grpc.CallOption) (*QueryRootCommentResponse, error)
+	QueryChildComment(ctx context.Context, in *QueryChildCommentRequest, opts ...grpc.CallOption) (*QueryChildCommentResponse, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	SaveComment(ctx context.Context, in *SaveCommentRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
@@ -894,10 +896,20 @@ func NewCommentServiceClient(cc grpc.ClientConnInterface) CommentServiceClient {
 	return &commentServiceClient{cc}
 }
 
-func (c *commentServiceClient) QueryComment(ctx context.Context, in *QueryCommentRequest, opts ...grpc.CallOption) (*QueryCommentResponse, error) {
+func (c *commentServiceClient) QueryRootComment(ctx context.Context, in *QueryRootCommentRequest, opts ...grpc.CallOption) (*QueryRootCommentResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryCommentResponse)
-	err := c.cc.Invoke(ctx, CommentService_QueryComment_FullMethodName, in, out, cOpts...)
+	out := new(QueryRootCommentResponse)
+	err := c.cc.Invoke(ctx, CommentService_QueryRootComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commentServiceClient) QueryChildComment(ctx context.Context, in *QueryChildCommentRequest, opts ...grpc.CallOption) (*QueryChildCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryChildCommentResponse)
+	err := c.cc.Invoke(ctx, CommentService_QueryChildComment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -930,7 +942,8 @@ func (c *commentServiceClient) SaveComment(ctx context.Context, in *SaveCommentR
 //
 // comment接口
 type CommentServiceServer interface {
-	QueryComment(context.Context, *QueryCommentRequest) (*QueryCommentResponse, error)
+	QueryRootComment(context.Context, *QueryRootCommentRequest) (*QueryRootCommentResponse, error)
+	QueryChildComment(context.Context, *QueryChildCommentRequest) (*QueryChildCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*empty.Empty, error)
 	SaveComment(context.Context, *SaveCommentRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedCommentServiceServer()
@@ -943,8 +956,11 @@ type CommentServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCommentServiceServer struct{}
 
-func (UnimplementedCommentServiceServer) QueryComment(context.Context, *QueryCommentRequest) (*QueryCommentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryComment not implemented")
+func (UnimplementedCommentServiceServer) QueryRootComment(context.Context, *QueryRootCommentRequest) (*QueryRootCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryRootComment not implemented")
+}
+func (UnimplementedCommentServiceServer) QueryChildComment(context.Context, *QueryChildCommentRequest) (*QueryChildCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryChildComment not implemented")
 }
 func (UnimplementedCommentServiceServer) DeleteComment(context.Context, *DeleteCommentRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
@@ -973,20 +989,38 @@ func RegisterCommentServiceServer(s grpc.ServiceRegistrar, srv CommentServiceSer
 	s.RegisterService(&CommentService_ServiceDesc, srv)
 }
 
-func _CommentService_QueryComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryCommentRequest)
+func _CommentService_QueryRootComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryRootCommentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CommentServiceServer).QueryComment(ctx, in)
+		return srv.(CommentServiceServer).QueryRootComment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CommentService_QueryComment_FullMethodName,
+		FullMethod: CommentService_QueryRootComment_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommentServiceServer).QueryComment(ctx, req.(*QueryCommentRequest))
+		return srv.(CommentServiceServer).QueryRootComment(ctx, req.(*QueryRootCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommentService_QueryChildComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryChildCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).QueryChildComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommentService_QueryChildComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).QueryChildComment(ctx, req.(*QueryChildCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1035,8 +1069,12 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CommentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "QueryComment",
-			Handler:    _CommentService_QueryComment_Handler,
+			MethodName: "QueryRootComment",
+			Handler:    _CommentService_QueryRootComment_Handler,
+		},
+		{
+			MethodName: "QueryChildComment",
+			Handler:    _CommentService_QueryChildComment_Handler,
 		},
 		{
 			MethodName: "DeleteComment",

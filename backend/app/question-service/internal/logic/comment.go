@@ -84,20 +84,17 @@ func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm, ipInfo *I
 	}
 }
 
-func (receiver CommentLogic) OnQueryComment(params *models.QueryCommentParams) *models.Response {
+func (receiver CommentLogic) OnQueryRootCommentList(params *models.RootCommentListQueryParams) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
 		Data:    nil,
 	}
 
-	request := &pb.QueryCommentRequest{
-		ObjId:          params.ObjId,
-		RootCommentId:  params.RootCommentId,
-		RootId:         params.RootId,
-		ReplyCommentId: params.ReplyCommentId,
-		ReplyId:        params.ReplyId,
-		Cursor:         params.CurSor,
+	request := &pb.QueryRootCommentRequest{
+		ObjId:    params.ObjId,
+		Page:     params.Page,
+		PageSize: params.PageSize,
 	}
 	dbConn, err := registry.NewDBConnection()
 	if err != nil {
@@ -108,7 +105,7 @@ func (receiver CommentLogic) OnQueryComment(params *models.QueryCommentParams) *
 	}
 	defer dbConn.Close()
 	client := pb.NewCommentServiceClient(dbConn)
-	response, err := client.QueryComment(context.Background(), request)
+	response, err := client.QueryRootComment(context.Background(), request)
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -116,6 +113,6 @@ func (receiver CommentLogic) OnQueryComment(params *models.QueryCommentParams) *
 		return res
 	}
 	res.Message = "OK"
-	res.Data = response.Data
+	res.Data = response
 	return res
 }
