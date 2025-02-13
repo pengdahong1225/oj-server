@@ -26,12 +26,10 @@ func (r CommentHandler) HandleAdd(ctx *gin.Context) {
 	info, err := IpQuery.QueryIpGeolocation(ip)
 	if err != nil {
 		logrus.Errorf("查询ip归属地失败,ip:%s,err:%s", ip, err.Error())
-		ctx.Set("ipInfo", "未知地区")
-	} else {
-		ctx.Set("ipInfo", info)
+		info.RegionName = "未知地区"
 	}
 
-	res := r.logic.OnAddComment(form, info)
+	res := r.logic.OnAddComment(form, info.RegionName)
 	ctx.JSON(http.StatusOK, res)
 }
 

@@ -35,5 +35,10 @@ func QueryIpGeolocation(ip string) (*IPInfoResp, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if ipInfo.Status != "success" {
+		return nil, fmt.Errorf("ipInfo.Status != success")
+	}
+
 	return ipInfo, nil
 }

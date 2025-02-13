@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/cache"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/consumer"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/routers"
 )
 
@@ -34,6 +35,9 @@ func (receiver *Server) Start() {
 			panic(err)
 		}
 	}()
+
+	// 启动消费者
+	go consumer.ConsumeComment()
 
 	err := receiver.Register()
 	if err != nil {
