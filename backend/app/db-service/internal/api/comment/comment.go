@@ -84,7 +84,8 @@ func translateComment(comment *mysql.Comment) *pb.Comment {
 		LikeCount:     int32(comment.LikeCount),
 		ReplyCount:    int32(comment.ReplyCount),
 		ChildCount:    int32(comment.ChildCount),
-		Stamp:         comment.Stamp,
+		PubStamp:      comment.PubStamp,
+		PubRegion:     comment.PubRegion,
 
 		IsRoot:         int32(comment.IsRoot),
 		RootId:         comment.RootId,

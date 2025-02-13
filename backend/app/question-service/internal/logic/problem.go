@@ -2,8 +2,8 @@ package logic
 
 import (
 	"context"
+	cache2 "github.com/pengdahong1225/oj-server/backend/app/question-service/internal/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
@@ -168,7 +168,7 @@ func (r ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *model
 		Data:    nil,
 	}
 
-	ok, err := cache.LockUser(uid, 60*time.Second)
+	ok, err := cache2.LockUser(uid, 60*time.Second)
 	if err != nil {
 		logrus.Errorln("lock user err:", err.Error())
 		res.Code = models.Failed
@@ -196,7 +196,7 @@ func (r ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *model
 		logrus.Errorln(err.Error())
 		res.Code = models.Failed
 		res.Message = err.Error()
-		cache.UnLockUser(uid)
+		cache2.UnLockUser(uid)
 		return res
 	}
 	// 提交到mq
@@ -210,7 +210,7 @@ func (r ProblemLogic) OnProblemSubmit(uid int64, form *models.SubmitForm) *model
 		res.Code = models.Failed
 		res.Message = "任务提交mq失败"
 		logrus.Errorln("任务提交mq失败")
-		cache.UnLockUser(uid)
+		cache2.UnLockUser(uid)
 		return res
 	} else {
 		res.Message = "题目提交成功"
@@ -261,7 +261,7 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 	}
 
 	// 查询状态
-	state, err := cache.QueryUPState(uid, problemID)
+	state, err := cache2.QueryUPState(uid, problemID)
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()
@@ -280,7 +280,7 @@ func (r ProblemLogic) QueryResult(uid int64, problemID int64) *models.Response {
 	}
 
 	// 当state == SubmitState_UPStateExited时，从缓存中提取结果
-	result, err := cache.GetJudgeResult(uid, problemID)
+	result, err := cache2.GetJudgeResult(uid, problemID)
 	if err != nil {
 		res.Code = models.Failed
 		res.Message = err.Error()

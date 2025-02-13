@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/api/IpQuery"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
 	"github.com/pengdahong1225/oj-server/backend/consts"
 	"github.com/pengdahong1225/oj-server/backend/module/mq"
@@ -14,7 +15,7 @@ import (
 
 type CommentLogic struct{}
 
-func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm) *models.Response {
+func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm, ipInfo *IpQuery.IPInfoResp) *models.Response {
 	res := &models.Response{
 		Code:    models.Success,
 		Message: "",
@@ -30,8 +31,8 @@ func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm) *models.R
 		Status:        1,
 		LikeCount:     0,
 		ChildCount:    0,
-		Stamp:         form.Stamp,
 	}
+	pbComment.PubRegion = ipInfo.RegionName
 
 	// 非楼主评论
 	if form.RootId > 0 && form.RootCommentId > 0 {
@@ -55,8 +56,8 @@ func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm) *models.R
 		pbComment.ReplyCommentId = 0
 	}
 
-	if pbComment.Stamp <= 0 {
-		pbComment.Stamp = time.Now().Unix()
+	if pbComment.PubStamp <= 0 {
+		pbComment.PubStamp = time.Now().Unix()
 	}
 
 	// 异步

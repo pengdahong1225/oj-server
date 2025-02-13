@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/api/captcha"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/captcha"
 	"net/http"
 	"regexp"
 )

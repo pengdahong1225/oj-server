@@ -17,6 +17,7 @@ func (s *Saver) onRootComment(pbComment *pb.Comment) {
 	comment.UserName = pbComment.UserName
 	comment.UserAvatarUrl = pbComment.UserAvatarUrl
 	comment.Content = pbComment.Content
+	comment.PubRegion = pbComment.PubRegion
 	comment.IsRoot = 1
 	comment.RootId = 0
 	comment.RootCommentId = 0

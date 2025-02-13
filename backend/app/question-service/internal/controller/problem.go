@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 	"net/http"
 	"strconv"
 )

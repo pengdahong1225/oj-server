@@ -4,8 +4,10 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/api/IpQuery"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/logic"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -18,7 +20,18 @@ func (r CommentHandler) HandleAdd(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	res := r.logic.OnAddComment(form)
+
+	// 查询ip归属地
+	ip := ctx.ClientIP()
+	info, err := IpQuery.QueryIpGeolocation(ip)
+	if err != nil {
+		logrus.Errorf("查询ip归属地失败,ip:%s,err:%s", ip, err.Error())
+		ctx.Set("ipInfo", "未知地区")
+	} else {
+		ctx.Set("ipInfo", info)
+	}
+
+	res := r.logic.OnAddComment(form, info)
 	ctx.JSON(http.StatusOK, res)
 }
 func (r CommentHandler) HandleGet(ctx *gin.Context) {

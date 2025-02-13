@@ -18,7 +18,8 @@ type Comment struct {
 	ReplyCount    int       `gorm:"column:reply_count" json:"reply_count"`
 	LikeCount     int       `gorm:"column:like_count" json:"like_count"`
 	ChildCount    int       `gorm:"column:child_count" json:"child_count"`
-	Stamp         int64     `gorm:"column:stamp" json:"stamp"`
+	PubStamp      int64     `gorm:"column:pub_stamp" json:"pub_stamp"`
+	PubRegion     string    `gorm:"column:pub_region" json:"pub_region"`
 
 	IsRoot         int   `gorm:"column:is_root" json:"is_root"`
 	RootId         int64 `gorm:"column:root_id" json:"root_id"`
@@ -37,6 +38,6 @@ func NewComment() *Comment {
 		ReplyCount: 0,
 		LikeCount:  0,
 		ChildCount: 0,
-		Stamp:      time.Now().Unix(),
+		PubStamp:   time.Now().Unix(),
 	}
 }

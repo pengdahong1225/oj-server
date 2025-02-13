@@ -3,8 +3,8 @@ package internal
 import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
+	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/cache"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/routers"
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/svc/cache"
 )
 
 type Server struct {
