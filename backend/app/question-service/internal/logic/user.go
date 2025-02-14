@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal/models"
@@ -231,7 +232,57 @@ func (r User) GetRecordList(uid int64, page, pageSize int) *models.Response {
 }
 
 func (r User) GetRecord(id int64) *models.Response {
-	return nil
+	res := &models.Response{
+		Code:    models.Success,
+		Message: "",
+		Data:    nil,
+	}
+	dbConn, err := registry.NewDBConnection()
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorf("db服务连接失败:%s\n", err.Error())
+		return res
+	}
+	defer dbConn.Close()
+
+	client := pb.NewRecordServiceClient(dbConn)
+	response, err := client.GetUserRecord(context.Background(), &pb.GetUserRecordRequest{
+		Id: id,
+	})
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+
+	// 解析results
+	var results []*pb.PBResult
+	err = json.Unmarshal(response.Data.Result, &results)
+	if err != nil {
+		res.Code = models.Failed
+		res.Message = err.Error()
+		logrus.Errorln(err.Error())
+		return res
+	}
+
+	data := &models.SubmitRecordData{
+		Uid:         response.Data.Uid,
+		ProblemId:   response.Data.ProblemId,
+		ProblemName: response.Data.ProblemName,
+		Status:      response.Data.Status,
+		Results:     results,
+		Code:        response.Data.Code,
+		Lang:        response.Data.Lang,
+		ID:          response.Data.Id,
+		CreateAt:    response.Data.CreatedAt,
+	}
+
+	res.Message = "OK"
+	res.Data = data
+
+	return res
 }
 
 // GetUserSolvedList 获取用户解决了哪些题目

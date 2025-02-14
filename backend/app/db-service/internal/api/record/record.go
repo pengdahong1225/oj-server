@@ -27,12 +27,13 @@ func (receiver *RecordServer) SaveUserSubmitRecord(ctx context.Context, request 
 	// todo 更新用户提交记录表
 	/*
 		insert into user_submit_record
-		(uid, problem_id, problem_name, status, code, result, lang)
+		(uid, user_name, problem_id, problem_name, status, code, result, lang)
 		values
-		(?, ?, ?, ?, ?, ?, ?);
+		(?, ?, ?, ?, ?, ?, ?, ?);
 	*/
 	record := &mysql.SubmitRecord{
 		Uid:         request.Data.Uid,
+		UserName:    request.Data.UserName,
 		ProblemID:   request.Data.ProblemId,
 		ProblemName: request.Data.ProblemName,
 		Status:      request.Data.Status,
@@ -169,6 +170,8 @@ func (receiver *RecordServer) GetUserRecord(ctx context.Context, request *pb.Get
 		Id:        int64(record.ID),
 		CreatedAt: record.CreatedAt.Unix(),
 
+		Uid:         record.Uid,
+		UserName:    record.UserName,
 		ProblemId:   record.ProblemID,
 		ProblemName: record.ProblemName,
 		Status:      record.Status,

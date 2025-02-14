@@ -33,11 +33,12 @@ message UserSubmitRecord{
   int64 problem_id = 2;
   string problem_name = 3;
   string status = 4;
-  bytes result = 5; // []JudgeResult 二进制数据
+  bytes result = 5; // []PBResult 二进制数据
   string code = 6;
   string lang = 7;
 
   int64 id = 8;
   int64 created_at = 9;
   int32 problem_level = 10;
+  string user_name = 11;
 }

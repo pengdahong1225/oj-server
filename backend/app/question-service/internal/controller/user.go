@@ -129,7 +129,21 @@ func (r User) HandleRecordList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (r User) HandleRecord(ctx *gin.Context) {}
+func (r User) HandleRecord(ctx *gin.Context) {
+	idStr := ctx.Query("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    models.Failed,
+			"message": "参数错误",
+		})
+		ctx.Abort()
+		return
+	}
+
+	res := r.logic.GetRecord(int64(id))
+	ctx.JSON(http.StatusOK, res)
+}
 
 func (r User) HandleSolvedList(ctx *gin.Context) {
 	uid := ctx.GetInt64("uid")

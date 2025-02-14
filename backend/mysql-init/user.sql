@@ -28,6 +28,7 @@ create table if not exists user_submit_record
     deleted_at TIMESTAMP,
 
     uid BIGINT not null comment '用户id',
+    user_name VARCHAR(64) DEFAULT '' comment '用户名',
     problem_id BIGINT not null comment '题目id',
     problem_name VARCHAR(64) not null comment '题目名称',
     status VARCHAR(64) not null comment '状态',

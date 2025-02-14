@@ -7,6 +7,7 @@ import (
 type SubmitRecord struct {
 	gorm.Model
 	Uid         int64  `gorm:"column:uid;index:idx_uid" json:"uid"`
+	UserName    string `gorm:"column:user_name" json:"user_name"`
 	ProblemID   int64  `gorm:"column:problem_id" json:"problem_id"`
 	ProblemName string `gorm:"column:problem_name" json:"problem_name"`
 	Status      string `gorm:"column:status" json:"status"`
