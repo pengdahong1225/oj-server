@@ -7,15 +7,24 @@ namespace API {
     }
     // 记录
     type Record = {
-        created_at?: string;
-        created_by?: number;
-        id?: number;
-        lang?: string;
-        memory?: number;
-        problem_id?: number;
-        run_time?: number;
-        status?: number;
-        title?: string;
-        uid?: number;
+        id: number;
+        create_at: number;
+        uid: number;
+        problem_id: number;
+        problem_name: string;
+        status: string;
+        results: Result[];
+        code: string;
+        lang: string;
+    }
+    type Result = {
+        status: string;
+        err_msg: string;
+        exitStatus: number;
+        time: number;
+        memory: number;
+        runTime: number;
+        content: string;
+        testCase: any;
     }
 }

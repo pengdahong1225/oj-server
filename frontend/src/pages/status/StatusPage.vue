@@ -1,33 +1,41 @@
 <script lang="ts" setup>
-import { SuccessFilled } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
+import { queryRecordService } from '@/api/userController'
+import { onMounted, ref } from 'vue'
+
+onMounted(() => {
+    getRecord()
+})
+
+const route = useRoute();
+
+const id = route.params.id
+const record = ref(<API.Record>({}))
+const getRecord = async () => {
+    const res = await queryRecordService(Number(id))
+    console.log(res)
+    record.value = res.data.data
+    console.log(record.value)
+}
+
 </script>
 
 <template>
     <div class="container">
-        <div class="result-container">
-            <el-descriptions size="large">
-                <template #title>
-                    <div class="icon-box">
-                        <el-icon color="#19be6b">
-                            <SuccessFilled />
-                        </el-icon>
-                        Accepted
-                    </div>
-                </template>
-                <el-descriptions-item label="Username">kooriookami</el-descriptions-item>
-                <el-descriptions-item label="Telephone">18100000000</el-descriptions-item>
-                <el-descriptions-item label="Place">Suzhou</el-descriptions-item>
-                <el-descriptions-item label="Remarks">
-                    <el-tag size="small">School</el-tag>
-                </el-descriptions-item>
-                <el-descriptions-item label="Address">
-                    No.1188, Wuzhong Avenue, Wuzhong District, Suzhou, Jiangsu Province
-                </el-descriptions-item>
-            </el-descriptions>
+        <div class="status-header">
+            <div class="state">
+                <span>通过</span>
+                <span>63 / 63 个通过的测试用例</span>
+            </div>
+            <div class="submit-info">黑手双城 提交于 2024.02.28 22:42</div>
         </div>
-
-        <div class="code-container">
-            source code
+        <div class="status-detail">
+            详细信息
+        </div>
+        <div class="status-code">
+            <code>
+                <pre>{{ record.code }}</pre>
+            </code>
         </div>
     </div>
 </template>
@@ -35,30 +43,11 @@ import { SuccessFilled } from '@element-plus/icons-vue'
 <style lang="less" scoped>
 .container {
     display: block;
-    justify-content: space-between;
-    width: 70%;
     margin: auto;
+    width: 70%;
 
-    .result-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 30px;
-        background-color: #e8f9f0;
-        border: 1px solid #d1f2e1;
-
-        .icon-box {
-            justify-content: space-between;
-            font-size: 35px;
-            display: flex;
-            align-items: center;
-            margin: auto;
-        }
-    }
-
-    .code-container {
-        margin-top: 30px;
-        border: 1px solid #00ffea;
+    .status-header {
+        display: block;
     }
 }
 </style>

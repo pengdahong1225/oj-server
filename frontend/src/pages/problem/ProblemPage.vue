@@ -103,18 +103,6 @@ const btype = computed(() => {
         return 'danger'
     }
 })
-const tmsg = computed(() => {
-    if (result.value === 'Accepted') {
-        return 'You have solved this problem'
-    } else {
-        return 'failed'
-    }
-})
-const showed = ref(false)
-const showResult = () => {
-    showed.value = true
-    // 跳转
-}
 
 // ACE主题和配置
 const lang_list = [
@@ -163,7 +151,7 @@ const onSubmitComment = async () => {
     const res = await addCommentService(form)
     if (res.data.message === 'OK') {
         // 立刻渲染一条评论到第一条
-        const new_comment = <API.Comment>{
+        const new_comment = <API.Comment>({
             id: 0,
             obj_id: problem.value.id,
             user_id: userStore.userInfo.uid,
@@ -174,10 +162,10 @@ const onSubmitComment = async () => {
             reply_count: 0,
             like_count: 0,
             child_count: 0,
-            pub_stamp: Date.now().toString(),
+            pub_stamp: Date.now(),
             pub_region: ' ',
-            is_root: true,
-        }
+            is_root: true
+        })
         root_comment_list.value.unshift(new_comment)
         new_comment_text.value = ''
     }
@@ -193,7 +181,9 @@ const getCommentList = async () => {
     root_comment_query_params.value.obj_id = problem.value.id
 
     const res = await getRootCommentListService(root_comment_query_params.value)
-    root_comment_list.value = res.data.data.data
+    if (res.data.data.data) {
+        root_comment_list.value = res.data.data.data
+    }
     root_comment_count.value = res.data.data.total
 }
 const handleCurrentChange = (page: number) => {
@@ -211,12 +201,14 @@ const handleCurrentChange = (page: number) => {
                 <div class="header-title">{{ btitle }}</div>
                 <div class="header-foot">
                     <div class="header-foot-level">
-                        <el-tag v-if="problem.level === 1" type="primary">简单</el-tag>
-                        <el-tag v-else-if="problem.level === 2" type="warning">中等</el-tag>
-                        <el-tag v-else type="danger">困难</el-tag>
+                        <el-tag v-if="problem.level === 1" type="success" round effect="plain">简单</el-tag>
+                        <el-tag v-else-if="problem.level === 2" type="warning" round effect="plain">中等</el-tag>
+                        <el-tag v-else type="danger" round effect="plain">困难</el-tag>
                     </div>
                     <div class="header-foot-tags">
-                        {{ problem.tags }}
+                        <div v-for="item in problem.tags" :key="item">
+                            <el-tag round effect="plain">{{ item }}</el-tag>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -256,12 +248,9 @@ const handleCurrentChange = (page: number) => {
             <div class="submit-area-foot">
                 <div class="result-area">
                     <div v-if="result !== ''">
-                        <el-button v-if="!showed" class="show-result-bnt" :type="btype" @click="showResult">
-                            {{ result }}
-                        </el-button>
-                        <el-tag v-else :type="btype" size="large">
+                        <el-tag :type="btype" size="large">
                             <template #default>
-                                <strong>{{ tmsg }}</strong>
+                                <strong>{{ result }}</strong>
                             </template>
                         </el-tag>
                     </div>
@@ -283,8 +272,8 @@ const handleCurrentChange = (page: number) => {
         <div class="comment-area">
             <!-- 输入评论 -->
             <div class="comment-input">
-                <el-input v-model="new_comment_text" type="textarea" show-word-limit :placeholder="place"
-                    resize="none" :autosize="{ minRows: 5 }" maxlength="1000"
+                <el-input v-model="new_comment_text" type="textarea" show-word-limit :placeholder="place" resize="none"
+                    :autosize="{ minRows: 5 }" maxlength="1000"
                     input-style="font-size: 18px; border: none; outline: none; overflow: hidden;" />
                 <div style="display: flex; justify-content: flex-end;">
                     <el-button type="success" :disabled="!userStore.userInfo.uid || !new_comment_text" auto-insert-space
@@ -308,9 +297,10 @@ const handleCurrentChange = (page: number) => {
                         <RootCommentItem :comment_data="item" :obj_id="problem.id"></RootCommentItem>
                     </div>
                     <!-- 分页 -->
-                    <el-pagination v-model:current-page="root_comment_query_params.page" v-model:page-size="root_comment_query_params.page_size"
-                        :total="root_comment_count" :background="true" layout="prev, pager, next, jumper"
-                        @current-change="handleCurrentChange" style="margin-top: 20px; justify-content: flex-end;" />
+                    <el-pagination v-model:current-page="root_comment_query_params.page"
+                        v-model:page-size="root_comment_query_params.page_size" :total="root_comment_count"
+                        :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
+                        style="margin-top: 20px; justify-content: flex-end;" />
                 </div>
             </el-card>
         </div>
@@ -342,6 +332,7 @@ const handleCurrentChange = (page: number) => {
 
             .header-foot-tags {
                 margin-left: 5px;
+                display: flex;
             }
         }
     }
