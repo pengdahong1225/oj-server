@@ -65,9 +65,12 @@ func (s *Saver) onChildComment(pbComment *pb.Comment) {
 	comment.UserName = pbComment.UserName
 	comment.UserAvatarUrl = pbComment.UserAvatarUrl
 	comment.Content = pbComment.Content
-	comment.IsRoot = 1
+	comment.IsRoot = 0
 	comment.RootId = pbComment.RootId
 	comment.RootCommentId = pbComment.RootCommentId
+	comment.ReplyId = pbComment.ReplyId
+	comment.ReplyCommentId = pbComment.ReplyCommentId
+	comment.ReplyUserName = pbComment.ReplyUserName
 
 	tx := mysql.DBSession.Begin()
 	if tx.Error != nil {

@@ -64,10 +64,11 @@ type AddCommentForm struct {
 	Content       string `json:"content" form:"content" binding:"required"`
 	Stamp         int64  `json:"stamp" form:"stamp"`
 
-	RootId         int64 `json:"root_id" form:"root_id"`
-	RootCommentId  int64 `json:"root_comment_id" form:"root_comment_id"`
-	ReplyId        int64 `json:"reply_id" form:"reply_id"`
-	ReplyCommentId int64 `json:"reply_comment_id" form:"reply_comment_id"`
+	RootId         int64  `json:"root_id" form:"root_id"`
+	RootCommentId  int64  `json:"root_comment_id" form:"root_comment_id"`
+	ReplyId        int64  `json:"reply_id" form:"reply_id"`
+	ReplyCommentId int64  `json:"reply_comment_id" form:"reply_comment_id"`
+	ReplyUserName  string `json:"reply_user_name" form:"reply_user_name"`
 }
 
 // RootCommentListQueryParams 顶层评论列表查询参数

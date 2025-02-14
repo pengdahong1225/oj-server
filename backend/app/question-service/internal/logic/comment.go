@@ -41,10 +41,12 @@ func (receiver CommentLogic) OnAddComment(form *models.AddCommentForm, region st
 		if form.ReplyId > 0 && form.ReplyCommentId > 0 {
 			pbComment.ReplyId = form.ReplyId
 			pbComment.ReplyCommentId = form.ReplyCommentId
+			pbComment.ReplyUserName = form.ReplyUserName
 		} else {
 			// 默认回复楼主
 			pbComment.ReplyId = form.RootId
 			pbComment.ReplyCommentId = form.RootCommentId
+			pbComment.ReplyUserName = form.ReplyUserName
 		}
 	} else {
 		// 楼主评论

@@ -21,11 +21,12 @@ type Comment struct {
 	PubStamp      int64     `gorm:"column:pub_stamp" json:"pub_stamp"`
 	PubRegion     string    `gorm:"column:pub_region" json:"pub_region"`
 
-	IsRoot         int   `gorm:"column:is_root" json:"is_root"`
-	RootId         int64 `gorm:"column:root_id" json:"root_id"`
-	RootCommentId  int64 `gorm:"column:root_comment_id" json:"root_comment_id"`
-	ReplyId        int64 `gorm:"column:reply_id" json:"reply_id"`
-	ReplyCommentId int64 `gorm:"column:reply_comment_id" json:"reply_comment_id"`
+	IsRoot         int    `gorm:"column:is_root" json:"is_root"`
+	RootId         int64  `gorm:"column:root_id" json:"root_id"`
+	RootCommentId  int64  `gorm:"column:root_comment_id" json:"root_comment_id"`
+	ReplyId        int64  `gorm:"column:reply_id" json:"reply_id"`
+	ReplyCommentId int64  `gorm:"column:reply_comment_id" json:"reply_comment_id"`
+	ReplyUserName  string `gorm:"column:reply_user_name" json:"reply_user_name"`
 }
 
 func (receiver *Comment) TableName() string {

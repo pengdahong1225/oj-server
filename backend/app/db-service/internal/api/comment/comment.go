@@ -78,9 +78,14 @@ func (c *CommentServer) QueryChildComment(ctx context.Context, in *pb.QueryChild
 	response.Total = int32(count)
 
 	comments := c.querier.onChildComment(in.ObjId, in.RootId, in.RootCommentId, in.Cursor)
+	maxId := int64(0)
 	for _, comment := range comments {
 		response.Data = append(response.Data, translateComment(&comment))
+		if comment.ID > maxId {
+			maxId = comment.ID
+		}
 	}
+	response.Cursor = int32(maxId)
 	return response, nil
 }
 
@@ -123,6 +128,7 @@ func translateComment(comment *mysql.Comment) *pb.Comment {
 		RootCommentId:  comment.RootCommentId,
 		ReplyId:        comment.ReplyId,
 		ReplyCommentId: comment.ReplyCommentId,
+		ReplyUserName:  comment.ReplyUserName,
 	}
 }
 

@@ -99,12 +99,13 @@ message QueryChildCommentRequest{
   int64 reply_id = 4;
   int64 reply_comment_id = 5;
 
-  // 游标分页
+  // 游标分页，指定查询id>cursor的评论
   int32 cursor = 6;
 }
 message QueryChildCommentResponse{
   repeated Comment data = 1;
   int32 total = 2;
+  int32 cursor = 7; // 当前页的最后一条评论id，客户端需要保存，下次请求时加上该值
 }
 message DeleteCommentRequest{
   int64  obj_id = 1;

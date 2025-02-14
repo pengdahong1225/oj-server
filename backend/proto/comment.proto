@@ -21,5 +21,6 @@ message Comment{
   int64 root_comment_id = 15;
   int64 reply_id = 16;
   int64 reply_comment_id = 17;
+  string reply_user_name = 18;
 }
 

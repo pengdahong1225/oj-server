@@ -14,13 +14,15 @@ create table if not exists comment(
     reply_count INT DEFAULT 0 COMMENT '回复数量',
     like_count INT DEFAULT 0 COMMENT '点赞数量',
     child_count INT DEFAULT 0 COMMENT '两层结构，root才有子评论',
-    stamp BIGINT NOT NULL COMMENT '时间戳',
+    pub_stamp BIGINT NOT NULL COMMENT '时间戳',
+    pub_region VARCHAR(64) DEFAULT '' COMMENT '发布地区',
 
     is_root tinyint DEFAULT 1 COMMENT '是否是楼主 1：是 0：不是',
     root_id BIGINT NOT NULL COMMENT '楼主id',
     root_comment_id BIGINT NOT NULL COMMENT '楼主评论id',
     reply_id BIGINT NOT NULL COMMENT '回复用户id',
     reply_comment_id BIGINT NOT NULL COMMENT '回复评论id',
+    reply_user_name VARCHAR(64) DEFAULT '' COMMENT '回复用户名',
 
     PRIMARY KEY(id),
     INDEX idx_obj_id(obj_id),
@@ -29,9 +31,3 @@ create table if not exists comment(
     INDEX idx_reply_id(reply_id),
     INDEX idx_like_count(like_count)
 )engine = InnoDB charset = utf8mb4;
-
-alter table comment
-change stamp pub_stamp BIGINT NOT NULL COMMENT '时间戳';
-
-alter table comment
-add pub_region VARCHAR(64) DEFAULT '' COMMENT '发布地区';
