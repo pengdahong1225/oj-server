@@ -9,6 +9,7 @@ const userStore = useUserStore()
 const props = defineProps<{
     comment_data: API.Comment
 }>()
+const emit = defineEmits(['child_comment_reply'])
 
 // 跳转链接
 const user_href = computed(() => {
@@ -16,6 +17,17 @@ const user_href = computed(() => {
 })
 // 默认头像
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+
+// 内容显示
+const show_content = computed(() => {
+    // 如果是回复楼主，不用显示@
+    if (props.comment_data.reply_comment_id === props.comment_data.root_comment_id) {
+        return props.comment_data.content
+    }
+    else {
+        return '@' + props.comment_data.reply_user_name + ' ' + props.comment_data.content
+    }
+})
 
 // 子评论点赞
 let is_already_like = ref(false)
@@ -31,14 +43,54 @@ const onClickLike = async () => {
     }
     const res = await likeCommentService(form)
     if (res.data.message === 'OK') {
+        if (!props.comment_data.like_count) {
+            props.comment_data.like_count = 0
+        }
         props.comment_data.like_count++
         is_already_like.value = true
     }
 }
-// 回复
-const onClickReply = (id: number) => {
-
+// 子评论回复 -- 需要传递给父组件处理
+const show_replay_area = ref(false)
+const onClickReply = () => {
+    show_replay_area.value = !show_replay_area.value
+    reply_comment_input.value = ''
 }
+const reply_comment_input = ref('')
+const place = computed(() => {
+    if (userStore.userInfo.uid === 0) {
+        return '请先登录...'
+    } else {
+        return '请输入评论...'
+    }
+})
+const onCancelReplay = () => {
+    show_replay_area.value = false
+    reply_comment_input.value = ''
+}
+const onSubmitComment = async () => {
+    // 回复的是root评论，所以root_id和reply_id一样
+    const form = <API.AddCommentForm>{
+        obj_id: props.comment_data.obj_id,
+        user_id: userStore.userInfo.uid,
+        user_name: userStore.userInfo.nickname,
+        user_avatar_url: userStore.userInfo.avatar_url,
+        content: reply_comment_input.value,
+        // 楼主id跟随回复的子评论
+        is_root: false,
+        root_id: props.comment_data.root_id,
+        root_comment_id: props.comment_data.root_comment_id,
+        // 回复id
+        reply_id: props.comment_data.user_id,
+        reply_comment_id: props.comment_data.id,
+        reply_user_name: props.comment_data.user_name
+    }
+
+    emit('child_comment_reply', form)
+    show_replay_area.value = false
+    reply_comment_input.value = ''
+}
+
 </script>
 
 <template>
@@ -58,7 +110,7 @@ const onClickReply = (id: number) => {
         </div>
         <!-- 内容区域 -->
         <div class="content-area">
-            {{ comment_data.content }}
+            {{ show_content }}
         </div>
         <!-- 操作区域 -->
         <div class="operation-area">
@@ -81,7 +133,7 @@ const onClickReply = (id: number) => {
                     <span style="margin-left: 3px;"> {{ comment_data.like_count }} </span>
                 </template>
             </el-button>
-            <el-button plain @click="onClickReply(comment_data.id)">
+            <el-button plain @click="onClickReply()">
                 <template #default>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="1.2em" height="1.2em"
                         fill="currentColor"
@@ -93,6 +145,17 @@ const onClickReply = (id: number) => {
                     <span style="margin-left: 3px;"> 回复 </span>
                 </template>
             </el-button>
+        </div>
+        <!-- 回复区域 -->
+        <div class="reply-area" v-if="show_replay_area">
+            <el-input v-model="reply_comment_input" type="textarea" show-word-limit :placeholder="place" resize="none"
+                :autosize="{ minRows: 5 }" maxlength="1000"
+                input-style="font-size: 18px; border: none; outline: none; overflow: hidden;" />
+            <div style="display: flex; justify-content: flex-end;">
+                <el-button type="info" auto-insert-space style="margin-top: 5px;" @click="onCancelReplay">取消</el-button>
+                <el-button type="success" :disabled="!userStore.userInfo.uid || !reply_comment_input" auto-insert-space
+                    style="margin-top: 5px;" @click="onSubmitComment">评论</el-button>
+            </div>
         </div>
     </div>
 </template>

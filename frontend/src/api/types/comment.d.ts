@@ -19,6 +19,7 @@ namespace API {
         root_comment_id: number;
         reply_id: number;
         reply_comment_id: number;
+        reply_user_name: string;
     }
 
     // 顶层评论列表查询参数
@@ -52,6 +53,7 @@ namespace API {
         root_comment_id: number;
         reply_id: number;
         reply_comment_id: number;
+        reply_user_name: string;
     }
     // 评论点赞接口表单
     type CommentLikeForm = {

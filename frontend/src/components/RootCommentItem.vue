@@ -42,6 +42,7 @@ const onClickLike = async () => {
 const show_replay_area = ref(false)
 const onClickReply = () => {
     show_replay_area.value = !show_replay_area.value
+    reply_comment_input.value = ''
 }
 const reply_comment_input = ref('')
 const place = computed(() => {
@@ -56,19 +57,76 @@ const onCancelReplay = () => {
     reply_comment_input.value = ''
 }
 const onSubmitComment = async () => {
+    // 回复的是root评论，所以root_id和reply_id一样
     const form = <API.AddCommentForm>{
         obj_id: props.obj_id,
         user_id: userStore.userInfo.uid,
         user_name: userStore.userInfo.nickname,
         user_avatar_url: userStore.userInfo.avatar_url,
         content: reply_comment_input.value,
+        is_root: false,
         root_id: props.comment_data.user_id,
         root_comment_id: props.comment_data.id,
         reply_id: props.comment_data.user_id,
         reply_comment_id: props.comment_data.id,
+        reply_user_name: props.comment_data.user_name,
     }
     const res = await addCommentService(form)
-    console.log(res)
+    if (res.data.message === 'OK') {
+        show_replay_area.value = false
+        // 立刻渲染一条评论到第一条
+        const new_comment = <API.Comment>{
+            id: 0,
+            obj_id: props.obj_id,
+            user_id: userStore.userInfo.uid,
+            user_name: userStore.userInfo.nickname,
+            user_avatar_url: userStore.userInfo.avatar_url,
+            content: reply_comment_input.value,
+            status: 1,
+            reply_count: 0,
+            like_count: 0,
+            child_count: 0,
+            pub_stamp: Date.now(),
+            pub_region: ' ',
+            is_root: false,
+            root_id: props.comment_data.user_id,
+            root_comment_id: props.comment_data.id,
+            reply_id: props.comment_data.user_id,
+            reply_comment_id: props.comment_data.id,
+        }
+        child_list.value.unshift(new_comment)
+        reply_comment_input.value = ''
+    }
+}
+
+// 子评论回复
+const child_comment_reply_action = async (form: API.AddCommentForm) => {
+    console.log("form=",form)
+    const res = await addCommentService(form)
+    if (res.data.message === 'OK') {
+        // 立刻渲染一条评论到第一条
+        const new_comment = <API.Comment>{
+            id: 0,
+            obj_id: form.obj_id,
+            user_id: form.user_id,
+            user_name: form.user_name,
+            user_avatar_url: form.user_avatar_url,
+            content: form.content,
+            status: 1,
+            reply_count: 0,
+            like_count: 0,
+            child_count: 0,
+            pub_stamp: Date.now(),
+            pub_region: ' ',
+            is_root: false,
+            root_id: form.root_id,
+            root_comment_id: form.root_comment_id,
+            reply_id: form.reply_id,
+            reply_comment_id: form.reply_comment_id,
+            reply_user_name: form.reply_user_name
+        }
+        child_list.value.unshift(new_comment)
+    }
 }
 
 // 展开回复列表
@@ -78,15 +136,18 @@ const expand_msg = computed(() => {
 })
 const onClickExpand = () => {
     is_expand.value = !is_expand.value
-    reset_cursor()
+    reset_child()
+    
     if (is_expand.value) {
         // 拉取子评论数据
         getChildCommentList()
     }
 }
 const child_list_cursor = ref(1)
-const reset_cursor = () => {
+const reset_child = () => {
     child_list_cursor.value = 1
+    show_count.value = 0
+    child_list.value = []
 }
 const child_list = ref(<API.Comment[]>[])
 const child_total = ref(0)
@@ -98,30 +159,26 @@ const getChildCommentList = async () => {
         cursor: child_list_cursor.value
     }
     const res = await getChildCommentListService(params)
-    console.log(res)
-    child_list.value = res.data.data.data
     child_total.value = res.data.data.total
-    // 更新游标为list中id最大值
-    for (let i = 0; i < child_list.value.length; i++) {
-        if (child_list.value[i].id > child_list_cursor.value) {
-            child_list_cursor.value = child_list.value[i].id
-        }
+    child_list_cursor.value = res.data.data.cursor
+    // 插入数组的条件：data不为nil，展示的数据量小于total
+    if (res.data.data.data && show_count.value < child_total.value) {
+        res.data.data.data.forEach((item: API.Comment) => {
+            child_list.value.push(item)
+            show_count.value++
+        })
     }
-
-    console.log("list:", child_list)
-    console.log("cursor:", child_list_cursor.value)
 }
+const show_count = ref(0)
 const need_show_more = computed(() => {
-    // 是否显示更多？
-    // 当前游标还未达到total值，就说明还有数据
-    return child_list_cursor.value < child_total.value
+    return show_count.value < child_total.value
 })
 const onClickShowMore = () => {
     getChildCommentList()
 }
 const onClickHide = () => {
     is_expand.value = false
-    reset_cursor()
+    reset_child()
 }
 
 </script>
@@ -177,7 +234,7 @@ const onClickHide = () => {
                                 d="M11.997 21.5a9.5 9.5 0 01-8.49-5.251A9.38 9.38 0 012.5 11.997V11.5c.267-4.88 4.12-8.733 8.945-8.999L12 2.5a9.378 9.378 0 014.25 1.007A9.498 9.498 0 0121.5 12a9.378 9.378 0 01-.856 3.937l.838 4.376a1 1 0 01-1.17 1.17l-4.376-.838a9.381 9.381 0 01-3.939.856zm3.99-2.882l3.254.623-.623-3.253a1 1 0 01.09-.64 7.381 7.381 0 00.792-3.346 7.5 7.5 0 00-4.147-6.708 7.385 7.385 0 00-3.35-.794H11.5c-3.752.208-6.792 3.248-7.002 7.055L4.5 12a7.387 7.387 0 00.794 3.353A7.5 7.5 0 0012 19.5a7.384 7.384 0 003.349-.793 1 1 0 01.639-.09z"
                                 clip-rule="evenodd"></path>
                         </svg>
-                        <span style="margin-left: 3px;">{{ expand_msg }} {{ comment_data.reply_count }}条回复 </span>
+                        <span style="margin-left: 3px;">{{ expand_msg }} {{ comment_data.child_count }}条回复 </span>
                     </template>
                 </el-button>
                 <el-button plain @click="onClickReply()">
@@ -208,7 +265,7 @@ const onClickHide = () => {
         </div>
         <!-- 子评论区域 -->
         <div class="reply-list" v-if="is_expand">
-            <SecondCommentItem v-for="item in child_list" :key="item.id" :comment_data="item"></SecondCommentItem>
+            <SecondCommentItem v-for="item in child_list" :key="item.id" :comment_data="item" @child_comment_reply="child_comment_reply_action"></SecondCommentItem>
             <div class="replay-foot" v-if="need_show_more">
                 <el-button plain @click="onClickShowMore">显示更多</el-button>
                 <el-button plain @click="onClickHide">隐藏</el-button>

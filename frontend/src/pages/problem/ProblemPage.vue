@@ -151,17 +151,36 @@ const place = computed(() => {
         return '请输入评论...'
     }
 })
-const new_comment = ref('')
+const new_comment_text = ref('')
 const onSubmitComment = async () => {
     const form = <API.AddCommentForm>{
         obj_id: problem.value.id,
         user_id: userStore.userInfo.uid,
         user_name: userStore.userInfo.nickname,
         user_avatar_url: userStore.userInfo.avatar_url,
-        content: new_comment.value
+        content: new_comment_text.value
     }
     const res = await addCommentService(form)
-    console.log(res)
+    if (res.data.message === 'OK') {
+        // 立刻渲染一条评论到第一条
+        const new_comment = <API.Comment>{
+            id: 0,
+            obj_id: problem.value.id,
+            user_id: userStore.userInfo.uid,
+            user_name: userStore.userInfo.nickname,
+            user_avatar_url: userStore.userInfo.avatar_url,
+            content: new_comment_text.value,
+            status: 1,
+            reply_count: 0,
+            like_count: 0,
+            child_count: 0,
+            pub_stamp: Date.now().toString(),
+            pub_region: ' ',
+            is_root: true,
+        }
+        root_comment_list.value.unshift(new_comment)
+        new_comment_text.value = ''
+    }
 }
 
 const root_comment_query_params = ref(<API.QueryRootCommentListParams>{
@@ -264,11 +283,11 @@ const handleCurrentChange = (page: number) => {
         <div class="comment-area">
             <!-- 输入评论 -->
             <div class="comment-input">
-                <el-input v-model="new_comment" type="textarea" show-word-limit :placeholder="place"
+                <el-input v-model="new_comment_text" type="textarea" show-word-limit :placeholder="place"
                     resize="none" :autosize="{ minRows: 5 }" maxlength="1000"
                     input-style="font-size: 18px; border: none; outline: none; overflow: hidden;" />
                 <div style="display: flex; justify-content: flex-end;">
-                    <el-button type="success" :disabled="!userStore.userInfo.uid || !new_comment" auto-insert-space
+                    <el-button type="success" :disabled="!userStore.userInfo.uid || !new_comment_text" auto-insert-space
                         style="margin-top: 5px;" @click="onSubmitComment">评论</el-button>
                 </div>
             </div>
