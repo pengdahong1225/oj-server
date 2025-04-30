@@ -47,7 +47,11 @@ func (receiver *Server) Start() {
 	defer listener.Close()
 
 	grpcServer := grpc.NewServer()
+
+	// 健康检查
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
+
+	//  服务
 	userSrv := user.UserServer{}
 	pb.RegisterUserServiceServer(grpcServer, &userSrv)
 	problemSrv := problem.ProblemServer{}

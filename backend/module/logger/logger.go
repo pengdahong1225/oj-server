@@ -58,6 +58,8 @@ func (hook FileHook) write(entry *logrus.Entry) {
 		hook.infoFile.Write([]byte(line))
 	case logrus.DebugLevel:
 		hook.debugFile.Write([]byte(line))
+	default:
+		panic("unhandled default case")
 	}
 }
 

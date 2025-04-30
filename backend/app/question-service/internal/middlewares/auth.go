@@ -10,7 +10,7 @@ import (
 
 func AuthLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// jwt鉴权头部信息 x-token 登录时返回token信息
+		// jwt鉴权头部信息 token
 		token := ctx.Request.Header.Get("token")
 		if token == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{

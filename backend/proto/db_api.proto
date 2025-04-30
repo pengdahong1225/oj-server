@@ -17,7 +17,9 @@ service UserService{
   rpc GetUserList(GetUserListRequest) returns(GetUserListResponse);
   rpc ResetUserPassword(ResetUserPasswordRequest) returns(google.protobuf.Empty);
 
+  // 查询用户解决了哪些题目
   rpc GetUserSolvedList(GetUserSolvedListRequest) returns(GetUserSolvedListResponse);
+  // 从给定题目集中查询用户ac了哪些题目
   rpc QueryUserSolvedListByProblemIds(QueryUserSolvedListByProblemIdsRequest) returns(QueryUserSolvedListByProblemIdsResponse);
 }
 // problem接口

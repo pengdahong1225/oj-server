@@ -29,6 +29,7 @@ func (r User) OnUserRegister(form *models.RegisterForm) *models.Response {
 	// todo 密码加密
 	hash := utils.HashPassword(form.PassWord)
 
+	// 注册
 	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed
@@ -65,6 +66,7 @@ func (r User) OnUserLogin(form *models.LoginFrom) *models.Response {
 
 	mobile, _ := strconv.ParseInt(form.Mobile, 10, 64)
 
+	// 拉取用户信息
 	dbConn, err := registry.NewDBConnection()
 	if err != nil {
 		res.Code = models.Failed

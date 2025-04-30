@@ -183,7 +183,7 @@ func (r *UserServer) GetUserList(ctx context.Context, request *pb.GetUserListReq
 	return nil, nil
 }
 
-// GetUserSolvedList 查询用户哪些题目
+// GetUserSolvedList 查询用户解决了哪些题目
 func (r *UserServer) GetUserSolvedList(ctx context.Context, request *pb.GetUserSolvedListRequest) (*pb.GetUserSolvedListResponse, error) {
 	db := mysql.DBSession
 	var userSolutionList []mysql.UserSolution

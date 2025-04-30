@@ -1,4 +1,6 @@
 use oj_online_server;
+
+-- 两层结构评论表
 create table if not exists comment(
     id BIGINT AUTO_INCREMENT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
