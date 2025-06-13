@@ -49,6 +49,7 @@ func (receiver *Server) Initialize() error {
 	return nil
 }
 
+// 服务注册
 func (receiver *Server) Register() error {
 	register, err := registry.NewRegistry()
 	if err != nil {
@@ -83,5 +84,26 @@ func (receiver *Server) Register() error {
 		return nil
 	} else {
 		return errors.New("unknown srv type")
+	}
+}
+
+// 服务注销
+func (receiver *Server) UnRegister() {
+	register, err := registry.NewRegistry()
+	if err != nil {
+		logrus.Errorf("注销服务失败: %v", err)
+		return
+	}
+
+	err = register.UnRegister(&pb.PBNodeInfo{
+		NodeType: int32(receiver.NodeType),
+		NodeId:   int32(receiver.NodeId),
+		Ip:       receiver.Host,
+		Port:     int32(receiver.Port),
+		State:    int32(pb.ENNodeState_EN_NODE_STATE_OFFLINE),
+	})
+	if err != nil {
+		logrus.Errorf("注销服务失败: %v", err)
+		return
 	}
 }

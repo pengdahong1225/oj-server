@@ -1,0 +1,194 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// 题目服务接口
+service ProblemService {
+  // 更新题目信息
+  rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse) {
+    option (google.api.http) = {
+      post: "/v1/problem/update"
+      body: "*"
+    };
+  }
+
+  // 删除题目
+  rpc DeleteProblem(DeleteProblemRequest) returns (DeleteProblemResponse) {
+    option (google.api.http) = {
+      delete: "/v1/problem"
+    };
+  }
+
+  // 获取题目列表
+  rpc GetProblemList(GetProblemListRequest) returns (GetProblemListResponse) {
+    option (google.api.http) = {
+      get: "/v1/problem/list"
+      response_body:  "*"
+    };
+  }
+
+  // 查询题目详情
+  rpc GetProblemData(GetProblemRequest) returns (GetProblemResponse) {
+    option (google.api.http) = {
+      get: "/v1/problem/{id}"
+      response_body:  "*"
+    };
+  }
+
+  // 获取tag列表
+  rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse) {
+    option (google.api.http) = {
+      get: "/v1/problem/tag_list"
+      response_body:  "*"
+    };
+  }
+
+  // 提交
+  rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse) {
+    option (google.api.http) = {
+      post: "/v1/problem/submit"
+      body: "*"
+    };
+  }
+
+  // 查询提交记录列表
+  rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse) {
+    option (google.api.http) = {
+      get: "/v1/problem/submit_record_list"
+      response_body:  "*"
+    };
+  }
+
+  // 查询提交记录详情
+  rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse) {
+    option (google.api.http) = {
+      get: "/v1/problem/submit_record"
+      response_body:  "*"
+    };
+  }
+}
+
+// 题目基础信息
+message Problem{
+  int64 id = 1;
+  string create_at = 2;
+  string delete_at = 3;
+
+  string title = 4;
+  string description = 5;
+  int32 level = 6;
+  repeated string tags = 7;
+  int64 create_by = 8;
+
+  ProblemConfig config = 9;
+
+  int32 status = 10;
+}
+message ProblemConfig{
+  repeated TestCase test_cases = 1;
+  Limit compile_limit = 2;
+  Limit run_limit = 3;
+  int32 level = 4;
+  string name = 5;
+}
+message TestCase{
+  string input = 1;
+  string output = 2;
+}
+message Limit{
+  int64 cpu_limit = 1;
+  int64 clock_limit = 2;
+  int64 memory_limit = 3;
+  int64 stack_limit = 4;
+  int64 proc_limit = 5;
+}
+
+// 更新题目
+message UpdateProblemRequest {
+    Problem problem = 1;
+}
+message UpdateProblemResponse {
+  int64 id = 1;
+  string message = 2;
+}
+
+// 删除题目
+message DeleteProblemRequest {
+  int64 id = 1;
+}
+message DeleteProblemResponse {
+  string message = 1;
+}
+
+// 查询题目列表
+// 使用偏移量分页
+message GetProblemListRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string keyword = 3;
+  string tag = 4;
+}
+message GetProblemListResponse {
+  int32 total = 1;
+  repeated Problem data = 2;
+}
+
+// 获取题目详情
+message GetProblemRequest{
+  int64 id = 1;
+}
+message GetProblemResponse{
+  Problem data = 1;
+}
+
+// tags
+message GetTagListResponse {
+  repeated string data = 1;
+}
+
+// 提交
+message SubmitProblemRequest {
+  int64 problem_id = 1;
+  string title = 2;
+  string lang = 3;
+  string code = 4;
+}
+message SubmitProblemResponse {
+  int64 task_id = 1;
+  string message = 2;
+}
+
+// 提交记录
+message SubmitRecord{
+  int64 uid = 1;
+  int64 problem_id = 2;
+  string problem_name = 3;
+  string status = 4;
+  bytes result = 5; // []PBResult 二进制数据
+  string code = 6;
+  string lang = 7;
+
+  int64 id = 8;
+  int64 created_at = 9;
+  int32 problem_level = 10;
+  string user_name = 11;
+}
+// 查询提交记录列表 使用偏移量分页
+message GetSubmitRecordListRequest {
+  int64 uid = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+message GetSubmitRecordListResponse {
+  int32 total = 1;
+  repeated SubmitRecord data = 2;
+}
+// 查询提交记录详情
+message GetSubmitRecordRequest {
+  int64 id = 1;
+}
+message GetSubmitRecordResponse {
+  SubmitRecord data = 1;
+}

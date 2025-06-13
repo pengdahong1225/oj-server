@@ -24,3 +24,55 @@ message Comment{
   string reply_user_name = 18;
 }
 
+import "google/protobuf/empty.proto";
+
+// comment接口
+service CommentService{
+  rpc QueryRootComment(QueryRootCommentRequest) returns(QueryRootCommentResponse);
+  rpc QueryChildComment(QueryChildCommentRequest) returns(QueryChildCommentResponse);
+  rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
+  rpc SaveComment(SaveCommentRequest) returns(google.protobuf.Empty);
+  rpc CommentLike(CommentLikeRequest) returns(google.protobuf.Empty);
+}
+// 评论接口
+message QueryRootCommentRequest{
+  int64  obj_id = 1;  // 指定评论区
+
+  // 偏移量分页
+  int32 page = 2;
+  int32 page_size = 3;
+}
+message QueryRootCommentResponse{
+  repeated Comment data = 1;
+  int32 total = 2;
+}
+message QueryChildCommentRequest{
+  int64  obj_id = 1;  // 指定评论区
+  // 指定楼主，因为要查询第二层，必须要指定
+  int64  root_id = 2;
+  int64 root_comment_id = 3;
+  // 指定回复目标，不指定则默认回复楼主
+  int64 reply_id = 4;
+  int64 reply_comment_id = 5;
+
+  // 游标分页，指定查询id>cursor的评论
+  int32 cursor = 6;
+}
+message QueryChildCommentResponse{
+  repeated Comment data = 1;
+  int32 total = 2;
+  int32 cursor = 7; // 当前页的最后一条评论id，客户端需要保存，下次请求时加上该值
+}
+message DeleteCommentRequest{
+  int64  obj_id = 1;
+  int64  user_id = 2;
+  int64  root_id = 3;
+  int64 reply_id = 4;
+}
+message SaveCommentRequest{
+  Comment data = 1;
+}
+message CommentLikeRequest{
+  int64  obj_id = 1;
+  int64  comment_id = 2;
+}

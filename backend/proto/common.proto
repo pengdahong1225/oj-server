@@ -22,3 +22,4 @@ message PBNodeInfo{
   int32 state = 5; // ENNodeState
   string name = 6;
 }
+

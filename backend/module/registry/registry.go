@@ -71,6 +71,14 @@ func (receiver *Registry) RegisterServiceWithHttp(info *pb.PBNodeInfo) error {
 	}
 	return nil
 }
+func (receiver *Registry) UnRegister(info *pb.PBNodeInfo) error {
+	id := fmt.Sprintf("%d:%d", info.NodeType, info.NodeId)
+	err := receiver.client.Agent().ServiceDeregister(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // NewDBConnection db服务连接
 // 注意需要后续手动close
