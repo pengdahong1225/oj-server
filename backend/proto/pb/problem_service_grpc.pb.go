@@ -27,6 +27,7 @@ const (
 	ProblemService_DeleteProblem_FullMethodName       = "/ProblemService/DeleteProblem"
 	ProblemService_GetProblemList_FullMethodName      = "/ProblemService/GetProblemList"
 	ProblemService_GetProblemData_FullMethodName      = "/ProblemService/GetProblemData"
+	ProblemService_GetProblemConfig_FullMethodName    = "/ProblemService/GetProblemConfig"
 	ProblemService_GetTagList_FullMethodName          = "/ProblemService/GetTagList"
 	ProblemService_SubmitProblem_FullMethodName       = "/ProblemService/SubmitProblem"
 	ProblemService_GetSubmitRecordList_FullMethodName = "/ProblemService/GetSubmitRecordList"
@@ -53,6 +54,8 @@ type ProblemServiceClient interface {
 	GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error)
 	// 查询题目详情
 	GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
+	// 获取题目配置
+	GetProblemConfig(ctx context.Context, in *GetProblemConfigRequest, opts ...grpc.CallOption) (*GetProblemConfigResponse, error)
 	// 获取tag列表
 	GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error)
 	// 提交
@@ -141,6 +144,16 @@ func (c *problemServiceClient) GetProblemData(ctx context.Context, in *GetProble
 	return out, nil
 }
 
+func (c *problemServiceClient) GetProblemConfig(ctx context.Context, in *GetProblemConfigRequest, opts ...grpc.CallOption) (*GetProblemConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProblemConfigResponse)
+	err := c.cc.Invoke(ctx, ProblemService_GetProblemConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *problemServiceClient) GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetTagListResponse)
@@ -201,6 +214,8 @@ type ProblemServiceServer interface {
 	GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error)
 	// 查询题目详情
 	GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
+	// 获取题目配置
+	GetProblemConfig(context.Context, *GetProblemConfigRequest) (*GetProblemConfigResponse, error)
 	// 获取tag列表
 	GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error)
 	// 提交
@@ -236,6 +251,9 @@ func (UnimplementedProblemServiceServer) GetProblemList(context.Context, *GetPro
 }
 func (UnimplementedProblemServiceServer) GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemData not implemented")
+}
+func (UnimplementedProblemServiceServer) GetProblemConfig(context.Context, *GetProblemConfigRequest) (*GetProblemConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProblemConfig not implemented")
 }
 func (UnimplementedProblemServiceServer) GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTagList not implemented")
@@ -388,6 +406,24 @@ func _ProblemService_GetProblemData_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProblemService_GetProblemConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProblemConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProblemServiceServer).GetProblemConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProblemService_GetProblemConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProblemServiceServer).GetProblemConfig(ctx, req.(*GetProblemConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProblemService_GetTagList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -494,6 +530,10 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProblemData",
 			Handler:    _ProblemService_GetProblemData_Handler,
+		},
+		{
+			MethodName: "GetProblemConfig",
+			Handler:    _ProblemService_GetProblemConfig_Handler,
 		},
 		{
 			MethodName: "GetTagList",

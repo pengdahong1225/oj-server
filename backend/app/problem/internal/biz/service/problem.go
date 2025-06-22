@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"github.com/pengdahong1225/oj-server/backend/app/common/errs"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/repository/domain"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/repository/model"
+	"github.com/pengdahong1225/oj-server/backend/app/problem/internal/repository/domain"
+	"github.com/pengdahong1225/oj-server/backend/app/problem/internal/repository/model"
 	"github.com/pengdahong1225/oj-server/backend/module/utils"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
@@ -28,10 +28,6 @@ func NewProblemService() *ProblemService {
 	return s
 }
 
-// TODO
-// 1.网关层要把用户相关信息通过context传递过来
-// 2.需要处理grpc错误与http错误的结合与转换
-// 3.需要实现进行参数校验中间件
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
 	resp := &pb.CreateProblemResponse{}
 
@@ -72,8 +68,15 @@ func (ps *ProblemService) DeleteProblem(ctx context.Context, in *pb.DeleteProble
 }
 
 func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	resp := &pb.GetProblemListResponse{}
+
+	total, problems, err := ps.db.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag)
+	if err != nil {
+		return nil, err
+	}
+	resp.Total = int32(total)
+	resp.Data = model.TransformList(problems)
+	return resp, nil
 }
 
 func (ps *ProblemService) GetProblemData(ctx context.Context, in *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {

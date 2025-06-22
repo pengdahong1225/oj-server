@@ -10,7 +10,7 @@ import (
 
 type UserClaims struct {
 	Uid       int64
-	Mobile    int64
+	Mobile    string
 	Authority int32
 	jwt.StandardClaims
 }

@@ -1,14 +1,18 @@
 package handler
 
 import (
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/define"
+	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/middlewares"
+	"github.com/pengdahong1225/oj-server/backend/consts"
+	"github.com/pengdahong1225/oj-server/backend/module/services"
+	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"regexp"
-	"github.com/sirupsen/logrus"
-	"github.com/pengdahong1225/oj-server/backend/module/services"
-	"github.com/pengdahong1225/oj-server/backend/consts"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"time"
 )
 
 func HandleUserLogin(ctx *gin.Context) {
@@ -47,14 +51,40 @@ func HandleUserLogin(ctx *gin.Context) {
 		Mobile:   form.Mobile,
 		Password: form.PassWord,
 	}
-	rsp, err := client.UserLogin(ctx, req)
+	login_resp, err := client.UserLogin(ctx, req)
 	if err != nil {
 		logrus.Info("UserLogin Failed: %s", err.Error())
 		resp.Code = define.Failed
 		resp.Message = "登录失败"
 		return
 	}
-	resp.Data = rsp
+	data := define.LoginRspData{
+		Rsp: login_resp,
+	}
+	// 生成token
+	j := middlewares.NewJWT()
+	// 设置 payload有效载荷
+	claims := &middlewares.UserClaims{
+		Uid:       login_resp.Uid,
+		Mobile:    login_resp.Mobile,
+		Authority: login_resp.Role,
+		StandardClaims: jwt.StandardClaims{
+			NotBefore: time.Now().Unix(),                       // 签名生效时间
+			ExpiresAt: time.Now().Unix() + consts.TokenTimeOut, // 7天过期
+			Issuer:    consts.Issuer,                           // 签名机构
+		},
+	}
+	token, err := j.CreateToken(claims)
+	if err != nil {
+		resp.Code = define.Failed
+		resp.Message = fmt.Sprintf("生成token失败:%s", err.Error())
+		resp.Data = nil
+		logrus.Errorf("生成token失败:%s", err.Error())
+		return
+	}
+	data.Token = token
+
+	resp.Data = data
 	resp.Message = "登录成功"
 	return
 }

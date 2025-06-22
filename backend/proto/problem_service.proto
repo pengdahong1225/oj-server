@@ -20,6 +20,8 @@ service ProblemService {
   rpc GetProblemList(GetProblemListRequest) returns (GetProblemListResponse);
   // 查询题目详情
   rpc GetProblemData(GetProblemRequest) returns (GetProblemResponse);
+  // 获取题目配置
+  rpc GetProblemConfig(GetProblemConfigRequest) returns (GetProblemConfigResponse);
   // 获取tag列表
   rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse);
 
@@ -43,20 +45,16 @@ message Problem{
   repeated string tags = 7;
   int64 create_by = 8;
 
-  ProblemConfig config = 9;
-
-  int32 status = 10;
+  int32 status = 10; // 是否发布
 }
+// 题目配置信息
 message ProblemConfig{
-  repeated TestCase test_cases = 1;
-  Limit compile_limit = 2;
-  Limit run_limit = 3;
-  int32 level = 4;
-  string name = 5;
-}
-message TestCase{
-  string input = 1;
-  string output = 2;
+  int64 id = 1;
+  int32 level = 2;
+  string name = 3;
+  Limit compile_limit = 4;
+  Limit run_limit = 5;
+  repeated TestCase test_cases = 6;
 }
 message Limit{
   int64 cpu_limit = 1;
@@ -64,6 +62,10 @@ message Limit{
   int64 memory_limit = 3;
   int64 stack_limit = 4;
   int64 proc_limit = 5;
+}
+message TestCase{
+  string input = 1;
+  string output = 2;
 }
 
 // 新增题目
@@ -98,15 +100,7 @@ message PublishProblemResponse {
 
 // 更新题目
 message UpdateProblemRequest {
-  int64 id = 1;
-  string title = 2;
-  string description = 3;
-  int32 level = 4;
-  repeated string tags = 5;
-
-  ProblemConfig config = 9;
-
-  int32 status = 10;
+  Problem data = 1;
 }
 message UpdateProblemResponse {
   int64 id = 1;
@@ -140,6 +134,14 @@ message GetProblemRequest{
 }
 message GetProblemResponse{
   Problem data = 1;
+}
+
+// 获取题目配置
+message GetProblemConfigRequest{
+  int64 id = 1;
+}
+message GetProblemConfigResponse{
+  ProblemConfig data = 1;
 }
 
 // tags

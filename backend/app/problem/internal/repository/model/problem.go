@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"github.com/pengdahong1225/oj-server/backend/module/utils"
+	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"time"
+)
 
 type Problem struct {
 	ID        int64     `gorm:"<-:false;primary_key;autoIncrement;column:id" json:"id"`
@@ -17,6 +21,25 @@ type Problem struct {
 	Config []byte `gorm:"column:config" json:"config"`
 }
 
-func (Problem) TableName() string {
+func (p *Problem) TableName() string {
 	return "problem"
+}
+
+func (p *Problem) Transform() *pb.Problem {
+	return &pb.Problem{
+		Id:          p.ID,
+		CreateAt:    p.CreateAt.String(),
+		Title:       p.Title,
+		Description: p.Description,
+		Level:       p.Level,
+		Tags:        utils.SplitStringWithX(string(p.Tags), "#"),
+		CreateBy:    p.CreateBy,
+	}
+}
+func TransformList(list []Problem) []*pb.Problem {
+	var problems []*pb.Problem
+	for _, problem := range list {
+		problems = append(problems, problem.Transform())
+	}
+	return problems
 }

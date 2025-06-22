@@ -1,46 +1,20 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
 // 用户服务接口
 service UserService {
   // 注册
-  rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse) {
-    option (google.api.http) = {
-      post: "/v1/user/register"
-      body: "*"
-    };
-  }
+  rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse);
   // 登录
-  rpc UserLogin(UserLoginRequest) returns (UserLoginResponse) {
-    option (google.api.http) = {
-      post: "/v1/user/login"
-      body: "*"
-    };
-  }
+  rpc UserLogin(UserLoginRequest) returns (UserLoginResponse);
   // 重置密码
-  rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse) {
-    option (google.api.http) = {
-      post: "/v1/user/reset_password"
-      body: "*"
-    };
-  }
+  rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse);
   // 查询用户信息
-  rpc GetUserInfo(google.protobuf.Empty) returns (GetUserInfoResponse) {
-    option (google.api.http) = {
-      get: "/v1/user"
-      response_body: "*"
-    };
-  }
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
   // 刷新token
-  rpc RefreshToken(google.protobuf.Empty) returns (RefreshTokenResponse) {
-    option (google.api.http) = {
-      post: "/v1/user/refresh_token"
-      body: "*"
-    };
-  }
+  rpc RefreshToken(google.protobuf.Empty) returns (RefreshTokenResponse);
 }
 
 // 用户基本数据
@@ -104,6 +78,10 @@ message ResetUserPasswordRequest {}
 message ResetUserPasswordResponse {}
 
 // 查询用户信息
+message GetUserInfoRequest {
+  int64 uid = 1;
+  string mobile = 2;
+}
 message GetUserInfoResponse {
   UserInfo data = 1;
 }

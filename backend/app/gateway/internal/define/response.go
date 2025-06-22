@@ -21,14 +21,8 @@ type RankList struct {
 }
 
 type LoginRspData struct {
-	Uid       int64  `json:"uid"`
-	Mobile    int64  `json:"mobile"`
-	NickName  string `json:"nickname"`
-	Email     string `json:"email"`
-	Gender    int32  `json:"gender"`
-	Role      int32  `json:"role"`
-	AvatarUrl string `json:"avatar_url"`
-	Token     string `json:"token"`
+	Rsp   *pb.UserLoginResponse `json:"data"`
+	Token string                `json:"token"`
 }
 
 type NoticeRspData struct {

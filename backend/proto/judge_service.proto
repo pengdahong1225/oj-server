@@ -1,17 +1,10 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-import "google/api/annotations.proto";
-
 // 判题服务接口
 service JudgeService {
   // 查询判题结果
-  rpc QueryJudgeResult(QueryJudgeResultRequest) returns (QueryJudgeResultResponse) {
-    option (google.api.http) = {
-      get: "/v1/judge/result"
-      response_body: "*"
-    };
-  }
+  rpc QueryJudgeResult(QueryJudgeResultRequest) returns (QueryJudgeResultResponse);
 }
 
 message QueryJudgeResultRequest {
