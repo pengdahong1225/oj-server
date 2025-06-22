@@ -1,11 +1,13 @@
 package service
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"context"
-	"github.com/sirupsen/logrus"
 	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/domain"
+	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/model"
+	"github.com/pengdahong1225/oj-server/backend/module/utils"
+	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type UserService struct {
@@ -24,8 +26,10 @@ func NewUserService() *UserService {
 }
 
 func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequest) (*pb.UserRegisterResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	// 密码加密
+	hash_pwd := utils.HashPassword(in.Password)
+
+	newUser := model.UserInfo{}
 }
 
 func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
