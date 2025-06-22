@@ -3,6 +3,8 @@ option go_package = "./;pb";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "google/protobuf/descriptor.proto";
 
 // 题目服务接口
 service ProblemService {
