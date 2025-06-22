@@ -20,6 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
+	ProblemService_CreateProblem_FullMethodName       = "/ProblemService/CreateProblem"
+	ProblemService_UploadConfig_FullMethodName        = "/ProblemService/UploadConfig"
+	ProblemService_PublishProblem_FullMethodName      = "/ProblemService/PublishProblem"
 	ProblemService_UpdateProblem_FullMethodName       = "/ProblemService/UpdateProblem"
 	ProblemService_DeleteProblem_FullMethodName       = "/ProblemService/DeleteProblem"
 	ProblemService_GetProblemList_FullMethodName      = "/ProblemService/GetProblemList"
@@ -36,6 +39,12 @@ const (
 //
 // 题目服务接口
 type ProblemServiceClient interface {
+	// 新增题目
+	CreateProblem(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error)
+	// 上传配置文件
+	UploadConfig(ctx context.Context, in *UploadConfigRequest, opts ...grpc.CallOption) (*UploadConfigResponse, error)
+	// 发布题目
+	PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*PublishProblemResponse, error)
 	// 更新题目信息
 	UpdateProblem(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error)
 	// 删除题目
@@ -60,6 +69,36 @@ type problemServiceClient struct {
 
 func NewProblemServiceClient(cc grpc.ClientConnInterface) ProblemServiceClient {
 	return &problemServiceClient{cc}
+}
+
+func (c *problemServiceClient) CreateProblem(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateProblemResponse)
+	err := c.cc.Invoke(ctx, ProblemService_CreateProblem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) UploadConfig(ctx context.Context, in *UploadConfigRequest, opts ...grpc.CallOption) (*UploadConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadConfigResponse)
+	err := c.cc.Invoke(ctx, ProblemService_UploadConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *problemServiceClient) PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*PublishProblemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublishProblemResponse)
+	err := c.cc.Invoke(ctx, ProblemService_PublishProblem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *problemServiceClient) UpdateProblem(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error) {
@@ -148,6 +187,12 @@ func (c *problemServiceClient) GetSubmitRecordData(ctx context.Context, in *GetS
 //
 // 题目服务接口
 type ProblemServiceServer interface {
+	// 新增题目
+	CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error)
+	// 上传配置文件
+	UploadConfig(context.Context, *UploadConfigRequest) (*UploadConfigResponse, error)
+	// 发布题目
+	PublishProblem(context.Context, *PublishProblemRequest) (*PublishProblemResponse, error)
 	// 更新题目信息
 	UpdateProblem(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error)
 	// 删除题目
@@ -171,6 +216,15 @@ type ProblemServiceServer interface {
 type UnimplementedProblemServiceServer struct {
 }
 
+func (UnimplementedProblemServiceServer) CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProblem not implemented")
+}
+func (UnimplementedProblemServiceServer) UploadConfig(context.Context, *UploadConfigRequest) (*UploadConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadConfig not implemented")
+}
+func (UnimplementedProblemServiceServer) PublishProblem(context.Context, *PublishProblemRequest) (*PublishProblemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishProblem not implemented")
+}
 func (UnimplementedProblemServiceServer) UpdateProblem(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProblem not implemented")
 }
@@ -206,6 +260,60 @@ type UnsafeProblemServiceServer interface {
 
 func RegisterProblemServiceServer(s grpc.ServiceRegistrar, srv ProblemServiceServer) {
 	s.RegisterService(&ProblemService_ServiceDesc, srv)
+}
+
+func _ProblemService_CreateProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProblemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProblemServiceServer).CreateProblem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProblemService_CreateProblem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProblemServiceServer).CreateProblem(ctx, req.(*CreateProblemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProblemService_UploadConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProblemServiceServer).UploadConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProblemService_UploadConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProblemServiceServer).UploadConfig(ctx, req.(*UploadConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProblemService_PublishProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishProblemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProblemServiceServer).PublishProblem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProblemService_PublishProblem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProblemServiceServer).PublishProblem(ctx, req.(*PublishProblemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ProblemService_UpdateProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -359,6 +467,18 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "ProblemService",
 	HandlerType: (*ProblemServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateProblem",
+			Handler:    _ProblemService_CreateProblem_Handler,
+		},
+		{
+			MethodName: "UploadConfig",
+			Handler:    _ProblemService_UploadConfig_Handler,
+		},
+		{
+			MethodName: "PublishProblem",
+			Handler:    _ProblemService_PublishProblem_Handler,
+		},
 		{
 			MethodName: "UpdateProblem",
 			Handler:    _ProblemService_UpdateProblem_Handler,
