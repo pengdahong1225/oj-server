@@ -1,12 +1,13 @@
-package cache
+package domain
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/app/db-service/internal/mysql"
+	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/domain/db"
+	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/domain/model"
 	"strconv"
 )
 
-func UpdateRankList(orderList []mysql.Statistics) error {
+func UpdateRankList(orderList []model.Statistics) error {
 	//var key = "rank"
 	//for _, item := range orderList {
 	//	data, _ := json.Marshal(item.User) // 序列化
@@ -24,12 +25,12 @@ func UpdateRankList(orderList []mysql.Statistics) error {
 // CacheProblemConfig
 // 缓存题目热点数据
 func CacheProblemConfig(problemID int64, data []byte) error {
-	return rdb.HSet(context.Background(), strconv.FormatInt(problemID, 10), "hotData", data).Err()
+	return db.Rdb.HSet(context.Background(), strconv.FormatInt(problemID, 10), "hotData", data).Err()
 }
 
 // UpdateTagList
 // 更新标签列表
 func UpdateTagList(list []string) error {
 	key := "tag_list"
-	return rdb.SAdd(context.Background(), key, list).Err()
+	return db.Rdb.SAdd(context.Background(), key, list).Err()
 }

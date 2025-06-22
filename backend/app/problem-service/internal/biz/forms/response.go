@@ -1,4 +1,4 @@
-package models
+package forms
 
 import "github.com/pengdahong1225/oj-server/backend/proto/pb"
 

@@ -4,12 +4,14 @@ import (
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
+	"github.com/pengdahong1225/oj-server/backend/app/gateway-service/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
 	"sync"
+	"time"
 )
 
 // Server
@@ -31,12 +33,21 @@ func (receiver *Server) Init() error {
 func (receiver *Server) Start() {
 	mux := runtime.NewServeMux()
 
-	mux.Handle
-
+	// 注册grpc服务
 	receiver.registerGrpcServices(mux, "problem-service", pb.RegisterProblemServiceHandlerFromEndpoint)
 	receiver.registerGrpcServices(mux, "judge-service", pb.RegisterJudgeServiceHandlerFromEndpoint)
 	receiver.registerGrpcServices(mux, "user-service", pb.RegisterUserServiceHandlerFromEndpoint)
 
+	// 注册中间件
+	handler := middlewares.RecoveryMiddleware(mux)   // 最外层：panic捕获
+	handler = middlewares.LoggingMiddleware(handler) // 日志记录
+	handler = middlewares.CorsMiddleware(handler)    // 跨域处理
+
+	handler = middlewares.RateLimitMiddleware(2*time.Second, 50, handler) // 限流
+	handler = middlewares.AuthLogin(handler)                              // 认证
+	handler = middlewares.Admin(handler)                                  // 鉴权
+
+	// 启动
 	receiver.wg.Add(1)
 	go func() {
 		defer receiver.wg.Done()

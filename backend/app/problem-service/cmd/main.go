@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/app/question-service/internal"
+	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal"
 )
 
 func main() {
 	server := internal.Server{}
-	server.Name = "question-service"
-	server.SrvType = "http"
+	server.Name = "problem-service"
+	server.SrvType = "grpc"
 
 	err := server.Init()
 	if err != nil {

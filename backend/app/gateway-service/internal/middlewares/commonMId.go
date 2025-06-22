@@ -5,15 +5,25 @@ import (
 	"net/http"
 )
 
-func WithLogging(h http.Handler) http.Handler {
+func RecoveryMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logrus.Infof("请求进入: %s %s", r.Method, r.URL.Path)
+		defer func() {
+			if r := recover(); r != nil {
+				logrus.Errorln("panic:", r)
+			}
+		}()
 		h.ServeHTTP(w, r)
 	})
 }
 
-// WithCors 跨域
-func WithCors(next http.Handler) http.Handler {
+func LoggingMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logrus.Infoln("请求方法:", r.Method, "请求路径:", r.URL.Path)
+		h.ServeHTTP(w, r)
+	})
+}
+
+func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization, Token, token")

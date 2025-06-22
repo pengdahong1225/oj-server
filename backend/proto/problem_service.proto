@@ -6,6 +6,30 @@ import "google/protobuf/empty.proto";
 
 // 题目服务接口
 service ProblemService {
+  // 新增题目
+  rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse) {
+    option (google.api.http) = {
+      post: "/v1/problem/create"
+      body: "*"
+    };
+  }
+
+  // 上传配置文件
+  rpc UploadConfig(UploadConfigRequest) returns (UploadConfigResponse) {
+    option (google.api.http) = {
+      post: "/v1/problem/upload_config"
+      body: "*"
+    };
+  }
+
+  // 发布题目
+  rpc PublishProblem(PublishProblemRequest) returns (PublishProblemResponse) {
+    option (google.api.http) = {
+      post: "/v1/problem/publish"
+      body: "*"
+    };
+  }
+
   // 更新题目信息
   rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse) {
     option (google.api.http) = {
@@ -105,9 +129,47 @@ message Limit{
   int64 proc_limit = 5;
 }
 
+// 新增题目
+message CreateProblemRequest {
+  string title = 1;
+  string content = 2;
+  string description = 3;
+  int32 level = 4;
+  repeated string tags = 5;
+}
+message CreateProblemResponse {
+  int64 id = 1;
+}
+
+// 上传配置文件
+message UploadConfigRequest {
+  bytes config = 1;
+}
+message UploadConfigResponse {
+  int64 id = 1;
+  string result = 2;
+}
+
+// 发布题目
+message PublishProblemRequest {
+  int64 id = 1;
+}
+message PublishProblemResponse {
+  int64 id = 1;
+  string result = 2;
+}
+
 // 更新题目
 message UpdateProblemRequest {
-    Problem problem = 1;
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  int32 level = 4;
+  repeated string tags = 5;
+
+  ProblemConfig config = 9;
+
+  int32 status = 10;
 }
 message UpdateProblemResponse {
   int64 id = 1;

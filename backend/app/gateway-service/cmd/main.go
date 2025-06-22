@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import "github.com/pengdahong1225/oj-server/backend/app/gateway-service/internal"
 

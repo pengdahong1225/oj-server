@@ -1,4 +1,4 @@
-package models
+package forms
 
 // binding的逗号之间不能有空格
 
