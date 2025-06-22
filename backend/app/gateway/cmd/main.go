@@ -1,6 +1,6 @@
 package main
 
-import "github.com/pengdahong1225/oj-server/backend/app/gateway-service/internal"
+import "github.com/pengdahong1225/oj-server/backend/app/gateway/internal"
 
 func main() {
 	server := internal.Server{}

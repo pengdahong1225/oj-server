@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway-service/internal/router"
+	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/router"
 	"github.com/sirupsen/logrus"
 	"sync"
 )

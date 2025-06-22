@@ -3,8 +3,8 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway-service/internal/handler"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway-service/internal/middlewares"
+	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/handler"
+	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/middlewares"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
