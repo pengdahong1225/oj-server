@@ -1,99 +1,34 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "github.com/mwitkow/go-proto-validators/validator.proto";
-import "google/protobuf/descriptor.proto";
+
 
 // 题目服务接口
 service ProblemService {
   // 新增题目
-  rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse) {
-    option (google.api.http) = {
-      post: "/v1/problem/create"
-      body: "*"
-    };
-  }
-
+  rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse);
   // 上传配置文件
-  rpc UploadConfig(UploadConfigRequest) returns (UploadConfigResponse) {
-    option (google.api.http) = {
-      post: "/v1/problem/upload_config"
-      body: "*"
-    };
-  }
-
+  rpc UploadConfig(UploadConfigRequest) returns (UploadConfigResponse);
   // 发布题目
-  rpc PublishProblem(PublishProblemRequest) returns (PublishProblemResponse) {
-    option (google.api.http) = {
-      post: "/v1/problem/publish"
-      body: "*"
-    };
-  }
-
+  rpc PublishProblem(PublishProblemRequest) returns (PublishProblemResponse);
   // 更新题目信息
-  rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse) {
-    option (google.api.http) = {
-      post: "/v1/problem/update"
-      body: "*"
-    };
-  }
-
+  rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse);
   // 删除题目
-  rpc DeleteProblem(DeleteProblemRequest) returns (DeleteProblemResponse) {
-    option (google.api.http) = {
-      delete: "/v1/problem"
-    };
-  }
-
+  rpc DeleteProblem(DeleteProblemRequest) returns (DeleteProblemResponse);
   // 获取题目列表
-  rpc GetProblemList(GetProblemListRequest) returns (GetProblemListResponse) {
-    option (google.api.http) = {
-      get: "/v1/problem/list"
-      response_body:  "*"
-    };
-  }
-
+  rpc GetProblemList(GetProblemListRequest) returns (GetProblemListResponse);
   // 查询题目详情
-  rpc GetProblemData(GetProblemRequest) returns (GetProblemResponse) {
-    option (google.api.http) = {
-      get: "/v1/problem/{id}"
-      response_body:  "*"
-    };
-  }
-
+  rpc GetProblemData(GetProblemRequest) returns (GetProblemResponse);
   // 获取tag列表
-  rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse) {
-    option (google.api.http) = {
-      get: "/v1/problem/tag_list"
-      response_body:  "*"
-    };
-  }
+  rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse);
 
   // 提交
-  rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse) {
-    option (google.api.http) = {
-      post: "/v1/problem/submit"
-      body: "*"
-    };
-  }
-
+  rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse);
   // 查询提交记录列表
-  rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse) {
-    option (google.api.http) = {
-      get: "/v1/problem/submit_record_list"
-      response_body:  "*"
-    };
-  }
-
+  rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse);
   // 查询提交记录详情
-  rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse) {
-    option (google.api.http) = {
-      get: "/v1/problem/submit_record"
-      response_body:  "*"
-    };
-  }
+  rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse);
 }
 
 // 题目基础信息

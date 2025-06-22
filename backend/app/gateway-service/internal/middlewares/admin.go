@@ -1,21 +1,22 @@
 package middlewares
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func Admin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims := r.Context().Value("claims").(*UserClaims)
-		if claims == nil {
-			http.Error(w, "无权限", http.StatusForbidden)
+func Admin() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		claims, _ := ctx.Get("claims")
+		currentUser := claims.(*UserClaims)
+		if currentUser.Authority == 0 {
+			ctx.JSON(http.StatusForbidden, gin.H{
+				"code":    1,
+				"message": "无权限",
+			})
+			ctx.Abort()
 			return
 		}
-		if claims.Authority == 0 {
-			http.Error(w, "无权限", http.StatusForbidden)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
+		ctx.Next()
+	}
 }

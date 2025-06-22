@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/biz/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/biz/service"
 	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/consumer"
 	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/repository/cache"
@@ -48,12 +47,6 @@ func (receiver *Server) Start() {
 	}
 	opts = append(opts, grpc.Creds(creds))
 
-	// 拦截器
-	chain := grpc.ChainUnaryInterceptor(
-		middlewares.RecoveryInterceptor,
-		middlewares.LoggingInterceptor,
-	)
-	opts = append(opts, chain)
 	grpcServer := grpc.NewServer(opts...)
 
 	// 健康检查

@@ -1,40 +1,35 @@
 package middlewares
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"time"
 )
 
-func RecoveryMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if r := recover(); r != nil {
-				logrus.Errorln("panic:", r)
-			}
-		}()
-		h.ServeHTTP(w, r)
-	})
-}
+func Cors() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		method := ctx.Request.Method
 
-func LoggingMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logrus.Infoln("请求方法:", r.Method, "请求路径:", r.URL.Path)
-		h.ServeHTTP(w, r)
-	})
-}
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.Header("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization, Token, token")
+		ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
+		ctx.Header("Access-Control-Expose-Headers", "Content-Length, Access_Control-Allow-Origin, Access_Control-Headers, Content-Type")
+		ctx.Header("Access-Control-Allow-Credentials", "true")
 
-func CorsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization, Token, token")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
-		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Access_Control-Allow-Origin, Access_Control-Headers, Content-Type")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
+		if method == "OPTIONS" {
+			ctx.AbortWithStatus(http.StatusNoContent)
 		}
-		next.ServeHTTP(w, r)
-	})
+	}
+}
+
+// 统计请求处理时耗
+func statCost() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		start := time.Now()
+		ctx.Set("midName", "statCost")
+		ctx.Next()
+		cost := time.Since(start)
+		log.Printf("----------- cost: %v -----------", cost)
+	}
 }

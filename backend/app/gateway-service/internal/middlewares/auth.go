@@ -1,25 +1,23 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
 
-func AuthLogin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 排除登录等无需认证的路径
-		if skipAuth(r) {
-			next.ServeHTTP(w, r)
-			return
-		}
-
+func AuthLogin() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 		// jwt鉴权头部信息 token
-		token := r.Header.Get("x-token")
+		token := ctx.Request.Header.Get("token")
 		if token == "" {
-			http.Error(w, "未登录", http.StatusUnauthorized)
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"code":    1,
+				"message": "未登录",
+			})
+			ctx.Abort()
 			return
 		}
 		j := NewJWT()
@@ -27,10 +25,18 @@ func AuthLogin(next http.Handler) http.Handler {
 		claims, err := j.ParseToken(token)
 		if err != nil {
 			if errors.Is(err, TokenExpired) {
-				http.Error(w, "授权已过期", http.StatusUnauthorized)
+				ctx.JSON(http.StatusUnauthorized, gin.H{
+					"code":    1,
+					"message": "授权已过期",
+				})
+				ctx.Abort()
 				return
 			} else {
-				http.Error(w, "token验证失败", http.StatusUnauthorized)
+				ctx.JSON(http.StatusUnauthorized, gin.H{
+					"code":    1,
+					"message": "token验证失败",
+				})
+				ctx.Abort()
 				return
 			}
 		}
@@ -40,7 +46,8 @@ func AuthLogin(next http.Handler) http.Handler {
 		logrus.Debugf("剩余：%v, [%v天]\n", remain, remain/86400)
 
 		// token通过
-		ctx := context.WithValue(r.Context(), "claims", claims)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+		ctx.Set("claims", claims)
+		ctx.Set("uid", claims.Uid)
+		ctx.Next()
+	}
 }
