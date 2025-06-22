@@ -4,18 +4,22 @@ import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
 	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/biz/middlewares"
+	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/biz/service"
 	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/consumer"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/domain/db"
+	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/repository/cache"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/biz/service"
+	"sync"
 )
 
 type Server struct {
 	ServerBase.Server
+	problemSrv *service.ProblemService
+	wg         sync.WaitGroup
 }
 
 func (receiver *Server) Init() error {
@@ -24,7 +28,8 @@ func (receiver *Server) Init() error {
 		return err
 	}
 
-	err = db.Init()
+	receiver.problemSrv = service.NewProblemService()
+	err = cache.Init()
 	if err != nil {
 		return err
 	}
@@ -47,7 +52,10 @@ func (receiver *Server) Start() {
 	problemSrv := service.ProblemService{}
 	pb.RegisterProblemServiceServer(grpcServer, &problemSrv)
 
+	// 启动
+	receiver.wg.Add(1)
 	go func() {
+		defer receiver.wg.Done()
 		netAddr := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
 		listener, err := net.Listen("tcp", netAddr)
 		if err != nil {
@@ -56,7 +64,7 @@ func (receiver *Server) Start() {
 		defer listener.Close()
 		err = grpcServer.Serve(listener)
 		if err != nil {
-			panic(err)
+			logrus.Fatalf("启动服务失败: %v", err)
 		}
 	}()
 
@@ -67,6 +75,7 @@ func (receiver *Server) Start() {
 	if err != nil {
 		panic(err)
 	}
+	defer receiver.UnRegister()
 
-	select {}
+	receiver.wg.Wait()
 }

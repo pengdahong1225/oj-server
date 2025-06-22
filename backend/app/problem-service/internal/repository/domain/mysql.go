@@ -1,20 +1,39 @@
-package db
+package domain
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/module/db"
+	"fmt"
+	"github.com/pengdahong1225/oj-server/backend/module/logger"
+	"github.com/pengdahong1225/oj-server/backend/module/settings"
+	"github.com/sirupsen/logrus"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var (
-	DbSession *gorm.DB
-	err       error
-)
+type MysqlDB struct {
+	db_ *gorm.DB
+}
 
-func Init() error {
-	DbSession, err = db.NewMysqlSession()
+func NewMysqlDB() (*MysqlDB, error) {
+	m := &MysqlDB{}
+
+	newLogger, err := logger.NewOrmLogger()
 	if err != nil {
-		return err
+		logrus.Errorf("new orm logger error: %v", err)
 	}
 
-	return nil
+	cfg := settings.Instance().MysqlConfig
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.User,
+		cfg.Pwd, cfg.Host, cfg.Port, cfg.Db)
+
+	db_, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+		// SkipDefaultTransaction: true, //全局禁用默认事务
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	m.db_ = db_
+
+	return m, nil
 }

@@ -2,17 +2,24 @@ package cache
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/module/db"
+	"fmt"
+	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/redis/go-redis/v9"
 )
 
 var (
-	rdb *redis.Client
+	RedisClient *redis.Client
 )
 
 func Init() error {
-	rdb = db.NewRedisClient()
-	st := rdb.Ping(context.Background())
+	cfg := settings.Instance().RedisConfig
+	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr:    dsn,
+		Network: "tcp",
+	})
+	st := RedisClient.Ping(context.Background())
 	if st.Err() != nil {
 		return st.Err()
 	}
