@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/define"
 	"github.com/pengdahong1225/oj-server/backend/consts"
-	"github.com/pengdahong1225/oj-server/backend/module/services"
+	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -38,7 +38,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	//uid, _ := strconv.ParseInt(uidStr, 10, 64)
 
 	// 调用problem服务
-	conn, err := services.Instance.GetConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		response.Code = define.Failed

@@ -20,11 +20,11 @@ services:
     networks:
       - net
 
-  db-service:
-    container_name: db-service
+  gateway-service:
+    container_name: gateway-service
     privileged: true
     build:
-      context: ./app/db-service # 路径
+      context: ./app/gateway # 路径
       dockerfile: Dockerfile
     volumes:
       - /root/server/oj-server/backend/log/db-service:/app/log
@@ -38,6 +38,24 @@ services:
       - "--node_id:1"
       - "--node_port:9000"
 
+  user-service:
+    container_name: user-service
+    privileged: true
+    build:
+      context: ./app/user # 路径
+      dockerfile: Dockerfile
+    volumes:
+      - /root/server/oj-server/backend/log/db-service:/app/log
+      - /root/server/oj-server/backend/config:/app/config
+    ports:
+      - "9010"
+    networks:
+      - net
+    command:
+      - "--node_type:2"
+      - "--node_id:1"
+      - "--node_port:9010"
+
   judge-service:
     container_name: judge-service
     privileged: true
@@ -48,34 +66,32 @@ services:
       - /root/server/oj-server/backend/log/judge-service:/app/log
       - /root/server/oj-server/backend/config:/app/config
     ports:
-      - "9010"
+      - "9020"
     networks:
       - net
     command:
-      - "--node_type:2"
+      - "--node_type:4"
       - "--node_id:1"
-      - "--node_port:9010"
+      - "--node_port:9020"
     depends_on: # 本地服务的依赖，控制启动先后顺序
-      - db-service
       - sandbox
-  
-  question-service:
-    container_name: question-service
+
+  problem-service:
+    container_name: problem-service
     privileged: true
     build:
-      context: ./app/question-service
+      context: ./app/problem
       dockerfile: Dockerfile
     volumes:
       - /root/server/oj-server/backend/log/question-service:/app/log
       - /root/server/oj-server/backend/config:/app/config
     ports:
-      - "9020:9020"
+      - "9030:9030"
     networks:
       - net
     command:
       - "--node_type:3"
       - "--node_id:1"
-      - "--node_port:9020"
+      - "--node_port:9030"
     depends_on: # 本地服务的依赖，控制启动先后顺序
-      - db-service
       - judge-service

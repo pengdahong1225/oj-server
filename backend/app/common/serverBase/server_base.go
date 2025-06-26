@@ -1,7 +1,6 @@
 package ServerBase
 
 import (
-	"errors"
 	"flag"
 	"github.com/pengdahong1225/oj-server/backend/module/logger"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
@@ -17,7 +16,7 @@ type Server struct {
 	Host     string
 	Port     int
 	Name     string
-	SrvType  string // grpc | http
+	Scheme   string // grpc | http
 }
 
 func (receiver *Server) Initialize() error {
@@ -46,61 +45,37 @@ func (receiver *Server) Initialize() error {
 		return err
 	}
 
+	// 初始化注册中心
+	err = registry.Init(receiver.Scheme)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // 服务注册
 func (receiver *Server) Register() error {
-	register, err := registry.NewRegistry()
+	err := registry.RegisterService(&pb.PBNodeInfo{
+		NodeType: pb.ENNodeType(receiver.NodeType),
+		NodeId:   int32(receiver.NodeId),
+		Ip:       receiver.Host,
+		Port:     int32(receiver.Port),
+		Name:     receiver.Name,
+	})
 	if err != nil {
 		return err
 	}
-
-	if receiver.SrvType == "grpc" {
-		err = register.RegisterServiceWithGrpc(&pb.PBNodeInfo{
-			NodeType: int32(receiver.NodeType),
-			NodeId:   int32(receiver.NodeId),
-			Ip:       receiver.Host,
-			Port:     int32(receiver.Port),
-			State:    int32(pb.ENNodeState_EN_NODE_STATE_ONLINE),
-			Name:     receiver.Name,
-		})
-		if err != nil {
-			return err
-		}
-		return nil
-	} else if receiver.SrvType == "http" {
-		err = register.RegisterServiceWithHttp(&pb.PBNodeInfo{
-			NodeType: int32(receiver.NodeType),
-			NodeId:   int32(receiver.NodeId),
-			Ip:       receiver.Host,
-			Port:     int32(receiver.Port),
-			State:    int32(pb.ENNodeState_EN_NODE_STATE_ONLINE),
-			Name:     receiver.Name,
-		})
-		if err != nil {
-			return err
-		}
-		return nil
-	} else {
-		return errors.New("unknown srv type")
-	}
+	return nil
 }
 
 // 服务注销
 func (receiver *Server) UnRegister() {
-	register, err := registry.NewRegistry()
-	if err != nil {
-		logrus.Errorf("注销服务失败: %v", err)
-		return
-	}
-
-	err = register.UnRegister(&pb.PBNodeInfo{
-		NodeType: int32(receiver.NodeType),
+	err := registry.DeregisterService(&pb.PBNodeInfo{
+		NodeType: pb.ENNodeType(receiver.NodeType),
 		NodeId:   int32(receiver.NodeId),
 		Ip:       receiver.Host,
 		Port:     int32(receiver.Port),
-		State:    int32(pb.ENNodeState_EN_NODE_STATE_OFFLINE),
 	})
 	if err != nil {
 		logrus.Errorf("注销服务失败: %v", err)

@@ -7,7 +7,7 @@ import (
 	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/define"
 	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/consts"
-	"github.com/pengdahong1225/oj-server/backend/module/services"
+	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -39,13 +39,14 @@ func HandleUserLogin(ctx *gin.Context) {
 	defer ctx.JSON(http.StatusOK, resp)
 
 	// 调用用户服务
-	conn, err := services.Instance.GetConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(consts.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.Code = define.Failed
 		resp.Message = "用户服务连接失败"
 		return
 	}
+	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 	req := &pb.UserLoginRequest{
 		Mobile:   form.Mobile,
@@ -120,7 +121,7 @@ func HandleUserRegister(ctx *gin.Context) {
 	defer ctx.JSON(http.StatusOK, resp)
 
 	// 调用用户服务
-	conn, err := services.Instance.GetConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(consts.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.Code = define.Failed

@@ -1,15 +1,17 @@
 package main
 
-import "github.com/pengdahong1225/oj-server/backend/app/gateway/internal"
+import (
+	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/server"
+)
 
 func main() {
-	server := internal.Server{}
-	server.Name = "gateway-service"
-	server.SrvType = "http"
+	s := server.Server{}
+	s.Name = "gateway-service"
+	s.Scheme = "http"
 
-	err := server.Init()
+	err := s.Init()
 	if err != nil {
 		panic(err)
 	}
-	server.Start()
+	s.Start()
 }
