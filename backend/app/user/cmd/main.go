@@ -1,9 +1,11 @@
 package main
 
-import "github.com/pengdahong1225/oj-server/backend/app/user/internal"
+import (
+	"github.com/pengdahong1225/oj-server/backend/app/user/internal/server"
+)
 
 func main() {
-	server := internal.Server{}
+	server := server.Server{}
 	server.Name = "user-service"
 	server.SrvType = "grpc"
 

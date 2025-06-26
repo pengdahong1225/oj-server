@@ -1,10 +1,10 @@
-package judge
+package service
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/cache"
-	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
+	"github.com/pengdahong1225/oj-server/backend/app/judge/internal/respository/cache"
+	"github.com/pengdahong1225/oj-server/backend/app/judge/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
 	"github.com/pengdahong1225/oj-server/backend/module/settings"
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// Handle 判题服务入口
+// Handle 判题逻辑入口
 func Handle(form *pb.SubmitForm) {
 	// 退出之后，需要将本次提交的状态置为UPStateExited
 	defer func() {

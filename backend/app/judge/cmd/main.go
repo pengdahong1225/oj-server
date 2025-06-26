@@ -1,17 +1,15 @@
 package main
 
-import (
-	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal"
-)
+import "github.com/pengdahong1225/oj-server/backend/app/judge/internal/server"
 
 func main() {
-	server := internal.Server{}
-	server.Name = "judge-service"
-	server.SrvType = "http"
+	s := server.Server{}
+	s.Name = "judge-service"
+	s.Scheme = "grpc"
 
-	err := server.Init()
+	err := s.Init()
 	if err != nil {
 		panic(err)
 	}
-	server.Start()
+	s.Start()
 }

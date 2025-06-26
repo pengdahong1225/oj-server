@@ -1,8 +1,10 @@
-package internal
+package server
 
 import (
 	"fmt"
 	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
+	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/cache"
+	"github.com/pengdahong1225/oj-server/backend/app/user/internal/service"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -11,8 +13,6 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"sync"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/cache"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/biz/service"
 )
 
 type Server struct {

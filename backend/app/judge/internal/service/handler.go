@@ -1,11 +1,11 @@
-package judge
+package service
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/judge-service/internal/types"
+	"github.com/pengdahong1225/oj-server/backend/app/judge/internal/types"
 	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"

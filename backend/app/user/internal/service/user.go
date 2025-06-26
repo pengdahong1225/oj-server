@@ -12,12 +12,6 @@ import (
 	"strconv"
 )
 
-const (
-	compareErr      = "密码校验失败"
-	loginSucc       = "登录成功"
-	getUserInfoFail = "获取用户信息失败: "
-)
-
 type UserService struct {
 	pb.UnimplementedUserServiceServer
 	db *domain.MysqlDB
@@ -28,7 +22,7 @@ func NewUserService() *UserService {
 	s := &UserService{}
 	s.db, err = domain.NewMysqlDB()
 	if err != nil {
-		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
+		logrus.Fatalf("NewUserService failed, err:%s", err.Error())
 	}
 	return s
 }
