@@ -14,8 +14,8 @@ import (
 	"time"
 )
 
-// Handle 判题逻辑入口
-func Handle(form *pb.SubmitForm) {
+// HandleJudge 判题逻辑入口
+func HandleJudge(form *pb.SubmitForm) {
 	// 退出之后，需要将本次提交的状态置为UPStateExited
 	defer func() {
 		if err := cache.SetUPState(form.Uid, form.ProblemId, int(pb.SubmitState_UPStateExited), 60*2*time.Second); err != nil {

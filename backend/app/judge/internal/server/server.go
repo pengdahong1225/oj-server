@@ -72,9 +72,13 @@ func (receiver *Server) syncDo(data []byte) bool {
 		return false
 	}
 	// 异步处理
-	goroutinePool.Instance().Submit(func() {
-		service.Handle(submitForm)
+	err = goroutinePool.Instance().Submit(func() {
+		service.HandleJudge(submitForm)
 	})
+	if err != nil {
+		logrus.Errorln("异步处理err：", err.Error())
+		return false
+	}
 
 	return true
 }
