@@ -5,13 +5,13 @@ import (
 )
 
 func main() {
-	server := server.Server{}
-	server.Name = "user-service"
-	server.SrvType = "grpc"
+	s := server.Server{}
+	s.Name = "user-service"
+	s.Scheme = "grpc"
 
-	err := server.Init()
+	err := s.Init()
 	if err != nil {
 		panic(err)
 	}
-	server.Start()
+	s.Start()
 }

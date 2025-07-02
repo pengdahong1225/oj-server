@@ -51,6 +51,7 @@ func questionRouters(engine *gin.Engine) {
 	userRouter := engine.Group("/user")
 	{
 		userRouter.POST("/login", handler.HandleUserLogin)
+		userRouter.GET("/refresh_token", handler.HandleReFreshAccessToken)
 		userRouter.POST("/register", handler.HandleUserRegister)
 		userRouter.POST("/reset_password", handler.HandleUserResetPassword)
 		userRouter.GET("/profile", middlewares.AuthLogin(), handler.HandleGetUserProfile)

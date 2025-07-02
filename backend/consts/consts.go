@@ -11,8 +11,9 @@ const (
 )
 
 const (
-	TokenTimeOut int64 = 60 * 60 * 24 * 7
-	Issuer             = "Messi"
+	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7
+	AccessTokenTimeOut  int64 = 60 * 15
+	Issuer                    = "Messi"
 )
 
 const (

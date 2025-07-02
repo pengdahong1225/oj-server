@@ -3,6 +3,8 @@ package middlewares
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/pengdahong1225/oj-server/backend/module/auth"
+	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -11,7 +13,7 @@ import (
 func AuthLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// jwt鉴权头部信息 token
-		token := ctx.Request.Header.Get("token")
+		token := ctx.Request.Header.Get("access-token")
 		if token == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"code":    1,
@@ -20,11 +22,14 @@ func AuthLogin() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		j := NewJWT()
+		signingKey := settings.Instance().SigningKey
+		j := auth.JWTCreator{
+			SigningKey: []byte(signingKey),
+		}
 		// 解析token包含的信息
 		claims, err := j.ParseToken(token)
 		if err != nil {
-			if errors.Is(err, TokenExpired) {
+			if errors.Is(err, auth.TokenExpired) {
 				ctx.JSON(http.StatusUnauthorized, gin.H{
 					"code":    1,
 					"message": "授权已过期",

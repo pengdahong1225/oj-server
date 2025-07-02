@@ -10,8 +10,12 @@ type Response struct {
 }
 
 const (
-	Success = 0
-	Failed  = 1
+	Success             = 0
+	Failed              = 1
+	AccessTokenExpired  = 2 // 访问令牌过期
+	RefreshTokenExpired = 3 // 刷新令牌过期
+	Unauthorized        = 4 // 未登录
+	TokenInvalid        = 5 // 令牌无效
 )
 
 type RankList struct {
@@ -21,8 +25,8 @@ type RankList struct {
 }
 
 type LoginRspData struct {
-	Rsp   *pb.UserLoginResponse `json:"data"`
-	Token string                `json:"token"`
+	Rsp         *pb.UserLoginResponse `json:"data"`
+	AccessToken string                `json:"access_token"`
 }
 
 type NoticeRspData struct {

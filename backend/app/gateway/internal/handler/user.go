@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/define"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/middlewares"
 	"github.com/pengdahong1225/oj-server/backend/consts"
+	"github.com/pengdahong1225/oj-server/backend/module/auth"
 	"github.com/pengdahong1225/oj-server/backend/module/registry"
+	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -63,19 +65,7 @@ func HandleUserLogin(ctx *gin.Context) {
 		Rsp: login_resp,
 	}
 	// 生成token
-	j := middlewares.NewJWT()
-	// 设置 payload有效载荷
-	claims := &middlewares.UserClaims{
-		Uid:       login_resp.Uid,
-		Mobile:    login_resp.Mobile,
-		Authority: login_resp.Role,
-		StandardClaims: jwt.StandardClaims{
-			NotBefore: time.Now().Unix(),                       // 签名生效时间
-			ExpiresAt: time.Now().Unix() + consts.TokenTimeOut, // 7天过期
-			Issuer:    consts.Issuer,                           // 签名机构
-		},
-	}
-	token, err := j.CreateToken(claims)
+	refreshToken, err := createRefreshAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
 	if err != nil {
 		resp.Code = define.Failed
 		resp.Message = fmt.Sprintf("生成token失败:%s", err.Error())
@@ -83,12 +73,100 @@ func HandleUserLogin(ctx *gin.Context) {
 		logrus.Errorf("生成token失败:%s", err.Error())
 		return
 	}
-	data.Token = token
-
+	accessToken, err := createAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
+	if err != nil {
+		resp.Code = define.Failed
+		resp.Message = fmt.Sprintf("生成token失败:%s", err.Error())
+		resp.Data = nil
+		logrus.Errorf("生成token失败:%s", err.Error())
+		return
+	}
+	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
+	data.AccessToken = accessToken
 	resp.Data = data
 	resp.Message = "登录成功"
 	return
 }
+func HandleReFreshAccessToken(ctx *gin.Context) {
+	resp := &define.Response{
+		Code: define.Success,
+	}
+
+	// 从cookie中获取refresh_token
+	refreshToken, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		resp.Code = define.Unauthorized
+		resp.Message = "refresh_token不存在"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	j := auth.JWTCreator{
+		SigningKey: []byte(settings.Instance().SigningKey),
+	}
+	claims, err := j.ParseToken(refreshToken)
+	if err != nil {
+		if errors.Is(err, auth.TokenExpired) {
+			resp.Code = define.RefreshTokenExpired
+			resp.Message = "refresh_token已过期"
+			ctx.JSON(http.StatusUnauthorized, resp)
+			return
+		} else {
+			resp.Code = define.TokenInvalid
+			resp.Message = "token验证失败"
+			ctx.JSON(http.StatusUnauthorized, resp)
+			return
+		}
+	}
+	// 获取新的access-token
+	accessToken, err := createAccessToken(claims.Uid, claims.Mobile, claims.Authority)
+	if err != nil {
+		resp.Code = define.Failed
+		resp.Message = "生成token失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+	resp.Data = gin.H{
+		"access_token": accessToken,
+	}
+	ctx.JSON(http.StatusOK, resp)
+}
+func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
+	signingKey := settings.Instance().SigningKey
+	j := auth.JWTCreator{
+		SigningKey: []byte(signingKey),
+	}
+	claims := &auth.UserClaims{
+		Uid:       uid,
+		Mobile:    mobile,
+		Authority: role,
+		Type:      "refresh",
+		StandardClaims: jwt.StandardClaims{
+			NotBefore: time.Now().Unix(),                              // 签名生效时间
+			ExpiresAt: time.Now().Unix() + consts.RefreshTokenTimeOut, // 7天过期
+			Issuer:    consts.Issuer,                                  // 签名机构
+		},
+	}
+	return j.CreateToken(claims)
+}
+func createAccessToken(uid int64, mobile string, role int32) (string, error) {
+	signingKey := settings.Instance().SigningKey
+	j := auth.JWTCreator{
+		SigningKey: []byte(signingKey),
+	}
+	claims := &auth.UserClaims{
+		Uid:       uid,
+		Mobile:    mobile,
+		Authority: role,
+		Type:      "access",
+		StandardClaims: jwt.StandardClaims{
+			NotBefore: time.Now().Unix(),                             // 签名生效时间
+			ExpiresAt: time.Now().Unix() + consts.AccessTokenTimeOut, // 15分钟过期
+			Issuer:    consts.Issuer,                                 // 签名机构
+		},
+	}
+	return j.CreateToken(claims)
+}
+
 func HandleUserRegister(ctx *gin.Context) {
 	// 表单验证
 	form, ret := validate(ctx, define.RegisterForm{})
@@ -144,11 +222,8 @@ func HandleUserRegister(ctx *gin.Context) {
 	resp.Message = "注册成功"
 	return
 }
-func HandleUserResetPassword(ctx *gin.Context) {
-
-}
-func HandleGetUserProfile(ctx *gin.Context) {}
-
+func HandleUserResetPassword(ctx *gin.Context) {}
+func HandleGetUserProfile(ctx *gin.Context)    {}
 func HandleGetUserRecordList(ctx *gin.Context) {}
 func HandleGetUserRecord(ctx *gin.Context)     {}
 func HandleGetUserSolvedList(ctx *gin.Context) {}
