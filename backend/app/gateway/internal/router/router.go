@@ -25,7 +25,7 @@ func Router() *gin.Engine {
 
 	// 初始化路由
 	healthCheckRouters(r)
-	questionRouters(r)
+	problemRouters(r)
 
 	return r
 }
@@ -40,10 +40,10 @@ func healthCheckRouters(engine *gin.Engine) {
 	})
 }
 
-// questionRouters
+// problemRouters
 // 题目服务相关路由
 // api/
-func questionRouters(engine *gin.Engine) {
+func problemRouters(engine *gin.Engine) {
 	// 排行榜
 	engine.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
 
