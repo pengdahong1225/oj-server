@@ -107,7 +107,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := cache.GetImageCaptcha(form.Mobile)
+	code, err := cache.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"
@@ -306,8 +306,66 @@ func HandleUserRegister(ctx *gin.Context) {
 	return
 }
 func HandleUserResetPassword(ctx *gin.Context) {
+	// 表单验证
+	form, ret := validate(ctx, define.ResetPasswordForm{})
+	if !ret {
+		return
+	}
 
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+	// 手机号校验
+	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	if !ok {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "手机号格式错误"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 验证码校验
+	code, err := cache.GetSmsCaptcha(form.Mobile)
+	if err != nil {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "验证码已过期"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	if form.CaptchaVal != code {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "验证码错误"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	// 调用用户服务
+	conn, err := registry.GetGrpcConnection(consts.UserService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务繁忙"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+	req := &pb.ResetUserPasswordRequest{
+		Mobile:   form.Mobile,
+		Password: form.PassWord,
+	}
+	rpc_resp, err := client.ResetUserPassword(ctx, req)
+	if err != nil {
+		logrus.Info("UserLogin Failed: %s", err.Error())
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "重置密码失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+	resp.Data = rpc_resp
+	resp.Message = "重置成功"
+	ctx.JSON(http.StatusOK, resp)
 }
+
 func HandleGetUserProfile(ctx *gin.Context)    {}
 func HandleGetUserRecordList(ctx *gin.Context) {}
 func HandleGetUserRecord(ctx *gin.Context)     {}

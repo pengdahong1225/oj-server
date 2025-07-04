@@ -71,7 +71,7 @@ func HandleGetSmsCode(ctx *gin.Context) {
 		return
 	}
 	// 缓存验证码
-	err = cache.SetImageCaptcha(form.Mobile, c)
+	err = cache.SetSmsCaptcha(form.Mobile, c)
 	if err != nil {
 		logrus.Errorf("缓存验证码失败: %v", err)
 		resp.ErrCode = pb.Error_EN_ServiceBusy

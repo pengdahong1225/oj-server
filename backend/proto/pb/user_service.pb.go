@@ -561,6 +561,8 @@ func (x *UserProblemStatistics) GetHardProblemCount() int64 {
 // 重置密码
 type ResetUserPasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Mobile        string                 `protobuf:"bytes,1,opt,name=mobile,proto3" json:"mobile,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -595,8 +597,23 @@ func (*ResetUserPasswordRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_proto_rawDescGZIP(), []int{7}
 }
 
+func (x *ResetUserPasswordRequest) GetMobile() string {
+	if x != nil {
+		return x.Mobile
+	}
+	return ""
+}
+
+func (x *ResetUserPasswordRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
 type ResetUserPasswordResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -629,6 +646,13 @@ func (x *ResetUserPasswordResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ResetUserPasswordResponse.ProtoReflect.Descriptor instead.
 func (*ResetUserPasswordResponse) Descriptor() ([]byte, []int) {
 	return file_user_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ResetUserPasswordResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 // 查询用户信息
@@ -778,9 +802,12 @@ const file_user_service_proto_rawDesc = "" +
 	"\x10accomplish_count\x18\x03 \x01(\x03R\x0faccomplishCount\x12,\n" +
 	"\x12easy_problem_count\x18\x04 \x01(\x03R\x10easyProblemCount\x120\n" +
 	"\x14medium_problem_count\x18\x05 \x01(\x03R\x12mediumProblemCount\x12,\n" +
-	"\x12hard_problem_count\x18\x06 \x01(\x03R\x10hardProblemCount\"\x1a\n" +
-	"\x18ResetUserPasswordRequest\"\x1b\n" +
-	"\x19ResetUserPasswordResponse\">\n" +
+	"\x12hard_problem_count\x18\x06 \x01(\x03R\x10hardProblemCount\"N\n" +
+	"\x18ResetUserPasswordRequest\x12\x16\n" +
+	"\x06mobile\x18\x01 \x01(\tR\x06mobile\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"5\n" +
+	"\x19ResetUserPasswordResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\">\n" +
 	"\x12GetUserInfoRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x16\n" +
 	"\x06mobile\x18\x02 \x01(\tR\x06mobile\"4\n" +

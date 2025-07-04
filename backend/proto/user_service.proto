@@ -76,8 +76,13 @@ message UserProblemStatistics{
 }
 
 // 重置密码
-message ResetUserPasswordRequest {}
-message ResetUserPasswordResponse {}
+message ResetUserPasswordRequest {
+  string mobile = 1;
+  string password = 2;
+}
+message ResetUserPasswordResponse {
+  string message = 1;
+}
 
 // 查询用户信息
 message GetUserInfoRequest {

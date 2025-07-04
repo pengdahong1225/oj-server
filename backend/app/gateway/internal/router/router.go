@@ -25,26 +25,21 @@ func Router() *gin.Engine {
 	r.Use(middlewares.Cors()) // 跨域处理
 
 	// 初始化路由
-	healthCheckRouters(r)
-	problemRouters(r)
+	initRouters(r)
 
 	return r
 }
 
-// healthCheckRouters 健康检查路由
-func healthCheckRouters(engine *gin.Engine) {
+// 注册http路由
+// api/
+func initRouters(engine *gin.Engine) {
 	engine.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"code":    "0",
 			"message": "health",
 		})
 	})
-}
 
-// problemRouters
-// 题目服务相关路由
-// api/
-func problemRouters(engine *gin.Engine) {
 	// 排行榜
 	engine.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
 
