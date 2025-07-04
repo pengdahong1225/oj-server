@@ -7,7 +7,7 @@ import (
 	"oj-server/app/judge/internal/respository/cache"
 	"oj-server/app/judge/internal/service"
 	"oj-server/consts"
-	"oj-server/module/goroutinePool"
+	"oj-server/module/gPool"
 	"oj-server/module/mq"
 	"oj-server/proto/pb"
 )
@@ -72,7 +72,7 @@ func (receiver *Server) syncDo(data []byte) bool {
 		return false
 	}
 	// 异步处理
-	err = goroutinePool.Instance().Submit(func() {
+	err = gPool.Instance().Submit(func() {
 		service.HandleJudge(submitForm)
 	})
 	if err != nil {

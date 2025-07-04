@@ -60,3 +60,16 @@ func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (in
 	}
 	return count, problemList, nil
 }
+
+func (md *MysqlDB) QueryProblemData(id int64) (*model.Problem, error) {
+	var problem model.Problem
+	result := md.db_.Where("id=?", id).Find(&problem)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return nil, errs.QueryFailed
+	}
+	if result.RowsAffected == 0 {
+		return nil, errs.NotFound
+	}
+	return &problem, nil
+}

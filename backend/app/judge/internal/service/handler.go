@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 	"oj-server/app/judge/internal/types"
-	"oj-server/module/goroutinePool"
+	"oj-server/module/gPool"
 	"oj-server/proto/pb"
 	"strings"
 	"sync"
@@ -100,7 +100,7 @@ func (r *Handler) run(param *types.Param) {
 
 	for _, test := range param.ProblemConfig.TestCases {
 		wg.Add(1)
-		goroutinePool.Instance().Submit(func() {
+		gPool.Instance().Submit(func() {
 			defer wg.Done()
 
 			form := types.SandBoxApiForm{

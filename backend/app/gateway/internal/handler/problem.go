@@ -4,18 +4,22 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
+	"oj-server/app/gateway/internal/productor"
+	"oj-server/app/gateway/internal/respository/cache"
 	"oj-server/consts"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
+	"path/filepath"
 	"strconv"
 )
 
 func HandleGetTagList(ctx *gin.Context) {}
 
 func HandleGetProblemList(ctx *gin.Context) {
-	response := &define.Response{
+	resp := &define.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 
@@ -25,28 +29,26 @@ func HandleGetProblemList(ctx *gin.Context) {
 	tag := ctx.Query("tag")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page <= 0 {
-		response.ErrCode = pb.Error_EN_FormValidateFailed
-		response.Message = "页码参数错误"
-		ctx.JSON(http.StatusBadRequest, response)
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "页码参数错误"
+		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
 	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil || pageSize <= 0 {
-		response.ErrCode = pb.Error_EN_FormValidateFailed
-		response.Message = "页大小参数错误"
-		ctx.JSON(http.StatusBadRequest, response)
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "页大小参数错误"
+		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	//uidStr := ctx.DefaultQuery("uid", "")
-	//uid, _ := strconv.ParseInt(uidStr, 10, 64)
 
 	// 调用problem服务
 	conn, err := registry.GetGrpcConnection(consts.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		response.ErrCode = pb.Error_EN_ServiceBusy
-		response.Message = "服务器错误"
-		ctx.JSON(http.StatusInternalServerError, response)
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -56,22 +58,204 @@ func HandleGetProblemList(ctx *gin.Context) {
 		Keyword:  keyWord,
 		Tag:      tag,
 	}
-	resp, err := client.GetProblemList(context.Background(), req)
+	rps_resp, err := client.GetProblemList(context.Background(), req)
 	if err != nil {
 		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
-		response.ErrCode = pb.Error_EN_Failed
-		response.Message = "获取题目列表失败"
-		ctx.JSON(http.StatusOK, response)
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "获取题目列表失败"
+		ctx.JSON(http.StatusOK, resp)
 		return
 	}
-	response.Data = resp
-	response.Message = "获取题目列表成功"
-	ctx.JSON(http.StatusOK, response)
+	resp.Data = rps_resp
+	resp.Message = "获取题目列表成功"
+	ctx.JSON(http.StatusOK, resp)
 	return
 }
-func HandleGetProblemDetail(ctx *gin.Context) {}
-func HandleSubmitProblem(ctx *gin.Context)    {}
-func HandleGetSubmitResult(ctx *gin.Context)  {}
-func HandleUpdateProblem(ctx *gin.Context)    {}
-func HandleCreateProblem(ctx *gin.Context)    {}
-func HandleDeleteProblem(ctx *gin.Context)    {}
+func HandleGetProblemDetail(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+	// 查询参数
+	idStr := ctx.Query("problem_id")
+	if idStr == "" {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "题目id不能为空"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	// 调用problem服务
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	req := &pb.GetProblemRequest{
+		Id: id,
+	}
+	rpc_resp, err := client.GetProblemData(context.Background(), req)
+	if err != nil {
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "获取题目详情失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+	resp.ErrCode = pb.Error_EN_Success
+	resp.Data = rpc_resp.Data
+	resp.Message = "获取题目详情成功"
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// 处理提交代码
+// 判断“用户”是否处于判题状态？true就拒绝
+// 用户提交了题目就立刻返回，并给题目设置状态
+// 客户端通过其他接口轮询题目结果
+func HandleSubmitProblem(ctx *gin.Context) {
+	// 表单验证
+	form, ret := validate(ctx, define.SubmitForm{})
+	if !ret {
+		return
+	}
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+	uid := ctx.GetInt64("uid")
+	_, err := cache.LockUser(uid)
+	if err != nil {
+		logrus.Errorf("lock user failed:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_DealingWithTask
+		resp.Message = "判题中..."
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	pbForm := pb.SubmitForm{
+		Uid:       uid,
+		ProblemId: form.ProblemID,
+		Title:     form.Title,
+		Lang:      form.Lang,
+		Code:      form.Code,
+	}
+	data, err := proto.Marshal(&pbForm)
+	if err != nil {
+		logrus.Errorf("marshal failed:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_MarshalFailed
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	// 提交到mq
+	if !productor.Publish(data) {
+		logrus.Errorf("publish failed")
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "位置错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		_ = cache.UnLockUser(uid)
+	}
+	resp.ErrCode = pb.Error_EN_Success
+	resp.Message = "题目提交成功"
+	ctx.JSON(http.StatusOK, resp)
+}
+func HandleGetSubmitResult(ctx *gin.Context) {}
+
+// 处理创建题目信息
+func HandleCreateProblem(ctx *gin.Context) {
+	form, ret := validate(ctx, define.CreateProblemForm{})
+	if !ret {
+		return
+	}
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+
+	// 调用problem服务
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	req := &pb.CreateProblemRequest{
+		Title:       form.Title,
+		Description: form.Description,
+		Level:       form.Level,
+		Tags:        form.Tags,
+	}
+	rpc_resp, err := client.CreateProblem(context.Background(), req)
+	if err != nil {
+		logrus.Errorf("problem服务创建题目失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "创建题目失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+	resp.ErrCode = pb.Error_EN_Success
+	resp.Data = rpc_resp
+	resp.Message = "创建题目成功"
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// 处理题目配置文件上传
+func HandleUploadConfig(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+
+	problemIdStr := ctx.PostForm("problem_id")
+	problemId, err := strconv.ParseInt(problemIdStr, 10, 64)
+	if err != nil || problemId <= 0 {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "无效的 problem_id"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	file, err := ctx.FormFile("config_file")
+	if err != nil {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "需要config_file字段"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	if filepath.Ext(file.Filename) != ".json" {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "文件格式错误"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 限制文件大小（默认 8MB，可调整）
+	maxSize := int64(8 << 20) // 8MB
+	if file.Size > maxSize {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "文件大小超过限制"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 保存文件到指定目录
+	dst := "./uploads/" + file.Filename
+	err = ctx.SaveUploadedFile(file, dst)
+	if err != nil {
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "文件保存失败"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	resp.ErrCode = pb.Error_EN_Success
+	resp.Message = "文件上传成功"
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// 处理发布题目
+func HandlePublishProblem(ctx *gin.Context) {}
+
+// 处理删除题目
+func HandleDeleteProblem(ctx *gin.Context) {}
+
+// 处理更新题目信息
+func HandleUpdateProblem(ctx *gin.Context) {}

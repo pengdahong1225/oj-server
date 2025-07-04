@@ -1,16 +1,15 @@
 package consumer
 
 import (
-	"context"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"oj-server/consts"
+	"oj-server/module/gPool"
 	"oj-server/module/mq"
-	"oj-server/module/registry"
 	"oj-server/proto/pb"
 )
 
-func ConsumeComment() {
+func StartCommentConsume() {
 	consumer := mq.NewConsumer(
 		consts.RabbitMqExchangeKind,
 		consts.RabbitMqExchangeName,
@@ -42,24 +41,12 @@ func syncHandle(data []byte) bool {
 		return false
 	}
 	// 处理
-	go writeComment(c)
+	_ = gPool.Instance().Submit(func() {
+		writeComment(c)
+	})
 
 	return true
 }
 func writeComment(c *pb.Comment) {
-	conn, err := registry.NewDBConnection()
-	if err != nil {
-		logrus.Errorf("db-service连接失败, err=%v", err.Error())
-		return
-	}
-	defer conn.Close()
 
-	client := pb.NewCommentServiceClient(conn)
-	_, err = client.SaveComment(context.Background(), &pb.SaveCommentRequest{
-		Data: c,
-	})
-	if err != nil {
-		logrus.Errorf("db-service保存评论失败, obj=%v,err=%v", c.ObjId, err.Error())
-		return
-	}
 }

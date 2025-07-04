@@ -37,15 +37,13 @@ func (s *Server) Init() error {
 }
 
 func (s *Server) Start() {
-	var opts []grpc.ServerOption
 	// tls认证
-	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
+	creds, err := credentials.NewServerTLSFromFile("./config/keys/server.crt", "./config/keys/server.key")
 	if err != nil {
 		logrus.Fatalf("Failed to generate credentials %v", err)
-
 	}
+	var opts []grpc.ServerOption
 	opts = append(opts, grpc.Creds(creds))
-
 	grpcServer := grpc.NewServer(opts...)
 
 	// 健康检查

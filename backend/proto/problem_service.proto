@@ -71,10 +71,9 @@ message TestCase{
 // 新增题目
 message CreateProblemRequest {
   string title = 1;
-  string content = 2;
-  string description = 3;
-  int32 level = 4;
-  repeated string tags = 5;
+  string description = 2;
+  int32 level = 3;
+  repeated string tags = 4;
 }
 message CreateProblemResponse {
   int64 id = 1;

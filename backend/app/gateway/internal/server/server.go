@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/app/common/serverBase"
+	"oj-server/app/gateway/internal/respository/cache"
 	"oj-server/app/gateway/internal/router"
 	"sync"
 )
@@ -17,6 +18,10 @@ type Server struct {
 
 func (s *Server) Init() error {
 	err := s.Initialize()
+	if err != nil {
+		return err
+	}
+	err = cache.Init()
 	if err != nil {
 		return err
 	}

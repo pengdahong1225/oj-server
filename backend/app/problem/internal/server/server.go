@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"oj-server/app/common/serverBase"
-	"oj-server/app/problem-service/internal/biz/service"
-	"oj-server/app/problem-service/internal/consumer"
-	"oj-server/app/problem-service/internal/repository/cache"
+	"oj-server/app/problem/internal/consumer"
+	"oj-server/app/problem/internal/repository/cache"
+	"oj-server/app/problem/internal/service"
 	"oj-server/proto/pb"
 	"sync"
 )
@@ -22,13 +22,13 @@ type Server struct {
 	wg         sync.WaitGroup
 }
 
-func (receiver *Server) Init() error {
-	err := receiver.Initialize()
+func (s *Server) Init() error {
+	err := s.Initialize()
 	if err != nil {
 		return err
 	}
 
-	receiver.problemSrv = service.NewProblemService()
+	s.problemSrv = service.NewProblemService()
 	err = cache.Init()
 	if err != nil {
 		return err
@@ -37,13 +37,12 @@ func (receiver *Server) Init() error {
 	return nil
 }
 
-func (receiver *Server) Start() {
+func (s *Server) Start() {
 	var opts []grpc.ServerOption
 	// tls认证
-	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
+	creds, err := credentials.NewServerTLSFromFile("./config/keys/server.pem", "./config/keys/server.key")
 	if err != nil {
 		logrus.Fatalf("Failed to generate credentials %v", err)
-
 	}
 	opts = append(opts, grpc.Creds(creds))
 
@@ -52,13 +51,13 @@ func (receiver *Server) Start() {
 	// 健康检查
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	// 将业务服务注册到grpc中
-	pb.RegisterProblemServiceServer(grpcServer, receiver.problemSrv)
+	pb.RegisterProblemServiceServer(grpcServer, s.problemSrv)
 
 	// 启动
-	receiver.wg.Add(1)
+	s.wg.Add(1)
 	go func() {
-		defer receiver.wg.Done()
-		netAddr := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
+		defer s.wg.Done()
+		netAddr := fmt.Sprintf("%s:%d", s.Host, s.Port)
 		listener, err := net.Listen("tcp", netAddr)
 		if err != nil {
 			panic(err)
@@ -70,14 +69,18 @@ func (receiver *Server) Start() {
 		}
 	}()
 
-	// 启动消费者
-	go consumer.ConsumeComment()
+	// 启动评论消费者
+	s.wg.Add(1)
+	go func() {
+		defer s.wg.Done()
+		consumer.StartCommentConsume()
+	}()
 
-	err = receiver.Register()
+	err = s.Register()
 	if err != nil {
 		panic(err)
 	}
-	defer receiver.UnRegister()
+	defer s.UnRegister()
 
-	receiver.wg.Wait()
+	s.wg.Wait()
 }

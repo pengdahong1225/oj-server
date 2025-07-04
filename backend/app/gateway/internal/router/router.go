@@ -71,11 +71,15 @@ func initRouters(engine *gin.Engine) {
 		problemRouter.GET("/tag_list", handler.HandleGetTagList)
 		problemRouter.GET("/list", handler.HandleGetProblemList)
 		problemRouter.GET("/detail", handler.HandleGetProblemDetail)
+
 		problemRouter.POST("/submit", middlewares.AuthLogin(), handler.HandleSubmitProblem)
 		problemRouter.GET("/result", middlewares.AuthLogin(), handler.HandleGetSubmitResult) // 本次提交的结果
+
 		problemRouter.POST("/add", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleCreateProblem)
-		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUpdateProblem)
+		problemRouter.POST("/upload_config", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUploadConfig)
+		problemRouter.GET("/publish", middlewares.AuthLogin(), middlewares.Admin(), handler.HandlePublishProblem)
 		problemRouter.DELETE("", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleDeleteProblem)
+		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUpdateProblem)
 	}
 
 	// 评论

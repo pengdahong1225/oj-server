@@ -1,4 +1,4 @@
-package goroutinePool
+package gPool
 
 import (
 	"github.com/panjf2000/ants/v2"
@@ -26,5 +26,5 @@ func Instance() *ants.Pool {
 func panicHandler(i interface{}) {
 	var buf [4096]byte
 	n := runtime.Stack(buf[:], false)
-	logrus.Errorln("worker exits from panic: %s\n", string(buf[:n]))
+	logrus.Errorln("worker exits from panic: %s", string(buf[:n]))
 }

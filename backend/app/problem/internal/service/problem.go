@@ -80,8 +80,14 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 }
 
 func (ps *ProblemService) GetProblemData(ctx context.Context, in *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	resp := &pb.GetProblemResponse{}
+
+	problem, err := ps.db.QueryProblemData(in.Id)
+	if err != nil {
+		return nil, err
+	}
+	resp.Data = problem.Transform()
+	return resp, nil
 }
 
 func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) (*pb.GetTagListResponse, error) {

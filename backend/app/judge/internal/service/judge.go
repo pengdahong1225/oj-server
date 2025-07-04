@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"oj-server/app/judge/internal/respository/cache"
 	"oj-server/app/judge/internal/types"
-	"oj-server/module/goroutinePool"
+	"oj-server/module/gPool"
 	"oj-server/module/registry"
 	"oj-server/module/settings"
 	"oj-server/proto/pb"
@@ -172,13 +172,13 @@ func doAction(param *types.Param) []*pb.PBResult {
 	}
 	wgRun := new(sync.WaitGroup)
 	wgRun.Add(1)
-	goroutinePool.Instance().Submit(func() {
+	gPool.Instance().Submit(func() {
 		defer wgRun.Done()
 		handler.run(param)
 	})
 	wgJudge := new(sync.WaitGroup)
 	wgJudge.Add(1)
-	goroutinePool.Instance().Submit(func() {
+	gPool.Instance().Submit(func() {
 		defer wgJudge.Done()
 		judgeResults := handler.judge()
 		results = append(results, judgeResults...)

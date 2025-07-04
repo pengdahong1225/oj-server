@@ -11,7 +11,8 @@ import (
 // 表单类型集
 type formTyper interface {
 	define.RegisterForm | define.LoginFrom | define.GetSmsCodeForm | define.SubmitForm | define.UpdateProblemForm |
-		define.AddCommentForm | define.CommentLikeForm | define.LoginWithSmsForm | define.ResetPasswordForm
+		define.AddCommentForm | define.CommentLikeForm | define.LoginWithSmsForm | define.ResetPasswordForm |
+		define.CreateProblemForm
 }
 
 // validate 通用表单验证
