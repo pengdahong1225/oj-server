@@ -15,8 +15,9 @@ import (
 func HandleGetTagList(ctx *gin.Context) {}
 
 func HandleGetProblemList(ctx *gin.Context) {
-	response := &define.Response{}
-	defer ctx.JSON(http.StatusOK, response)
+	response := &define.Response{
+		Code: define.Success,
+	}
 
 	pageStr := ctx.Query("page")
 	pageSizeStr := ctx.Query("page_size")
@@ -26,12 +27,14 @@ func HandleGetProblemList(ctx *gin.Context) {
 	if err != nil || page <= 0 {
 		response.Code = define.Failed
 		response.Message = "页码参数错误"
+		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil || pageSize <= 0 {
 		response.Code = define.Failed
 		response.Message = "页大小参数错误"
+		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 	//uidStr := ctx.DefaultQuery("uid", "")
@@ -42,7 +45,8 @@ func HandleGetProblemList(ctx *gin.Context) {
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		response.Code = define.Failed
-		response.Message = "problem服务连接失败"
+		response.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -56,11 +60,13 @@ func HandleGetProblemList(ctx *gin.Context) {
 	if err != nil {
 		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
 		response.Code = define.Failed
-		response.Message = "problem服务获取题目列表失败"
+		response.Message = "获取题目列表失败"
+		ctx.JSON(http.StatusOK, response)
 		return
 	}
 	response.Code = define.Success
 	response.Data = resp
+	ctx.JSON(http.StatusOK, response)
 	return
 }
 func HandleGetProblemDetail(ctx *gin.Context) {}

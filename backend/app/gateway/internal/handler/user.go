@@ -23,29 +23,28 @@ func HandleUserLogin(ctx *gin.Context) {
 	if !ret {
 		return
 	}
-	// 手机号校验
-	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
-	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    define.Failed,
-			"message": "手机号格式错误",
-		})
-		return
-	}
 
 	resp := &define.Response{
 		Code:    define.Success,
 		Message: "",
 		Data:    nil,
 	}
-	defer ctx.JSON(http.StatusOK, resp)
+	// 手机号校验
+	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	if !ok {
+		resp.Code = define.Failed
+		resp.Message = "手机号格式错误"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
 
 	// 调用用户服务
 	conn, err := registry.GetGrpcConnection(consts.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.Code = define.Failed
-		resp.Message = "用户服务连接失败"
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	defer conn.Close()
@@ -59,6 +58,7 @@ func HandleUserLogin(ctx *gin.Context) {
 		logrus.Info("UserLogin Failed: %s", err.Error())
 		resp.Code = define.Failed
 		resp.Message = "登录失败"
+		ctx.JSON(http.StatusOK, resp)
 		return
 	}
 	data := define.LoginRspData{
@@ -67,24 +67,27 @@ func HandleUserLogin(ctx *gin.Context) {
 	// 生成token
 	refreshToken, err := createRefreshAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
 	if err != nil {
+		logrus.Errorf("生成token失败:%s", err.Error())
 		resp.Code = define.Failed
 		resp.Message = fmt.Sprintf("生成token失败:%s", err.Error())
 		resp.Data = nil
-		logrus.Errorf("生成token失败:%s", err.Error())
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	accessToken, err := createAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
 	if err != nil {
+		logrus.Errorf("生成token失败:%s", err.Error())
 		resp.Code = define.Failed
 		resp.Message = fmt.Sprintf("生成token失败:%s", err.Error())
 		resp.Data = nil
-		logrus.Errorf("生成token失败:%s", err.Error())
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
 	data.AccessToken = accessToken
 	resp.Data = data
 	resp.Message = "登录成功"
+	ctx.JSON(http.StatusOK, resp)
 	return
 }
 func HandleReFreshAccessToken(ctx *gin.Context) {
@@ -122,7 +125,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	if err != nil {
 		resp.Code = define.Failed
 		resp.Message = "生成token失败"
-		ctx.JSON(http.StatusOK, resp)
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	resp.Data = gin.H{
@@ -173,37 +176,33 @@ func HandleUserRegister(ctx *gin.Context) {
 	if !ret {
 		return
 	}
+
+	resp := &define.Response{
+		Code: define.Success,
+	}
 	// 手机号校验
 	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    define.Failed,
-			"message": "手机号格式错误",
-		})
+		resp.Code = define.Failed
+		resp.Message = "手机号格式错误"
+		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
 	// 密码校验
 	if form.PassWord != form.RePassWord {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    define.Failed,
-			"message": "两次密码输入不匹配",
-		})
+		resp.Code = define.Failed
+		resp.Message = "两次密码输入不匹配"
+		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-
-	resp := &define.Response{
-		Code:    define.Success,
-		Message: "",
-		Data:    nil,
-	}
-	defer ctx.JSON(http.StatusOK, resp)
 
 	// 调用用户服务
 	conn, err := registry.GetGrpcConnection(consts.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.Code = define.Failed
-		resp.Message = "用户服务连接失败"
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	client := pb.NewUserServiceClient(conn)
@@ -216,10 +215,12 @@ func HandleUserRegister(ctx *gin.Context) {
 		logrus.Info("UserRegister Failed: %s", err.Error())
 		resp.Code = define.Failed
 		resp.Message = "注册失败"
+		ctx.JSON(http.StatusOK, resp)
 		return
 	}
 	resp.Data = rsp
 	resp.Message = "注册成功"
+	ctx.JSON(http.StatusOK, resp)
 	return
 }
 func HandleUserResetPassword(ctx *gin.Context) {}
