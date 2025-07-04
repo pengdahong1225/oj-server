@@ -2,9 +2,9 @@ package mq
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"oj-server/module/settings"
 )
 
 var connection *amqp.Connection

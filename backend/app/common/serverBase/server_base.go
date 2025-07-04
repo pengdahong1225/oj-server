@@ -2,12 +2,12 @@ package ServerBase
 
 import (
 	"flag"
-	"github.com/pengdahong1225/oj-server/backend/module/logger"
-	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
-	"github.com/pengdahong1225/oj-server/backend/module/utils"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
+	"oj-server/module/logger"
+	"oj-server/module/registry"
+	"oj-server/module/settings"
+	"oj-server/module/utils"
+	"oj-server/proto/pb"
 )
 
 type Server struct {

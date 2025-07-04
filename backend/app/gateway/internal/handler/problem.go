@@ -3,12 +3,12 @@ package handler
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/define"
-	"github.com/pengdahong1225/oj-server/backend/consts"
-	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"oj-server/app/gateway/internal/define"
+	"oj-server/consts"
+	"oj-server/module/registry"
+	"oj-server/proto/pb"
 	"strconv"
 )
 
@@ -16,7 +16,7 @@ func HandleGetTagList(ctx *gin.Context) {}
 
 func HandleGetProblemList(ctx *gin.Context) {
 	response := &define.Response{
-		Code: define.Success,
+		ErrCode: pb.Error_EN_Success,
 	}
 
 	pageStr := ctx.Query("page")
@@ -25,14 +25,14 @@ func HandleGetProblemList(ctx *gin.Context) {
 	tag := ctx.Query("tag")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page <= 0 {
-		response.Code = define.Failed
+		response.ErrCode = pb.Error_EN_FormValidateFailed
 		response.Message = "页码参数错误"
 		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil || pageSize <= 0 {
-		response.Code = define.Failed
+		response.ErrCode = pb.Error_EN_FormValidateFailed
 		response.Message = "页大小参数错误"
 		ctx.JSON(http.StatusBadRequest, response)
 		return
@@ -44,7 +44,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	conn, err := registry.GetGrpcConnection(consts.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		response.Code = define.Failed
+		response.ErrCode = pb.Error_EN_ServiceBusy
 		response.Message = "服务器错误"
 		ctx.JSON(http.StatusInternalServerError, response)
 		return
@@ -59,13 +59,13 @@ func HandleGetProblemList(ctx *gin.Context) {
 	resp, err := client.GetProblemList(context.Background(), req)
 	if err != nil {
 		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
-		response.Code = define.Failed
+		response.ErrCode = pb.Error_EN_Failed
 		response.Message = "获取题目列表失败"
 		ctx.JSON(http.StatusOK, response)
 		return
 	}
-	response.Code = define.Success
 	response.Data = resp
+	response.Message = "获取题目列表成功"
 	ctx.JSON(http.StatusOK, response)
 	return
 }

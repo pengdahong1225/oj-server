@@ -2,9 +2,9 @@ package server
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/router"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/common/serverBase"
+	"oj-server/app/gateway/internal/router"
 	"sync"
 )
 
@@ -15,8 +15,8 @@ type Server struct {
 	wg sync.WaitGroup
 }
 
-func (receiver *Server) Init() error {
-	err := receiver.Initialize()
+func (s *Server) Init() error {
+	err := s.Initialize()
 	if err != nil {
 		return err
 	}
@@ -24,13 +24,13 @@ func (receiver *Server) Init() error {
 	return nil
 }
 
-func (receiver *Server) Start() {
+func (s *Server) Start() {
 	// 启动
-	receiver.wg.Add(1)
+	s.wg.Add(1)
 	go func() {
-		defer receiver.wg.Done()
+		defer s.wg.Done()
 		engine := router.Router()
-		dsn := fmt.Sprintf(":%d", receiver.Port)
+		dsn := fmt.Sprintf(":%d", s.Port)
 		err := engine.Run(dsn)
 		if err != nil {
 			logrus.Fatalf("启动服务失败: %v", err)
@@ -38,11 +38,11 @@ func (receiver *Server) Start() {
 	}()
 
 	// 服务注册
-	err := receiver.Register()
+	err := s.Register()
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
-	defer receiver.UnRegister()
+	defer s.UnRegister()
 
-	receiver.wg.Wait()
+	s.wg.Wait()
 }

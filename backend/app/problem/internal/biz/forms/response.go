@@ -1,6 +1,6 @@
 package forms
 
-import "github.com/pengdahong1225/oj-server/backend/proto/pb"
+import "oj-server/proto/pb"
 
 // Response 统一返回格式
 type Response struct {

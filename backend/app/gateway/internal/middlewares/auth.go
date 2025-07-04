@@ -3,10 +3,10 @@ package middlewares
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/pengdahong1225/oj-server/backend/module/auth"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"oj-server/module/auth"
+	"oj-server/module/settings"
 	"time"
 )
 

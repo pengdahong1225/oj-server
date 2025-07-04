@@ -1,22 +1,13 @@
 package define
 
-import "github.com/pengdahong1225/oj-server/backend/proto/pb"
+import "oj-server/proto/pb"
 
 // Response 统一返回格式
 type Response struct {
-	Code    int    `json:"code"` // 业务状态码
-	Message string `json:"message"`
-	Data    any    `json:"data"`
+	ErrCode pb.Error `json:"code"` // 业务状态码
+	Message string   `json:"message"`
+	Data    any      `json:"data"`
 }
-
-const (
-	Success             = 0
-	Failed              = 1
-	AccessTokenExpired  = 2 // 访问令牌过期
-	RefreshTokenExpired = 3 // 刷新令牌过期
-	Unauthorized        = 4 // 未登录
-	TokenInvalid        = 5 // 令牌无效
-)
 
 type RankList struct {
 	Phone     int64  `json:"phone"`

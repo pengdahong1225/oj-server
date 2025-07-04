@@ -8,18 +8,18 @@ import (
 )
 
 var (
-	RedisClient *redis.Client
+	rdb *redis.Client
 )
 
 func Init() error {
 	cfg := settings.Instance().RedisConfig
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
-	RedisClient = redis.NewClient(&redis.Options{
+	rdb = redis.NewClient(&redis.Options{
 		Addr:    dsn,
 		Network: "tcp",
 	})
-	st := RedisClient.Ping(context.Background())
+	st := rdb.Ping(context.Background())
 	if st.Err() != nil {
 		return st.Err()
 	}

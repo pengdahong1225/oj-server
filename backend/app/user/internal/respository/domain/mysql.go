@@ -2,11 +2,11 @@ package domain
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/module/logger"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"oj-server/module/logger"
+	"oj-server/module/settings"
 )
 
 type MysqlDB struct {

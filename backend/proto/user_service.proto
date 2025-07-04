@@ -1,20 +1,18 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
-import "google/protobuf/empty.proto";
-
 // 用户服务接口
 service UserService {
   // 注册
   rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse);
-  // 登录
+  // 登录-账号密码
   rpc UserLogin(UserLoginRequest) returns (UserLoginResponse);
+  // 登录-验证码
+  rpc UserLoginBySmsCode(UserLoginBySmsCodeRequest) returns (UserLoginResponse);
   // 重置密码
   rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse);
   // 查询用户信息
   rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
-  // 刷新token
-  rpc RefreshToken(google.protobuf.Empty) returns (RefreshTokenResponse);
 }
 
 // 用户基本数据
@@ -48,10 +46,14 @@ message UserRegisterResponse {
   int64 uid = 1;
   string message = 2;
 }
-// 登录
+// 登录-账号密码
 message UserLoginRequest {
   string mobile = 1;
   string password = 2;
+}
+// 登录-验证码
+message UserLoginBySmsCodeRequest {
+  string mobile = 1;
 }
 message UserLoginResponse {
   int64 uid = 1;
@@ -84,9 +86,4 @@ message GetUserInfoRequest {
 }
 message GetUserInfoResponse {
   UserInfo data = 1;
-}
-
-// 刷新token
-message RefreshTokenResponse {
-  string token = 1;
 }

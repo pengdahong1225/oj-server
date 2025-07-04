@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="user" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="backend" />
+    <working_directory value="$PROJECT_DIR$/app/user" />
+    <kind value="DIRECTORY" />
+    <package value="oj-server" />
+    <directory value="$PROJECT_DIR$/app/user/cmd" />
+    <filePath value="$PROJECT_DIR$" />
+    <output_directory value="$PROJECT_DIR$/app/user" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>

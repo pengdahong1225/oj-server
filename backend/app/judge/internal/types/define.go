@@ -1,6 +1,6 @@
 package types
 
-import "github.com/pengdahong1225/oj-server/backend/proto/pb"
+import "oj-server/proto/pb"
 
 type Param struct {
 	Uid           int64

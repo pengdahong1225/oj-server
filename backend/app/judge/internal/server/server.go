@@ -1,15 +1,15 @@
 package server
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
-	"github.com/pengdahong1225/oj-server/backend/app/judge/internal/respository/cache"
-	"github.com/pengdahong1225/oj-server/backend/app/judge/internal/service"
-	"github.com/pengdahong1225/oj-server/backend/consts"
-	"github.com/pengdahong1225/oj-server/backend/module/goroutinePool"
-	"github.com/pengdahong1225/oj-server/backend/module/mq"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"oj-server/app/common/serverBase"
+	"oj-server/app/judge/internal/respository/cache"
+	"oj-server/app/judge/internal/service"
+	"oj-server/consts"
+	"oj-server/module/goroutinePool"
+	"oj-server/module/mq"
+	"oj-server/proto/pb"
 )
 
 type Server struct {

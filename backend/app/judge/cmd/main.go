@@ -1,6 +1,6 @@
 package main
 
-import "github.com/pengdahong1225/oj-server/backend/app/judge/internal/server"
+import "oj-server/app/judge/internal/server"
 
 func main() {
 	s := server.Server{}

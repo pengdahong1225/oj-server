@@ -3,12 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/domain"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/model"
-	"github.com/pengdahong1225/oj-server/backend/module/utils"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"oj-server/app/user/internal/respository/domain"
+	"oj-server/app/user/internal/respository/model"
+	"oj-server/module/utils"
+	"oj-server/proto/pb"
 	"strconv"
 )
 
@@ -111,9 +110,4 @@ func (us *UserService) GetUserInfo(ctx context.Context, in *pb.GetUserInfoReques
 	}
 
 	return resp, nil
-}
-
-func (us *UserService) RefreshToken(ctx context.Context, empty *emptypb.Empty) (*pb.RefreshTokenResponse, error) {
-	//TODO implement me
-	panic("implement me")
 }

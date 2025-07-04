@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="gateway" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="backend" />
+    <working_directory value="$PROJECT_DIR$/app/gateway" />
+    <parameters value="--node_type=3 --node_id=1 --port=9020 --name=&quot;gateway&quot;" />
+    <kind value="DIRECTORY" />
+    <package value="question-service" />
+    <directory value="$PROJECT_DIR$/app/gateway/cmd" />
+    <filePath value="$PROJECT_DIR$" />
+    <output_directory value="$PROJECT_DIR$/app/gateway" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>

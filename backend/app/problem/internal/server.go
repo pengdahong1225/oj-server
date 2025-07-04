@@ -2,17 +2,17 @@ package internal
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/biz/service"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/consumer"
-	"github.com/pengdahong1225/oj-server/backend/app/problem-service/internal/repository/cache"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
+	"oj-server/app/common/serverBase"
+	"oj-server/app/problem-service/internal/biz/service"
+	"oj-server/app/problem-service/internal/consumer"
+	"oj-server/app/problem-service/internal/repository/cache"
+	"oj-server/proto/pb"
 	"sync"
 )
 

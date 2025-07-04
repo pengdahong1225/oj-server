@@ -3,12 +3,13 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/handler"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/middlewares"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"oj-server/app/gateway/internal/handler"
+	"oj-server/app/gateway/internal/middlewares"
 	"os"
+	"time"
 )
 
 func Router() *gin.Engine {
@@ -47,10 +48,19 @@ func problemRouters(engine *gin.Engine) {
 	// 排行榜
 	engine.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
 
+	// 验证码
+	captchaRouter := engine.Group("/captcha")
+	captchaRouter.Use(middlewares.RateLimitMiddleware(2*time.Second, 50))
+	{
+		captchaRouter.GET("/image", handler.HandleGetImageCode)
+		captchaRouter.POST("/sms", handler.HandleGetSmsCode)
+	}
+
 	// 用户相关
 	userRouter := engine.Group("/user")
 	{
 		userRouter.POST("/login", handler.HandleUserLogin)
+		userRouter.POST("/login_sms", handler.HandleUserLoginBySms)
 		userRouter.GET("/refresh_token", handler.HandleReFreshAccessToken)
 		userRouter.POST("/register", handler.HandleUserRegister)
 		userRouter.POST("/reset_password", handler.HandleUserResetPassword)

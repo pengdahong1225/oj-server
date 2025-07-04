@@ -7,18 +7,16 @@ import (
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/sirupsen/logrus"
-	"oj-server/app/question-service/internal/cache"
 	"oj-server/module/settings"
 	"oj-server/module/utils"
 	"os"
 )
 
-func SendSmsCode(mobile string) error {
+func SendSmsCode(mobile string) (string, error) {
 	logMode := os.Getenv("LOG_MODE")
 	if logMode == "release" {
 		// 生成随机数
 		c := utils.GenerateSmsCode(6)
-		expire := 180 // 3min过期
 		param := map[string]string{
 			"code": c,
 		}
@@ -26,33 +24,12 @@ func SendSmsCode(mobile string) error {
 
 		// 调用第三方服务发送
 		if err := send(data, mobile); err != nil {
-			return err
-		}
-
-		// 缓存验证码
-		if err := cache.SetCaptcha(mobile, c, expire); err != nil {
-			return err
-		}
-	} else {
-		return nil
-	}
-
-	return nil
-}
-
-func VerifySmsCode(mobile string, code string) bool {
-	logMode := os.Getenv("LOG_MODE")
-	if logMode == "release" {
-		value, err := cache.GetCaptcha(mobile)
-		if err != nil {
-			logrus.Infoln("cache get value err:", err)
-			return false
+			return "", err
 		} else {
-			return value == code
+			return c, nil
 		}
-	} else {
-		return code == "123456"
 	}
+	return "123456", nil
 }
 
 func send(param []byte, phone string) error {

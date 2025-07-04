@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,11 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_UserRegister_FullMethodName      = "/UserService/UserRegister"
-	UserService_UserLogin_FullMethodName         = "/UserService/UserLogin"
-	UserService_ResetUserPassword_FullMethodName = "/UserService/ResetUserPassword"
-	UserService_GetUserInfo_FullMethodName       = "/UserService/GetUserInfo"
-	UserService_RefreshToken_FullMethodName      = "/UserService/RefreshToken"
+	UserService_UserRegister_FullMethodName       = "/UserService/UserRegister"
+	UserService_UserLogin_FullMethodName          = "/UserService/UserLogin"
+	UserService_UserLoginBySmsCode_FullMethodName = "/UserService/UserLoginBySmsCode"
+	UserService_ResetUserPassword_FullMethodName  = "/UserService/ResetUserPassword"
+	UserService_GetUserInfo_FullMethodName        = "/UserService/GetUserInfo"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -35,14 +34,14 @@ const (
 type UserServiceClient interface {
 	// 注册
 	UserRegister(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error)
-	// 登录
+	// 登录-账号密码
 	UserLogin(ctx context.Context, in *UserLoginRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
+	// 登录-验证码
+	UserLoginBySmsCode(ctx context.Context, in *UserLoginBySmsCodeRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
 	// 重置密码
 	ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*ResetUserPasswordResponse, error)
 	// 查询用户信息
 	GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
-	// 刷新token
-	RefreshToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 }
 
 type userServiceClient struct {
@@ -73,6 +72,16 @@ func (c *userServiceClient) UserLogin(ctx context.Context, in *UserLoginRequest,
 	return out, nil
 }
 
+func (c *userServiceClient) UserLoginBySmsCode(ctx context.Context, in *UserLoginBySmsCodeRequest, opts ...grpc.CallOption) (*UserLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserLoginResponse)
+	err := c.cc.Invoke(ctx, UserService_UserLoginBySmsCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*ResetUserPasswordResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResetUserPasswordResponse)
@@ -93,16 +102,6 @@ func (c *userServiceClient) GetUserInfo(ctx context.Context, in *GetUserInfoRequ
 	return out, nil
 }
 
-func (c *userServiceClient) RefreshToken(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RefreshTokenResponse)
-	err := c.cc.Invoke(ctx, UserService_RefreshToken_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -111,14 +110,14 @@ func (c *userServiceClient) RefreshToken(ctx context.Context, in *emptypb.Empty,
 type UserServiceServer interface {
 	// 注册
 	UserRegister(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error)
-	// 登录
+	// 登录-账号密码
 	UserLogin(context.Context, *UserLoginRequest) (*UserLoginResponse, error)
+	// 登录-验证码
+	UserLoginBySmsCode(context.Context, *UserLoginBySmsCodeRequest) (*UserLoginResponse, error)
 	// 重置密码
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	// 查询用户信息
 	GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
-	// 刷新token
-	RefreshToken(context.Context, *emptypb.Empty) (*RefreshTokenResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -135,14 +134,14 @@ func (UnimplementedUserServiceServer) UserRegister(context.Context, *UserRegiste
 func (UnimplementedUserServiceServer) UserLogin(context.Context, *UserLoginRequest) (*UserLoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserLogin not implemented")
 }
+func (UnimplementedUserServiceServer) UserLoginBySmsCode(context.Context, *UserLoginBySmsCodeRequest) (*UserLoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserLoginBySmsCode not implemented")
+}
 func (UnimplementedUserServiceServer) ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetUserPassword not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
-}
-func (UnimplementedUserServiceServer) RefreshToken(context.Context, *emptypb.Empty) (*RefreshTokenResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -201,6 +200,24 @@ func _UserService_UserLogin_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UserLoginBySmsCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserLoginBySmsCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UserLoginBySmsCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UserLoginBySmsCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UserLoginBySmsCode(ctx, req.(*UserLoginBySmsCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_ResetUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResetUserPasswordRequest)
 	if err := dec(in); err != nil {
@@ -237,24 +254,6 @@ func _UserService_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).RefreshToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_RefreshToken_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).RefreshToken(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -271,16 +270,16 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_UserLogin_Handler,
 		},
 		{
+			MethodName: "UserLoginBySmsCode",
+			Handler:    _UserService_UserLoginBySmsCode_Handler,
+		},
+		{
 			MethodName: "ResetUserPassword",
 			Handler:    _UserService_ResetUserPassword_Handler,
 		},
 		{
 			MethodName: "GetUserInfo",
 			Handler:    _UserService_GetUserInfo_Handler,
-		},
-		{
-			MethodName: "RefreshToken",
-			Handler:    _UserService_RefreshToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

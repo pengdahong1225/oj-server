@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/module/utils"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
+	"oj-server/module/utils"
+	"oj-server/proto/pb"
 	"time"
 )
 

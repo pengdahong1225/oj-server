@@ -4,31 +4,34 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
-	"github.com/pengdahong1225/oj-server/backend/app/gateway/internal/define"
+	"oj-server/app/gateway/internal/define"
+	"oj-server/proto/pb"
 )
 
 // 表单类型集
 type formTyper interface {
 	define.RegisterForm | define.LoginFrom | define.GetSmsCodeForm | define.SubmitForm | define.UpdateProblemForm |
-	define.AddCommentForm | define.NoticeForm | define.CommentLikeForm
+		define.AddCommentForm | define.CommentLikeForm | define.LoginWithSmsForm
 }
 
 // validate 通用表单验证
 func validate[T formTyper](ctx *gin.Context, form T) (*T, bool) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+		Message: "",
+	}
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
-			ctx.JSON(http.StatusForbidden, gin.H{
-				"code":    define.Failed,
-				"message": "表单验证错误",
-			})
+			resp.ErrCode = pb.Error_EN_Failed
+			resp.Message = "表单验证-未知错误"
+			ctx.JSON(http.StatusBadRequest, resp)
 			return nil, false
 		}
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    define.Failed,
-			"message": errs.Error(),
-		})
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = errs.Error()
+		ctx.JSON(http.StatusBadRequest, resp)
 		return nil, false
 	}
 	return &form, true

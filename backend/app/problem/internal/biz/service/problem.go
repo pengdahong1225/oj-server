@@ -2,15 +2,15 @@ package service
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/app/common/errs"
-	"github.com/pengdahong1225/oj-server/backend/app/problem/internal/repository/domain"
-	"github.com/pengdahong1225/oj-server/backend/app/problem/internal/repository/model"
-	"github.com/pengdahong1225/oj-server/backend/module/utils"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"oj-server/app/common/errs"
+	"oj-server/app/problem/internal/repository/domain"
+	"oj-server/app/problem/internal/repository/model"
+	"oj-server/module/utils"
+	"oj-server/proto/pb"
 )
 
 type ProblemService struct {

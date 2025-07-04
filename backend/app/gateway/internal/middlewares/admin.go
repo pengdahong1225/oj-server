@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pengdahong1225/oj-server/backend/module/auth"
 	"net/http"
+	"oj-server/module/auth"
 )
 
 func Admin() gin.HandlerFunc {

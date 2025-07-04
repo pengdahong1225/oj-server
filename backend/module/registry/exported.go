@@ -3,9 +3,9 @@ package registry
 import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"google.golang.org/grpc"
+	"oj-server/module/settings"
+	"oj-server/proto/pb"
 )
 
 var (

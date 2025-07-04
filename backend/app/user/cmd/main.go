@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/server"
+	"oj-server/app/user/internal/server"
 )
 
 func main() {

@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/app/judge/internal/respository/domain"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"oj-server/app/judge/internal/respository/domain"
+	"oj-server/proto/pb"
 )
 
 type JudgeService struct {

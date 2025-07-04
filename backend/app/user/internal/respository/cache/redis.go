@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"github.com/redis/go-redis/v9"
-	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/module/settings"
 	"context"
+	"fmt"
+	"github.com/redis/go-redis/v9"
+	"oj-server/module/settings"
 )
 
 var (

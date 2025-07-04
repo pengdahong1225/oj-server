@@ -2,16 +2,16 @@ package server
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/common/serverBase"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/cache"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/service"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
+	"oj-server/app/common/serverBase"
+	"oj-server/app/user/internal/respository/cache"
+	"oj-server/app/user/internal/service"
+	"oj-server/proto/pb"
 	"sync"
 )
 
@@ -21,13 +21,13 @@ type Server struct {
 	wg      sync.WaitGroup
 }
 
-func (receiver *Server) Init() error {
-	err := receiver.Initialize()
+func (s *Server) Init() error {
+	err := s.Initialize()
 	if err != nil {
 		return err
 	}
 
-	receiver.userSrv = service.NewUserService()
+	s.userSrv = service.NewUserService()
 	err = cache.Init()
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (receiver *Server) Init() error {
 	return nil
 }
 
-func (receiver *Server) Start() {
+func (s *Server) Start() {
 	var opts []grpc.ServerOption
 	// tls认证
 	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
@@ -51,13 +51,13 @@ func (receiver *Server) Start() {
 	// 健康检查
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	// 将业务服务注册到grpc中
-	pb.RegisterUserServiceServer(grpcServer, receiver.userSrv)
+	pb.RegisterUserServiceServer(grpcServer, s.userSrv)
 
 	// 启动
-	receiver.wg.Add(1)
+	s.wg.Add(1)
 	go func() {
-		defer receiver.wg.Done()
-		netAddr := fmt.Sprintf("%s:%d", receiver.Host, receiver.Port)
+		defer s.wg.Done()
+		netAddr := fmt.Sprintf("%s:%d", s.Host, s.Port)
 		listener, err := net.Listen("tcp", netAddr)
 		if err != nil {
 			panic(err)
@@ -69,11 +69,11 @@ func (receiver *Server) Start() {
 		}
 	}()
 
-	err = receiver.Register()
+	err = s.Register()
 	if err != nil {
 		panic(err)
 	}
-	defer receiver.UnRegister()
+	defer s.UnRegister()
 
-	receiver.wg.Wait()
+	s.wg.Wait()
 }

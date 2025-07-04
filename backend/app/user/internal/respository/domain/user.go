@@ -1,9 +1,9 @@
 package domain
 
 import (
-	"github.com/pengdahong1225/oj-server/backend/app/common/errs"
-	"github.com/pengdahong1225/oj-server/backend/app/user/internal/respository/model"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/common/errs"
+	"oj-server/app/user/internal/respository/model"
 )
 
 func (md *MysqlDB) CreateNewUser(user *model.UserInfo) (int64, error) {

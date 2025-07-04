@@ -3,8 +3,8 @@ package registry
 import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"google.golang.org/grpc"
+	"oj-server/proto/pb"
 	"sync"
 )
 

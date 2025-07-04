@@ -2,10 +2,10 @@ package domain
 
 import (
 	"fmt"
-	"github.com/pengdahong1225/oj-server/backend/app/common/errs"
-	"github.com/pengdahong1225/oj-server/backend/app/problem/internal/repository/model"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"oj-server/app/common/errs"
+	"oj-server/app/problem/internal/repository/model"
 )
 
 func (md *MysqlDB) CreateProblem(problem *model.Problem) (int64, error) {

@@ -2,12 +2,12 @@ package consumer
 
 import (
 	"context"
-	"github.com/pengdahong1225/oj-server/backend/consts"
-	"github.com/pengdahong1225/oj-server/backend/module/mq"
-	"github.com/pengdahong1225/oj-server/backend/module/registry"
-	"github.com/pengdahong1225/oj-server/backend/proto/pb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"oj-server/consts"
+	"oj-server/module/mq"
+	"oj-server/module/registry"
+	"oj-server/proto/pb"
 )
 
 func ConsumeComment() {
