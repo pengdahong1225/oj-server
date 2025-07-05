@@ -2,15 +2,20 @@ package service
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"io"
 	"oj-server/app/common/errs"
 	"oj-server/app/problem/internal/repository/domain"
 	"oj-server/app/problem/internal/repository/model"
 	"oj-server/module/utils"
 	"oj-server/proto/pb"
+	"os"
+	"path/filepath"
 )
 
 type ProblemService struct {
@@ -38,7 +43,6 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 		Description:  in.Description,
 		CreateBy:     0,
 		CommentCount: 0,
-		Config:       nil,
 	}
 
 	id, err := ps.db.CreateProblem(problem)
@@ -49,12 +53,67 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 	resp.Id = id
 	return resp, nil
 }
+func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServer) error {
+	var (
+		problemID int64
+		filename  string
+		fileSize  int64
+		writer    io.Writer
+	)
+	// 创建目标文件
+	for {
+		chunk, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			logrus.Errorf("receive chunk failed: %v", err)
+			return status.Error(codes.Internal, "receive chunk failed")
+		}
 
-func (ps *ProblemService) UploadConfig(ctx context.Context, in *pb.UploadConfigRequest) (*pb.UploadConfigResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UploadConfig not implemented")
+		// 首次接收时初始化
+		if writer == nil {
+			problemID = chunk.ProblemId
+			filename = chunk.FileName
+			filePath := fmt.Sprintf("/data/problems/%d/%s", problemID, filename)
+
+			// 创建目录
+			if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+				logrus.Errorf("create dir failed: %v", err)
+				return status.Error(codes.Internal, "create dir failed")
+			}
+
+			// 创建文件
+			f, err := os.Create(filePath)
+			if err != nil {
+				logrus.Errorf("create file failed: %v", err)
+				return status.Error(codes.Internal, "create file failed")
+			}
+			defer f.Close()
+			writer = f
+		}
+
+		// 写入分片
+		if n, err := writer.Write(chunk.Content); err != nil {
+			logrus.Errorf("write chunk failed: %v", err)
+			return status.Error(codes.Internal, "write chunk failed")
+		} else {
+			fileSize += int64(n)
+		}
+	}
+
+	// 返回成功响应
+	return stream.SendAndClose(&pb.UploadConfigResponse{
+		FilePath: fmt.Sprintf("/data/problems/%d/%s", problemID, filename),
+		Size:     fileSize,
+	})
 }
 func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProblemRequest) (*pb.PublishProblemResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PublishProblem not implemented")
+	err := ps.db.UpdateProblemStatus(in.Id, 1)
+	if errors.As(err, &errs.NotFound) {
+		return nil, status.Error(codes.NotFound, "problem not found")
+	}
+	return nil, status.Error(codes.Internal, "update problem status failed")
 }
 
 func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
 	"oj-server/app/gateway/internal/productor"
@@ -16,8 +17,10 @@ import (
 	"strconv"
 )
 
+// 处理获取标签列表
 func HandleGetTagList(ctx *gin.Context) {}
 
+// 处理获取题目列表
 func HandleGetProblemList(ctx *gin.Context) {
 	resp := &define.Response{
 		ErrCode: pb.Error_EN_Success,
@@ -71,6 +74,8 @@ func HandleGetProblemList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 	return
 }
+
+// 处理获取题目详情
 func HandleGetProblemDetail(ctx *gin.Context) {
 	resp := &define.Response{
 		ErrCode: pb.Error_EN_Success,
@@ -159,6 +164,8 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	resp.Message = "题目提交成功"
 	ctx.JSON(http.StatusOK, resp)
 }
+
+// 处理获取提交结果
 func HandleGetSubmitResult(ctx *gin.Context) {}
 
 // 处理创建题目信息
@@ -206,7 +213,7 @@ func HandleUploadConfig(ctx *gin.Context) {
 	resp := &define.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
-
+	// 获取元数据
 	problemIdStr := ctx.PostForm("problem_id")
 	problemId, err := strconv.ParseInt(problemIdStr, 10, 64)
 	if err != nil || problemId <= 0 {
@@ -216,14 +223,15 @@ func HandleUploadConfig(ctx *gin.Context) {
 		return
 	}
 
-	file, err := ctx.FormFile("config_file")
+	// 获取文件
+	fileHeader, err := ctx.FormFile("config_file")
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "需要config_file字段"
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	if filepath.Ext(file.Filename) != ".json" {
+	if filepath.Ext(fileHeader.Filename) != ".json" {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "文件格式错误"
 		ctx.JSON(http.StatusBadRequest, resp)
@@ -231,16 +239,72 @@ func HandleUploadConfig(ctx *gin.Context) {
 	}
 	// 限制文件大小（默认 8MB，可调整）
 	maxSize := int64(8 << 20) // 8MB
-	if file.Size > maxSize {
+	if fileHeader.Size > maxSize {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "文件大小超过限制"
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	// 保存文件到指定目录
-	dst := "./uploads/" + file.Filename
-	err = ctx.SaveUploadedFile(file, dst)
+	// 打开文件流
+	file, err := fileHeader.Open()
 	if err != nil {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "文件打开失败"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 创建gRPC流
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	stream, err := client.UploadConfig(ctx)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	// 分片读取并流式传输
+	buffer := make([]byte, 1<<20) // 1MB分片
+	for {
+		n, err := file.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			logrus.Errorf("file read error:%s", err.Error())
+			_ = stream.CloseSend()
+			resp.ErrCode = pb.Error_EN_ServiceBusy
+			resp.Message = "服务器错误"
+			ctx.JSON(http.StatusInternalServerError, resp)
+			return
+		}
+		// 发送分片到Problem服务
+		err = stream.Send(&pb.UploadConfigFileChunk{
+			Content:   buffer[:n],
+			ProblemId: problemId,
+			FileName:  fileHeader.Filename,
+		})
+		if err != nil {
+			logrus.Errorf("file send error:%s", err.Error())
+			_ = stream.CloseSend()
+			resp.ErrCode = pb.Error_EN_ServiceBusy
+			resp.Message = "服务器错误"
+			ctx.JSON(500, resp)
+			return
+		}
+	}
+	// 获取Problem服务响应
+	rpc_resp, err := stream.CloseAndRecv()
+	if err != nil {
+		logrus.Errorf("file save error:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
 		resp.Message = "文件保存失败"
 		ctx.JSON(http.StatusInternalServerError, resp)
@@ -248,11 +312,49 @@ func HandleUploadConfig(ctx *gin.Context) {
 	}
 	resp.ErrCode = pb.Error_EN_Success
 	resp.Message = "文件上传成功"
+	resp.Data = rpc_resp
 	ctx.JSON(http.StatusOK, resp)
 }
 
 // 处理发布题目
-func HandlePublishProblem(ctx *gin.Context) {}
+func HandlePublishProblem(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+	// 获取元数据
+	problemIdStr := ctx.PostForm("problem_id")
+	problemId, err := strconv.ParseInt(problemIdStr, 10, 64)
+	if err != nil || problemId <= 0 {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "无效的 problem_id"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 调用problem服务
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	req := &pb.PublishProblemRequest{
+		Id: problemId,
+	}
+	rpc_resp, err := client.PublishProblem(ctx, req)
+	if err != nil {
+		logrus.Errorf("PublishProblem Failed: %s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	resp.Data = rpc_resp
+	resp.Message = "发布成功"
+	ctx.JSON(http.StatusOK, resp)
+}
 
 // 处理删除题目
 func HandleDeleteProblem(ctx *gin.Context) {}

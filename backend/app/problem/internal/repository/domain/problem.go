@@ -73,3 +73,15 @@ func (md *MysqlDB) QueryProblemData(id int64) (*model.Problem, error) {
 	}
 	return &problem, nil
 }
+
+func (md *MysqlDB) UpdateProblemStatus(id int64, status int32) error {
+	result := md.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", status)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return errs.UpdateFailed
+	}
+	if result.RowsAffected == 0 {
+		return errs.NotFound
+	}
+	return nil
+}

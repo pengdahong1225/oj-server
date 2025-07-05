@@ -1,6 +1,7 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
+// 网关返回的错误码
 enum Error {
   // 公共err
   EN_Success = 0;

@@ -9,7 +9,7 @@ service ProblemService {
   // 新增题目
   rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse);
   // 上传配置文件
-  rpc UploadConfig(UploadConfigRequest) returns (UploadConfigResponse);
+  rpc UploadConfig(stream UploadConfigFileChunk) returns (UploadConfigResponse);
   // 发布题目
   rpc PublishProblem(PublishProblemRequest) returns (PublishProblemResponse);
   // 更新题目信息
@@ -80,12 +80,14 @@ message CreateProblemResponse {
 }
 
 // 上传配置文件
-message UploadConfigRequest {
-  bytes config = 1;
+message UploadConfigFileChunk {
+  int64 problem_id = 1;
+  string file_name = 2;
+  bytes content = 3; // 文件分片内容
 }
 message UploadConfigResponse {
-  int64 id = 1;
-  string result = 2;
+  string file_path = 1;    // 服务端最终存储路径
+  int64 size = 2;          // 文件大小(字节)
 }
 
 // 发布题目

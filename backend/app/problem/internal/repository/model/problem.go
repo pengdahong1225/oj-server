@@ -17,8 +17,7 @@ type Problem struct {
 	Description  string `gorm:"column:description" json:"description"`
 	CreateBy     int64  `gorm:"column:create_by" json:"create_by"`
 	CommentCount int64  `gorm:"column:comment_count;type:blob" json:"comment_count"`
-
-	Config []byte `gorm:"column:config" json:"config"`
+	Status       int32  `gorm:"column:status" json:"status"` // 状态 1：发布 0：隐藏（默认值）
 }
 
 func (p *Problem) TableName() string {

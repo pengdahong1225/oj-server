@@ -13,7 +13,7 @@ create table if not exists problem
     create_by BIGINT DEFAULT 0 comment '题目创建者',
     comment_count BIGINT DEFAULT 0 comment '评论总数量',
 
-    state tinyint DEFAULT 1 comment '状态 1：发布 0：隐藏',
+    status tinyint DEFAULT 0 comment '状态 1：发布 0：隐藏',
 
     PRIMARY KEY(id),
     UNIQUE INDEX idx_title(title)

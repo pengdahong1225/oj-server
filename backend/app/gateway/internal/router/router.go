@@ -77,7 +77,7 @@ func initRouters(engine *gin.Engine) {
 
 		problemRouter.POST("/add", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleCreateProblem)
 		problemRouter.POST("/upload_config", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUploadConfig)
-		problemRouter.GET("/publish", middlewares.AuthLogin(), middlewares.Admin(), handler.HandlePublishProblem)
+		problemRouter.POST("/publish", middlewares.AuthLogin(), middlewares.Admin(), handler.HandlePublishProblem)
 		problemRouter.DELETE("", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleDeleteProblem)
 		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUpdateProblem)
 	}

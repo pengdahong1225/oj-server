@@ -43,7 +43,7 @@ type ProblemServiceClient interface {
 	// 新增题目
 	CreateProblem(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error)
 	// 上传配置文件
-	UploadConfig(ctx context.Context, in *UploadConfigRequest, opts ...grpc.CallOption) (*UploadConfigResponse, error)
+	UploadConfig(ctx context.Context, opts ...grpc.CallOption) (ProblemService_UploadConfigClient, error)
 	// 发布题目
 	PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*PublishProblemResponse, error)
 	// 更新题目信息
@@ -84,14 +84,39 @@ func (c *problemServiceClient) CreateProblem(ctx context.Context, in *CreateProb
 	return out, nil
 }
 
-func (c *problemServiceClient) UploadConfig(ctx context.Context, in *UploadConfigRequest, opts ...grpc.CallOption) (*UploadConfigResponse, error) {
+func (c *problemServiceClient) UploadConfig(ctx context.Context, opts ...grpc.CallOption) (ProblemService_UploadConfigClient, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UploadConfigResponse)
-	err := c.cc.Invoke(ctx, ProblemService_UploadConfig_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ProblemService_ServiceDesc.Streams[0], ProblemService_UploadConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &problemServiceUploadConfigClient{ClientStream: stream}
+	return x, nil
+}
+
+type ProblemService_UploadConfigClient interface {
+	Send(*UploadConfigFileChunk) error
+	CloseAndRecv() (*UploadConfigResponse, error)
+	grpc.ClientStream
+}
+
+type problemServiceUploadConfigClient struct {
+	grpc.ClientStream
+}
+
+func (x *problemServiceUploadConfigClient) Send(m *UploadConfigFileChunk) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *problemServiceUploadConfigClient) CloseAndRecv() (*UploadConfigResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(UploadConfigResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *problemServiceClient) PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*PublishProblemResponse, error) {
@@ -203,7 +228,7 @@ type ProblemServiceServer interface {
 	// 新增题目
 	CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error)
 	// 上传配置文件
-	UploadConfig(context.Context, *UploadConfigRequest) (*UploadConfigResponse, error)
+	UploadConfig(ProblemService_UploadConfigServer) error
 	// 发布题目
 	PublishProblem(context.Context, *PublishProblemRequest) (*PublishProblemResponse, error)
 	// 更新题目信息
@@ -234,8 +259,8 @@ type UnimplementedProblemServiceServer struct {
 func (UnimplementedProblemServiceServer) CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProblem not implemented")
 }
-func (UnimplementedProblemServiceServer) UploadConfig(context.Context, *UploadConfigRequest) (*UploadConfigResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UploadConfig not implemented")
+func (UnimplementedProblemServiceServer) UploadConfig(ProblemService_UploadConfigServer) error {
+	return status.Errorf(codes.Unimplemented, "method UploadConfig not implemented")
 }
 func (UnimplementedProblemServiceServer) PublishProblem(context.Context, *PublishProblemRequest) (*PublishProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishProblem not implemented")
@@ -298,22 +323,30 @@ func _ProblemService_CreateProblem_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProblemService_UploadConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadConfigRequest)
-	if err := dec(in); err != nil {
+func _ProblemService_UploadConfig_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ProblemServiceServer).UploadConfig(&problemServiceUploadConfigServer{ServerStream: stream})
+}
+
+type ProblemService_UploadConfigServer interface {
+	SendAndClose(*UploadConfigResponse) error
+	Recv() (*UploadConfigFileChunk, error)
+	grpc.ServerStream
+}
+
+type problemServiceUploadConfigServer struct {
+	grpc.ServerStream
+}
+
+func (x *problemServiceUploadConfigServer) SendAndClose(m *UploadConfigResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *problemServiceUploadConfigServer) Recv() (*UploadConfigFileChunk, error) {
+	m := new(UploadConfigFileChunk)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(ProblemServiceServer).UploadConfig(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProblemService_UploadConfig_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).UploadConfig(ctx, req.(*UploadConfigRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 func _ProblemService_PublishProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -508,10 +541,6 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProblemService_CreateProblem_Handler,
 		},
 		{
-			MethodName: "UploadConfig",
-			Handler:    _ProblemService_UploadConfig_Handler,
-		},
-		{
 			MethodName: "PublishProblem",
 			Handler:    _ProblemService_PublishProblem_Handler,
 		},
@@ -552,6 +581,12 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProblemService_GetSubmitRecordData_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "UploadConfig",
+			Handler:       _ProblemService_UploadConfig_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "problem_service.proto",
 }
