@@ -15,6 +15,7 @@ enum Error {
   EN_FormValidateFailed      = 8; // 表单验证失败
   EN_MarshalFailed = 9; // 序列化失败
   EN_UnmarshalFailed = 10; // 反序列化失败
+  EN_Publish2MqFailed = 11; // 发送消息到MQ失败
 
   // 业务err 100+
   EN_LoginFailed = 100;

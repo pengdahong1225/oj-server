@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/app/user/internal/respository/domain"
-	"oj-server/app/user/internal/respository/model"
 	"oj-server/module/utils"
 	"oj-server/proto/pb"
 	"strconv"
+	"oj-server/module/model"
 )
 
 type UserService struct {
@@ -59,6 +59,7 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	return resp, nil
 }
 
+// 账号密码登录
 func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
@@ -83,9 +84,38 @@ func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (
 	return resp, nil
 }
 
+// 验证码登录
+func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginBySmsCodeRequest) (*pb.UserLoginResponse, error) {
+	// 拉取用户信息
+	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
+	userInfo, err := us.db.GetUserInfoByMobile(mobile)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.UserLoginResponse{
+		Uid:       userInfo.ID,
+		Mobile:    strconv.FormatInt(userInfo.Mobile, 10),
+		NickName:  userInfo.NickName,
+		Email:     userInfo.Email,
+		Gender:    userInfo.Gender,
+		Role:      userInfo.Role,
+		AvatarUrl: userInfo.AvatarUrl,
+	}
+	return resp, nil
+}
+
 func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPasswordRequest) (*pb.ResetUserPasswordResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	resp := &pb.ResetUserPasswordResponse{}
+	hash := utils.HashPassword(in.Password)
+	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
+	err := us.db.ResetUserPassword(mobile, hash)
+	if err != nil {
+		logrus.Errorf("重置密码失败, err: %s", err.Error())
+		resp.Message = "重置密码失败: " + err.Error()
+		return resp, err
+	}
+	return resp, nil
 }
 
 func (us *UserService) GetUserInfo(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {

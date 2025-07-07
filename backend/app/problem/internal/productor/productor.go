@@ -6,11 +6,12 @@ import (
 )
 
 var (
-	productor *mq.Producer
+	// 判题任务生产者
+	problem_productor *mq.Producer
 )
 
 func init() {
-	productor = mq.NewProducer(
+	problem_productor = mq.NewProducer(
 		consts.RabbitMqExchangeKind,
 		consts.RabbitMqExchangeName,
 		consts.RabbitMqJudgeQueue,
@@ -19,5 +20,5 @@ func init() {
 }
 
 func Publish(data []byte) bool {
-	return productor.Publish(data)
+	return problem_productor.Publish(data)
 }

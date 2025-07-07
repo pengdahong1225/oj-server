@@ -2,21 +2,22 @@ package settings
 
 // 从viper反射到数据模型，需要设置`mapstructure`反射字段
 type AppConfig struct {
-	*SandBox        `mapstructure:"sandbox"`
-	*MysqlConfig    `mapstructure:"mysql"`
-	*RedisConfig    `mapstructure:"redis"`
-	*RegistryConfig `mapstructure:"registry"`
-	*MqConfig       `mapstructure:"rabbitmq"`
-	*JwtConfig      `mapstructure:"jwt"`
-	*SmsConfig      `mapstructure:"sms"`
+	SandBoxCfg  []*SandBox `mapstructure:"sandbox"`
+	MysqlCfg    *Mysql     `mapstructure:"mysql"`
+	RedisCfg    *Redis     `mapstructure:"redis"`
+	RegistryCfg *Registry  `mapstructure:"registry"`
+	MQCfg       *MQ        `mapstructure:"rabbitmq"`
+	JwtCfg      *Jwt       `mapstructure:"jwt"`
+	SmsCfg      *Sms       `mapstructure:"sms"`
 }
 
 type SandBox struct {
+	Type string `mapstructure:"type"`
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
-type MysqlConfig struct {
+type Mysql struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 	Db   string `mapstructure:"db"`
@@ -24,16 +25,16 @@ type MysqlConfig struct {
 	Pwd  string `mapstructure:"password"`
 }
 
-type RedisConfig struct {
+type Redis struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
-type JwtConfig struct {
+type Jwt struct {
 	SigningKey string `mapstructure:"key"`
 }
 
-type SmsConfig struct {
+type Sms struct {
 	AccessKeyId     string `mapstructure:"accessKeyId"`
 	AccessKeySecret string `mapstructure:"accessKeySecret"`
 	Endpoint        string `mapstructure:"endpoint"`
@@ -41,12 +42,12 @@ type SmsConfig struct {
 	TemplateCode    string `mapstructure:"templateCode"`
 }
 
-type RegistryConfig struct {
+type Registry struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
-type MqConfig struct {
+type MQ struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`

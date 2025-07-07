@@ -1,33 +1,24 @@
-package service
+package processor
 
 import (
+	"oj-server/app/judge/internal/define"
+	"oj-server/proto/pb"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"io"
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"github.com/sirupsen/logrus"
-	"io"
-	"net/http"
-	"oj-server/app/judge/internal/types"
-	"oj-server/module/gPool"
-	"oj-server/proto/pb"
-	"strings"
 	"sync"
+	"oj-server/module/gPool"
 )
 
-type Handler struct {
-	baseUrl    string
-	runResults chan *types.RunResultInChan // 运行结果
+type CPPProcessor struct {
+	BaseProcessor
 }
 
-func NewHandler(host string, port int) *Handler {
-	return &Handler{
-		baseUrl:    fmt.Sprintf("http://%s:%d", host, port),
-		runResults: make(chan *types.RunResultInChan, 100),
-	}
-}
-func (r *Handler) compile(param *types.Param) (*types.SandBoxApiResponse, error) {
-	form := types.SandBoxApiForm{
+func (cp *CPPProcessor) Compile(param *define.Param) (*define.SandBoxApiResponse, error) {
+	form := define.SandBoxApiForm{
 		CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
 		ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
 		MemoryLimit: param.ProblemConfig.CompileLimit.MemoryLimit,
@@ -48,7 +39,7 @@ func (r *Handler) compile(param *types.Param) (*types.SandBoxApiResponse, error)
 	form.CopyOutCached = []string{"main"}
 
 	// 构造body
-	body := types.Body{}
+	body := define.Body{}
 	body.Cmd = append(body.Cmd, form)
 	data, err := json.Marshal(body)
 	if err != nil {
@@ -56,7 +47,7 @@ func (r *Handler) compile(param *types.Param) (*types.SandBoxApiResponse, error)
 		return nil, err
 	}
 	// POST请求
-	req, err := http.NewRequest("POST", r.baseUrl+"/run", bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", cp.sandBoxUrl+"/run", bytes.NewBuffer(data))
 	if err != nil {
 		logrus.Errorln("Error creating request:", err.Error())
 		return nil, err
@@ -80,7 +71,7 @@ func (r *Handler) compile(param *types.Param) (*types.SandBoxApiResponse, error)
 	logrus.Debugln("Response Status:", resp.Status)
 	logrus.Debugln("Response Body:", string(respBody))
 
-	var result []*types.SandBoxApiResponse
+	var result []*define.SandBoxApiResponse
 	if err := json.Unmarshal(respBody, &result); err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
@@ -93,17 +84,16 @@ func (r *Handler) compile(param *types.Param) (*types.SandBoxApiResponse, error)
 		return nil, errors.New("result len = 0")
 	}
 }
-
-func (r *Handler) run(param *types.Param) {
+func (cp *CPPProcessor) Run(param *define.Param) {
 	// 循环调用(并发地发送多个测试用例的运行请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 
 	for _, test := range param.ProblemConfig.TestCases {
 		wg.Add(1)
-		gPool.Instance().Submit(func() {
+		_ = gPool.Instance().Submit(func() {
 			defer wg.Done()
 
-			form := types.SandBoxApiForm{
+			form := define.SandBoxApiForm{
 				CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
 				ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
 				MemoryLimit: param.ProblemConfig.CompileLimit.MemoryLimit,
@@ -120,7 +110,7 @@ func (r *Handler) run(param *types.Param) {
 				"main": {"fileId": param.FileIds["main"]},
 			}
 
-			body := types.Body{}
+			body := define.Body{}
 			body.Cmd = append(body.Cmd, form)
 			data, err := json.Marshal(body)
 			if err != nil {
@@ -129,7 +119,7 @@ func (r *Handler) run(param *types.Param) {
 			}
 			// POST请求
 			client := &http.Client{}
-			req, err := http.NewRequest("POST", r.baseUrl+"/run", bytes.NewBuffer(data))
+			req, err := http.NewRequest("POST", cp.sandBoxUrl+"/run", bytes.NewBuffer(data))
 			if err != nil {
 				logrus.Errorln("Error creating request:", err)
 				return
@@ -152,13 +142,13 @@ func (r *Handler) run(param *types.Param) {
 			logrus.Debugln("Response Body:", string(respBody))
 
 			// 将结果放入管道
-			var results []*types.SandBoxApiResponse
+			var results []*define.SandBoxApiResponse
 			if err := json.Unmarshal(respBody, &results); err != nil {
 				logrus.Errorln("Error unmarshalling JSON:", err)
 				return
 			}
 			if len(results) > 0 {
-				r.runResults <- &types.RunResultInChan{
+				cp.runResults <- &define.RunResultInChan{
 					Result: results[0],
 					Case:   test,
 				}
@@ -169,33 +159,27 @@ func (r *Handler) run(param *types.Param) {
 }
 
 // 检查结果状态，只check结果状态为Accepted的
-func (r *Handler) judge() []*pb.PBResult {
+func (cp *CPPProcessor) Judge() []*pb.PBResult {
 	var results []*pb.PBResult
-	for runResult := range r.runResults {
+	for runResult := range cp.runResults {
 		pbResult := translatePBResult(runResult.Result)
 		// status不为Accepted的，不用检测结果
-		if runResult.Result.Status != types.Accepted {
+		if runResult.Result.Status != define.Accepted {
 			pbResult.Content = "Run Error"
 			results = append(results, pbResult)
 			continue
 		}
 		// 判断output是否满足预期
 		// 不满足结果的状态为Wrong Answer
-		if !r.checkAnswer(runResult.Result.Files["stdout"], runResult.Case.Output) {
-			pbResult.Status = types.WrongAnswer
+		if !cp.CheckAnswer(runResult.Result.Files["stdout"], runResult.Case.Output) {
+			pbResult.Status = define.WrongAnswer
 			pbResult.Content = "答案错误"
 			results = append(results, pbResult)
 		} else {
-			pbResult.Status = types.Accepted
+			pbResult.Status = define.Accepted
 			pbResult.Content = "通过"
 			results = append(results, pbResult)
 		}
 	}
 	return results
-}
-
-func (r *Handler) checkAnswer(X string, Y string) bool {
-	X = strings.Replace(X, " ", "", -1)
-	X = strings.Replace(X, "\n", "", -1)
-	return X == Y
 }

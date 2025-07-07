@@ -1,10 +1,12 @@
-package types
+package define
 
 import "oj-server/proto/pb"
 
+// 判题任务上下文参数
 type Param struct {
 	Uid           int64
-	ProblemID     int64
+	UserName      string
+	ProblemData   *pb.Problem
 	Code          string // 源代码
 	Language      string // 语种
 	ProblemConfig *pb.ProblemConfig

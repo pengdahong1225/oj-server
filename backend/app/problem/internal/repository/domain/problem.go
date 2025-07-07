@@ -3,13 +3,19 @@ package domain
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
-	"oj-server/app/common/errs"
-	"oj-server/app/problem/internal/repository/model"
+	"oj-server/module/model"
 )
 
 func (md *MysqlDB) CreateProblem(problem *model.Problem) (int64, error) {
-	return -1, nil
+	result := md.db_.Create(problem)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return -1, status.Errorf(codes.Internal, "create problem failed")
+	}
+	return problem.ID, nil
 }
 
 // QueryProblemList 分页查询题库列表
@@ -37,7 +43,7 @@ func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (in
 	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return -1, nil, errs.QueryFailed
+		return -1, nil, status.Errorf(codes.Internal, "query failed")
 	}
 
 	/*
@@ -53,10 +59,9 @@ func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (in
 	} else {
 		result = md.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	}
-
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return -1, nil, errs.QueryFailed
+		return -1, nil, status.Errorf(codes.Internal, "query failed")
 	}
 	return count, problemList, nil
 }
@@ -66,22 +71,46 @@ func (md *MysqlDB) QueryProblemData(id int64) (*model.Problem, error) {
 	result := md.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return nil, errs.QueryFailed
+		return nil, status.Errorf(codes.Internal, "query failed")
 	}
 	if result.RowsAffected == 0 {
-		return nil, errs.NotFound
+		return nil, status.Errorf(codes.NotFound, "problem not found")
 	}
 	return &problem, nil
+}
+
+func (md *MysqlDB) UpdateProblem(problem *model.Problem) error {
+	result := md.db_.Model(&model.Problem{}).Where("id=?", problem.ID).Updates(problem)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return status.Errorf(codes.Internal, "query failed")
+	}
+	if result.RowsAffected == 0 {
+		return status.Errorf(codes.NotFound, "problem not found")
+	}
+	return nil
 }
 
 func (md *MysqlDB) UpdateProblemStatus(id int64, status int32) error {
 	result := md.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", status)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return errs.UpdateFailed
+		return status.Errorf(codes.Internal, "query failed")
 	}
 	if result.RowsAffected == 0 {
-		return errs.NotFound
+		return status.Errorf(codes.NotFound, "query failed")
+	}
+	return nil
+}
+
+func (md *MysqlDB) DeleteProblem(id int64) error {
+	result := md.db_.Where("id=?", id).Delete(&model.Problem{})
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return status.Errorf(codes.Internal, "delete problem failed")
+	}
+	if result.RowsAffected == 0 {
+		return status.Errorf(codes.NotFound, "problem not found")
 	}
 	return nil
 }

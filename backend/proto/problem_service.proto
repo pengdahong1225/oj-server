@@ -31,6 +31,8 @@ service ProblemService {
   rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse);
   // 查询提交记录详情
   rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse);
+  // 查询判题结果
+  rpc QueryJudgeResult(QueryJudgeResultRequest) returns (QueryJudgeResultResponse);
 }
 
 // 题目基础信息
@@ -82,8 +84,7 @@ message CreateProblemResponse {
 // 上传配置文件
 message UploadConfigFileChunk {
   int64 problem_id = 1;
-  string file_name = 2;
-  bytes content = 3; // 文件分片内容
+  bytes content = 2; // 文件分片内容
 }
 message UploadConfigResponse {
   string file_path = 1;    // 服务端最终存储路径
@@ -158,7 +159,7 @@ message SubmitProblemRequest {
   string code = 4;
 }
 message SubmitProblemResponse {
-  int64 task_id = 1;
+  string task_id = 1;
   string message = 2;
 }
 
@@ -193,4 +194,12 @@ message GetSubmitRecordRequest {
 }
 message GetSubmitRecordResponse {
   SubmitRecord data = 1;
+}
+
+message QueryJudgeResultRequest {
+  int64 task_id = 1;
+}
+message QueryJudgeResultResponse {
+  string status = 1;
+  string message = 2;
 }

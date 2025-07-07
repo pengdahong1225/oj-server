@@ -2,8 +2,9 @@ package domain
 
 import (
 	"github.com/sirupsen/logrus"
-	"oj-server/app/common/errs"
-	"oj-server/app/user/internal/respository/model"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"oj-server/module/model"
 )
 
 func (md *MysqlDB) CreateNewUser(user *model.UserInfo) (int64, error) {
@@ -11,29 +12,44 @@ func (md *MysqlDB) CreateNewUser(user *model.UserInfo) (int64, error) {
 	result := md.db_.Where("mobile=?", user.Mobile).Find(&u)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
-		return -1, errs.QueryFailed
+		return -1, status.Errorf(codes.Internal, "query user faild")
 	}
 	if result.RowsAffected > 0 {
-		return -1, errs.AlreadyExists
+		return -1, status.Errorf(codes.AlreadyExists, "user already exists")
 	}
 
 	result = md.db_.Create(&user)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
-		return -1, errs.CreateFailed
+		return -1, status.Errorf(codes.Internal, "create user faild")
 	}
 	return user.ID, nil
 }
-
 func (md *MysqlDB) GetUserInfoByMobile(mobile int64) (*model.UserInfo, error) {
 	var user model.UserInfo
 	result := md.db_.Where("mobile=?", mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
-		return nil, errs.QueryFailed
+		return nil, status.Errorf(codes.Internal, "query user faild")
 	}
 	if result.RowsAffected == 0 {
-		return nil, errs.NotFound
+		return nil, status.Errorf(codes.NotFound, "user not found")
 	}
 	return &user, nil
+}
+
+func (md *MysqlDB) ResetUserPassword(mobile int64, password string) error {
+	/*
+		update user_info set password = '123456'
+		where mobile = ?;
+	*/
+	result := md.db_.Model(&model.UserInfo{}).Where("mobile=?", mobile).Update("password", password)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return status.Errorf(codes.Internal, "update user faild")
+	}
+	if result.RowsAffected == 0 {
+		return status.Errorf(codes.NotFound, "user not found")
+	}
+	return nil
 }

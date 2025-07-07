@@ -3,6 +3,7 @@ FROM debian:latest
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Shanghai
 
+# 安装c/c++环境
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     gcc \

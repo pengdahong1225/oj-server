@@ -4,12 +4,9 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
-	"oj-server/app/gateway/internal/productor"
-	"oj-server/app/gateway/internal/respository/cache"
 	"oj-server/consts"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
@@ -128,38 +125,33 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	resp := &define.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
+	// 获取元数据
 	uid := ctx.GetInt64("uid")
-	_, err := cache.LockUser(uid)
+
+	// 调用题目服务
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
 	if err != nil {
-		logrus.Errorf("lock user failed:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_DealingWithTask
-		resp.Message = "判题中..."
-		ctx.JSON(http.StatusBadRequest, resp)
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	pbForm := pb.SubmitForm{
-		Uid:       uid,
+	client := pb.NewProblemServiceClient(conn)
+	req := &pb.SubmitProblemRequest{
 		ProblemId: form.ProblemID,
 		Title:     form.Title,
 		Lang:      form.Lang,
 		Code:      form.Code,
 	}
-	data, err := proto.Marshal(&pbForm)
+	rpc_resp, err := client.SubmitProblem(context.WithValue(context.Background(), "uid", uid), req)
 	if err != nil {
-		logrus.Errorf("marshal failed:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_MarshalFailed
-		resp.Message = "服务器错误"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-	// 提交到mq
-	if !productor.Publish(data) {
-		logrus.Errorf("publish failed")
+		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
-		resp.Message = "位置错误"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		_ = cache.UnLockUser(uid)
+		resp.Message = "提交代码失败"
+		ctx.JSON(http.StatusOK, resp)
 	}
+	resp.Data = rpc_resp
 	resp.ErrCode = pb.Error_EN_Success
 	resp.Message = "题目提交成功"
 	ctx.JSON(http.StatusOK, resp)

@@ -14,7 +14,6 @@ import (
 
 type Server struct {
 	ServerBase.Server
-	judgeSrv *service.JudgeService
 }
 
 func (receiver *Server) Init() error {
@@ -22,7 +21,10 @@ func (receiver *Server) Init() error {
 	if err != nil {
 		return err
 	}
-	receiver.judgeSrv = service.NewJudgeService()
+	err = service.Init()
+	if err != nil {
+		return err
+	}
 	err = cache.Init()
 	if err != nil {
 		return err
@@ -73,7 +75,7 @@ func (receiver *Server) syncDo(data []byte) bool {
 	}
 	// 异步处理
 	err = gPool.Instance().Submit(func() {
-		service.HandleJudge(submitForm)
+		service.Handle(submitForm)
 	})
 	if err != nil {
 		logrus.Errorln("异步处理err：", err.Error())
