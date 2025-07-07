@@ -1,28 +1,37 @@
 package consumer
 
 import (
-	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 	"oj-server/consts"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
 	"oj-server/proto/pb"
+
+	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
-func StartCommentConsume() {
-	consumer := mq.NewConsumer(
+var (
+	// 评论任务消费者
+	comment_consumer *mq.Consumer
+)
+
+func init() {
+	comment_consumer = mq.NewConsumer(
 		consts.RabbitMqExchangeKind,
 		consts.RabbitMqExchangeName,
 		consts.RabbitMqCommentQueue,
 		consts.RabbitMqCommentKey,
 		"", // 消费者标签，用于区别不同的消费者
 	)
-	deliveries := consumer.Consume()
+}
+
+func StartCommentConsume() {
+	deliveries := comment_consumer.Consume()
 	if deliveries == nil {
 		logrus.Errorln("消费失败")
 		return
 	}
-	defer consumer.Close()
+	defer comment_consumer.Close()
 
 	for d := range deliveries {
 		if syncHandle(d.Body) {
