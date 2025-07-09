@@ -33,19 +33,21 @@ func SendSmsCode(mobile string) (string, error) {
 }
 
 func send(param []byte, phone string) error {
+	sms_cfg := settings.Instance().SmsCfg
+
 	config := &openapi.Config{
 		// 您的AccessKey ID
-		AccessKeyId: &settings.Instance().SmsConfig.AccessKeyId,
+		AccessKeyId: &sms_cfg.AccessKeyId,
 		// 您的AccessKey Secret
-		AccessKeySecret: &settings.Instance().SmsConfig.AccessKeySecret,
+		AccessKeySecret: &sms_cfg.AccessKeySecret,
 	}
 	// 访问的域名
-	config.Endpoint = tea.String(settings.Instance().SmsConfig.Endpoint)
+	config.Endpoint = tea.String(sms_cfg.Endpoint)
 	client, _ := dysmsapi.NewClient(config)
 
 	request := &dysmsapi.SendSmsRequest{}
-	request.SetSignName(settings.Instance().SmsConfig.SignName)
-	request.SetTemplateCode(settings.Instance().SmsConfig.TemplateCode)
+	request.SetSignName(sms_cfg.SignName)
+	request.SetTemplateCode(sms_cfg.TemplateCode)
 	request.SetPhoneNumbers(phone)
 	request.SetTemplateParam(string(param))
 

@@ -40,7 +40,7 @@ func (receiver *Server) Initialize() error {
 	logrus.Debugf("--------------- name:%v, node_type:%v, node_id:%v, host:%v, port:%v ---------------", receiver.Name, receiver.NodeType, receiver.NodeId, receiver.Host, receiver.Port)
 
 	// 读取配置
-	err = settings.Instance().LoadConfig()
+	err = settings.AppConf.LoadConfig()
 	if err != nil {
 		return err
 	}

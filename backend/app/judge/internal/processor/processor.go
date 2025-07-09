@@ -67,7 +67,7 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 	// 设置题目状态[编译]
 	err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateCompiling), consts.TaskStateExpired)
 	if err != nil {
-		logrus.Errorf("设置题目[%d]状态失败, err=%s", param.ProblemID, err.Error())
+		logrus.Errorf("设置题目[%d]状态失败, err=%s", param.ProblemData.Id, err.Error())
 		results = append(results, &pb.PBResult{
 			Status: define.InternalError,
 			ErrMsg: "task状态设置失败",

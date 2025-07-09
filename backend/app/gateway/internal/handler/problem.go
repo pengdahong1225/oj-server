@@ -282,7 +282,6 @@ func HandleUploadConfig(ctx *gin.Context) {
 		err = stream.Send(&pb.UploadConfigFileChunk{
 			Content:   buffer[:n],
 			ProblemId: problemId,
-			FileName:  fileHeader.Filename,
 		})
 		if err != nil {
 			logrus.Errorf("file send error:%s", err.Error())

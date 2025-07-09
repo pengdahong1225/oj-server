@@ -60,8 +60,8 @@ func initRouters(engine *gin.Engine) {
 		userRouter.POST("/register", handler.HandleUserRegister)
 		userRouter.POST("/reset_password", handler.HandleUserResetPassword)
 		userRouter.GET("/profile", middlewares.AuthLogin(), handler.HandleGetUserProfile)
-		userRouter.GET("/record_list", middlewares.AuthLogin(), handler.HandleGetUserRecordList) // 历史提交记录列表
 		userRouter.GET("/record", middlewares.AuthLogin(), handler.HandleGetUserRecord)
+		userRouter.GET("/record_list", middlewares.AuthLogin(), handler.HandleGetUserRecordList) // 历史提交记录列表
 		userRouter.GET("/solved_list", middlewares.AuthLogin(), handler.HandleGetUserSolvedList)
 	}
 

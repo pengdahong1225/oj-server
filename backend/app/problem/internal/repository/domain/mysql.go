@@ -21,7 +21,7 @@ func NewMysqlDB() (*MysqlDB, error) {
 		logrus.Errorf("new orm logger error: %v", err)
 	}
 
-	cfg := settings.Instance().MysqlConfig
+	cfg := settings.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.User,
 		cfg.Pwd, cfg.Host, cfg.Port, cfg.Db)
 

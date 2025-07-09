@@ -16,6 +16,8 @@ import (
 	"oj-server/proto/pb"
 	"regexp"
 	"time"
+	"strconv"
+	"context"
 )
 
 func HandleUserLogin(ctx *gin.Context) {
@@ -186,7 +188,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 		return
 	}
 	j := auth.JWTCreator{
-		SigningKey: []byte(settings.Instance().SigningKey),
+		SigningKey: []byte(settings.AppConf.JwtCfg.SigningKey),
 	}
 	claims, err := j.ParseToken(refreshToken)
 	if err != nil {
@@ -216,7 +218,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := settings.Instance().SigningKey
+	signingKey := settings.AppConf.JwtCfg.SigningKey
 	j := auth.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
@@ -234,7 +236,7 @@ func createRefreshAccessToken(uid int64, mobile string, role int32) (string, err
 	return j.CreateToken(claims)
 }
 func createAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := settings.Instance().SigningKey
+	signingKey := settings.AppConf.JwtCfg.SigningKey
 	j := auth.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
@@ -366,7 +368,64 @@ func HandleUserResetPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func HandleGetUserProfile(ctx *gin.Context)    {}
-func HandleGetUserRecordList(ctx *gin.Context) {}
-func HandleGetUserRecord(ctx *gin.Context)     {}
+func HandleGetUserProfile(ctx *gin.Context) {}
+
+func HandleGetUserRecord(ctx *gin.Context) {}
+
+// 处理获取用户历史提交记录
+// 偏移量分页
+func HandleGetUserRecordList(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+
+	// 获取元数据
+	uid := ctx.GetInt64("uid")
+
+	// 参数校验
+	pageStr := ctx.Query("page")
+	pageSizeStr := ctx.Query("page_size")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "页码参数错误"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize <= 0 {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "页大小参数错误"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 调用题目服务
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务繁忙"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	defer conn.Close()
+	client := pb.NewProblemServiceClient(conn)
+	req := &pb.GetSubmitRecordListRequest{
+		Uid:      uid,
+		Page:     int32(page),
+		PageSize: int32(pageSize),
+	}
+	rpc_resp, err := client.GetSubmitRecordList(context.Background(), req)
+	if err != nil {
+		logrus.Errorf("problem服务获取提交记录列表失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "获取提交记录列表失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+	resp.Data = rpc_resp
+	resp.Message = "获取提交记录列表成功"
+	resp.ErrCode = pb.Error_EN_Success
+	ctx.JSON(http.StatusOK, resp)
+}
 func HandleGetUserSolvedList(ctx *gin.Context) {}
