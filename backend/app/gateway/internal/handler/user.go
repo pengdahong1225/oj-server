@@ -1,11 +1,9 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
 	"oj-server/app/gateway/internal/respository/cache"
@@ -15,9 +13,12 @@ import (
 	"oj-server/module/settings"
 	"oj-server/proto/pb"
 	"regexp"
-	"time"
 	"strconv"
-	"context"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func HandleUserLogin(ctx *gin.Context) {
@@ -368,9 +369,81 @@ func HandleUserResetPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func HandleGetUserProfile(ctx *gin.Context) {}
+func HandleGetUserProfile(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+	uid := ctx.GetInt64("uid")
+	// 调用用户服务
+	conn, err := registry.GetGrpcConnection(consts.UserService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务繁忙"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+	request := &pb.GetUserInfoRequest{
+		Uid: uid,
+	}
+	rpc_resp, err := client.GetUserInfo(ctx, request)
+	if err != nil {
+		logrus.Errorf("用户服务获取用户信息失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "用户信息查询失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+	resp.Data = rpc_resp
+	resp.ErrCode = pb.Error_EN_Success
+	resp.Message = "获取用户信息成功"
+	ctx.JSON(http.StatusOK, resp)
+}
 
-func HandleGetUserRecord(ctx *gin.Context) {}
+// 处理获取用户某个提交记录的具体信息
+func HandleGetUserRecord(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+
+	idStr := ctx.Query("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		resp.ErrCode = pb.Error_EN_FormValidateFailed
+		resp.Message = "提交记录id不能为空"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	// 调用题目服务
+	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务繁忙"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	defer conn.Close()
+	client := pb.NewProblemServiceClient(conn)
+	request := &pb.GetSubmitRecordRequest{
+		Id: int64(id),
+	}
+	rpc_resp, err := client.GetSubmitRecordData(ctx, request)
+	if err != nil {
+		logrus.Errorf("调用题目服务失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "查询失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
+	}
+
+	resp.ErrCode = pb.Error_EN_Success
+	resp.Data = rpc_resp.Data
+	resp.Message = "获取提交记录成功"
+	ctx.JSON(http.StatusOK, resp)
+}
 
 // 处理获取用户历史提交记录
 // 偏移量分页
@@ -428,4 +501,6 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 	resp.ErrCode = pb.Error_EN_Success
 	ctx.JSON(http.StatusOK, resp)
 }
+
+// 处理获取用户的AC题目列表
 func HandleGetUserSolvedList(ctx *gin.Context) {}

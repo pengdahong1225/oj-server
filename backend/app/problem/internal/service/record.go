@@ -1,10 +1,10 @@
 package service
 
 import (
-	"oj-server/proto/pb"
 	"context"
+	"oj-server/proto/pb"
+
 	"github.com/sirupsen/logrus"
-	"oj-server/module/model"
 )
 
 // GetSubmitRecordList
@@ -38,26 +38,14 @@ func (ps *ProblemService) GetSubmitRecordList(ctx context.Context, in *pb.GetSub
 }
 
 func (ps *ProblemService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubmitRecordRequest) (*pb.GetSubmitRecordResponse, error) {
-	var record model.SubmitRecord
-	result := db.Where("id = ?", request.Id).First(&record)
-	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
-		return nil, errs.QueryFailed
+	record, err := ps.db.QuerySubmitRecord(in.Id)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, err
 	}
-	if result.RowsAffected == 0 {
-		return nil, errs.NotFound
+	resp := &pb.GetSubmitRecordResponse{
+		Data: record.Transform(),
 	}
-	return &pb.GetUserRecordResponse{Data: &pb.UserSubmitRecord{
-		Id:        int64(record.ID),
-		CreatedAt: record.CreatedAt.Unix(),
 
-		Uid:         record.Uid,
-		UserName:    record.UserName,
-		ProblemId:   record.ProblemID,
-		ProblemName: record.ProblemName,
-		Status:      record.Status,
-		Lang:        record.Lang,
-		Code:        record.Code,
-		Result:      record.Result,
-	}}, nil
+	return resp, nil
 }

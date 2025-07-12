@@ -3,12 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"oj-server/app/user/internal/respository/domain"
+	"oj-server/module/model"
 	"oj-server/module/utils"
 	"oj-server/proto/pb"
 	"strconv"
-	"oj-server/module/model"
+
+	"github.com/sirupsen/logrus"
 )
 
 type UserService struct {
@@ -26,6 +27,7 @@ func NewUserService() *UserService {
 	return s
 }
 
+// 注册
 func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequest) (*pb.UserRegisterResponse, error) {
 	resp := &pb.UserRegisterResponse{}
 
@@ -105,6 +107,7 @@ func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginB
 	return resp, nil
 }
 
+// 重置密码
 func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPasswordRequest) (*pb.ResetUserPasswordResponse, error) {
 	resp := &pb.ResetUserPasswordResponse{}
 	hash := utils.HashPassword(in.Password)
@@ -118,6 +121,7 @@ func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPa
 	return resp, nil
 }
 
+// 获取用户信息
 func (us *UserService) GetUserInfo(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
