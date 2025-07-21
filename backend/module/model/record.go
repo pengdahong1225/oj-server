@@ -1,6 +1,8 @@
 package model
 
 import (
+	"oj-server/proto/pb"
+
 	"gorm.io/gorm"
 )
 
@@ -18,6 +20,20 @@ type SubmitRecord struct {
 
 func (receiver SubmitRecord) TableName() string {
 	return "user_submit_record"
+}
+
+func (receiver *SubmitRecord) Transform() *pb.SubmitRecord {
+	return &pb.SubmitRecord{
+		Id:          int64(receiver.ID),
+		CreatedAt:   receiver.CreatedAt.Unix(),
+		Uid:         receiver.Uid,
+		UserName:    receiver.UserName,
+		ProblemId:   receiver.ProblemID,
+		ProblemName: receiver.ProblemName,
+		Status:      receiver.Status,
+		Code:        receiver.Code,
+		Result:      receiver.Result,
+	}
 }
 
 //func (receiver *SubmitRecord) TableName(stamp int64) string {
