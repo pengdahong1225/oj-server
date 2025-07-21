@@ -1,13 +1,9 @@
 .idea/
 *.exe
 *.exe~
-bin
 log
 cmake-build-*
 .vscode
 *.log.*
 *.o
 config/
-/app/db-service/service
-/app/judge-service/service
-/app/question-service/service

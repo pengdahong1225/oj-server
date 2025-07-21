@@ -1,10 +1,10 @@
 package domain
 
 import (
-	"oj-server/module/model"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"oj-server/module/model"
 )
 
 func (md *MysqlDB) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error) {
@@ -30,4 +30,5 @@ func (md *MysqlDB) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64
 	return count, records, nil
 }
 func (md *MysqlDB) QueryUserRecord(uid int64, offset int, pageSize int) (int64, []model.SubmitRecord, error) {
+	return -1, nil, nil
 }

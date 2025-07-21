@@ -33,7 +33,7 @@ func SendSmsCode(mobile string) (string, error) {
 }
 
 func send(param []byte, phone string) error {
-	sms_cfg := settings.Instance().SmsCfg
+	sms_cfg := settings.AppConf.SmsCfg
 
 	config := &openapi.Config{
 		// 您的AccessKey ID

@@ -25,7 +25,7 @@ func AuthLogin() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		signingKey := settings.Instance().SigningKey
+		signingKey := settings.AppConf.JwtCfg.SigningKey
 		j := auth.JWTCreator{
 			SigningKey: []byte(signingKey),
 		}

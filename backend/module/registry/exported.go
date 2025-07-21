@@ -16,7 +16,7 @@ func Init(scheme string) error {
 	instance = new(Registry)
 
 	// 配置中心地址
-	cfg := settings.Instance().RegistryConfig
+	cfg := settings.AppConf.RegistryCfg
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	consulConf := consulapi.DefaultConfig()
 	consulConf.Address = dsn
