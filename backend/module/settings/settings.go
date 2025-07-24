@@ -4,12 +4,11 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"sync"
+	"path"
 )
 
 var (
 	AppConf *AppConfig
-	once    sync.Once
 )
 
 func init() {
@@ -26,11 +25,14 @@ type AppConfig struct {
 	SmsCfg      *Sms       `mapstructure:"sms"`
 }
 
-func (receiver *AppConfig) LoadConfig() error {
+func (receiver *AppConfig) LoadConfig(config string) error {
+	filePath := path.Dir(config)
+	fileName := path.Base(config)
+
 	// 读取配置
 	v := viper.New()
-	v.AddConfigPath("config")
-	v.SetConfigName("config")
+	v.AddConfigPath(filePath)
+	v.SetConfigName(fileName)
 	v.SetConfigType("yaml")
 	if e := v.ReadInConfig(); e != nil {
 		return e

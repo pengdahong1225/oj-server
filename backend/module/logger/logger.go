@@ -34,7 +34,7 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, hook.name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	hook.logFile = logFile
 	hook.fileDate = timer
 

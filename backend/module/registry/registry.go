@@ -18,7 +18,7 @@ type Registry struct {
 }
 
 func (r *Registry) registerService(info *pb.PBNodeInfo) error {
-	id := fmt.Sprintf("%d:%d", info.NodeType, info.NodeId)
+	id := fmt.Sprintf("%s:%d", info.Name, info.NodeId)
 
 	var srv *consulapi.AgentServiceRegistration
 	if r.scheme == "grpc" {

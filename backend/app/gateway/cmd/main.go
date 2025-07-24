@@ -6,7 +6,6 @@ import (
 
 func main() {
 	s := server.Server{}
-	s.Name = "gateway-service"
 	s.Scheme = "http"
 
 	err := s.Init()
