@@ -20,7 +20,7 @@ type Server struct {
 }
 
 func (receiver *Server) Initialize() error {
-	err := logger.Init("./log", "debug")
+	err := logger.Init("./log", receiver.Name, logrus.DebugLevel)
 	if err != nil {
 		return err
 	}
