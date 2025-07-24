@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"oj-server/app/gateway/internal/define"
 	"oj-server/app/gateway/internal/respository/cache"
-	"oj-server/module/third_party/captcha"
+	captcha2 "oj-server/module/captcha"
 	"oj-server/proto/pb"
 	"regexp"
 )
@@ -16,7 +16,7 @@ func HandleGetImageCode(ctx *gin.Context) {
 	resp := define.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
-	id, b64s, err := captcha.GenerateImageCaptcha()
+	id, b64s, err := captcha2.GenerateImageCaptcha()
 	if err != nil {
 		logrus.Errorf("生成图像验证码失败: %v", err)
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -55,7 +55,7 @@ func HandleGetSmsCode(ctx *gin.Context) {
 		return
 	}
 	// 图形验证码校验
-	if !captcha.VerifyImageCaptcha(form.CaptchaID, form.CaptchaValue) {
+	if !captcha2.VerifyImageCaptcha(form.CaptchaID, form.CaptchaValue) {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "图形验证码输入错误"
 		ctx.JSON(http.StatusBadRequest, resp)
@@ -63,7 +63,7 @@ func HandleGetSmsCode(ctx *gin.Context) {
 	}
 
 	// 发送验证码
-	c, err := captcha.SendSmsCode(form.Mobile)
+	c, err := captcha2.SendSmsCode(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_ServiceBusy
 		resp.Message = "服务繁忙"

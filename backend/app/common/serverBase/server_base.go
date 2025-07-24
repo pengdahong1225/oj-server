@@ -6,8 +6,8 @@ import (
 	"oj-server/module/logger"
 	"oj-server/module/registry"
 	"oj-server/module/settings"
-	"oj-server/module/utils"
 	"oj-server/proto/pb"
+	"oj-server/utils"
 )
 
 type Server struct {

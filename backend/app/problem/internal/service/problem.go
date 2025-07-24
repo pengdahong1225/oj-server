@@ -13,11 +13,11 @@ import (
 	"oj-server/app/problem/internal/repository/cache"
 	"oj-server/app/problem/internal/repository/domain"
 	"oj-server/consts"
-	"oj-server/module/utils"
+	"oj-server/module/model"
 	"oj-server/proto/pb"
+	"oj-server/utils"
 	"os"
 	"path/filepath"
-	"oj-server/module/model"
 )
 
 type ProblemService struct {

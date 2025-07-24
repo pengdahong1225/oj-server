@@ -6,11 +6,9 @@ import (
 )
 
 func TestWorker_InitLog(t *testing.T) {
-	appName := "question-service"
+	appName := "gateway"
 	path := "./"
-	level := "debug"
-
-	if err := Init(appName, path, level); err != nil {
+	if err := Init(path, appName, logrus.InfoLevel); err != nil {
 		t.Error(err.Error())
 		return
 	}

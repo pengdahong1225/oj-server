@@ -1,8 +1,8 @@
 package model
 
 import (
-	"oj-server/module/utils"
 	"oj-server/proto/pb"
+	"oj-server/utils"
 	"time"
 )
 

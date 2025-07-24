@@ -11,11 +11,10 @@ import (
 )
 
 type FileHook struct {
-	errFile   *os.File
-	infoFile  *os.File
-	debugFile *os.File
-	fileDate  string
-	filePath  string
+	logFile  *os.File
+	fileDate string
+	filePath string
+	name     string
 }
 
 func (hook FileHook) Levels() []logrus.Level {
@@ -29,42 +28,28 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 		hook.write(entry)
 		return nil
 	}
-	hook.errFile.Close()
-	hook.infoFile.Close()
-	hook.debugFile.Close()
+	hook.logFile.Close()
 
 	err := os.MkdirAll(hook.filePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-
-	hook.errFile = errFile
-	hook.infoFile = infoFile
-	hook.debugFile = debugFile
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	hook.logFile = logFile
 	hook.fileDate = timer
+
 	hook.write(entry)
+
 	return nil
 }
 
 func (hook FileHook) write(entry *logrus.Entry) {
-	line, _ := entry.String()
-	switch entry.Level {
-	case logrus.ErrorLevel:
-		hook.errFile.Write([]byte(line))
-	case logrus.InfoLevel:
-		hook.infoFile.Write([]byte(line))
-	case logrus.DebugLevel:
-		hook.debugFile.Write([]byte(line))
-	default:
-		panic("unhandled default case")
-	}
+	line, _ := entry.Bytes()
+	_, _ = hook.logFile.Write(line)
 }
 
 // Init 初始化日志
-func Init(filePath, level string) error {
+func Init(filePath, name string, level logrus.Level) error {
 	timer := time.Now().Format("2006-01-02")
 	err := os.MkdirAll(filePath, os.ModePerm)
 	if err != nil {
@@ -72,23 +57,15 @@ func Init(filePath, level string) error {
 	}
 
 	// 日志文件
-	errFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, "error", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	infoFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, "info", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	debugFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, "debug", timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	hook := &FileHook{
-		errFile:   errFile,
-		infoFile:  infoFile,
-		debugFile: debugFile,
-		fileDate:  timer,
-		filePath:  filePath,
+		logFile:  logFile,
+		fileDate: timer,
+		filePath: filePath,
+		name:     name,
 	}
 	logrus.AddHook(hook)
-	if level == "info" {
-		logrus.SetLevel(logrus.InfoLevel)
-	} else {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
+	logrus.SetLevel(level)
 
 	format := &nested.Formatter{
 		HideKeys:        true,
@@ -98,8 +75,7 @@ func Init(filePath, level string) error {
 		CallerFirst:     true,
 		CustomCallerFormatter: func(f *runtime.Frame) string {
 			filename := path.Base(f.File)
-			funcname := path.Base(f.Function)
-			return fmt.Sprintf(" [%s:%d %s]", filename, f.Line, funcname)
+			return fmt.Sprintf(" %s:%d", filename, f.Line)
 		},
 	}
 

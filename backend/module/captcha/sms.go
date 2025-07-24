@@ -8,7 +8,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/sirupsen/logrus"
 	"oj-server/module/settings"
-	"oj-server/module/utils"
+	"oj-server/utils"
 	"os"
 )
 

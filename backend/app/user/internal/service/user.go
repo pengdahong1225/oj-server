@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"oj-server/app/user/internal/respository/domain"
 	"oj-server/module/model"
-	"oj-server/module/utils"
 	"oj-server/proto/pb"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
+	"oj-server/utils"
 )
 
 type UserService struct {
