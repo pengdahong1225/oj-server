@@ -1,27 +1,26 @@
-package server
+package gateway
 
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"oj-server/app/common/serverBase"
 	"oj-server/app/gateway/internal/respository/cache"
 	"oj-server/app/gateway/internal/router"
+	"oj-server/module/configManager"
+	"oj-server/module/registry"
 	"sync"
 )
 
 // Server
 // 服务器
 type Server struct {
-	ServerBase.Server
-	wg sync.WaitGroup
+}
+
+func NewServer() *Server {
+	return &Server{}
 }
 
 func (s *Server) Init() error {
-	err := s.Initialize()
-	if err != nil {
-		return err
-	}
-	err = cache.Init()
+	err := cache.Init()
 	if err != nil {
 		return err
 	}
@@ -29,13 +28,15 @@ func (s *Server) Init() error {
 	return nil
 }
 
-func (s *Server) Start() {
+func (s *Server) Run() {
+	server_cfg := configManager.ServerConf
+	wg := sync.WaitGroup{}
 	// 启动
-	s.wg.Add(1)
+	wg.Add(1)
 	go func() {
-		defer s.wg.Done()
+		defer wg.Done()
 		engine := router.Router()
-		dsn := fmt.Sprintf(":%d", s.Port)
+		dsn := fmt.Sprintf(":%d", server_cfg.Port)
 		err := engine.Run(dsn)
 		if err != nil {
 			logrus.Fatalf("启动服务失败: %v", err)
@@ -43,11 +44,17 @@ func (s *Server) Start() {
 	}()
 
 	// 服务注册
-	err := s.Register()
+	err := registry.RegisterService()
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
-	defer s.UnRegister()
+	defer func() {
+		err = registry.DeregisterService()
+		if err != nil {
+			logrus.Errorf("注销服务失败: %v", err)
+			return
+		}
+	}()
 
-	s.wg.Wait()
+	wg.Wait()
 }

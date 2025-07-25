@@ -1,18 +1,18 @@
 package service
 
 import (
-	"oj-server/app/judge/internal/processor"
-	"oj-server/proto/pb"
-	"oj-server/app/judge/internal/respository/domain"
-	"time"
-	"github.com/sirupsen/logrus"
-	"oj-server/app/judge/internal/respository/cache"
-	"oj-server/app/judge/internal/define"
-	"fmt"
-	"os"
-	"oj-server/consts"
 	"encoding/json"
+	"fmt"
+	"github.com/sirupsen/logrus"
+	"oj-server/app/judge/internal/define"
+	"oj-server/app/judge/internal/processor"
+	"oj-server/app/judge/internal/respository/cache"
+	"oj-server/app/judge/internal/respository/domain"
+	"oj-server/global"
 	"oj-server/module/model"
+	"oj-server/proto/pb"
+	"os"
+	"time"
 )
 
 var (
@@ -66,7 +66,7 @@ func preAction(form *pb.SubmitForm) (bool, *define.Param) {
 	}
 
 	// 读取题目配置文件
-	cfg_path := fmt.Sprintf("%s/%d.json", consts.ProblemConfigPath, form.ProblemId)
+	cfg_path := fmt.Sprintf("%s/%d.json", global.ProblemConfigPath, form.ProblemId)
 	if _, err := os.Stat(cfg_path); os.IsNotExist(err) {
 		logrus.Errorf("题目[%d]配置文件不存在, err=%s", form.ProblemId, err.Error())
 		return false, nil
@@ -108,7 +108,7 @@ func analyzeResult(param *define.Param, results []*pb.PBResult) {
 func saveResult(param *define.Param, data []byte) {
 	// 保存本次提交结果
 	taskId := fmt.Sprintf("%d_%d", param.Uid, param.ProblemData.Id)
-	err := cache.SetJudgeResult(taskId, param.Message, consts.JudgeResultExpired)
+	err := cache.SetJudgeResult(taskId, param.Message, global.JudgeResultExpired)
 	if err != nil {
 		logrus.Errorf("保存判题结果失败, err=%s", err.Error())
 	}

@@ -12,7 +12,7 @@ import (
 	"oj-server/app/problem/internal/productor"
 	"oj-server/app/problem/internal/repository/cache"
 	"oj-server/app/problem/internal/repository/domain"
-	"oj-server/consts"
+	"oj-server/global"
 	"oj-server/module/model"
 	"oj-server/proto/pb"
 	"oj-server/utils"
@@ -75,7 +75,7 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 		// 首次接收时初始化
 		if writer == nil {
 			problemID = chunk.ProblemId
-			filePath := fmt.Sprintf("%s/%d.json", consts.ProblemConfigPath, problemID)
+			filePath := fmt.Sprintf("%s/%d.json", global.ProblemConfigPath, problemID)
 
 			// 创建目录
 			if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
@@ -104,7 +104,7 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 
 	// 返回成功响应
 	return stream.SendAndClose(&pb.UploadConfigResponse{
-		FilePath: fmt.Sprintf("%s/%d.json", consts.ProblemConfigPath, problemID),
+		FilePath: fmt.Sprintf("%s/%d.json", global.ProblemConfigPath, problemID),
 		Size:     fileSize,
 	})
 }

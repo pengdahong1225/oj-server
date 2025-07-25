@@ -1,4 +1,4 @@
-package server
+package user
 
 import (
 	"fmt"
@@ -8,28 +8,21 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"oj-server/app/common/serverBase"
-	"oj-server/app/problem/internal/consumer"
-	"oj-server/app/problem/internal/repository/cache"
-	"oj-server/app/problem/internal/service"
+	"oj-server/app/user/internal/respository/cache"
+	"oj-server/app/user/internal/service"
+	"oj-server/module/configManager"
+	"oj-server/module/registry"
 	"oj-server/proto/pb"
 	"sync"
 )
 
 type Server struct {
-	ServerBase.Server
-	problemSrv *service.ProblemService
-	wg         sync.WaitGroup
+	userSrv *service.UserService
 }
 
 func (s *Server) Init() error {
-	err := s.Initialize()
-	if err != nil {
-		return err
-	}
-
-	s.problemSrv = service.NewProblemService()
-	err = cache.Init()
+	s.userSrv = service.NewUserService()
+	err := cache.Init()
 	if err != nil {
 		return err
 	}
@@ -37,27 +30,29 @@ func (s *Server) Init() error {
 	return nil
 }
 
-func (s *Server) Start() {
-	var opts []grpc.ServerOption
+func (s *Server) Run() {
 	// tls认证
-	creds, err := credentials.NewServerTLSFromFile("./config/keys/server.pem", "./config/keys/server.key")
+	creds, err := credentials.NewServerTLSFromFile("./config/keys/server.crt", "./config/keys/server.key")
 	if err != nil {
 		logrus.Fatalf("Failed to generate credentials %v", err)
 	}
+	var opts []grpc.ServerOption
 	opts = append(opts, grpc.Creds(creds))
-
 	grpcServer := grpc.NewServer(opts...)
 
 	// 健康检查
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	// 将业务服务注册到grpc中
-	pb.RegisterProblemServiceServer(grpcServer, s.problemSrv)
+	pb.RegisterUserServiceServer(grpcServer, s.userSrv)
 
 	// 启动
-	s.wg.Add(1)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
-		defer s.wg.Done()
-		netAddr := fmt.Sprintf("%s:%d", s.Host, s.Port)
+		defer wg.Done()
+
+		cfg := configManager.ServerConf
+		netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 		listener, err := net.Listen("tcp", netAddr)
 		if err != nil {
 			panic(err)
@@ -69,18 +64,18 @@ func (s *Server) Start() {
 		}
 	}()
 
-	// 启动评论消费者
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		consumer.StartCommentConsume()
+	// 服务注册
+	err = registry.RegisterService()
+	if err != nil {
+		logrus.Fatalf("注册服务失败: %v", err)
+	}
+	defer func() {
+		err = registry.DeregisterService()
+		if err != nil {
+			logrus.Errorf("注销服务失败: %v", err)
+			return
+		}
 	}()
 
-	err = s.Register()
-	if err != nil {
-		panic(err)
-	}
-	defer s.UnRegister()
-
-	s.wg.Wait()
+	wg.Wait()
 }

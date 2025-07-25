@@ -8,12 +8,13 @@ import (
 	"net/http"
 	"oj-server/app/gateway/internal/handler"
 	"oj-server/app/gateway/internal/middlewares"
+	"oj-server/global"
 	"os"
 	"time"
 )
 
 func Router() *gin.Engine {
-	path := fmt.Sprintf("%s/web.log", "./log")
+	path := fmt.Sprintf("%s/web.log", global.LogPath)
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		logrus.Errorf("web日志文件打开失败：%s", err.Error())

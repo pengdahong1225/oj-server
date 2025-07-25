@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"oj-server/module/settings"
+	"oj-server/module/configManager"
 )
 
 var connection *amqp.Connection
 
-func connect(cfg *settings.MqConfig) (*amqp.Connection, error) {
+func connect(cfg *configManager.MqConfig) (*amqp.Connection, error) {
 	dsn := fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		cfg.User,
 		cfg.PassWord,
@@ -25,7 +25,7 @@ func connect(cfg *settings.MqConfig) (*amqp.Connection, error) {
 func newChannel(exName, exKind, quName, routingKey string) *amqp.Channel {
 	if connection == nil || connection.IsClosed() {
 		var err error
-		connection, err = connect(settings.Instance().MqConfig)
+		connection, err = connect(configManager.Instance().MqConfig)
 		if err != nil {
 			logrus.Errorln(err)
 			return nil

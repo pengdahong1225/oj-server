@@ -1,12 +1,12 @@
-package consts
+package global
 
 import "time"
 
 const (
-	GatewayService = "gateway-service"
-	UserService    = "user-service"
-	ProblemService = "problem-service"
-	JudgeService   = "judge-service"
+	GatewayService = "gateway"
+	UserService    = "user"
+	ProblemService = "problem"
+	JudgeService   = "judge"
 )
 
 const (
@@ -20,6 +20,8 @@ const (
 )
 
 const (
+	ConfigPath                = "./config"
+	LogPath                   = "./log"
 	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7
 	AccessTokenTimeOut  int64 = 60 * 15
 	Issuer                    = "Messi"

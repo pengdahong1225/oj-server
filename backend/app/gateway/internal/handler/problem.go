@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
-	"oj-server/consts"
+	"oj-server/global"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
 	"path/filepath"
@@ -43,7 +43,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	}
 
 	// 调用problem服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -87,7 +87,7 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 	}
 	id, _ := strconv.ParseInt(idStr, 10, 64)
 	// 调用problem服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -129,7 +129,7 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	uid := ctx.GetInt64("uid")
 
 	// 调用题目服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -171,7 +171,7 @@ func HandleCreateProblem(ctx *gin.Context) {
 	}
 
 	// 调用problem服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -246,7 +246,7 @@ func HandleUploadConfig(ctx *gin.Context) {
 		return
 	}
 	// 创建gRPC流
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -322,7 +322,7 @@ func HandlePublishProblem(ctx *gin.Context) {
 		return
 	}
 	// 调用problem服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy

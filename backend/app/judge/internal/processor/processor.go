@@ -1,16 +1,16 @@
 package processor
 
 import (
-	"oj-server/app/judge/internal/define"
-	"oj-server/proto/pb"
 	"fmt"
-	"oj-server/app/judge/internal/respository/cache"
 	"github.com/sirupsen/logrus"
-	"sync"
+	"oj-server/app/judge/internal/define"
+	"oj-server/app/judge/internal/respository/cache"
+	"oj-server/global"
 	"oj-server/module/gPool"
-	"oj-server/consts"
-	"time"
+	"oj-server/proto/pb"
 	"strings"
+	"sync"
+	"time"
 )
 
 // 定义判题任务的处理模板
@@ -50,13 +50,13 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 	results := make([]*pb.PBResult, 0, 10)
 	// 退出之后，需要将本次任务的状态置为UPStateExited，并且释放锁
 	defer func() {
-		if err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateExited), consts.TaskStateExpired); err != nil {
+		if err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateExited), global.TaskStateExpired); err != nil {
 			logrus.Errorln(err.Error())
 		}
 		_ = cache.UnLockUser(form.Uid) // 释放锁
 	}()
 	// 初始化任务状态
-	if err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateNormal), consts.TaskStateExpired); err != nil {
+	if err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateNormal), global.TaskStateExpired); err != nil {
 		logrus.Errorf("初始化任务状态失败, err=%s", err.Error())
 		results = append(results, &pb.PBResult{
 			Status: define.InternalError,
@@ -65,7 +65,7 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 		return results
 	}
 	// 设置题目状态[编译]
-	err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateCompiling), consts.TaskStateExpired)
+	err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateCompiling), global.TaskStateExpired)
 	if err != nil {
 		logrus.Errorf("设置题目[%d]状态失败, err=%s", param.ProblemData.Id, err.Error())
 		results = append(results, &pb.PBResult{
@@ -91,7 +91,7 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 		pbResult.Content = "Compile Error"
 		results = append(results, pbResult)
 		// 更新状态
-		if err = cache.SetTaskState(taskId, int(pb.SubmitState_UPStateExited), consts.TaskStateExpired); err != nil {
+		if err = cache.SetTaskState(taskId, int(pb.SubmitState_UPStateExited), global.TaskStateExpired); err != nil {
 			logrus.Errorln(err.Error())
 			return nil
 		}

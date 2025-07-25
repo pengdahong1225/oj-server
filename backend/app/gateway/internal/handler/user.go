@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"oj-server/app/gateway/internal/define"
 	"oj-server/app/gateway/internal/respository/cache"
-	"oj-server/consts"
+	"oj-server/global"
 	"oj-server/module/auth"
+	"oj-server/module/configManager"
 	"oj-server/module/registry"
-	"oj-server/module/settings"
 	"oj-server/proto/pb"
 	"regexp"
 	"strconv"
@@ -41,7 +41,7 @@ func HandleUserLogin(ctx *gin.Context) {
 	}
 
 	// 调用用户服务
-	conn, err := registry.GetGrpcConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(global.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -125,7 +125,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 	}
 
 	// 调用用户服务
-	conn, err := registry.GetGrpcConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(global.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -189,7 +189,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 		return
 	}
 	j := auth.JWTCreator{
-		SigningKey: []byte(settings.AppConf.JwtCfg.SigningKey),
+		SigningKey: []byte(configManager.AppConf.JwtCfg.SigningKey),
 	}
 	claims, err := j.ParseToken(refreshToken)
 	if err != nil {
@@ -219,7 +219,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := settings.AppConf.JwtCfg.SigningKey
+	signingKey := configManager.AppConf.JwtCfg.SigningKey
 	j := auth.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
@@ -230,14 +230,14 @@ func createRefreshAccessToken(uid int64, mobile string, role int32) (string, err
 		Type:      "refresh",
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),                              // 签名生效时间
-			ExpiresAt: time.Now().Unix() + consts.RefreshTokenTimeOut, // 7天过期
-			Issuer:    consts.Issuer,                                  // 签名机构
+			ExpiresAt: time.Now().Unix() + global.RefreshTokenTimeOut, // 7天过期
+			Issuer:    global.Issuer,                                  // 签名机构
 		},
 	}
 	return j.CreateToken(claims)
 }
 func createAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := settings.AppConf.JwtCfg.SigningKey
+	signingKey := configManager.AppConf.JwtCfg.SigningKey
 	j := auth.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
@@ -248,8 +248,8 @@ func createAccessToken(uid int64, mobile string, role int32) (string, error) {
 		Type:      "access",
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),                             // 签名生效时间
-			ExpiresAt: time.Now().Unix() + consts.AccessTokenTimeOut, // 15分钟过期
-			Issuer:    consts.Issuer,                                 // 签名机构
+			ExpiresAt: time.Now().Unix() + global.AccessTokenTimeOut, // 15分钟过期
+			Issuer:    global.Issuer,                                 // 签名机构
 		},
 	}
 	return j.CreateToken(claims)
@@ -282,7 +282,7 @@ func HandleUserRegister(ctx *gin.Context) {
 	}
 
 	// 调用用户服务
-	conn, err := registry.GetGrpcConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(global.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -342,7 +342,7 @@ func HandleUserResetPassword(ctx *gin.Context) {
 	}
 
 	// 调用用户服务
-	conn, err := registry.GetGrpcConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(global.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -375,7 +375,7 @@ func HandleGetUserProfile(ctx *gin.Context) {
 	}
 	uid := ctx.GetInt64("uid")
 	// 调用用户服务
-	conn, err := registry.GetGrpcConnection(consts.UserService)
+	conn, err := registry.GetGrpcConnection(global.UserService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -417,7 +417,7 @@ func HandleGetUserRecord(ctx *gin.Context) {
 		return
 	}
 	// 调用题目服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -473,7 +473,7 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 		return
 	}
 	// 调用题目服务
-	conn, err := registry.GetGrpcConnection(consts.ProblemService)
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy

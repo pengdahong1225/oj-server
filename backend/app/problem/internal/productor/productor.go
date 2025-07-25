@@ -1,7 +1,7 @@
 package productor
 
 import (
-	"oj-server/consts"
+	"oj-server/global"
 	"oj-server/module/mq"
 )
 
@@ -12,10 +12,10 @@ var (
 
 func init() {
 	problem_productor = mq.NewProducer(
-		consts.RabbitMqExchangeKind,
-		consts.RabbitMqExchangeName,
-		consts.RabbitMqJudgeQueue,
-		consts.RabbitMqJudgeKey,
+		global.RabbitMqExchangeKind,
+		global.RabbitMqExchangeName,
+		global.RabbitMqJudgeQueue,
+		global.RabbitMqJudgeKey,
 	)
 }
 

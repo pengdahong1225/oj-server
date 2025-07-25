@@ -7,7 +7,7 @@ import (
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/sirupsen/logrus"
-	"oj-server/module/settings"
+	"oj-server/module/configManager"
 	"oj-server/utils"
 	"os"
 )
@@ -33,7 +33,7 @@ func SendSmsCode(mobile string) (string, error) {
 }
 
 func send(param []byte, phone string) error {
-	sms_cfg := settings.AppConf.SmsCfg
+	sms_cfg := configManager.AppConf.SmsCfg
 
 	config := &openapi.Config{
 		// 您的AccessKey ID

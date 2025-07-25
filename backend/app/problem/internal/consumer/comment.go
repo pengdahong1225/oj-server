@@ -1,7 +1,7 @@
 package consumer
 
 import (
-	"oj-server/consts"
+	"oj-server/global"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
 	"oj-server/proto/pb"
@@ -17,10 +17,10 @@ var (
 
 func init() {
 	comment_consumer = mq.NewConsumer(
-		consts.RabbitMqExchangeKind,
-		consts.RabbitMqExchangeName,
-		consts.RabbitMqCommentQueue,
-		consts.RabbitMqCommentKey,
+		global.RabbitMqExchangeKind,
+		global.RabbitMqExchangeName,
+		global.RabbitMqCommentQueue,
+		global.RabbitMqCommentKey,
 		"", // 消费者标签，用于区别不同的消费者
 	)
 }

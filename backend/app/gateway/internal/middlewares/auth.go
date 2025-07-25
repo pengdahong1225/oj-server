@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"oj-server/app/gateway/internal/define"
 	"oj-server/module/auth"
-	"oj-server/module/settings"
+	"oj-server/module/configManager"
 	"oj-server/proto/pb"
 	"time"
 )
@@ -25,7 +25,7 @@ func AuthLogin() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		signingKey := settings.AppConf.JwtCfg.SigningKey
+		signingKey := configManager.AppConf.JwtCfg.SigningKey
 		j := auth.JWTCreator{
 			SigningKey: []byte(signingKey),
 		}

@@ -1,27 +1,22 @@
-package server
+package judge
 
 import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
-	"oj-server/app/common/serverBase"
 	"oj-server/app/judge/internal/respository/cache"
 	"oj-server/app/judge/internal/service"
-	"oj-server/consts"
+	"oj-server/global"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
+	"oj-server/module/registry"
 	"oj-server/proto/pb"
+	"sync"
 )
 
-type Server struct {
-	ServerBase.Server
-}
+type Server struct{}
 
-func (receiver *Server) Init() error {
-	err := receiver.Initialize()
-	if err != nil {
-		return err
-	}
-	err = service.Init()
+func (s *Server) Init() error {
+	err := service.Init()
 	if err != nil {
 		return err
 	}
@@ -32,21 +27,36 @@ func (receiver *Server) Init() error {
 	return nil
 }
 
-func (receiver *Server) Start() {
-	go receiver.startJudgeConsume()
+func (s *Server) Run() {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		s.startJudgeConsume()
+	}()
 
-	err := receiver.Register()
+	// 服务注册
+	err := registry.RegisterService()
 	if err != nil {
-		panic(err)
+		logrus.Fatalf("注册服务失败: %v", err)
 	}
+	defer func() {
+		err = registry.DeregisterService()
+		if err != nil {
+			logrus.Errorf("注销服务失败: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
 }
 
-func (receiver *Server) startJudgeConsume() {
+func (s *Server) startJudgeConsume() {
 	consumer := mq.NewConsumer(
-		consts.RabbitMqExchangeKind,
-		consts.RabbitMqExchangeName,
-		consts.RabbitMqJudgeQueue,
-		consts.RabbitMqJudgeKey,
+		global.RabbitMqExchangeKind,
+		global.RabbitMqExchangeName,
+		global.RabbitMqJudgeQueue,
+		global.RabbitMqJudgeKey,
 		"", // 消费者标签，用于区别不同的消费者
 	)
 	deliveries := consumer.Consume()
@@ -57,7 +67,7 @@ func (receiver *Server) startJudgeConsume() {
 	defer consumer.Close()
 
 	for d := range deliveries {
-		if receiver.syncDo(d.Body) {
+		if s.syncDo(d.Body) {
 			d.Ack(false)
 		} else {
 			d.Reject(false)
@@ -66,7 +76,7 @@ func (receiver *Server) startJudgeConsume() {
 }
 
 // 解析，校验，提交任务给评测机
-func (receiver *Server) syncDo(data []byte) bool {
+func (s *Server) syncDo(data []byte) bool {
 	submitForm := &pb.SubmitForm{}
 	err := proto.Unmarshal(data, submitForm)
 	if err != nil {

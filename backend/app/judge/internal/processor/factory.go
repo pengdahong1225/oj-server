@@ -1,11 +1,11 @@
 package processor
 
 import (
-	"oj-server/app/judge/internal/define"
-	"strings"
-	"oj-server/module/settings"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/judge/internal/define"
+	"oj-server/module/configManager"
+	"strings"
 )
 
 func NewProcessor(language string) *BaseProcessor {
@@ -27,7 +27,7 @@ func NewProcessor(language string) *BaseProcessor {
 
 	// 查询sandbox地址
 	var addr string
-	for _, item := range settings.Instance().SandBoxCfg {
+	for _, item := range configManager.Instance().SandBoxCfg {
 		if item.Type == language {
 			addr = fmt.Sprintf("http://%s:%d", item.Host, item.Port)
 			break

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"oj-server/module/settings"
+	"oj-server/module/configManager"
 )
 
 var (
@@ -12,7 +12,7 @@ var (
 )
 
 func Init() error {
-	cfg := settings.Instance().RedisConfig
+	cfg := configManager.AppConf.RedisCfg
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
 	RedisClient = redis.NewClient(&redis.Options{

@@ -4,20 +4,20 @@ import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
-	"oj-server/module/settings"
-	"oj-server/proto/pb"
+	"oj-server/module/configManager"
 )
 
 var (
 	instance *Registry
 )
 
-func Init(scheme string) error {
+func Init() error {
 	instance = new(Registry)
 
 	// 配置中心地址
-	cfg := settings.AppConf.RegistryCfg
-	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	server_cfg := configManager.ServerConf
+	app_cfg := configManager.AppConf.RegistryCfg
+	dsn := fmt.Sprintf("%s:%d", app_cfg.Host, app_cfg.Port)
 	consulConf := consulapi.DefaultConfig()
 	consulConf.Address = dsn
 	// client
@@ -27,16 +27,16 @@ func Init(scheme string) error {
 	}
 	instance.addr = dsn
 	instance.client = c
-	instance.scheme = scheme
+	instance.scheme = server_cfg.Scheme
 
 	return nil
 }
 
-func RegisterService(info *pb.PBNodeInfo) error {
-	return instance.registerService(info)
+func RegisterService() error {
+	return instance.registerService()
 }
-func DeregisterService(info *pb.PBNodeInfo) error {
-	return instance.unRegister(info)
+func DeregisterService() error {
+	return instance.unRegister()
 }
 func GetGrpcConnection(name string) (*grpc.ClientConn, error) {
 	return instance.getGrpcConnection(name)
