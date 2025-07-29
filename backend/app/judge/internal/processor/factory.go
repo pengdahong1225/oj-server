@@ -27,7 +27,7 @@ func NewProcessor(language string) *BaseProcessor {
 
 	// 查询sandbox地址
 	var addr string
-	for _, item := range configManager.Instance().SandBoxCfg {
+	for _, item := range configManager.AppConf.SandBoxCfg {
 		if item.Type == language {
 			addr = fmt.Sprintf("http://%s:%d", item.Host, item.Port)
 			break

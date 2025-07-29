@@ -5,7 +5,8 @@ import (
 	_ "github.com/mbobakov/grpc-consul-resolver" // It's important
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func (r *Registry) getGrpcConnection(name string) (*grpc.ClientConn, error) {
@@ -13,24 +14,19 @@ func (r *Registry) getGrpcConnection(name string) (*grpc.ClientConn, error) {
 	defer r.mux.Unlock()
 
 	conn, ok := r.servicesMap[name]
-	if ok {
+	if ok && conn.GetState() == connectivity.Ready {
 		return conn, nil
 	}
+
 	// 创建服务连接池
 	// 加载证书
 	var (
-		creds credentials.TransportCredentials
-		err   error
+		err error
 	)
-	creds, err = credentials.NewClientTLSFromFile("cert/server.pem", "")
-	if err != nil {
-		logrus.Errorf("Failed to create TLS credentials %v", err)
-		return nil, err
-	}
 	target := fmt.Sprintf("consul://%s/%s?wait=10s&healthy=true", r.addr, name)
 	conn, err = grpc.NewClient(
 		target,
-		grpc.WithTransportCredentials(creds),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),                // 不安全连接
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`), // 负载均衡，轮训策略
 	)
 	if err != nil {

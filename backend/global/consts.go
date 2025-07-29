@@ -22,6 +22,7 @@ const (
 const (
 	ConfigPath                = "./config"
 	LogPath                   = "./log"
+	TLSPath                   = "./config/keys"
 	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7
 	AccessTokenTimeOut  int64 = 60 * 15
 	Issuer                    = "Messi"

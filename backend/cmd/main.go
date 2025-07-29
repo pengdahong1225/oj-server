@@ -10,6 +10,9 @@ import (
 	"oj-server/module/logger"
 	"oj-server/module/registry"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -61,5 +64,17 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Failed to init server: %v", err)
 	}
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigChan
+		logrus.Errorf("Recv signal: %v", sig)
+		server.Stop()
+		time.Sleep(time.Second)
+		os.Exit(0)
+	}()
+
+	// 启动
 	server.Run()
 }

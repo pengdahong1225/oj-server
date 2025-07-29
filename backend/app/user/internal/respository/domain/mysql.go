@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/logger"
 )
@@ -17,7 +16,7 @@ type MysqlDB struct {
 func NewMysqlDB() (*MysqlDB, error) {
 	m := &MysqlDB{}
 
-	newLogger, err := logger.NewOrmLogger(global.LogPath)
+	newLogger, err := logger.NewOrmLogger()
 	if err != nil {
 		logrus.Errorf("new orm logger error: %v", err)
 	}

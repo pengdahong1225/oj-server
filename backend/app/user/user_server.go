@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
@@ -13,11 +12,15 @@ import (
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"sync"
 )
 
 type Server struct {
-	userSrv *service.UserService
+	listener net.Listener
+	userSrv  *service.UserService
+}
+
+func NewServer() *Server {
+	return &Server{}
 }
 
 func (s *Server) Init() error {
@@ -31,51 +34,34 @@ func (s *Server) Init() error {
 }
 
 func (s *Server) Run() {
-	// tls认证
-	creds, err := credentials.NewServerTLSFromFile("./config/keys/server.crt", "./config/keys/server.key")
-	if err != nil {
-		logrus.Fatalf("Failed to generate credentials %v", err)
-	}
-	var opts []grpc.ServerOption
-	opts = append(opts, grpc.Creds(creds))
-	grpcServer := grpc.NewServer(opts...)
-
-	// 健康检查
-	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
-	// 将业务服务注册到grpc中
-	pb.RegisterUserServiceServer(grpcServer, s.userSrv)
-
-	// 启动
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		cfg := configManager.ServerConf
-		netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-		listener, err := net.Listen("tcp", netAddr)
-		if err != nil {
-			panic(err)
-		}
-		defer listener.Close()
-		err = grpcServer.Serve(listener)
-		if err != nil {
-			logrus.Fatalf("启动服务失败: %v", err)
-		}
-	}()
-
 	// 服务注册
-	err = registry.RegisterService()
+	err := registry.RegisterService()
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
-	defer func() {
-		err = registry.DeregisterService()
-		if err != nil {
-			logrus.Errorf("注销服务失败: %v", err)
-			return
-		}
-	}()
 
-	wg.Wait()
+	// 监听
+	cfg := configManager.ServerConf
+	netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	listener, err := net.Listen("tcp", netAddr)
+	if err != nil {
+		panic(err)
+	}
+	defer listener.Close()
+	s.listener = listener
+
+	// 启动
+	grpcServer := grpc.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
+	pb.RegisterUserServiceServer(grpcServer, s.userSrv)
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		logrus.Errorf("%s", err)
+		_ = registry.DeregisterService()
+	}
+}
+
+func (s *Server) Stop() {
+	_ = s.listener.Close()
+	logrus.Errorf("======================= user stop =======================")
 }

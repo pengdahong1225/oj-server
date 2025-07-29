@@ -1,19 +1,25 @@
 package judge
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"net/http"
 	"oj-server/app/judge/internal/respository/cache"
 	"oj-server/app/judge/internal/service"
 	"oj-server/global"
+	"oj-server/module/configManager"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"sync"
 )
 
 type Server struct{}
+
+func NewServer() *Server {
+	return &Server{}
+}
 
 func (s *Server) Init() error {
 	err := service.Init()
@@ -28,27 +34,31 @@ func (s *Server) Init() error {
 }
 
 func (s *Server) Run() {
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		s.startJudgeConsume()
-	}()
+	go s.startJudgeConsume()
 
 	// 服务注册
 	err := registry.RegisterService()
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
-	defer func() {
-		err = registry.DeregisterService()
-		if err != nil {
-			logrus.Errorf("注销服务失败: %v", err)
-			return
-		}
-	}()
 
-	wg.Wait()
+	cfg := configManager.ServerConf
+	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
+		if req.Method == "GET" {
+			_, _ = res.Write([]byte("ok"))
+		}
+	})
+	err = http.ListenAndServe(dsn, nil)
+	if err != nil {
+		logrus.Errorf("%s", err)
+		_ = registry.DeregisterService()
+	}
+}
+
+func (s *Server) Stop() {
+	_ = registry.DeregisterService()
+	logrus.Errorf("======================= judge stop =======================")
 }
 
 func (s *Server) startJudgeConsume() {

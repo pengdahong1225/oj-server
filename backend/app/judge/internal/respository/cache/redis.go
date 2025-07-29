@@ -12,7 +12,7 @@ var (
 )
 
 func Init() error {
-	cfg := configManager.Instance().RedisCfg
+	cfg := configManager.AppConf.RedisCfg
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
 	rdb = redis.NewClient(&redis.Options{

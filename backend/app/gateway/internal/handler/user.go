@@ -57,7 +57,7 @@ func HandleUserLogin(ctx *gin.Context) {
 	}
 	login_resp, err := client.UserLogin(ctx, req)
 	if err != nil {
-		logrus.Info("UserLogin Failed: %s", err.Error())
+		logrus.Infof("UserLogin Failed: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_LoginFailed
 		resp.Message = "登录失败"
 		ctx.JSON(http.StatusOK, resp)

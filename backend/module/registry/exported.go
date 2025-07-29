@@ -29,6 +29,8 @@ func Init() error {
 	instance.client = c
 	instance.scheme = server_cfg.Scheme
 
+	instance.servicesMap = make(map[string]*grpc.ClientConn)
+
 	return nil
 }
 

@@ -91,8 +91,8 @@ func (md *MysqlDB) UpdateProblem(problem *model.Problem) error {
 	return nil
 }
 
-func (md *MysqlDB) UpdateProblemStatus(id int64, status int32) error {
-	result := md.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", status)
+func (md *MysqlDB) UpdateProblemStatus(id int64, st int32) error {
+	result := md.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", st)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
