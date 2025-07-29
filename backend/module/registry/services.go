@@ -10,19 +10,28 @@ import (
 )
 
 func (r *Registry) getGrpcConnection(name string) (*grpc.ClientConn, error) {
+	r.mux.RLock()
+	conn, ok := r.servicesMap[name]
+	if ok && conn.GetState() == connectivity.Ready {
+		return conn, nil
+	}
+	r.mux.RUnlock()
+
+	return r.createGrpcConnection(name)
+}
+
+func (r *Registry) createGrpcConnection(name string) (*grpc.ClientConn, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	// 拿到锁后再次检查
 	conn, ok := r.servicesMap[name]
 	if ok && conn.GetState() == connectivity.Ready {
 		return conn, nil
 	}
 
 	// 创建服务连接池
-	// 加载证书
-	var (
-		err error
-	)
+	var err error
 	target := fmt.Sprintf("consul://%s/%s?wait=10s&healthy=true", r.addr, name)
 	conn, err = grpc.NewClient(
 		target,
@@ -33,7 +42,8 @@ func (r *Registry) getGrpcConnection(name string) (*grpc.ClientConn, error) {
 		logrus.Errorf("Failed to create connection with %s: %v", name, err)
 		return nil, err
 	}
-	// 记录
+
 	r.servicesMap[name] = conn
+
 	return conn, nil
 }

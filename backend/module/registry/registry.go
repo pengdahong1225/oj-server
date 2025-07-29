@@ -15,7 +15,7 @@ type Registry struct {
 	scheme string // http or grpc
 
 	servicesMap map[string]*grpc.ClientConn // 服务连接池
-	mux         sync.Mutex
+	mux         sync.RWMutex
 }
 
 func (r *Registry) registerService() error {
