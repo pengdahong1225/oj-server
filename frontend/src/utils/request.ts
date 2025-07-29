@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores'
 import router from '@/router'
 
 // const baseURL = 'http://192.168.201.128/api'
-const baseURL = 'http://localhost:9020'
+const baseURL = 'http://localhost:9000'
 
 const useStore = useUserStore()
 let isRefreshing = false;
