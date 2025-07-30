@@ -3,7 +3,7 @@ package gateway
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"oj-server/app/gateway/internal/respository/cache"
+	"oj-server/app/gateway/internal/repo/cache"
 	"oj-server/app/gateway/internal/router"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"

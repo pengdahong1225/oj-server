@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"oj-server/app/user/internal/respository/domain"
+	"oj-server/app/user/internal/repo/domain"
 	"oj-server/module/model"
 	"oj-server/proto/pb"
 	"strconv"

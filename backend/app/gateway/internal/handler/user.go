@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
-	"oj-server/app/gateway/internal/respository/cache"
+	"oj-server/app/gateway/internal/repo/cache"
 	"oj-server/global"
 	"oj-server/module/auth"
 	"oj-server/module/configManager"

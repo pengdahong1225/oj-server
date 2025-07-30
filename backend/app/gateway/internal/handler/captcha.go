@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
-	"oj-server/app/gateway/internal/respository/cache"
+	"oj-server/app/gateway/internal/repo/cache"
 	captcha2 "oj-server/module/captcha"
 	"oj-server/proto/pb"
 	"regexp"
