@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"oj-server/app/gateway/internal/define"
-	"oj-server/app/gateway/internal/respository/cache"
 	"oj-server/global"
 	"oj-server/module/auth"
 	"oj-server/module/configManager"
@@ -19,6 +18,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/gateway/internal/data"
 )
 
 func HandleUserLogin(ctx *gin.Context) {
@@ -110,7 +110,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := cache.GetSmsCaptcha(form.Mobile)
+	code, err := data.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"
@@ -327,7 +327,7 @@ func HandleUserResetPassword(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := cache.GetSmsCaptcha(form.Mobile)
+	code, err := data.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"

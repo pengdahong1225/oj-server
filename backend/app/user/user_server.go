@@ -7,7 +7,6 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"oj-server/app/user/internal/respository/cache"
 	"oj-server/app/user/internal/service"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
@@ -25,11 +24,6 @@ func NewServer() *Server {
 
 func (s *Server) Init() error {
 	s.userSrv = service.NewUserService()
-	err := cache.Init()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

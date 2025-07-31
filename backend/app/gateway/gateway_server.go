@@ -3,7 +3,7 @@ package gateway
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"oj-server/app/gateway/internal/respository/cache"
+	"oj-server/app/gateway/internal/data"
 	"oj-server/app/gateway/internal/router"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
@@ -19,7 +19,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	err := cache.Init()
+	err := data.Init()
 	if err != nil {
 		return err
 	}

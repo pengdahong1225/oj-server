@@ -1,37 +1,19 @@
-package consumer
+package service
 
 import (
-	"oj-server/global"
-	"oj-server/module/gPool"
-	"oj-server/module/mq"
-	"oj-server/proto/pb"
-
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"oj-server/module/gPool"
+	"oj-server/proto/pb"
 )
 
-var (
-	// 评论任务消费者
-	comment_consumer *mq.Consumer
-)
-
-func init() {
-	comment_consumer = mq.NewConsumer(
-		global.RabbitMqExchangeKind,
-		global.RabbitMqExchangeName,
-		global.RabbitMqCommentQueue,
-		global.RabbitMqCommentKey,
-		"", // 消费者标签，用于区别不同的消费者
-	)
-}
-
-func StartCommentConsume() {
-	deliveries := comment_consumer.Consume()
+func (ps *ProblemService) StartCommentConsume() {
+	deliveries := ps.comment_consumer.Consume()
 	if deliveries == nil {
 		logrus.Errorln("消费失败")
 		return
 	}
-	defer comment_consumer.Close()
+	defer ps.comment_consumer.Close()
 
 	for d := range deliveries {
 		if syncHandle(d.Body) {

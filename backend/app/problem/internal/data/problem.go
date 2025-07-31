@@ -1,16 +1,47 @@
-package domain
+package data
 
 import (
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
-	"oj-server/module/model"
+	"oj-server/global"
+	"oj-server/module/configManager"
+	"oj-server/module/db"
+	"oj-server/module/db/model"
 )
 
-func (md *MysqlDB) CreateProblem(problem *model.Problem) (int64, error) {
-	result := md.db_.Create(problem)
+type ProblemRepo struct {
+	db_  *gorm.DB
+	rdb_ *redis.Client
+}
+
+func NewProblemRepo() (*ProblemRepo, error) {
+	mysql_cfg := configManager.AppConf.MysqlCfg
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
+		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
+	db_, err := db.NewMysqlCli(dsn, global.LogPath)
+	if err != nil {
+		return nil, err
+	}
+
+	redis_cfg := configManager.AppConf.RedisCfg
+	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
+	rdb_, err := db.NewRedisCli(dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ProblemRepo{
+		db_:  db_,
+		rdb_: rdb_,
+	}, nil
+}
+
+func (pr *ProblemRepo) CreateProblem(problem *model.Problem) (int64, error) {
+	result := pr.db_.Create(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return -1, status.Errorf(codes.Internal, "create problem failed")
@@ -24,7 +55,7 @@ func (md *MysqlDB) CreateProblem(problem *model.Problem) (int64, error) {
 // @page_size 单页数量
 // @keyword 关键字
 // @tag 标签
-func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error) {
+func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error) {
 	name := "%" + keyword + "%"
 	offSet := (page - 1) * pageSize
 	query := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, tag)
@@ -37,9 +68,9 @@ func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (in
 	var result *gorm.DB
 	var count int64 = 0
 	if tag == "" {
-		result = md.db_.Model(&model.Problem{}).Where("title LIKE ?", name).Count(&count)
+		result = pr.db_.Model(&model.Problem{}).Where("title LIKE ?", name).Count(&count)
 	} else {
-		result = md.db_.Model(&model.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
+		result = pr.db_.Model(&model.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
 	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -55,9 +86,9 @@ func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (in
 	*/
 	var problemList []model.Problem
 	if tag == "" {
-		result = md.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
+		result = pr.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	} else {
-		result = md.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
+		result = pr.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -66,9 +97,9 @@ func (md *MysqlDB) QueryProblemList(page, pageSize int, keyword, tag string) (in
 	return count, problemList, nil
 }
 
-func (md *MysqlDB) QueryProblemData(id int64) (*model.Problem, error) {
+func (pr *ProblemRepo) QueryProblemData(id int64) (*model.Problem, error) {
 	var problem model.Problem
-	result := md.db_.Where("id=?", id).Find(&problem)
+	result := pr.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query failed")
@@ -79,8 +110,8 @@ func (md *MysqlDB) QueryProblemData(id int64) (*model.Problem, error) {
 	return &problem, nil
 }
 
-func (md *MysqlDB) UpdateProblem(problem *model.Problem) error {
-	result := md.db_.Model(&model.Problem{}).Where("id=?", problem.ID).Updates(problem)
+func (pr *ProblemRepo) UpdateProblem(problem *model.Problem) error {
+	result := pr.db_.Model(&model.Problem{}).Where("id=?", problem.ID).Updates(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
@@ -91,8 +122,8 @@ func (md *MysqlDB) UpdateProblem(problem *model.Problem) error {
 	return nil
 }
 
-func (md *MysqlDB) UpdateProblemStatus(id int64, st int32) error {
-	result := md.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", st)
+func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
+	result := pr.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", st)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
@@ -103,8 +134,8 @@ func (md *MysqlDB) UpdateProblemStatus(id int64, st int32) error {
 	return nil
 }
 
-func (md *MysqlDB) DeleteProblem(id int64) error {
-	result := md.db_.Where("id=?", id).Delete(&model.Problem{})
+func (pr *ProblemRepo) DeleteProblem(id int64) error {
+	result := pr.db_.Where("id=?", id).Delete(&model.Problem{})
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "delete problem failed")

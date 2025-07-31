@@ -9,30 +9,62 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
-	"oj-server/app/problem/internal/productor"
-	"oj-server/app/problem/internal/repository/cache"
-	"oj-server/app/problem/internal/repository/domain"
+	"oj-server/app/problem/internal/biz"
+	"oj-server/app/problem/internal/data"
 	"oj-server/global"
-	"oj-server/module/model"
+	"oj-server/module/db/model"
+	"oj-server/module/mq"
 	"oj-server/proto/pb"
 	"oj-server/utils"
 	"os"
 	"path/filepath"
 )
 
+// 题目服务
 type ProblemService struct {
 	pb.UnimplementedProblemServiceServer
-	db *domain.MysqlDB
+	pc *biz.ProblemUseCase
+	rc *biz.RecordUseCase
+
+	problem_productor *mq.Producer // 判题任务生产者
+	comment_consumer  *mq.Consumer // 评论任务消费者
 }
 
 func NewProblemService() *ProblemService {
 	var err error
 	s := &ProblemService{}
-	s.db, err = domain.NewMysqlDB()
+
+	pr, err := data.NewProblemRepo()
 	if err != nil {
 		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
 	}
+	rr, err := data.NewRecordRepo()
+	if err != nil {
+		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
+	}
+
+	s.pc = biz.NewProblemUseCase(pr) // 注入实现
+	s.rc = biz.NewRecordUseCase(rr)  // 注入实现
+
+	s.problem_productor = mq.NewProducer(
+		global.RabbitMqExchangeKind,
+		global.RabbitMqExchangeName,
+		global.RabbitMqJudgeQueue,
+		global.RabbitMqJudgeKey,
+	)
+	s.comment_consumer = mq.NewConsumer(
+		global.RabbitMqExchangeKind,
+		global.RabbitMqExchangeName,
+		global.RabbitMqCommentQueue,
+		global.RabbitMqCommentKey,
+		"", // 消费者标签，用于区别不同的消费者
+	)
+
 	return s
+}
+
+func (ps *ProblemService) PublishSubmit2MQ(data []byte) bool {
+	return ps.problem_productor.Publish(data)
 }
 
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
@@ -47,7 +79,7 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 		CommentCount: 0,
 	}
 
-	id, err := ps.db.CreateProblem(problem)
+	id, err := ps.pc.CreateProblem(problem)
 	if err != nil {
 		logrus.Errorf("CreateProblem failed, err:%s", err.Error())
 		return nil, err
@@ -111,7 +143,7 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProblemRequest) (*pb.PublishProblemResponse, error) {
 	resp := &pb.PublishProblemResponse{}
 
-	err := ps.db.UpdateProblemStatus(in.Id, 1)
+	err := ps.pc.UpdateProblemStatus(in.Id, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +166,7 @@ func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProble
 		CreateBy:    in.Data.CreateBy,
 		Status:      in.Data.Status,
 	}
-	err := ps.db.UpdateProblem(problem)
+	err := ps.pc.UpdateProblem(problem)
 	if err != nil {
 		logrus.Errorf("UpdateProblem failed, err:%s", err.Error())
 		return nil, err
@@ -144,13 +176,13 @@ func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProble
 
 func (ps *ProblemService) DeleteProblem(ctx context.Context, in *pb.DeleteProblemRequest) (*pb.DeleteProblemResponse, error) {
 	resp := &pb.DeleteProblemResponse{}
-	return resp, ps.db.DeleteProblem(in.Id)
+	return resp, ps.pc.DeleteProblem(in.Id)
 }
 
 func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
 	resp := &pb.GetProblemListResponse{}
 
-	total, problems, err := ps.db.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag)
+	total, problems, err := ps.pc.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +194,7 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 func (ps *ProblemService) GetProblemData(ctx context.Context, in *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	resp := &pb.GetProblemResponse{}
 
-	problem, err := ps.db.QueryProblemData(in.Id)
+	problem, err := ps.pc.QueryProblemData(in.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +211,8 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 
 	// todo 加锁，在超时or判题服务处理完后 才释放锁
 	// 重复提交时会触发加锁失败
-	_, err := cache.LockUser(uid)
+	key := fmt.Sprintf("%s:%d", global.UserLockPrefix, uid)
+	_, err := ps.rc.Lock(key, global.UserLockTTL)
 	if err != nil {
 		logrus.Errorf("lock user failed:%s", err.Error())
 		return nil, fmt.Errorf("判题中")
@@ -192,16 +225,16 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		Lang:      in.Lang,
 		Code:      in.Code,
 	}
-	data, err := proto.Marshal(&form)
+	form_data, err := proto.Marshal(&form)
 	if err != nil {
 		logrus.Errorf("marshal failed:%s", err.Error())
-		_ = cache.UnLockUser(uid) // 释放锁
+		_ = ps.rc.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "marshal failed")
 	}
 	// 提交到mq
-	if !productor.Publish(data) {
+	if !ps.PublishSubmit2MQ(form_data) {
 		logrus.Errorf("publish to mq failed")
-		_ = cache.UnLockUser(uid) // 释放锁
+		_ = ps.rc.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "服务器错误")
 	}
 

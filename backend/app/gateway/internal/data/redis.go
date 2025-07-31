@@ -1,27 +1,24 @@
-package cache
+package data
 
 import (
-	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"oj-server/module/configManager"
+	"oj-server/module/db"
 )
 
 var (
 	rdb *redis.Client
+	err error
 )
 
 func Init() error {
 	cfg := configManager.AppConf.RedisCfg
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
-	rdb = redis.NewClient(&redis.Options{
-		Addr:    dsn,
-		Network: "tcp",
-	})
-	st := rdb.Ping(context.Background())
-	if st.Err() != nil {
-		return st.Err()
+	rdb, err = db.NewRedisCli(dsn)
+	if err != nil {
+		return err
 	}
 	return nil
 }

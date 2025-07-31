@@ -4,25 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/judge/internal/biz"
+	"oj-server/app/judge/internal/data"
 	"oj-server/app/judge/internal/define"
 	"oj-server/app/judge/internal/processor"
-	"oj-server/app/judge/internal/respository/cache"
-	"oj-server/app/judge/internal/respository/domain"
 	"oj-server/global"
-	"oj-server/module/model"
+	"oj-server/module/db/model"
 	"oj-server/proto/pb"
 	"os"
 	"time"
 )
 
 var (
-	db_ *domain.MysqlDB
+	uc *biz.JudgeUseCase
 )
 
 func Init() error {
-	var err error
-	db_, err = domain.NewMysqlDB()
-	return err
+	repo, err := data.NewRepo()
+	if err != nil {
+		return err
+	}
+	uc = biz.NewJudgeUseCase(repo)
+
+	return nil
 }
 
 func Handle(form *pb.SubmitForm) {
@@ -37,7 +41,10 @@ func Handle(form *pb.SubmitForm) {
 			ErrMsg: "任务预处理失败",
 		})
 	} else {
-		p := processor.NewProcessor(form.Lang)
+		p := processor.NewProcessor(form.Lang, uc)
+		if p == nil {
+			return
+		}
 
 		start := time.Now()
 		results = p.HandleJudgeTask(form, param)
@@ -47,19 +54,19 @@ func Handle(form *pb.SubmitForm) {
 
 	analyzeResult(param, results)
 	// 记录结果
-	data, err := json.Marshal(results)
+	results_data, err := json.Marshal(results)
 	if err != nil {
 		logrus.Errorf("结果序列化错误, err=%s", err.Error())
 		return
 	}
-	saveResult(param, data)
+	saveResult(param, results_data)
 }
 
 func preAction(form *pb.SubmitForm) (bool, *define.Param) {
 	param := &define.Param{}
 
 	// 拉取题目信息
-	problem, err := db_.QueryProblemData(form.ProblemId)
+	problem, err := uc.QueryProblemData(form.ProblemId)
 	if err != nil {
 		logrus.Errorf("无法拉取题目[%d]信息, err=%s", form.ProblemId, err.Error())
 		return false, nil
@@ -108,7 +115,7 @@ func analyzeResult(param *define.Param, results []*pb.PBResult) {
 func saveResult(param *define.Param, data []byte) {
 	// 保存本次提交结果
 	taskId := fmt.Sprintf("%d_%d", param.Uid, param.ProblemData.Id)
-	err := cache.SetJudgeResult(taskId, param.Message, global.JudgeResultExpired)
+	err := uc.SetTaskResult(taskId, param.Message)
 	if err != nil {
 		logrus.Errorf("保存判题结果失败, err=%s", err.Error())
 	}
@@ -123,7 +130,7 @@ func saveResult(param *define.Param, data []byte) {
 		Result:      data,
 		Lang:        param.Language,
 	}
-	err = db_.UpdateUserSubmitRecord(record, param.ProblemData.Level)
+	err = uc.UpdateUserSubmitRecord(record, param.ProblemData.Level)
 	if err != nil {
 		logrus.Errorf("更新数据库提交记录失败, err=%s", err.Error())
 	}

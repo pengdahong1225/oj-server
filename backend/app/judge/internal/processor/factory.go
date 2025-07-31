@@ -3,12 +3,13 @@ package processor
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/judge/internal/biz"
 	"oj-server/app/judge/internal/define"
 	"oj-server/module/configManager"
 	"strings"
 )
 
-func NewProcessor(language string) *BaseProcessor {
+func NewProcessor(language string, uc *biz.JudgeUseCase) *BaseProcessor {
 	var processor IProcessor
 
 	language = strings.ToLower(language)
@@ -22,7 +23,8 @@ func NewProcessor(language string) *BaseProcessor {
 	case "python":
 		processor = &PyProcessor{}
 	default:
-		panic("unsupported language")
+		logrus.Errorf("language not supported, language=%s", language)
+		return nil
 	}
 
 	// 查询sandbox地址
@@ -38,6 +40,7 @@ func NewProcessor(language string) *BaseProcessor {
 	}
 
 	return &BaseProcessor{
+		uc:         uc,
 		impl:       processor,
 		sandBoxUrl: addr,
 		runResults: make(chan *define.RunResultInChan, 100),

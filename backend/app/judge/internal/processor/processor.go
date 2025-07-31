@@ -3,14 +3,17 @@ package processor
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"oj-server/app/judge/internal/biz"
 	"oj-server/app/judge/internal/define"
-	"oj-server/app/judge/internal/respository/cache"
 	"oj-server/global"
 	"oj-server/module/gPool"
 	"oj-server/proto/pb"
 	"strings"
 	"sync"
-	"time"
+)
+
+const (
+	TaskStatePrefix = "state"
 )
 
 // 定义判题任务的处理模板
@@ -22,6 +25,8 @@ type IProcessor interface {
 
 // 基础实现
 type BaseProcessor struct {
+	uc *biz.JudgeUseCase
+
 	impl       IProcessor // 注入具体实现
 	param      *define.Param
 	sandBoxUrl string
@@ -50,13 +55,13 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 	results := make([]*pb.PBResult, 0, 10)
 	// 退出之后，需要将本次任务的状态置为UPStateExited，并且释放锁
 	defer func() {
-		if err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateExited), global.TaskStateExpired); err != nil {
-			logrus.Errorln(err.Error())
-		}
-		_ = cache.UnLockUser(form.Uid) // 释放锁
+		_ = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateExited))
+		key := fmt.Sprintf("%s:%d", global.UserLockPrefix, form.Uid)
+		_ = b.uc.UnLock(key) // 释放锁
 	}()
 	// 初始化任务状态
-	if err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateNormal), global.TaskStateExpired); err != nil {
+	err := b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateNormal))
+	if err != nil {
 		logrus.Errorf("初始化任务状态失败, err=%s", err.Error())
 		results = append(results, &pb.PBResult{
 			Status: define.InternalError,
@@ -65,7 +70,7 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 		return results
 	}
 	// 设置题目状态[编译]
-	err := cache.SetTaskState(taskId, int(pb.SubmitState_UPStateCompiling), global.TaskStateExpired)
+	err = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateCompiling))
 	if err != nil {
 		logrus.Errorf("设置题目[%d]状态失败, err=%s", param.ProblemData.Id, err.Error())
 		results = append(results, &pb.PBResult{
@@ -91,7 +96,8 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 		pbResult.Content = "Compile Error"
 		results = append(results, pbResult)
 		// 更新状态
-		if err = cache.SetTaskState(taskId, int(pb.SubmitState_UPStateExited), global.TaskStateExpired); err != nil {
+		err = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateExited))
+		if err != nil {
 			logrus.Errorln(err.Error())
 			return nil
 		}
@@ -104,7 +110,8 @@ func (b *BaseProcessor) HandleJudgeTask(form *pb.SubmitForm, param *define.Param
 	param.FileIds = compileResult.FileIds
 
 	// 设置题目状态[判题中]
-	if err = cache.SetTaskState(taskId, int(pb.SubmitState_UPStateJudging), 60*2*time.Second); err != nil {
+	err = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateJudging))
+	if err != nil {
 		logrus.Errorln(err.Error())
 	}
 	wgRun := new(sync.WaitGroup)

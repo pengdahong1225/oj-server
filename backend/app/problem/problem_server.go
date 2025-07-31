@@ -7,8 +7,6 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"oj-server/app/problem/internal/consumer"
-	"oj-server/app/problem/internal/repository/cache"
 	"oj-server/app/problem/internal/service"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
@@ -26,17 +24,11 @@ func NewServer() *Server {
 
 func (s *Server) Init() error {
 	s.problemSrv = service.NewProblemService()
-	err := cache.Init()
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
 
 func (s *Server) Run() {
-	go consumer.StartCommentConsume()
-
 	// 服务注册
 	err := registry.RegisterService()
 	if err != nil {
@@ -54,6 +46,8 @@ func (s *Server) Run() {
 	s.listener = listener
 
 	// 启动
+	go s.problemSrv.StartCommentConsume()
+
 	grpcServer := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	pb.RegisterProblemServiceServer(grpcServer, s.problemSrv)

@@ -3,24 +3,29 @@ package service
 import (
 	"context"
 	"fmt"
-	"oj-server/app/user/internal/respository/domain"
-	"oj-server/module/model"
 	"oj-server/proto/pb"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
+	"oj-server/app/user/internal/biz"
+	"oj-server/app/user/internal/data"
+	"oj-server/module/db/model"
 	"oj-server/utils"
 )
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
-	db *domain.MysqlDB
+	uc *biz.UserUseCase
 }
 
 func NewUserService() *UserService {
 	var err error
 	s := &UserService{}
-	s.db, err = domain.NewMysqlDB()
+	up, err := data.NewUserRepo()
+	if err != nil {
+		logrus.Fatalf("NewUserService failed, err:%s", err.Error())
+	}
+	s.uc = biz.NewUserUseCase(up) // 注入实现
 	if err != nil {
 		logrus.Fatalf("NewUserService failed, err:%s", err.Error())
 	}
@@ -50,7 +55,7 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	}
 
 	var id int64
-	id, err = us.db.CreateNewUser(&newUser)
+	id, err = us.uc.CreateNewUser(&newUser)
 	if err != nil {
 		logrus.Infof("创建新用户失败, err: %s", err.Error())
 		resp.Message = "创建新用户失败: " + err.Error()
@@ -65,7 +70,7 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	userInfo, err := us.db.GetUserInfoByMobile(mobile)
+	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +95,7 @@ func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (
 func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginBySmsCodeRequest) (*pb.UserLoginResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	userInfo, err := us.db.GetUserInfoByMobile(mobile)
+	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +117,7 @@ func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPa
 	resp := &pb.ResetUserPasswordResponse{}
 	hash := utils.HashPassword(in.Password)
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	err := us.db.ResetUserPassword(mobile, hash)
+	err := us.uc.ResetUserPassword(mobile, hash)
 	if err != nil {
 		logrus.Errorf("重置密码失败, err: %s", err.Error())
 		resp.Message = "重置密码失败: " + err.Error()
@@ -125,7 +130,7 @@ func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPa
 func (us *UserService) GetUserInfo(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	userInfo, err := us.db.GetUserInfoByMobile(mobile)
+	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
 	if err != nil {
 		return nil, err
 	}

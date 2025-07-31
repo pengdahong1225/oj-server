@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"net/http"
-	"oj-server/app/judge/internal/respository/cache"
 	"oj-server/app/judge/internal/service"
 	"oj-server/global"
 	"oj-server/module/configManager"
@@ -26,10 +25,7 @@ func (s *Server) Init() error {
 	if err != nil {
 		return err
 	}
-	err = cache.Init()
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 

@@ -14,7 +14,7 @@ import (
 // @pageSize
 func (ps *ProblemService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubmitRecordListRequest) (*pb.GetSubmitRecordListResponse, error) {
 	offSet := int((in.Page - 1) * in.PageSize)
-	count, records, err := ps.db.QuerySubmitRecordList(in.Uid, int(in.PageSize), offSet)
+	count, records, err := ps.rc.QuerySubmitRecordList(in.Uid, int(in.PageSize), offSet)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
@@ -38,7 +38,7 @@ func (ps *ProblemService) GetSubmitRecordList(ctx context.Context, in *pb.GetSub
 }
 
 func (ps *ProblemService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubmitRecordRequest) (*pb.GetSubmitRecordResponse, error) {
-	record, err := ps.db.QuerySubmitRecord(in.Id)
+	record, err := ps.rc.QuerySubmitRecord(in.Id)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
