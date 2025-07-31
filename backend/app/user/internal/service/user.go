@@ -6,11 +6,12 @@ import (
 	"oj-server/proto/pb"
 	"strconv"
 
-	"github.com/sirupsen/logrus"
 	"oj-server/app/user/internal/biz"
 	"oj-server/app/user/internal/data"
 	"oj-server/module/db/model"
 	"oj-server/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 type UserService struct {

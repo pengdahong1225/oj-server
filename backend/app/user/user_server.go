@@ -2,15 +2,16 @@ package user
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"oj-server/app/user/internal/service"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
+
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type Server struct {

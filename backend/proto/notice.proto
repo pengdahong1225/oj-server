@@ -2,10 +2,10 @@ syntax = "proto3";
 option go_package = "./;pb";
 
 message Notice{
-int64 id = 1;
-string title = 2;
-string create_at = 3;
-string content = 4;
-int32 status = 5;
-int64 create_by = 6;
+  int64 id = 1;
+  string title = 2;
+  string create_at = 3;
+  string content = 4;
+  int32 status = 5;
+  int64 create_by = 6;
 }

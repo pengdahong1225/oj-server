@@ -2,11 +2,12 @@ package gateway
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"oj-server/app/gateway/internal/data"
 	"oj-server/app/gateway/internal/router"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Server

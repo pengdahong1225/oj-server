@@ -15,10 +15,11 @@ import (
 	"strconv"
 	"time"
 
+	"oj-server/app/gateway/internal/data"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"oj-server/app/gateway/internal/data"
 )
 
 func HandleUserLogin(ctx *gin.Context) {

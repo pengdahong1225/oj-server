@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"oj-server/app/gateway/internal/data"
 	"oj-server/app/gateway/internal/define"
 	"oj-server/module/captcha"
 	"oj-server/proto/pb"
 	"regexp"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // 获取图像验证码
