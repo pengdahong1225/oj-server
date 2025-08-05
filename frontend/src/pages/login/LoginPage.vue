@@ -92,14 +92,14 @@ const login = async () => {
   const user = <API.UserProfile>{
     uid: res.data.data.uid,
     mobile: res.data.data.mobile,
-    nickname: res.data.data.nickname,
+    nick_name: res.data.data.nick_name,
     gender: res.data.data.gender,
     email: res.data.data.email,
     avatar_url: res.data.data.avatar_url,
     role: res.data.data.role
   }
   userStore.setUserInfo(user)
-  userStore.setToken(res.data.data.token)
+  userStore.setToken(res.data.data.access_token)
   router.push('/')
 }
 </script>

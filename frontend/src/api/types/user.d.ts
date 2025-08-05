@@ -3,7 +3,7 @@ namespace API {
     type UserProfile = {
         uid: number;
         mobile?: number;
-        nickname?: string;
+        nick_name?: string;
         email?: string;
         gender?: number;
         role?: number;

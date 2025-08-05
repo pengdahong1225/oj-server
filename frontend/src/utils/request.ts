@@ -48,7 +48,7 @@ instance.interceptors.request.use(
     // 携带token
     if (useStore.token) {
       config.headers.Authorization = useStore.token
-      config.headers['token'] = useStore.token
+      config.headers['access-token'] = useStore.token
     }
     return config
   },
@@ -64,7 +64,7 @@ instance.interceptors.response.use(
     ElMessage.error(res.data.message || '服务异常')
     return Promise.reject(res.data)
   },
-  (err) => {
+  async (err) => {
     // 错误的特殊情况 => 401 权限不足 或 token 过期
     // if (err.response?.status === 401) {
     //   router.push('/login')
@@ -75,19 +75,22 @@ instance.interceptors.response.use(
     if (response && response.status === 401) {
       if (!isRefreshing) {
         isRefreshing = true;
-        return refreshToken().then(newToken => {
-          useStore.token = newToken;
-          originalRequest.headers['token'] = newToken;
-          processQueue(null, newToken);
-          return instance(originalRequest);
-        }).catch(err => {
-          processQueue(err, null);
-          useStore.clearUserInfo()
-          router.push('/login');
-          return Promise.reject(err);
-        }).finally(() => {
-          isRefreshing = false;
-        });
+        try {
+          try {
+            const newToken = await refreshToken()
+            useStore.token = newToken
+            originalRequest.headers['token'] = newToken
+            processQueue(null, newToken)
+            return await instance(originalRequest)
+          } catch (err_2) {
+            processQueue(err_2, null)
+            useStore.clearUserInfo()
+            router.push('/login')
+            return await Promise.reject(err_2)
+          }
+        } finally {
+          isRefreshing = false
+        }
       } else {
         return new Promise((resolve, reject) => {
           requests.push((token) => {

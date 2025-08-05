@@ -37,8 +37,10 @@ const queryNoticeList = async () => {
     loading.value = true
     const res = await queryNoticeListService(params.value)
     console.log(res)
+
     notice_list.value = res.data.data.noticeList
     total.value = res.data.data.total
+    
     loading.value = false
 }
 

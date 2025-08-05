@@ -9,7 +9,7 @@ export const useUserStore = defineStore('user', () => {
     const token = ref('')
     const userInfo = ref<API.UserProfile>({
         uid: 0,
-        nickname: '',
+        nick_name: '',
         avatar_url: '',
         mobile: 0,
         email: '',
@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
     }
     const clearUserInfo = () => {
         userInfo.value.uid = 0
-        userInfo.value.nickname = ''
+        userInfo.value.nick_name = ''
         userInfo.value.avatar_url = ''
         userInfo.value.mobile = 0
         userInfo.value.email = ''
