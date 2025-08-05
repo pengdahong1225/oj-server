@@ -15,16 +15,6 @@ type RankList struct {
 	PassCount int64  `json:"passCount"`
 }
 
-type LoginRspData struct {
-	Rsp         *pb.UserLoginResponse `json:"data"`
-	AccessToken string                `json:"access_token"`
-}
-
-type NoticeRspData struct {
-	Total      int32        `json:"total"`
-	NoticeList []*pb.Notice `json:"noticeList"`
-}
-
 type SubmitRecordData struct {
 	Uid         int64          `json:"uid,omitempty"`
 	ProblemId   int64          `json:"problem_id,omitempty"`

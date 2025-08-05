@@ -56,7 +56,7 @@ func HandleUserLogin(ctx *gin.Context) {
 		Mobile:   form.Mobile,
 		Password: form.PassWord,
 	}
-	login_resp, err := client.UserLogin(ctx, req)
+	rpc_resp, err := client.UserLogin(ctx, req)
 	if err != nil {
 		logrus.Infof("UserLogin Failed: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_LoginFailed
@@ -64,11 +64,8 @@ func HandleUserLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, resp)
 		return
 	}
-	data := define.LoginRspData{
-		Rsp: login_resp,
-	}
 	// 生成token
-	refreshToken, err := createRefreshAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
+	refreshToken, err := createRefreshAccessToken(rpc_resp.Uid, rpc_resp.Mobile, rpc_resp.Role)
 	if err != nil {
 		logrus.Errorf("生成token失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
@@ -77,7 +74,7 @@ func HandleUserLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	accessToken, err := createAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
+	accessToken, err := createAccessToken(rpc_resp.Uid, rpc_resp.Mobile, rpc_resp.Role)
 	if err != nil {
 		logrus.Errorf("生成token失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
@@ -86,9 +83,15 @@ func HandleUserLogin(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
+
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
-	data.AccessToken = accessToken
-	resp.Data = data
+	resp_data := define.LoginResponse{
+		Data:        rpc_resp,
+		AccessToken: accessToken,
+	}
+
+	resp_data.AccessToken = accessToken
+	resp.Data = resp_data
 	resp.Message = "登录成功"
 	ctx.JSON(http.StatusOK, resp)
 }
@@ -147,9 +150,6 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, resp)
 		return
 	}
-	data := define.LoginRspData{
-		Rsp: login_resp,
-	}
 	// 生成token
 	refreshToken, err := createRefreshAccessToken(login_resp.Uid, login_resp.Mobile, login_resp.Role)
 	if err != nil {
@@ -169,9 +169,13 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
+
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
-	data.AccessToken = accessToken
-	resp.Data = data
+	resp_data := define.LoginResponse{
+		Data:        login_resp,
+		AccessToken: accessToken,
+	}
+	resp.Data = resp_data
 	resp.Message = "登录成功"
 	ctx.JSON(http.StatusOK, resp)
 }

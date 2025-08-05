@@ -93,4 +93,10 @@ func initRouters(engine *gin.Engine) {
 		commentRouter.DELETE("", handler.HandleDeleteComment)
 		commentRouter.POST("/like", handler.HandleLikeComment)
 	}
+
+	// notice
+	noticeRouter := engine.Group("/notice")
+	{
+		noticeRouter.GET("/list", handler.HandleGetNoticeList)
+	}
 }
