@@ -25,10 +25,10 @@ const params = ref(<API.QueryProblemListParams>{
 
 const getProblemList = async () => {
     loading.value = true
-    const res = await queryProblemListService(params.value)
-    console.log(res)
-    total.value = res.data.data.total
-    problemList.value = res.data.data.data
+    const resp = await queryProblemListService(params.value)
+    console.log(resp)
+    total.value = resp.data.data.total
+    problemList.value = resp.data.data.data
     loading.value = false
 }
 const handleCurrentChange = (page: number) => {

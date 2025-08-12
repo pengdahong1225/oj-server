@@ -14,7 +14,7 @@ onMounted(() => {
 const getUserInfo = async () => {
     const res = await getUserInfoService(userStore.userInfo.uid)
     console.log(res)
-    userStore.setUserInfo(res.data.data)
+    // userStore.setUserInfo(res.data.data)
 }
 
 const onUpdateProfile = () => {
@@ -40,7 +40,7 @@ const onUpdateAvator = () => {
                         <el-input v-model="userStore.userInfo.uid" disabled />
                     </el-form-item>
                     <el-form-item label="NickName" prop="nickname" style="width: 500px;">
-                        <el-input v-model="userStore.userInfo.nickname" />
+                        <el-input v-model="userStore.userInfo.nick_name" />
                     </el-form-item>
                     <el-form-item label="Mobile" prop="mobile" style="width: 500px;">
                         <el-input v-model="userStore.userInfo.mobile" />

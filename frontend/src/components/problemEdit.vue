@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { updateProblemService, queryProblemDetailService, getProblemTagListService } from '@/api/problemController'
-import type { Problem } from '@/types/problem.ts'
 
 const level_list = [
     { label: '简单', value: 1 },
@@ -11,7 +10,7 @@ const level_list = [
 const drawerVisible = ref(false)
 const formRef = ref()
 
-const formModel = ref<Problem>({
+const formModel = ref<API.Problem>({
     id: 0,
     title: '',
     description: '',
@@ -33,7 +32,7 @@ const onSubmit = async () => {
     emit('success', !isEdit)
 }
 
-const open = (row: Problem) => {
+const open = (row: API.Problem) => {
     drawerVisible.value = true
     formModel.value = row
     if (formModel.value.id > 0) {

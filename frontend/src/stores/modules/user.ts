@@ -22,6 +22,9 @@ export const useUserStore = defineStore('user', () => {
     const setToken = (value: string) => {
         token.value = value
     }
+    const clearToken = () => {
+        token.value = ''
+    }
     const clearUserInfo = () => {
         userInfo.value.uid = 0
         userInfo.value.nick_name = ''
@@ -38,7 +41,8 @@ export const useUserStore = defineStore('user', () => {
         token,
         setUserInfo,
         clearUserInfo,
-        setToken
+        setToken,
+        clearToken
     }
 }, {
     persist: true // 持久化

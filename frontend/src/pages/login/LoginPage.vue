@@ -86,20 +86,21 @@ const router = useRouter()
 const userStore = useUserStore()
 const login = async () => {
   await form.value.validate()
-  const res = await userLoginService(login_form.value)
-  console.log(res)
+  const resp = await userLoginService(login_form.value)
+  console.log(resp)
   ElMessage.success('登录成功')
-  const user = <API.UserProfile>{
-    uid: res.data.data.uid,
-    mobile: res.data.data.mobile,
-    nick_name: res.data.data.nick_name,
-    gender: res.data.data.gender,
-    email: res.data.data.email,
-    avatar_url: res.data.data.avatar_url,
-    role: res.data.data.role
+  const info = resp.data.data.user_info
+  const user_info = <API.UserProfile>{
+    uid: info.uid,
+    mobile: info.mobile,
+    nick_name: info.nick_name,
+    gender: info.gender,
+    email: info.email,
+    avatar_url: info.avatar_url,
+    role: info.role
   }
-  userStore.setUserInfo(user)
-  userStore.setToken(res.data.data.access_token)
+  userStore.setUserInfo(user_info)
+  userStore.setToken(resp.data.data.access_token)
   router.push('/')
 }
 </script>

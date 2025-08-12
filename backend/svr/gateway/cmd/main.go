@@ -1,0 +1,78 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"github.com/sirupsen/logrus"
+	"oj-server/common"
+	"oj-server/global"
+	"oj-server/module/configManager"
+	"oj-server/module/logger"
+	"oj-server/module/registry"
+	"oj-server/src/gateway/server"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+)
+
+func main() {
+	var (
+		server_config string
+		help          bool
+		srv           common.IServer
+	)
+	flag.StringVar(&server_config, "f", "server_config.yaml", "server config")
+	flag.BoolVar(&help, "h", false, "help")
+	flag.Parse()
+
+	actualArgs := len(os.Args[1:])
+	if actualArgs < 1 || help {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	// 加载配置
+	configPath := fmt.Sprintf("%s/%s", global.ConfigPath, server_config)
+	err := configManager.LoadServerConfigFile(configPath)
+	if err != nil {
+		panic(err)
+	}
+	appCfgPath := fmt.Sprintf("%s/%s", global.ConfigPath, "app_config.yaml")
+	err = configManager.LoadAppConfigFile(appCfgPath)
+	if err != nil {
+		panic(err)
+	}
+
+	// 初始化日志
+	serverCfg := configManager.ServerConf
+	err = logger.Init(global.LogPath, serverCfg.NodeType, logrus.DebugLevel)
+	if err != nil {
+		panic(err)
+	}
+
+	// 初始化注册中心
+	err = registry.Init()
+	if err != nil {
+		panic(err)
+	}
+	logrus.Debugf("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------", serverCfg.NodeType, serverCfg.NodeId, serverCfg.Host, serverCfg.Port, serverCfg.Scheme)
+
+	srv = server.NewServer()
+	if err = srv.Init(); err != nil {
+		logrus.Fatalf("Failed to init server: %v", err)
+	}
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigChan
+		logrus.Errorf("Recv signal: %v", sig)
+		srv.Stop()
+		time.Sleep(time.Second)
+		os.Exit(0)
+	}()
+
+	// 启动
+	srv.Run()
+}
