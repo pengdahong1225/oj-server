@@ -6,7 +6,7 @@ import (
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/src/user/internal/service"
+	"oj-server/svr/user/internal/service"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

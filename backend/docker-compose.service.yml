@@ -24,7 +24,7 @@ services:
     container_name: gateway-service
     privileged: true
     build:
-      context: ./app/gateway # 路径
+      context: svr/gateway # 路径
       dockerfile: Dockerfile
     volumes:
       - /root/server/oj-server/backend/log/db-service:/app/log
@@ -42,7 +42,7 @@ services:
     container_name: user-service
     privileged: true
     build:
-      context: ./app/user # 路径
+      context: svr/user # 路径
       dockerfile: Dockerfile
     volumes:
       - /root/server/oj-server/backend/log/db-service:/app/log
@@ -60,7 +60,7 @@ services:
     container_name: judge-service
     privileged: true
     build:
-      context: ./app/judge-service
+      context: svr/judge-service
       dockerfile: Dockerfile
     volumes:
       - /root/server/oj-server/backend/log/judge-service:/app/log
@@ -80,7 +80,7 @@ services:
     container_name: problem-service
     privileged: true
     build:
-      context: ./app/problem
+      context: svr/problem
       dockerfile: Dockerfile
     volumes:
       - /root/server/oj-server/backend/log/question-service:/app/log

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"oj-server/module/auth"
 	"oj-server/proto/pb"
-	"oj-server/src/gateway/internal/define"
+	"oj-server/svr/gateway/internal/define"
 )
 
 func Admin() gin.HandlerFunc {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
-	"oj-server/src/gateway/internal/data"
-	"oj-server/src/gateway/internal/router"
+	"oj-server/svr/gateway/internal/data"
+	"oj-server/svr/gateway/internal/router"
 
 	"github.com/sirupsen/logrus"
 )

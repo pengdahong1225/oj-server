@@ -9,7 +9,7 @@ import (
 	"oj-server/global"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/src/gateway/internal/define"
+	"oj-server/svr/gateway/internal/define"
 	"path/filepath"
 	"strconv"
 )

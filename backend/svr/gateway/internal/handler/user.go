@@ -10,12 +10,12 @@ import (
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/src/gateway/internal/define"
+	"oj-server/svr/gateway/internal/define"
 	"regexp"
 	"strconv"
 	"time"
 
-	"oj-server/src/gateway/internal/data"
+	"oj-server/svr/gateway/internal/data"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -86,7 +86,7 @@ func HandleUserLogin(ctx *gin.Context) {
 
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
 	resp_data := define.LoginResponse{
-		Data:        rpc_resp,
+		UserInfo:    rpc_resp,
 		AccessToken: accessToken,
 	}
 
@@ -172,7 +172,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
 	resp_data := define.LoginResponse{
-		Data:        login_resp,
+		UserInfo:    login_resp,
 		AccessToken: accessToken,
 	}
 	resp.Data = resp_data
@@ -188,6 +188,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	// 从cookie中获取refresh_token
 	refreshToken, err := ctx.Cookie("refresh_token")
 	if err != nil {
+		logrus.Errorf("获取refresh_token失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Unauthorized
 		resp.Message = "refresh_token不存在"
 		ctx.JSON(http.StatusBadRequest, resp)
@@ -199,11 +200,13 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	claims, err := j.ParseToken(refreshToken)
 	if err != nil {
 		if errors.Is(err, auth.TokenExpired) {
+			logrus.Errorf("refresh_token已过期:%s", err.Error())
 			resp.ErrCode = pb.Error_EN_RefreshTokenExpired
 			resp.Message = "refresh_token已过期"
 			ctx.JSON(http.StatusUnauthorized, resp)
 			return
 		} else {
+			logrus.Errorf("refresh_token验证失败:%s", err.Error())
 			resp.ErrCode = pb.Error_EN_TokenInvalid
 			resp.Message = "refresh_token验证失败"
 			ctx.JSON(http.StatusUnauthorized, resp)
@@ -393,7 +396,7 @@ func HandleGetUserProfile(ctx *gin.Context) {
 	request := &pb.GetUserInfoRequest{
 		Uid: uid,
 	}
-	rpc_resp, err := client.GetUserInfo(ctx, request)
+	rpc_resp, err := client.GetUserInfoByUid(ctx, request)
 	if err != nil {
 		logrus.Errorf("用户服务获取用户信息失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed

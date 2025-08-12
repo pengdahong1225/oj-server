@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"oj-server/module/captcha"
 	"oj-server/proto/pb"
-	"oj-server/src/gateway/internal/data"
-	"oj-server/src/gateway/internal/define"
+	"oj-server/svr/gateway/internal/data"
+	"oj-server/svr/gateway/internal/define"
 	"regexp"
 
 	"github.com/gin-gonic/gin"

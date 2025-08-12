@@ -13,7 +13,7 @@ const (
 	ConfigPath                = "./config"
 	LogPath                   = "./log"
 	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7
-	AccessTokenTimeOut  int64 = 60 * 15
+	AccessTokenTimeOut  int64 = 60 * 1
 	Issuer                    = "Messi"
 	ProblemConfigPath         = "/data/problem_config"
 )

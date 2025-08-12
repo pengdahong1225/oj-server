@@ -10,7 +10,7 @@ import (
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/src/problem/internal/service"
+	"oj-server/svr/problem/internal/service"
 )
 
 type Server struct {

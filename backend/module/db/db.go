@@ -14,7 +14,8 @@ import (
 )
 
 func NewMysqlCli(dsn, logPath string) (*gorm.DB, error) {
-	filePath := fmt.Sprintf("%s/orm.log", logPath)
+	timer := time.Now().Format("2006_01_02")
+	filePath := fmt.Sprintf("%s/orm.%s.log", logPath, timer)
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err

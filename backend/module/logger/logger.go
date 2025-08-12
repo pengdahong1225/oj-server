@@ -23,7 +23,7 @@ func (hook FileHook) Levels() []logrus.Level {
 
 // Fire 按时间和级别写入
 func (hook FileHook) Fire(entry *logrus.Entry) error {
-	timer := entry.Time.Format("2006-01-02")
+	timer := entry.Time.Format("2006_01_02")
 	if hook.fileDate == timer {
 		hook.write(entry)
 		return nil
@@ -34,7 +34,7 @@ func (hook FileHook) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", hook.filePath, hook.name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log", hook.filePath, hook.name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	hook.logFile = logFile
 	hook.fileDate = timer
 
@@ -50,14 +50,14 @@ func (hook FileHook) write(entry *logrus.Entry) {
 
 // Init 初始化日志
 func Init(filePath, name string, level logrus.Level) error {
-	timer := time.Now().Format("2006-01-02")
+	timer := time.Now().Format("2006_01_02")
 	err := os.MkdirAll(filePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	// 日志文件
-	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.log.%s", filePath, name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, _ := os.OpenFile(fmt.Sprintf("%s/%s.%s.log", filePath, name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	hook := &FileHook{
 		logFile:  logFile,
 		fileDate: timer,

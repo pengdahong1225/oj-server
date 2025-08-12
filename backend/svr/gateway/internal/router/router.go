@@ -7,14 +7,15 @@ import (
 	"io"
 	"net/http"
 	"oj-server/global"
-	"oj-server/src/gateway/internal/handler"
-	"oj-server/src/gateway/internal/middlewares"
+	"oj-server/svr/gateway/internal/handler"
+	"oj-server/svr/gateway/internal/middlewares"
 	"os"
 	"time"
 )
 
 func Router() *gin.Engine {
-	path := fmt.Sprintf("%s/web.log", global.LogPath)
+	timer := time.Now().Format("2006_01_02")
+	path := fmt.Sprintf("%s/web.%s.log", global.LogPath, timer)
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		logrus.Errorf("web日志文件打开失败：%s", err.Error())
@@ -57,7 +58,7 @@ func initRouters(engine *gin.Engine) {
 	{
 		userRouter.POST("/login", handler.HandleUserLogin)
 		userRouter.POST("/login_sms", handler.HandleUserLoginBySms)
-		userRouter.GET("/refresh_token", handler.HandleReFreshAccessToken)
+		userRouter.POST("/refresh_token", handler.HandleReFreshAccessToken)
 		userRouter.POST("/register", handler.HandleUserRegister)
 		userRouter.POST("/reset_password", handler.HandleUserResetPassword)
 		userRouter.GET("/profile", middlewares.AuthLogin(), handler.HandleGetUserProfile)

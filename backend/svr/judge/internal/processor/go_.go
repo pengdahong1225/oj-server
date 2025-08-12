@@ -1,8 +1,8 @@
 package processor
 
 import (
-	"oj-server/src/judge/internal/define"
 	"oj-server/proto/pb"
+	"oj-server/svr/judge/internal/define"
 )
 
 type GoProcessor struct {

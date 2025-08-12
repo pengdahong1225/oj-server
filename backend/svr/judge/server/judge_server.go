@@ -11,7 +11,7 @@ import (
 	"oj-server/module/mq"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/src/judge/internal/service"
+	"oj-server/svr/judge/internal/service"
 )
 
 type Server struct{}

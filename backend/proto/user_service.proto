@@ -12,7 +12,8 @@ service UserService {
   // 重置密码
   rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse);
   // 查询用户信息
-  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
+  rpc GetUserInfoByUid(GetUserInfoRequest) returns (GetUserInfoResponse);
+  rpc GetUserInfoByMobile(GetUserInfoRequest) returns (GetUserInfoResponse);
 }
 
 // 用户基本数据

@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"oj-server/proto/pb"
-	"oj-server/src/gateway/internal/define"
+	"oj-server/svr/gateway/internal/define"
 )
 
 func HandleGetNoticeList(ctx *gin.Context) {

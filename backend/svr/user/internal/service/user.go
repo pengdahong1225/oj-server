@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"oj-server/module/db/model"
-	"oj-server/src/user/internal/biz"
-	"oj-server/src/user/internal/data"
+	"oj-server/svr/user/internal/biz"
+	"oj-server/svr/user/internal/data"
 	"oj-server/utils"
 
 	"github.com/sirupsen/logrus"
@@ -128,11 +128,37 @@ func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPa
 }
 
 // 获取用户信息
-func (us *UserService) GetUserInfo(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
+func (us *UserService) GetUserInfoByUid(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
+	// 拉取用户信息
+	userInfo, err := us.uc.GetUserInfoByUid(in.Uid)
+	if err != nil {
+		logrus.Errorf("获取用户信息失败, err: %s", err.Error())
+		return nil, err
+	}
+	u := pb.UserInfo{
+		Uid:       userInfo.ID,
+		CreateAt:  userInfo.CreateAt.Unix(),
+		Mobile:    userInfo.Mobile,
+		Nickname:  userInfo.NickName,
+		Email:     userInfo.Email,
+		Gender:    userInfo.Gender,
+		Role:      userInfo.Role,
+		AvatarUrl: userInfo.AvatarUrl,
+	}
+	resp := &pb.GetUserInfoResponse{
+		Data: &u,
+	}
+
+	return resp, nil
+}
+
+// 获取用户信息
+func (us *UserService) GetUserInfoByMobile(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
 	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
 	if err != nil {
+		logrus.Errorf("获取用户信息失败, err: %s", err.Error())
 		return nil, err
 	}
 	u := pb.UserInfo{

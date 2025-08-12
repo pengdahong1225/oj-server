@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"oj-server/module/gPool"
 	"oj-server/proto/pb"
-	"oj-server/src/judge/internal/define"
+	"oj-server/svr/judge/internal/define"
 	"sync"
 )
 

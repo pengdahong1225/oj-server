@@ -9,7 +9,7 @@ import (
 	"oj-server/module/logger"
 	"oj-server/module/registry"
 	"oj-server/svr/common"
-	"oj-server/svr/gateway/server"
+	"oj-server/svr/problem/server"
 	"os"
 	"os/signal"
 	"syscall"

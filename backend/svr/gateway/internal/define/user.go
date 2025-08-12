@@ -21,7 +21,7 @@ type LoginWithSmsForm struct {
 	CaptchaVal string `form:"captchaVal" json:"captchaVal" binding:"required"`
 }
 type LoginResponse struct {
-	Data        *pb.UserLoginResponse `json:"data"`
+	UserInfo    *pb.UserLoginResponse `json:"user_info"`
 	AccessToken string                `json:"access_token"`
 }
 

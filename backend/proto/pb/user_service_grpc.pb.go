@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_UserRegister_FullMethodName       = "/UserService/UserRegister"
-	UserService_UserLogin_FullMethodName          = "/UserService/UserLogin"
-	UserService_UserLoginBySmsCode_FullMethodName = "/UserService/UserLoginBySmsCode"
-	UserService_ResetUserPassword_FullMethodName  = "/UserService/ResetUserPassword"
-	UserService_GetUserInfo_FullMethodName        = "/UserService/GetUserInfo"
+	UserService_UserRegister_FullMethodName        = "/UserService/UserRegister"
+	UserService_UserLogin_FullMethodName           = "/UserService/UserLogin"
+	UserService_UserLoginBySmsCode_FullMethodName  = "/UserService/UserLoginBySmsCode"
+	UserService_ResetUserPassword_FullMethodName   = "/UserService/ResetUserPassword"
+	UserService_GetUserInfoByUid_FullMethodName    = "/UserService/GetUserInfoByUid"
+	UserService_GetUserInfoByMobile_FullMethodName = "/UserService/GetUserInfoByMobile"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -41,7 +42,8 @@ type UserServiceClient interface {
 	// 重置密码
 	ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*ResetUserPasswordResponse, error)
 	// 查询用户信息
-	GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
+	GetUserInfoByUid(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
+	GetUserInfoByMobile(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
 }
 
 type userServiceClient struct {
@@ -92,10 +94,20 @@ func (c *userServiceClient) ResetUserPassword(ctx context.Context, in *ResetUser
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error) {
+func (c *userServiceClient) GetUserInfoByUid(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserInfoResponse)
-	err := c.cc.Invoke(ctx, UserService_GetUserInfo_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_GetUserInfoByUid_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUserInfoByMobile(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserInfoResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserInfoByMobile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +129,8 @@ type UserServiceServer interface {
 	// 重置密码
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	// 查询用户信息
-	GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
+	GetUserInfoByUid(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
+	GetUserInfoByMobile(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -140,8 +153,11 @@ func (UnimplementedUserServiceServer) UserLoginBySmsCode(context.Context, *UserL
 func (UnimplementedUserServiceServer) ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetUserPassword not implemented")
 }
-func (UnimplementedUserServiceServer) GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
+func (UnimplementedUserServiceServer) GetUserInfoByUid(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfoByUid not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserInfoByMobile(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfoByMobile not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -236,20 +252,38 @@ func _UserService_ResetUserPassword_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetUserInfoByUid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserInfoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserInfo(ctx, in)
+		return srv.(UserServiceServer).GetUserInfoByUid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_GetUserInfo_FullMethodName,
+		FullMethod: UserService_GetUserInfoByUid_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserInfo(ctx, req.(*GetUserInfoRequest))
+		return srv.(UserServiceServer).GetUserInfoByUid(ctx, req.(*GetUserInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUserInfoByMobile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserInfoByMobile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserInfoByMobile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserInfoByMobile(ctx, req.(*GetUserInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -278,8 +312,12 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_ResetUserPassword_Handler,
 		},
 		{
-			MethodName: "GetUserInfo",
-			Handler:    _UserService_GetUserInfo_Handler,
+			MethodName: "GetUserInfoByUid",
+			Handler:    _UserService_GetUserInfoByUid_Handler,
+		},
+		{
+			MethodName: "GetUserInfoByMobile",
+			Handler:    _UserService_GetUserInfoByMobile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

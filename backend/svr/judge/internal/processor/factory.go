@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/module/configManager"
-	"oj-server/src/judge/internal/biz"
-	"oj-server/src/judge/internal/define"
+	"oj-server/svr/judge/internal/biz"
+	"oj-server/svr/judge/internal/define"
 	"strings"
 )
 

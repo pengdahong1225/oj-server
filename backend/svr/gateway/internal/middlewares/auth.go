@@ -8,7 +8,8 @@ import (
 	"oj-server/module/auth"
 	"oj-server/module/configManager"
 	"oj-server/proto/pb"
-	"oj-server/src/gateway/internal/define"
+	"oj-server/svr/gateway/internal/define"
+	"strings"
 	"time"
 )
 
@@ -17,7 +18,7 @@ func AuthLogin() gin.HandlerFunc {
 		resp := &define.Response{}
 
 		// jwt鉴权头部信息 token
-		token := ctx.Request.Header.Get("access-token")
+		token := ctx.GetHeader("Authorization")
 		if token == "" {
 			resp.ErrCode = pb.Error_EN_Unauthorized
 			resp.Message = "未登录"
@@ -25,6 +26,7 @@ func AuthLogin() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		token = strings.TrimPrefix(token, "Bearer ")
 		signingKey := configManager.AppConf.JwtCfg.SigningKey
 		j := auth.JWTCreator{
 			SigningKey: []byte(signingKey),

@@ -2,7 +2,7 @@ package processor
 
 import (
 	"oj-server/proto/pb"
-	"oj-server/src/judge/internal/define"
+	"oj-server/svr/judge/internal/define"
 )
 
 type CProcessor struct {

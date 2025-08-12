@@ -58,6 +58,18 @@ func (up *UserRepo) CreateNewUser(user *model.UserInfo) (int64, error) {
 	}
 	return user.ID, nil
 }
+func (up *UserRepo) GetUserInfoByUid(mobile int64) (*model.UserInfo, error) {
+	var user model.UserInfo
+	result := up.db_.Where("id=?", mobile).Find(&user)
+	if result.Error != nil {
+		logrus.Errorf("查询错误, err: %s", result.Error.Error())
+		return nil, status.Errorf(codes.Internal, "query user faild")
+	}
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "user not found")
+	}
+	return &user, nil
+}
 func (up *UserRepo) GetUserInfoByMobile(mobile int64) (*model.UserInfo, error) {
 	var user model.UserInfo
 	result := up.db_.Where("mobile=?", mobile).Find(&user)

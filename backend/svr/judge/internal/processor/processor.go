@@ -6,8 +6,8 @@ import (
 	"oj-server/global"
 	"oj-server/module/gPool"
 	"oj-server/proto/pb"
-	"oj-server/src/judge/internal/biz"
-	"oj-server/src/judge/internal/define"
+	"oj-server/svr/judge/internal/biz"
+	"oj-server/svr/judge/internal/define"
 	"strings"
 	"sync"
 )
