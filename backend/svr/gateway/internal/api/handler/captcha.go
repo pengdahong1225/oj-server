@@ -5,11 +5,11 @@ import (
 	"oj-server/module/captcha"
 	"oj-server/proto/pb"
 	"oj-server/svr/gateway/internal/data"
-	"oj-server/svr/gateway/internal/define"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"oj-server/svr/gateway/internal/api/define"
 )
 
 // 获取图像验证码

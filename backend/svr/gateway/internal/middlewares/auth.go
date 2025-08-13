@@ -8,7 +8,7 @@ import (
 	"oj-server/module/auth"
 	"oj-server/module/configManager"
 	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/define"
+	"oj-server/svr/gateway/internal/api/define"
 	"strings"
 	"time"
 )

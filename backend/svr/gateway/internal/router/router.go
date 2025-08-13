@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"oj-server/global"
-	"oj-server/svr/gateway/internal/handler"
+	"oj-server/svr/gateway/internal/api/handler"
 	"oj-server/svr/gateway/internal/middlewares"
 	"os"
 	"time"
@@ -37,7 +37,7 @@ func Router() *gin.Engine {
 func initRouters(engine *gin.Engine) {
 	engine.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
-			"code":    "0",
+			"code":    0,
 			"message": "health",
 		})
 	})

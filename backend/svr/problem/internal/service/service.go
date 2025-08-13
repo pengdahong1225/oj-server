@@ -26,8 +26,8 @@ type ProblemService struct {
 	pc *biz.ProblemUseCase
 	rc *biz.RecordUseCase
 
-	problem_productor *mq.Producer // 判题任务生产者
-	comment_consumer  *mq.Consumer // 评论任务消费者
+	problem_producer *mq.Producer // 判题任务生产者
+	comment_consumer *mq.Consumer // 评论任务消费者
 }
 
 func NewProblemService() *ProblemService {
@@ -46,7 +46,7 @@ func NewProblemService() *ProblemService {
 	s.pc = biz.NewProblemUseCase(pr) // 注入实现
 	s.rc = biz.NewRecordUseCase(rr)  // 注入实现
 
-	s.problem_productor = mq.NewProducer(
+	s.problem_producer = mq.NewProducer(
 		global.RabbitMqExchangeKind,
 		global.RabbitMqExchangeName,
 		global.RabbitMqJudgeQueue,
@@ -64,7 +64,7 @@ func NewProblemService() *ProblemService {
 }
 
 func (ps *ProblemService) PublishSubmit2MQ(data []byte) bool {
-	return ps.problem_productor.Publish(data)
+	return ps.problem_producer.Publish(data)
 }
 
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
@@ -244,6 +244,13 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 }
 
 func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) (*pb.GetTagListResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	resp := &pb.GetTagListResponse{}
+
+	// 查询所有的标签
+	tagList, err := ps.pc.QueryTagList()
+	if err != nil {
+		return nil, err
+	}
+	resp.Data = tagList
+	return resp, nil
 }

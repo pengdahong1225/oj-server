@@ -10,7 +10,6 @@ import (
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/define"
 	"regexp"
 	"strconv"
 	"time"
@@ -20,6 +19,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"oj-server/svr/gateway/internal/api/define"
 )
 
 func HandleUserLogin(ctx *gin.Context) {

@@ -5,7 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/define"
+	"oj-server/svr/gateway/internal/api/define"
 )
 
 // 表单类型集

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -144,4 +145,35 @@ func (pr *ProblemRepo) DeleteProblem(id int64) error {
 		return status.Errorf(codes.NotFound, "problem not found")
 	}
 	return nil
+}
+
+// 查询标签列表
+// 要区分not found 和 err
+func (pr *ProblemRepo) QueryTagList() ([]string, error) {
+	var (
+		tagList []string
+		err     error
+	)
+	// 先查询缓存
+	tagList, err = pr.rdb_.SMembers(context.Background(), global.TagListKey).Result()
+	if err != nil {
+		// 缓存中没有or查询缓存失败，则从数据库中查询
+		/*
+			select tags from problem
+		*/
+		result := pr.db_.Model(&model.Problem{}).Pluck("tags", &tagList)
+		if result.Error != nil {
+			logrus.Errorf("query tag list failed: %s", result.Error.Error())
+			return nil, status.Errorf(codes.Internal, "query failed")
+		}
+		if result.RowsAffected == 0 {
+			return nil, nil // not found
+		}
+		for _, tag := range tagList {
+			// 添加到缓存
+			pr.rdb_.SAdd(context.Background(), global.TagListKey, tag)
+		}
+	}
+
+	return tagList, nil
 }

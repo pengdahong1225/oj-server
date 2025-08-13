@@ -18,6 +18,8 @@ type ProblemRepo interface {
 	UpdateProblemStatus(id int64, st int32) error
 	// 删除题目
 	DeleteProblem(id int64) error
+	// 查询标签列表
+	QueryTagList() ([]string, error)
 }
 
 type ProblemUseCase struct {
@@ -47,4 +49,7 @@ func (pc *ProblemUseCase) UpdateProblemStatus(id int64, st int32) error {
 }
 func (pc *ProblemUseCase) DeleteProblem(id int64) error {
 	return pc.repo.DeleteProblem(id)
+}
+func (pc *ProblemUseCase) QueryTagList() ([]string, error) {
+	return pc.repo.QueryTagList()
 }

@@ -44,4 +44,7 @@ const (
 	// 用户锁
 	UserLockPrefix = "user_lock"      // 用户锁前缀
 	UserLockTTL    = 60 * time.Second // 用户锁TTL
+
+	// tag list
+	TagListKey = "tag_list_set"
 )

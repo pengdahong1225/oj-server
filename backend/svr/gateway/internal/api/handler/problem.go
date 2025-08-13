@@ -10,7 +10,7 @@ import (
 	"oj-server/global"
 	"oj-server/module/registry"
 	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/define"
+	"oj-server/svr/gateway/internal/api/define"
 	"path/filepath"
 	"strconv"
 )
@@ -32,8 +32,15 @@ func HandleGetTagList(ctx *gin.Context) {
 	client := pb.NewProblemServiceClient(conn)
 	rpc_resp, err := client.GetTagList(context.Background(), &empty.Empty{})
 	if err != nil {
-		
+		logrus.Errorf("problem服务获取标签列表失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_Failed
+		resp.Message = "获取标签列表失败"
+		ctx.JSON(http.StatusOK, resp)
+		return
 	}
+	resp.Data = rpc_resp.Data
+	resp.Message = "获取标签列表成功"
+	ctx.JSON(http.StatusOK, resp)
 }
 
 // 处理获取题目列表

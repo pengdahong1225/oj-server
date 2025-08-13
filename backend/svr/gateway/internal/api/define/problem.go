@@ -5,9 +5,9 @@ package define
 // CreateProblemForm 创建题目表单
 type CreateProblemForm struct {
 	Title       string   `json:"title" form:"title" binding:"required"`
-	Description string   `json:"description" form:"description" binding:"required"`
 	Level       int32    `json:"level" form:"level" binding:"required"`
 	Tags        []string `json:"tags" form:"tags" binding:"required"`
+	Description string   `json:"description" form:"description" binding:"required"`
 }
 
 // ProblemConfig 题目配置文件模型
