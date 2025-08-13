@@ -27,6 +27,19 @@ namespace API {
         create_by?: number;
         config?: string;
     }
+    type CreateProblemForm = {
+        title: string;
+        level: number;
+        tags: string[];
+        description: string;
+    }
+    type UpdateProblemForm = {
+        id: number;
+        title: string;
+        level: number;
+        tags: string[];
+        description: string;
+    }
     
     type ProblemConfig = {
         testCases: TestCase[];

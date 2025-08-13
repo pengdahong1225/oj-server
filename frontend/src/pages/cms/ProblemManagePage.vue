@@ -48,24 +48,21 @@ const onReset = () => {
 
 const problemEditRef = ref()
 const onAddProblem = () => {
-    problemEditRef.value.open({})
+    problemEditRef.value.open("create", {})
 }
 const onEdit = (row: API.Problem) => {
-    problemEditRef.value.open(row)
+    problemEditRef.value.open("update", row)
 }
 const onDelete = (row: API.Problem) => {
     console.log(row)
 }
-// 添加或者编辑 成功的回调
-const onSuccess = (isAdd: boolean) => {
-    if (isAdd) {
+// 添加/编辑的回调
+const onSuccess = (mode: string) => {
+    if (mode === 'create') {
         // 如果是添加，最好渲染最后一页
         const lastPage = Math.ceil((total.value + 1) / params.value.page_size)
         // 更新成最大页码数，再渲染
         params.value.page = lastPage
-        ElMessage.success('添加成功')
-    } else {
-        ElMessage.success('更新成功')
     }
 
     getProblemList()

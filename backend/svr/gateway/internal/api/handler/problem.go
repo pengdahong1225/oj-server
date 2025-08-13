@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -15,7 +16,25 @@ import (
 )
 
 // 处理获取标签列表
-func HandleGetTagList(ctx *gin.Context) {}
+func HandleGetTagList(ctx *gin.Context) {
+	resp := &define.Response{
+		ErrCode: pb.Error_EN_Success,
+	}
+	// 调用problem服务
+	conn, err := registry.GetGrpcConnection(global.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.Message = "服务器错误"
+		ctx.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	rpc_resp, err := client.GetTagList(context.Background(), &empty.Empty{})
+	if err != nil {
+		
+	}
+}
 
 // 处理获取题目列表
 func HandleGetProblemList(ctx *gin.Context) {

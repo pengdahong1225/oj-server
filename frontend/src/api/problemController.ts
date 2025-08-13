@@ -59,10 +59,24 @@ export async function queryResultService(id: number) {
 }
 
 /**
+ * 创建题目
+ * POST /problem/add
+ */
+export async function addProblemService(data: API.CreateProblemForm) {
+    return request('/problem/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: data
+    })
+}
+
+/**
  * 更新题目
  * POST /problem/update
  */
-export async function updateProblemService(data: API.Problem) {
+export async function updateProblemService(data: API.UpdateProblemForm) {
     return request('/problem/update', {
         method: 'POST',
         headers: {
