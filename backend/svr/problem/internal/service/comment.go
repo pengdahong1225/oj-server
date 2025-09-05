@@ -10,7 +10,7 @@ import (
 func (ps *ProblemService) StartCommentConsume() {
 	deliveries := ps.comment_consumer.Consume()
 	if deliveries == nil {
-		logrus.Errorln("消费失败")
+		logrus.Errorf("获取deliveries失败")
 		return
 	}
 	defer ps.comment_consumer.Close()
