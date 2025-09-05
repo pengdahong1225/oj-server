@@ -10,7 +10,6 @@ import (
 	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/db"
-	"oj-server/module/db/model"
 )
 
 type UserRepo struct {
@@ -40,8 +39,8 @@ func NewUserRepo() (*UserRepo, error) {
 	}, nil
 }
 
-func (up *UserRepo) CreateNewUser(user *model.UserInfo) (int64, error) {
-	var u model.UserInfo
+func (up *UserRepo) CreateNewUser(user *db.UserInfo) (int64, error) {
+	var u db.UserInfo
 	result := up.db_.Where("mobile=?", user.Mobile).Find(&u)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
@@ -58,8 +57,8 @@ func (up *UserRepo) CreateNewUser(user *model.UserInfo) (int64, error) {
 	}
 	return user.ID, nil
 }
-func (up *UserRepo) GetUserInfoByUid(mobile int64) (*model.UserInfo, error) {
-	var user model.UserInfo
+func (up *UserRepo) GetUserInfoByUid(mobile int64) (*db.UserInfo, error) {
+	var user db.UserInfo
 	result := up.db_.Where("id=?", mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
@@ -70,8 +69,8 @@ func (up *UserRepo) GetUserInfoByUid(mobile int64) (*model.UserInfo, error) {
 	}
 	return &user, nil
 }
-func (up *UserRepo) GetUserInfoByMobile(mobile int64) (*model.UserInfo, error) {
-	var user model.UserInfo
+func (up *UserRepo) GetUserInfoByMobile(mobile int64) (*db.UserInfo, error) {
+	var user db.UserInfo
 	result := up.db_.Where("mobile=?", mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
@@ -88,7 +87,7 @@ func (up *UserRepo) ResetUserPassword(mobile int64, password string) error {
 		update user_info set password = '123456'
 		where mobile = ?;
 	*/
-	result := up.db_.Model(&model.UserInfo{}).Where("mobile=?", mobile).Update("password", password)
+	result := up.db_.Model(&db.UserInfo{}).Where("mobile=?", mobile).Update("password", password)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "update user faild")

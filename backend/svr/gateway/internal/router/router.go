@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"oj-server/global"
-	"oj-server/svr/gateway/internal/api/handler"
+	"oj-server/svr/gateway/internal/handler"
 	"oj-server/svr/gateway/internal/middlewares"
 	"os"
 	"time"

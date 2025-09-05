@@ -1,6 +1,6 @@
 package define
 
-import "oj-server/proto/pb"
+import "oj-server/module/proto/pb"
 
 // 判题任务上下文参数
 type Param struct {
@@ -18,7 +18,7 @@ type Param struct {
 	Message  string
 }
 
-// SandBoxApiForm 沙箱接口表单
+// 沙箱接口表单
 type SandBoxApiForm struct {
 	// 资源限制
 	CpuLimit          int64  `json:"cpuLimit"`          // CPU时间限制，单位纳秒

@@ -5,17 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"oj-server/module/auth"
 	"oj-server/module/configManager"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/api/define"
+	"oj-server/module/proto/pb"
+	"oj-server/svr/gateway/internal/model"
 	"strings"
 	"time"
 )
 
 func AuthLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resp := &define.Response{}
+		resp := &model.Response{}
 
 		// jwt鉴权头部信息 token
 		token := ctx.GetHeader("Authorization")
@@ -28,13 +27,13 @@ func AuthLogin() gin.HandlerFunc {
 		}
 		token = strings.TrimPrefix(token, "Bearer ")
 		signingKey := configManager.AppConf.JwtCfg.SigningKey
-		j := auth.JWTCreator{
+		j := JWTCreator{
 			SigningKey: []byte(signingKey),
 		}
 		// 解析token包含的信息
 		claims, err := j.ParseToken(token)
 		if err != nil {
-			if errors.Is(err, auth.TokenExpired) {
+			if errors.Is(err, TokenExpired) {
 				resp.ErrCode = pb.Error_EN_AccessTokenExpired
 				resp.Message = "授权已过期"
 				ctx.JSON(http.StatusUnauthorized, resp)

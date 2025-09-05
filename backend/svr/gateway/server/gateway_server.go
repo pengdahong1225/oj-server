@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
-	"oj-server/svr/gateway/internal/data"
+	"oj-server/svr/gateway/internal/repository"
 	"oj-server/svr/gateway/internal/router"
 
 	"github.com/sirupsen/logrus"
 )
 
-// Server
-// 服务器
 type Server struct {
 }
 
@@ -20,7 +18,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	err := data.Init()
+	err := repository.Init()
 	if err != nil {
 		return err
 	}

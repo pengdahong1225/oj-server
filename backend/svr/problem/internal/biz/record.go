@@ -1,16 +1,16 @@
 package biz
 
 import (
-	"oj-server/module/db/model"
+	"oj-server/module/db"
 	"time"
 )
 
 // 仓库接口由data层去实现
 type RecordRepo interface {
 	// 查询提交记录列表
-	QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error)
+	QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []db.SubmitRecord, error)
 	// 查询提交记录
-	QuerySubmitRecord(id int64) (*model.SubmitRecord, error)
+	QuerySubmitRecord(id int64) (*db.SubmitRecord, error)
 
 	// 加锁
 	Lock(key string, ttl time.Duration) (bool, error)
@@ -28,10 +28,10 @@ func NewRecordUseCase(repo RecordRepo) *RecordUseCase {
 	}
 }
 
-func (rc *RecordUseCase) QuerySubmitRecordList(uid int64, page, pageSize int) (int64, []model.SubmitRecord, error) {
+func (rc *RecordUseCase) QuerySubmitRecordList(uid int64, page, pageSize int) (int64, []db.SubmitRecord, error) {
 	return rc.repo.QuerySubmitRecordList(uid, pageSize, page)
 }
-func (rc *RecordUseCase) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
+func (rc *RecordUseCase) QuerySubmitRecord(id int64) (*db.SubmitRecord, error) {
 	return rc.repo.QuerySubmitRecord(id)
 }
 func (rc *RecordUseCase) Lock(key string, ttl time.Duration) (bool, error) {

@@ -4,7 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"oj-server/module/gPool"
-	"oj-server/proto/pb"
+	"oj-server/module/proto/pb"
 )
 
 func (ps *ProblemService) StartCommentConsume() {

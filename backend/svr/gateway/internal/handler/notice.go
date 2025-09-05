@@ -4,19 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/api/define"
+	"oj-server/module/proto/pb"
+	"oj-server/svr/gateway/internal/model"
 )
 
 func HandleGetNoticeList(ctx *gin.Context) {
-	resp := define.Response{
+	resp := model.Response{
 		ErrCode: pb.Error_EN_Success,
 		Message: "",
 		Data:    nil,
 	}
 
-	// 表单验证
-	from := &define.QueryNoticeListParams{}
+	// 参数验证
+	from := &model.QueryNoticeListParams{}
 	err := ctx.ShouldBindQuery(from)
 	if err != nil {
 		logrus.Debugf("表单验证失败: %v", err)
@@ -28,7 +28,7 @@ func HandleGetNoticeList(ctx *gin.Context) {
 
 	// ...
 
-	resp.Data = &define.QueryNoticeListResponse{
+	resp.Data = &model.QueryNoticeListResponse{
 		NoticeList: nil,
 		Total:      0,
 	}

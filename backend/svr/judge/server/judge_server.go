@@ -9,8 +9,8 @@ import (
 	"oj-server/module/configManager"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
+	"oj-server/module/proto/pb"
 	"oj-server/module/registry"
-	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/service"
 )
 

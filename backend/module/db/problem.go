@@ -1,8 +1,6 @@
-package model
+package db
 
 import (
-	"oj-server/proto/pb"
-	"oj-server/utils"
 	"time"
 )
 
@@ -22,23 +20,4 @@ type Problem struct {
 
 func (p *Problem) TableName() string {
 	return "problem"
-}
-
-func (p *Problem) Transform() *pb.Problem {
-	return &pb.Problem{
-		Id:          p.ID,
-		CreateAt:    p.CreateAt.String(),
-		Title:       p.Title,
-		Description: p.Description,
-		Level:       p.Level,
-		Tags:        utils.SplitStringWithX(string(p.Tags), "#"),
-		CreateBy:    p.CreateBy,
-	}
-}
-func TransformList(list []Problem) []*pb.Problem {
-	var problems []*pb.Problem
-	for _, problem := range list {
-		problems = append(problems, problem.Transform())
-	}
-	return problems
 }

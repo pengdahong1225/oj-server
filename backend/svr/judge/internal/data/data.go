@@ -11,7 +11,6 @@ import (
 	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/db"
-	model2 "oj-server/module/db/model"
 )
 
 type JudgeRepo struct {
@@ -41,8 +40,8 @@ func NewRepo() (*JudgeRepo, error) {
 	}, nil
 }
 
-func (r *JudgeRepo) QueryProblemData(id int64) (*model2.Problem, error) {
-	var problem model2.Problem
+func (r *JudgeRepo) QueryProblemData(id int64) (*db.Problem, error) {
+	var problem db.Problem
 	result := r.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -58,7 +57,7 @@ func (r *JudgeRepo) QueryProblemData(id int64) (*model2.Problem, error) {
 // 1.更新用户提交记录表
 // 2.更新(用户,题目)AC表
 // 3.更新用户解题情况统计表
-func (r *JudgeRepo) UpdateUserSubmitRecord(record *model2.SubmitRecord, level int32) error {
+func (r *JudgeRepo) UpdateUserSubmitRecord(record *db.SubmitRecord, level int32) error {
 	tx := r.db_.Begin()
 	if tx.Error != nil {
 		logrus.Errorf("tx error: %v", tx.Error)
@@ -86,7 +85,7 @@ func (r *JudgeRepo) UpdateUserSubmitRecord(record *model2.SubmitRecord, level in
 	*/
 	var repeatedAc = true
 	if record.Status == "Accepted" {
-		data := model2.UserSolution{}
+		data := db.UserSolution{}
 		result = tx.Where("uid=? and problem_id=?", record.Uid, record.ProblemID).Find(&data)
 		if result.RowsAffected == 0 {
 			repeatedAc = false
@@ -103,7 +102,7 @@ func (r *JudgeRepo) UpdateUserSubmitRecord(record *model2.SubmitRecord, level in
 	}
 
 	// todo 更新用户解题情况统计表
-	data := model2.Statistics{
+	data := db.Statistics{
 		Uid: record.Uid,
 	}
 	result = tx.FirstOrCreate(&data)

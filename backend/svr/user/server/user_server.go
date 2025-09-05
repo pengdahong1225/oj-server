@@ -5,13 +5,13 @@ import (
 	"net"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
-	"oj-server/proto/pb"
 	"oj-server/svr/user/internal/service"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"oj-server/module/proto/pb"
 )
 
 type Server struct {

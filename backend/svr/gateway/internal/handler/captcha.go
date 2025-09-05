@@ -3,18 +3,18 @@ package handler
 import (
 	"net/http"
 	"oj-server/module/captcha"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/data"
+	"oj-server/svr/gateway/internal/repository"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"oj-server/svr/gateway/internal/api/define"
+	"oj-server/module/proto/pb"
+	"oj-server/svr/gateway/internal/model"
 )
 
 // 获取图像验证码
 func HandleGetImageCode(ctx *gin.Context) {
-	resp := define.Response{
+	resp := model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	id, b64s, err := captcha.GenerateImageCaptcha()
@@ -26,7 +26,7 @@ func HandleGetImageCode(ctx *gin.Context) {
 		return
 	}
 
-	data := define.ImageCaptchaData{
+	data := model.ImageCaptchaData{
 		CaptchaID: id,
 		Captcha:   b64s,
 	}
@@ -39,16 +39,16 @@ func HandleGetImageCode(ctx *gin.Context) {
 // 获取短信验证码
 func HandleGetSmsCode(ctx *gin.Context) {
 	// 表单校验
-	form, ret := validate(ctx, define.GetSmsCodeForm{})
-	if !ret {
+	form, ok := validateWithForm(ctx, model.GetSmsCodeForm{})
+	if !ok {
 		return
 	}
 
-	resp := define.Response{
+	resp := model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 手机号校验
-	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "手机号格式错误"
@@ -72,7 +72,7 @@ func HandleGetSmsCode(ctx *gin.Context) {
 		return
 	}
 	// 缓存验证码
-	err = data.SetSmsCaptcha(form.Mobile, c)
+	err = repository.SetSmsCaptcha(form.Mobile, c)
 	if err != nil {
 		logrus.Errorf("缓存验证码失败: %v", err)
 		resp.ErrCode = pb.Error_EN_ServiceBusy

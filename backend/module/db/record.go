@@ -1,9 +1,8 @@
-package model
+package db
 
 import (
-	"oj-server/proto/pb"
-
 	"gorm.io/gorm"
+	"oj-server/module/proto/pb"
 )
 
 type SubmitRecord struct {
@@ -18,7 +17,7 @@ type SubmitRecord struct {
 	Lang        string `gorm:"column:lang" json:"lang"`
 }
 
-func (receiver SubmitRecord) TableName() string {
+func (receiver *SubmitRecord) TableName() string {
 	return "user_submit_record"
 }
 

@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"oj-server/proto/pb"
 
 	"github.com/sirupsen/logrus"
+	"oj-server/module/proto/pb"
 )
 
 // GetSubmitRecordList

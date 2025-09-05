@@ -8,16 +8,16 @@ import (
 	"io"
 	"net/http"
 	"oj-server/global"
+	"oj-server/module/proto/pb"
 	"oj-server/module/registry"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/api/define"
+	"oj-server/svr/gateway/internal/model"
 	"path/filepath"
 	"strconv"
 )
 
 // 处理获取标签列表
 func HandleGetTagList(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 调用problem服务
@@ -45,25 +45,15 @@ func HandleGetTagList(ctx *gin.Context) {
 
 // 处理获取题目列表
 func HandleGetProblemList(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 
-	pageStr := ctx.Query("page")
-	pageSizeStr := ctx.Query("page_size")
-	keyWord := ctx.Query("keyword")
-	tag := ctx.Query("tag")
-	page, err := strconv.Atoi(pageStr)
-	if err != nil || page <= 0 {
+	// 查询参数校验
+	var params model.QueryProblemListParams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "页码参数错误"
-		ctx.JSON(http.StatusBadRequest, resp)
-		return
-	}
-	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil || pageSize <= 0 {
-		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "页大小参数错误"
+		resp.Message = "参数验证失败"
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
@@ -79,10 +69,10 @@ func HandleGetProblemList(ctx *gin.Context) {
 	}
 	client := pb.NewProblemServiceClient(conn)
 	req := &pb.GetProblemListRequest{
-		Page:     int32(page),
-		PageSize: int32(pageSize),
-		Keyword:  keyWord,
-		Tag:      tag,
+		Page:     params.Page,
+		PageSize: params.PageSize,
+		Keyword:  params.Keyword,
+		Tag:      params.Tag,
 	}
 	rps_resp, err := client.GetProblemList(context.Background(), req)
 	if err != nil {
@@ -100,18 +90,18 @@ func HandleGetProblemList(ctx *gin.Context) {
 
 // 处理获取题目详情
 func HandleGetProblemDetail(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 查询参数
-	idStr := ctx.Query("problem_id")
-	if idStr == "" {
+	problem_id, err := strconv.ParseInt(ctx.Query("problem_id"), 10, 64)
+	if err != nil {
+		logrus.Errorf("problem_id validate err: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "题目id不能为空"
+		resp.Message = "problem_id validate err"
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	id, _ := strconv.ParseInt(idStr, 10, 64)
 	// 调用problem服务
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
@@ -123,7 +113,7 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 	}
 	client := pb.NewProblemServiceClient(conn)
 	req := &pb.GetProblemRequest{
-		Id: id,
+		Id: problem_id,
 	}
 	rpc_resp, err := client.GetProblemData(context.Background(), req)
 	if err != nil {
@@ -144,11 +134,12 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 // 客户端通过其他接口轮询题目结果
 func HandleSubmitProblem(ctx *gin.Context) {
 	// 表单验证
-	form, ret := validate(ctx, define.SubmitForm{})
-	if !ret {
+	form, ok := validateWithJson(ctx, model.SubmitForm{})
+	if !ok {
 		return
 	}
-	resp := &define.Response{
+
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 获取元数据
@@ -159,7 +150,7 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务器错误"
+		resp.Message = "服务繁忙"
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
@@ -174,12 +165,11 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	if err != nil {
 		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
-		resp.Message = "提交代码失败"
+		resp.Message = "提交失败"
 		ctx.JSON(http.StatusOK, resp)
 	}
-	resp.Data = rpc_resp
-	resp.ErrCode = pb.Error_EN_Success
-	resp.Message = "题目提交成功"
+	resp.Data = rpc_resp.TaskId
+	resp.Message = rpc_resp.Message
 	ctx.JSON(http.StatusOK, resp)
 }
 
@@ -188,11 +178,11 @@ func HandleGetSubmitResult(ctx *gin.Context) {}
 
 // 处理创建题目信息
 func HandleCreateProblem(ctx *gin.Context) {
-	form, ret := validate(ctx, define.CreateProblemForm{})
+	form, ret := validateWithForm(ctx, model.CreateProblemForm{})
 	if !ret {
 		return
 	}
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 
@@ -201,7 +191,7 @@ func HandleCreateProblem(ctx *gin.Context) {
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务器错误"
+		resp.Message = "服务繁忙"
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
@@ -228,7 +218,7 @@ func HandleCreateProblem(ctx *gin.Context) {
 
 // 处理题目配置文件上传
 func HandleUploadConfig(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 获取元数据
@@ -335,13 +325,12 @@ func HandleUploadConfig(ctx *gin.Context) {
 
 // 处理发布题目
 func HandlePublishProblem(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 获取元数据
-	problemIdStr := ctx.PostForm("problem_id")
-	problemId, err := strconv.ParseInt(problemIdStr, 10, 64)
-	if err != nil || problemId <= 0 {
+	problem_id, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
+	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "无效的 problem_id"
 		ctx.JSON(http.StatusBadRequest, resp)
@@ -358,7 +347,7 @@ func HandlePublishProblem(ctx *gin.Context) {
 	}
 	client := pb.NewProblemServiceClient(conn)
 	req := &pb.PublishProblemRequest{
-		Id: problemId,
+		Id: problem_id,
 	}
 	rpc_resp, err := client.PublishProblem(ctx, req)
 	if err != nil {

@@ -10,9 +10,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"oj-server/global"
-	"oj-server/module/db/model"
+	"oj-server/module/db"
 	"oj-server/module/mq"
-	"oj-server/proto/pb"
+	"oj-server/module/proto/pb"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
 	"oj-server/utils"
@@ -70,7 +70,7 @@ func (ps *ProblemService) PublishSubmit2MQ(data []byte) bool {
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
 	resp := &pb.CreateProblemResponse{}
 
-	problem := &model.Problem{
+	problem := &db.Problem{
 		Title:        in.Title,
 		Level:        in.Level,
 		Tags:         []byte(utils.SpliceStringWithX(in.Tags, "#")),
@@ -157,7 +157,7 @@ func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProb
 func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
 	resp := &pb.UpdateProblemResponse{}
 
-	problem := &model.Problem{
+	problem := &db.Problem{
 		ID:          in.Data.Id,
 		Title:       in.Data.Title,
 		Level:       in.Data.Level,
@@ -187,7 +187,7 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 		return nil, err
 	}
 	resp.Total = int32(total)
-	resp.Data = model.TransformList(problems)
+	resp.Data = utils.TransformList(problems)
 	return resp, nil
 }
 
@@ -198,7 +198,7 @@ func (ps *ProblemService) GetProblemData(ctx context.Context, in *pb.GetProblemR
 	if err != nil {
 		return nil, err
 	}
-	resp.Data = problem.Transform()
+	resp.Data = utils.Transform(problem)
 	return resp, nil
 }
 

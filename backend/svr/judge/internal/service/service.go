@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
-	"oj-server/module/db/model"
-	"oj-server/proto/pb"
+	"oj-server/module/db"
+	"oj-server/module/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/data"
 	"oj-server/svr/judge/internal/define"
 	"oj-server/svr/judge/internal/processor"
+	"oj-server/utils"
 	"os"
 	"time"
 )
@@ -92,7 +93,7 @@ func preAction(form *pb.SubmitForm) (bool, *define.Param) {
 
 	param.Uid = form.Uid
 	param.UserName = form.UserName
-	param.ProblemData = problem.Transform()
+	param.ProblemData = utils.Transform(problem)
 	param.Code = form.Code
 	param.Language = form.Lang
 	param.ProblemConfig = &cfg
@@ -120,7 +121,7 @@ func saveResult(param *define.Param, data []byte) {
 		logrus.Errorf("保存判题结果失败, err=%s", err.Error())
 	}
 	// 更新数据库
-	record := &model.SubmitRecord{
+	record := &db.SubmitRecord{
 		Uid:         param.Uid,
 		UserName:    param.UserName,
 		ProblemID:   param.ProblemData.Id,

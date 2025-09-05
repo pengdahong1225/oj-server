@@ -1,4 +1,4 @@
-package auth
+package middlewares
 
 import (
 	"errors"
@@ -24,7 +24,7 @@ type JWTCreator struct {
 	SigningKey []byte
 }
 
-// CreateToken 创建身份令牌
+// 创建身份令牌
 func (receiver *JWTCreator) CreateToken(claims *UserClaims) (string, error) {
 	// 选择HS256加密的HMAC
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -32,7 +32,7 @@ func (receiver *JWTCreator) CreateToken(claims *UserClaims) (string, error) {
 	return token.SignedString(receiver.SigningKey)
 }
 
-// ParseToken 解析签名令牌
+// 解析签名令牌
 func (receiver *JWTCreator) ParseToken(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return receiver.SigningKey, nil

@@ -6,34 +6,34 @@ import (
 	"fmt"
 	"net/http"
 	"oj-server/global"
-	"oj-server/module/auth"
 	"oj-server/module/configManager"
 	"oj-server/module/registry"
-	"oj-server/proto/pb"
 	"regexp"
 	"strconv"
 	"time"
 
-	"oj-server/svr/gateway/internal/data"
+	"oj-server/svr/gateway/internal/repository"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"oj-server/svr/gateway/internal/api/define"
+	"oj-server/module/proto/pb"
+	"oj-server/svr/gateway/internal/middlewares"
+	"oj-server/svr/gateway/internal/model"
 )
 
 func HandleUserLogin(ctx *gin.Context) {
 	// 表单验证
-	form, ret := validate(ctx, define.LoginFrom{})
-	if !ret {
+	form, ok := validateWithForm(ctx, model.LoginFrom{})
+	if !ok {
 		return
 	}
 
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 手机号校验
-	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "手机号格式错误"
@@ -85,7 +85,7 @@ func HandleUserLogin(ctx *gin.Context) {
 	}
 
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
-	resp_data := define.LoginResponse{
+	resp_data := model.LoginResponse{
 		UserInfo:    rpc_resp,
 		AccessToken: accessToken,
 	}
@@ -97,16 +97,16 @@ func HandleUserLogin(ctx *gin.Context) {
 }
 func HandleUserLoginBySms(ctx *gin.Context) {
 	// 表单验证
-	form, ret := validate(ctx, define.LoginWithSmsForm{})
-	if !ret {
+	form, ok := validateWithForm(ctx, model.LoginWithSmsForm{})
+	if !ok {
 		return
 	}
 
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 手机号校验
-	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "手机号格式错误"
@@ -114,7 +114,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := data.GetSmsCaptcha(form.Mobile)
+	code, err := repository.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"
@@ -171,7 +171,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 	}
 
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
-	resp_data := define.LoginResponse{
+	resp_data := model.LoginResponse{
 		UserInfo:    login_resp,
 		AccessToken: accessToken,
 	}
@@ -181,7 +181,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 }
 
 func HandleReFreshAccessToken(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 
@@ -194,12 +194,12 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	j := auth.JWTCreator{
+	j := middlewares.JWTCreator{
 		SigningKey: []byte(configManager.AppConf.JwtCfg.SigningKey),
 	}
 	claims, err := j.ParseToken(refreshToken)
 	if err != nil {
-		if errors.Is(err, auth.TokenExpired) {
+		if errors.Is(err, middlewares.TokenExpired) {
 			logrus.Errorf("refresh_token已过期:%s", err.Error())
 			resp.ErrCode = pb.Error_EN_RefreshTokenExpired
 			resp.Message = "refresh_token已过期"
@@ -228,10 +228,10 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
 	signingKey := configManager.AppConf.JwtCfg.SigningKey
-	j := auth.JWTCreator{
+	j := middlewares.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
-	claims := &auth.UserClaims{
+	claims := &middlewares.UserClaims{
 		Uid:       uid,
 		Mobile:    mobile,
 		Authority: role,
@@ -246,10 +246,10 @@ func createRefreshAccessToken(uid int64, mobile string, role int32) (string, err
 }
 func createAccessToken(uid int64, mobile string, role int32) (string, error) {
 	signingKey := configManager.AppConf.JwtCfg.SigningKey
-	j := auth.JWTCreator{
+	j := middlewares.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
-	claims := &auth.UserClaims{
+	claims := &middlewares.UserClaims{
 		Uid:       uid,
 		Mobile:    mobile,
 		Authority: role,
@@ -265,16 +265,16 @@ func createAccessToken(uid int64, mobile string, role int32) (string, error) {
 
 func HandleUserRegister(ctx *gin.Context) {
 	// 表单验证
-	form, ret := validate(ctx, define.RegisterForm{})
-	if !ret {
+	form, ok := validateWithForm(ctx, model.RegisterForm{})
+	if !ok {
 		return
 	}
 
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 手机号校验
-	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "手机号格式错误"
@@ -318,16 +318,16 @@ func HandleUserRegister(ctx *gin.Context) {
 }
 func HandleUserResetPassword(ctx *gin.Context) {
 	// 表单验证
-	form, ret := validate(ctx, define.ResetPasswordForm{})
-	if !ret {
+	form, ok := validateWithForm(ctx, model.ResetPasswordForm{})
+	if !ok {
 		return
 	}
 
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	// 手机号校验
-	ok, _ := regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "手机号格式错误"
@@ -335,7 +335,7 @@ func HandleUserResetPassword(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := data.GetSmsCaptcha(form.Mobile)
+	code, err := repository.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"
@@ -378,7 +378,7 @@ func HandleUserResetPassword(ctx *gin.Context) {
 }
 
 func HandleGetUserProfile(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 	uid := ctx.GetInt64("uid")
@@ -412,12 +412,11 @@ func HandleGetUserProfile(ctx *gin.Context) {
 
 // 处理获取用户某个提交记录的具体信息
 func HandleGetUserRecord(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 
-	idStr := ctx.Query("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
 	if err != nil || id <= 0 {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "提交记录id不能为空"
@@ -436,7 +435,7 @@ func HandleGetUserRecord(ctx *gin.Context) {
 	defer conn.Close()
 	client := pb.NewProblemServiceClient(conn)
 	request := &pb.GetSubmitRecordRequest{
-		Id: int64(id),
+		Id: id,
 	}
 	rpc_resp, err := client.GetSubmitRecordData(ctx, request)
 	if err != nil {
@@ -456,30 +455,22 @@ func HandleGetUserRecord(ctx *gin.Context) {
 // 处理获取用户历史提交记录
 // 偏移量分页
 func HandleGetUserRecordList(ctx *gin.Context) {
-	resp := &define.Response{
+	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 	}
 
 	// 获取元数据
 	uid := ctx.GetInt64("uid")
 
-	// 参数校验
-	pageStr := ctx.Query("page")
-	pageSizeStr := ctx.Query("page_size")
-	page, err := strconv.Atoi(pageStr)
-	if err != nil || page <= 0 {
+	// 查询参数校验
+	var params model.QueryUserRecordListParams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "页码参数错误"
+		resp.Message = "参数验证失败"
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil || pageSize <= 0 {
-		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "页大小参数错误"
-		ctx.JSON(http.StatusBadRequest, resp)
-		return
-	}
+
 	// 调用题目服务
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
@@ -493,8 +484,8 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 	client := pb.NewProblemServiceClient(conn)
 	req := &pb.GetSubmitRecordListRequest{
 		Uid:      uid,
-		Page:     int32(page),
-		PageSize: int32(pageSize),
+		Page:     params.Page,
+		PageSize: params.PageSize,
 	}
 	rpc_resp, err := client.GetSubmitRecordList(context.Background(), req)
 	if err != nil {

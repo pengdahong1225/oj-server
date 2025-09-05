@@ -1,8 +1,8 @@
-package define
+package model
 
-import "oj-server/proto/pb"
+import "oj-server/module/proto/pb"
 
-// Response 统一返回格式
+// 统一返回格式
 type Response struct {
 	ErrCode pb.Error `json:"code"` // 业务状态码
 	Message string   `json:"message"`

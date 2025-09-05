@@ -11,7 +11,6 @@ import (
 	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/db"
-	"oj-server/module/db/model"
 )
 
 type ProblemRepo struct {
@@ -41,7 +40,7 @@ func NewProblemRepo() (*ProblemRepo, error) {
 	}, nil
 }
 
-func (pr *ProblemRepo) CreateProblem(problem *model.Problem) (int64, error) {
+func (pr *ProblemRepo) CreateProblem(problem *db.Problem) (int64, error) {
 	result := pr.db_.Create(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -56,7 +55,7 @@ func (pr *ProblemRepo) CreateProblem(problem *model.Problem) (int64, error) {
 // @page_size 单页数量
 // @keyword 关键字
 // @tag 标签
-func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error) {
+func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []db.Problem, error) {
 	name := "%" + keyword + "%"
 	offSet := (page - 1) * pageSize
 	query := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, tag)
@@ -69,9 +68,9 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 	var result *gorm.DB
 	var count int64 = 0
 	if tag == "" {
-		result = pr.db_.Model(&model.Problem{}).Where("title LIKE ?", name).Count(&count)
+		result = pr.db_.Model(&db.Problem{}).Where("title LIKE ?", name).Count(&count)
 	} else {
-		result = pr.db_.Model(&model.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
+		result = pr.db_.Model(&db.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
 	}
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -85,7 +84,7 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 		offset off_set
 		limit page_size;
 	*/
-	var problemList []model.Problem
+	var problemList []db.Problem
 	if tag == "" {
 		result = pr.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	} else {
@@ -98,8 +97,8 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 	return count, problemList, nil
 }
 
-func (pr *ProblemRepo) QueryProblemData(id int64) (*model.Problem, error) {
-	var problem model.Problem
+func (pr *ProblemRepo) QueryProblemData(id int64) (*db.Problem, error) {
+	var problem db.Problem
 	result := pr.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -111,8 +110,8 @@ func (pr *ProblemRepo) QueryProblemData(id int64) (*model.Problem, error) {
 	return &problem, nil
 }
 
-func (pr *ProblemRepo) UpdateProblem(problem *model.Problem) error {
-	result := pr.db_.Model(&model.Problem{}).Where("id=?", problem.ID).Updates(problem)
+func (pr *ProblemRepo) UpdateProblem(problem *db.Problem) error {
+	result := pr.db_.Model(&db.Problem{}).Where("id=?", problem.ID).Updates(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
@@ -124,7 +123,7 @@ func (pr *ProblemRepo) UpdateProblem(problem *model.Problem) error {
 }
 
 func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
-	result := pr.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", st)
+	result := pr.db_.Model(&db.Problem{}).Where("id=?", id).Update("status", st)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
@@ -136,7 +135,7 @@ func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
 }
 
 func (pr *ProblemRepo) DeleteProblem(id int64) error {
-	result := pr.db_.Where("id=?", id).Delete(&model.Problem{})
+	result := pr.db_.Where("id=?", id).Delete(&db.Problem{})
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "delete problem failed")
@@ -161,7 +160,7 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 		/*
 			select tags from problem
 		*/
-		result := pr.db_.Model(&model.Problem{}).Pluck("tags", &tagList)
+		result := pr.db_.Model(&db.Problem{}).Pluck("tags", &tagList)
 		if result.Error != nil {
 			logrus.Errorf("query tag list failed: %s", result.Error.Error())
 			return nil, status.Errorf(codes.Internal, "query failed")

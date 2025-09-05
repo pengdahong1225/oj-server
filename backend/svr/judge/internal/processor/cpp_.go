@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 	"oj-server/module/gPool"
-	"oj-server/proto/pb"
+	"oj-server/module/proto/pb"
 	"oj-server/svr/judge/internal/define"
 	"sync"
 )

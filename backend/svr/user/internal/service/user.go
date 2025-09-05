@@ -3,15 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
-	"oj-server/proto/pb"
 	"strconv"
 
-	"oj-server/module/db/model"
 	"oj-server/svr/user/internal/biz"
 	"oj-server/svr/user/internal/data"
 	"oj-server/utils"
 
 	"github.com/sirupsen/logrus"
+	"oj-server/module/db"
+	"oj-server/module/proto/pb"
 )
 
 type UserService struct {
@@ -45,7 +45,7 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 		resp.Message = "mobile转换失败: " + err.Error()
 		return resp, err
 	}
-	newUser := model.UserInfo{
+	newUser := db.UserInfo{
 		Mobile:    mobile,
 		PassWord:  hash_pwd,
 		NickName:  in.Nickname,

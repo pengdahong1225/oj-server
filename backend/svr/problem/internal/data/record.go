@@ -11,7 +11,6 @@ import (
 	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/db"
-	"oj-server/module/db/model"
 	"time"
 )
 
@@ -43,7 +42,7 @@ func NewRecordRepo() (*RecordRepo, error) {
 }
 
 // 查询用户的历史提交记录
-func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error) {
+func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []db.SubmitRecord, error) {
 	/*
 		select id, created_at, problem_name, status, lang from user_submit_record
 		where uid = ?
@@ -52,12 +51,12 @@ func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (in
 		limit page_size;
 	*/
 	var count int64 = 0
-	result := rr.db_.Model(&model.SubmitRecord{}).Where("uid = ?", uid).Count(&count)
+	result := rr.db_.Model(&db.SubmitRecord{}).Where("uid = ?", uid).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return 0, nil, status.Errorf(codes.Internal, "查询提交记录失败")
 	}
-	var records []model.SubmitRecord
+	var records []db.SubmitRecord
 	result = rr.db_.Where("uid = ?", uid).Order("created_at desc").Offset(offset).Limit(pageSize).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -67,8 +66,8 @@ func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (in
 }
 
 // 查询某项提交记录的详细信息
-func (rr *RecordRepo) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
-	var record model.SubmitRecord
+func (rr *RecordRepo) QuerySubmitRecord(id int64) (*db.SubmitRecord, error) {
+	var record db.SubmitRecord
 	result := rr.db_.Where("id = ?", id).First(&record)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())

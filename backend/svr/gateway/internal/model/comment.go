@@ -1,4 +1,4 @@
-package define
+package model
 
 // binding的逗号之间不能有空格
 
