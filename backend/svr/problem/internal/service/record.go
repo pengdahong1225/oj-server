@@ -7,7 +7,6 @@ import (
 	"oj-server/module/proto/pb"
 )
 
-// GetSubmitRecordList
 // 分页查询用户的提交记录
 // @uid
 // @page

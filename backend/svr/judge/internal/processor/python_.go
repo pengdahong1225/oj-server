@@ -2,17 +2,17 @@ package processor
 
 import (
 	"oj-server/module/proto/pb"
-	"oj-server/svr/judge/internal/define"
+	"oj-server/svr/judge/internal/biz"
 )
 
 type PyProcessor struct {
-	BaseProcessor
+	BasicProcessor
 }
 
-func (cp *PyProcessor) Compile(param *define.Param) (*define.SandBoxApiResponse, error) {
+func (cp *PyProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error) {
 	return nil, nil
 }
-func (cp *PyProcessor) Run(param *define.Param) {
+func (cp *PyProcessor) Run(param *biz.Param) {
 }
 func (cp *PyProcessor) Judge() []*pb.PBResult {
 	return nil

@@ -42,19 +42,20 @@ func initRouters(engine *gin.Engine) {
 		})
 	})
 
+	v1 := engine.Group("/api/v1")
 	// 排行榜
-	engine.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
+	v1.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
 
-	// 验证码
-	captchaRouter := engine.Group("/captcha")
+	// 验证码 api/v1/captcha
+	captchaRouter := v1.Group("/captcha")
 	captchaRouter.Use(middlewares.RateLimitMiddleware(2*time.Second, 50))
 	{
 		captchaRouter.GET("/image", handler.HandleGetImageCode)
 		captchaRouter.POST("/sms", handler.HandleGetSmsCode)
 	}
 
-	// 用户相关
-	userRouter := engine.Group("/user")
+	// 用户相关 api/v1/user
+	userRouter := v1.Group("/user")
 	{
 		userRouter.POST("/login", handler.HandleUserLogin)
 		userRouter.POST("/login_sms", handler.HandleUserLoginBySms)
@@ -67,10 +68,10 @@ func initRouters(engine *gin.Engine) {
 		userRouter.GET("/solved_list", middlewares.AuthLogin(), handler.HandleGetUserSolvedList)
 	}
 
-	// 题目相关
-	problemRouter := engine.Group("/problem")
+	// 题目相关 api/v1/problem
+	problemRouter := v1.Group("/problem")
 	{
-		problemRouter.GET("/tag_list", handler.HandleGetTagList)
+		problemRouter.GET("/tag_list", handler.HandleGetProblemTagList)
 		problemRouter.GET("/list", handler.HandleGetProblemList)
 		problemRouter.GET("/detail", handler.HandleGetProblemDetail)
 
@@ -84,8 +85,8 @@ func initRouters(engine *gin.Engine) {
 		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUpdateProblem)
 	}
 
-	// 评论
-	commentRouter := engine.Group("/comment")
+	// 评论 api/v1/comment
+	commentRouter := v1.Group("/comment")
 	commentRouter.Use(middlewares.AuthLogin())
 	{
 		commentRouter.GET("/root_list", handler.HandleGetRootCommentList)
@@ -95,8 +96,8 @@ func initRouters(engine *gin.Engine) {
 		commentRouter.POST("/like", handler.HandleLikeComment)
 	}
 
-	// notice
-	noticeRouter := engine.Group("/notice")
+	// notice api/v1/notice
+	noticeRouter := v1.Group("/notice")
 	{
 		noticeRouter.GET("/list", handler.HandleGetNoticeList)
 	}

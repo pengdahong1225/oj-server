@@ -21,7 +21,7 @@ func RateLimitMiddleware(fillInterval time.Duration, cap int64) func(c *gin.Cont
 	return func(c *gin.Context) {
 		// 如果取不到令牌就中断本次请求返回 rate limit...
 		if bucket.TakeAvailable(1) == 0 {
-			c.String(http.StatusOK, "rate limit...")
+			c.String(http.StatusOK, "服务繁忙")
 			c.Abort()
 			return
 		}

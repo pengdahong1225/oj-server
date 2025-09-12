@@ -43,10 +43,7 @@ type jsonTyper interface {
 }
 
 func validateWithJson[T jsonTyper](ctx *gin.Context, form T) (*T, bool) {
-	resp := &model.Response{
-		ErrCode: pb.Error_EN_Success,
-		Message: "",
-	}
+	resp := &model.Response{}
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		var errs validator.ValidationErrors
 		ok := errors.As(err, &errs)

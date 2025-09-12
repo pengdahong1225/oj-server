@@ -20,7 +20,7 @@ func main() {
 	var (
 		server_config string
 		help          bool
-		srv           common.IServer
+		judge_server  common.IServer
 	)
 	flag.StringVar(&server_config, "f", "server_config.yaml", "server config")
 	flag.BoolVar(&help, "h", false, "help")
@@ -58,8 +58,8 @@ func main() {
 	}
 	logrus.Debugf("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------", serverCfg.NodeType, serverCfg.NodeId, serverCfg.Host, serverCfg.Port, serverCfg.Scheme)
 
-	srv = server.NewServer()
-	if err = srv.Init(); err != nil {
+	judge_server = server.NewServer()
+	if err = judge_server.Init(); err != nil {
 		logrus.Fatalf("Failed to init server: %v", err)
 	}
 
@@ -68,11 +68,11 @@ func main() {
 	go func() {
 		sig := <-sigChan
 		logrus.Errorf("Recv signal: %v", sig)
-		srv.Stop()
+		judge_server.Stop()
 		time.Sleep(time.Second)
 		os.Exit(0)
 	}()
 
 	// 启动
-	srv.Run()
+	judge_server.Run()
 }

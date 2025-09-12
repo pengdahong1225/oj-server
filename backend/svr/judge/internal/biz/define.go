@@ -1,4 +1,4 @@
-package define
+package biz
 
 import "oj-server/module/proto/pb"
 
@@ -52,7 +52,7 @@ type SandBoxApiForm struct {
 	CopyOutMax int64 `json:"copyOutMax"`
 }
 
-type Body struct {
+type SandBoxApiBody struct {
 	Cmd []SandBoxApiForm `json:"cmd"`
 }
 

@@ -15,16 +15,18 @@ import (
 	"strconv"
 )
 
-// 处理获取标签列表
-func HandleGetTagList(ctx *gin.Context) {
+// 获取题目标签列表
+func HandleGetProblemTagList(ctx *gin.Context) {
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
+
 	// 调用problem服务
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.ErrCode = pb.Error_EN_ServiceConnectFailed
 		resp.Message = "服务器错误"
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
@@ -32,28 +34,29 @@ func HandleGetTagList(ctx *gin.Context) {
 	client := pb.NewProblemServiceClient(conn)
 	rpc_resp, err := client.GetTagList(context.Background(), &empty.Empty{})
 	if err != nil {
-		logrus.Errorf("problem服务获取标签列表失败:%s", err.Error())
+		logrus.Errorf("获取题目标签列表失败: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
-		resp.Message = "获取标签列表失败"
+		resp.Message = "获取题目标签列表失败"
 		ctx.JSON(http.StatusOK, resp)
 		return
 	}
+
 	resp.Data = rpc_resp.Data
-	resp.Message = "获取标签列表成功"
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// 处理获取题目列表
+// 获取题目列表
 func HandleGetProblemList(ctx *gin.Context) {
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 
 	// 查询参数校验
 	var params model.QueryProblemListParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "参数验证失败"
+		resp.Message = "参数校验失败"
 		ctx.JSON(http.StatusBadRequest, resp)
 		return
 	}
@@ -61,7 +64,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	// 调用problem服务
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
-		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		logrus.Errorf("problem服务连接失败: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
 		resp.Message = "服务器错误"
 		ctx.JSON(http.StatusInternalServerError, resp)
@@ -74,7 +77,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 		Keyword:  params.Keyword,
 		Tag:      params.Tag,
 	}
-	rps_resp, err := client.GetProblemList(context.Background(), req)
+	rpc_resp, err := client.GetProblemList(context.Background(), req)
 	if err != nil {
 		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
@@ -82,16 +85,33 @@ func HandleGetProblemList(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, resp)
 		return
 	}
-	resp.Data = rps_resp
-	resp.Message = "获取题目列表成功"
+
+	data := &model.QueryProblemListResult{
+		Total: rpc_resp.Total,
+	}
+	data.List = make([]*model.Problem, len(rpc_resp.Data))
+	for i, v := range rpc_resp.Data {
+		data.List[i] = &model.Problem{
+			ID:          v.Id,
+			Title:       v.Title,
+			Description: v.Description,
+			Level:       v.Level,
+			Tags:        v.Tags,
+			Status:      v.Status,
+			CreateAt:    v.CreateAt,
+		}
+	}
+
+	resp.Data = data
 	ctx.JSON(http.StatusOK, resp)
 	return
 }
 
-// 处理获取题目详情
+// 获取题目详情
 func HandleGetProblemDetail(ctx *gin.Context) {
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 	// 查询参数
 	problem_id, err := strconv.ParseInt(ctx.Query("problem_id"), 10, 64)
@@ -106,7 +126,7 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.ErrCode = pb.Error_EN_ServiceConnectFailed
 		resp.Message = "服务器错误"
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
@@ -122,16 +142,20 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, resp)
 		return
 	}
-	resp.ErrCode = pb.Error_EN_Success
-	resp.Data = rpc_resp.Data
-	resp.Message = "获取题目详情成功"
+	data := &model.Problem{
+		ID:          rpc_resp.Problem.Id,
+		Title:       rpc_resp.Problem.Title,
+		Description: rpc_resp.Problem.Description,
+		Level:       rpc_resp.Problem.Level,
+		Tags:        rpc_resp.Problem.Tags,
+		Status:      rpc_resp.Problem.Status,
+		CreateAt:    rpc_resp.Problem.CreateAt,
+	}
+	resp.Data = data
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// 处理提交代码
-// 判断“用户”是否处于判题状态？true就拒绝
-// 用户提交了题目就立刻返回，并给题目设置状态
-// 客户端通过其他接口轮询题目结果
+// 提交代码
 func HandleSubmitProblem(ctx *gin.Context) {
 	// 表单验证
 	form, ok := validateWithJson(ctx, model.SubmitForm{})
@@ -141,6 +165,7 @@ func HandleSubmitProblem(ctx *gin.Context) {
 
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 	// 获取元数据
 	uid := ctx.GetInt64("uid")
@@ -149,7 +174,7 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_ServiceBusy
+		resp.ErrCode = pb.Error_EN_ServiceConnectFailed
 		resp.Message = "服务繁忙"
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
@@ -173,10 +198,11 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// 处理获取提交结果
+// 获取判题任务结果
+// 拿到判题任务结果，再去获取任务的output
 func HandleGetSubmitResult(ctx *gin.Context) {}
 
-// 处理创建题目信息
+// 创建题目信息
 func HandleCreateProblem(ctx *gin.Context) {
 	form, ret := validateWithForm(ctx, model.CreateProblemForm{})
 	if !ret {

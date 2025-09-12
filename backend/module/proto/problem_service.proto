@@ -126,7 +126,7 @@ message GetProblemListRequest {
   string tag = 4;
 }
 message GetProblemListResponse {
-  int32 total = 1;
+  int64 total = 1;
   repeated Problem data = 2;
 }
 
@@ -135,7 +135,7 @@ message GetProblemRequest{
   int64 id = 1;
 }
 message GetProblemResponse{
-  Problem data = 1;
+  Problem problem = 1;
 }
 
 // 获取题目配置
@@ -143,7 +143,7 @@ message GetProblemConfigRequest{
   int64 id = 1;
 }
 message GetProblemConfigResponse{
-  ProblemConfig data = 1;
+  ProblemConfig problem_config = 1;
 }
 
 // tags

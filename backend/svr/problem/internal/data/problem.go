@@ -49,29 +49,28 @@ func (pr *ProblemRepo) CreateProblem(problem *db.Problem) (int64, error) {
 	return problem.ID, nil
 }
 
-// QueryProblemList 分页查询题库列表
+// 分页查询题库列表
 // 查询{id，title，level，tags}
 // @page 页码
 // @page_size 单页数量
 // @keyword 关键字
 // @tag 标签
 func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []db.Problem, error) {
-	name := "%" + keyword + "%"
-	offSet := (page - 1) * pageSize
-	query := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, tag)
-
-	logrus.Debugf("query conditions: %s\n", query)
-	/*
-		select COUNT(*) AS count from problem
-		where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表"');
+	/**
+	select COUNT(*) AS count
+	from problem
+	where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表"');
 	*/
-	var result *gorm.DB
 	var count int64 = 0
-	if tag == "" {
-		result = pr.db_.Model(&db.Problem{}).Where("title LIKE ?", name).Count(&count)
-	} else {
-		result = pr.db_.Model(&db.Problem{}).Where("title LIKE ?", name).Where(query).Count(&count)
+	query := pr.db_.Model(&db.Problem{})
+	if keyword != "" {
+		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
+	if tag != "" {
+		str := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, tag)
+		query = query.Where(str)
+	}
+	result := query.Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return -1, nil, status.Errorf(codes.Internal, "query failed")
@@ -84,14 +83,18 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 		offset off_set
 		limit page_size;
 	*/
+	offSet := (page - 1) * pageSize
 	var problemList []db.Problem
-	if tag == "" {
-		result = pr.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
-	} else {
-		result = pr.db_.Select("id,title,level,tags,create_at,create_by").Where("title LIKE ?", name).Where(query).Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
+	query = pr.db_.Model(&db.Problem{}).Select("id,title,level,tags,create_at,create_by")
+	if keyword != "" {
+		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
+	if tag != "" {
+		query = query.Where("JSON_CONTAINS(tags, ?)", tag)
+	}
+	result = query.Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
+		logrus.Errorf("query problem list failed: %s", result.Error.Error())
 		return -1, nil, status.Errorf(codes.Internal, "query failed")
 	}
 	return count, problemList, nil
@@ -101,7 +104,7 @@ func (pr *ProblemRepo) QueryProblemData(id int64) (*db.Problem, error) {
 	var problem db.Problem
 	result := pr.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
+		logrus.Errorf("query problem failed: %s", result.Error.Error())
 		return nil, status.Errorf(codes.Internal, "query failed")
 	}
 	if result.RowsAffected == 0 {

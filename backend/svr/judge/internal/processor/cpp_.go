@@ -9,16 +9,16 @@ import (
 	"net/http"
 	"oj-server/module/gPool"
 	"oj-server/module/proto/pb"
-	"oj-server/svr/judge/internal/define"
+	"oj-server/svr/judge/internal/biz"
 	"sync"
 )
 
 type CPPProcessor struct {
-	BaseProcessor
+	BasicProcessor
 }
 
-func (cp *CPPProcessor) Compile(param *define.Param) (*define.SandBoxApiResponse, error) {
-	form := define.SandBoxApiForm{
+func (cp *CPPProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error) {
+	form := biz.SandBoxApiForm{
 		CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
 		ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
 		MemoryLimit: param.ProblemConfig.CompileLimit.MemoryLimit,
@@ -39,7 +39,7 @@ func (cp *CPPProcessor) Compile(param *define.Param) (*define.SandBoxApiResponse
 	form.CopyOutCached = []string{"main"}
 
 	// 构造body
-	body := define.Body{}
+	body := biz.SandBoxApiBody{}
 	body.Cmd = append(body.Cmd, form)
 	data, err := json.Marshal(body)
 	if err != nil {
@@ -69,10 +69,10 @@ func (cp *CPPProcessor) Compile(param *define.Param) (*define.SandBoxApiResponse
 		return nil, err
 	}
 	logrus.Debugln("Response Status:", resp.Status)
-	logrus.Debugln("Response Body:", string(respBody))
+	logrus.Debugln("Response SandBoxApiBody:", string(respBody))
 
-	var result []*define.SandBoxApiResponse
-	if err := json.Unmarshal(respBody, &result); err != nil {
+	var result []*biz.SandBoxApiResponse
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (cp *CPPProcessor) Compile(param *define.Param) (*define.SandBoxApiResponse
 		return nil, errors.New("result len = 0")
 	}
 }
-func (cp *CPPProcessor) Run(param *define.Param) {
+func (cp *CPPProcessor) Run(param *biz.Param) {
 	// 循环调用(并发地发送多个测试用例的运行请求，并等待所有请求完成)
 	wg := new(sync.WaitGroup)
 
@@ -93,7 +93,7 @@ func (cp *CPPProcessor) Run(param *define.Param) {
 		_ = gPool.Instance().Submit(func() {
 			defer wg.Done()
 
-			form := define.SandBoxApiForm{
+			form := biz.SandBoxApiForm{
 				CpuLimit:    param.ProblemConfig.CompileLimit.CpuLimit,
 				ClockLimit:  param.ProblemConfig.CompileLimit.ClockLimit,
 				MemoryLimit: param.ProblemConfig.CompileLimit.MemoryLimit,
@@ -110,7 +110,7 @@ func (cp *CPPProcessor) Run(param *define.Param) {
 				"main": {"fileId": param.FileIds["main"]},
 			}
 
-			body := define.Body{}
+			body := biz.SandBoxApiBody{}
 			body.Cmd = append(body.Cmd, form)
 			data, err := json.Marshal(body)
 			if err != nil {
@@ -139,16 +139,16 @@ func (cp *CPPProcessor) Run(param *define.Param) {
 				return
 			}
 			logrus.Debugln("Response Status:", resp.Status)
-			logrus.Debugln("Response Body:", string(respBody))
+			logrus.Debugln("Response SandBoxApiBody:", string(respBody))
 
 			// 将结果放入管道
-			var results []*define.SandBoxApiResponse
+			var results []*biz.SandBoxApiResponse
 			if err := json.Unmarshal(respBody, &results); err != nil {
 				logrus.Errorln("Error unmarshalling JSON:", err)
 				return
 			}
 			if len(results) > 0 {
-				cp.runResults <- &define.RunResultInChan{
+				cp.runResultsChan <- &biz.RunResultInChan{
 					Result: results[0],
 					Case:   test,
 				}
@@ -161,10 +161,10 @@ func (cp *CPPProcessor) Run(param *define.Param) {
 // 检查结果状态，只check结果状态为Accepted的
 func (cp *CPPProcessor) Judge() []*pb.PBResult {
 	var results []*pb.PBResult
-	for runResult := range cp.runResults {
+	for runResult := range cp.runResultsChan {
 		pbResult := translatePBResult(runResult.Result)
 		// status不为Accepted的，不用检测结果
-		if runResult.Result.Status != define.Accepted {
+		if runResult.Result.Status != biz.Accepted {
 			pbResult.Content = "Run Error"
 			results = append(results, pbResult)
 			continue
@@ -172,11 +172,11 @@ func (cp *CPPProcessor) Judge() []*pb.PBResult {
 		// 判断output是否满足预期
 		// 不满足结果的状态为Wrong Answer
 		if !cp.CheckAnswer(runResult.Result.Files["stdout"], runResult.Case.Output) {
-			pbResult.Status = define.WrongAnswer
+			pbResult.Status = biz.WrongAnswer
 			pbResult.Content = "答案错误"
 			results = append(results, pbResult)
 		} else {
-			pbResult.Status = define.Accepted
+			pbResult.Status = biz.Accepted
 			pbResult.Content = "通过"
 			results = append(results, pbResult)
 		}

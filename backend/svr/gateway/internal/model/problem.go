@@ -1,5 +1,15 @@
 package model
 
+type Problem struct {
+	ID          int64    `json:"problem_id"`
+	CreateAt    string   `json:"create_at"`
+	Title       string   `json:"problem_title"`
+	Level       int32    `json:"level"`
+	Description string   `json:"description"`
+	Tags        []string `json:"tags"`
+	Status      int32    `json:"status"`
+}
+
 // binding的逗号之间不能有空格
 
 // 创建题目表单
@@ -53,6 +63,10 @@ type QueryProblemListParams struct {
 	PageSize int32  `form:"page_size" binding:"required"`
 	Keyword  string `form:"keyword"`
 	Tag      string `form:"tag"`
+}
+type QueryProblemListResult struct {
+	Total int64      `json:"total"`
+	List  []*Problem `json:"list"`
 }
 
 // 查询题目集中哪些题目被用户 AC 了
