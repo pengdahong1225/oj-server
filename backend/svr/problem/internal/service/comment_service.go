@@ -11,7 +11,7 @@ import (
 	"oj-server/module/db"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
 )

@@ -5,14 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/gateway/internal/model"
 )
 
 type formTyper interface {
 	model.RegisterForm | model.LoginFrom | model.GetSmsCodeForm | model.UpdateProblemForm |
-		model.AddCommentForm | model.CommentLikeForm | model.LoginWithSmsForm | model.ResetPasswordForm |
-		model.CreateProblemForm
+		model.CommentLikeForm | model.LoginWithSmsForm | model.ResetPasswordForm |
+		model.DeleteCommentForm
 }
 
 func validateWithForm[T formTyper](ctx *gin.Context, form T) (*T, bool) {
@@ -39,7 +39,7 @@ func validateWithForm[T formTyper](ctx *gin.Context, form T) (*T, bool) {
 }
 
 type jsonTyper interface {
-	model.SubmitForm
+	model.SubmitForm | model.CreateCommentForm | model.CreateProblemForm
 }
 
 func validateWithJson[T jsonTyper](ctx *gin.Context, form T) (*T, bool) {

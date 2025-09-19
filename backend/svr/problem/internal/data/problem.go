@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"oj-server/global"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/db"
 	"time"
 )
@@ -20,7 +20,7 @@ type ProblemRepo struct {
 }
 
 func NewProblemRepo() (*ProblemRepo, error) {
-	mysql_cfg := configManager.AppConf.MysqlCfg
+	mysql_cfg := configs.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
 	db_, err := db.NewMysqlCli(dsn, global.LogPath)
@@ -28,7 +28,7 @@ func NewProblemRepo() (*ProblemRepo, error) {
 		return nil, err
 	}
 
-	redis_cfg := configManager.AppConf.RedisCfg
+	redis_cfg := configs.AppConf.RedisCfg
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
 	rdb_, err := db.NewRedisCli(dsn)
 	if err != nil {
@@ -44,7 +44,7 @@ func NewProblemRepo() (*ProblemRepo, error) {
 func (pr *ProblemRepo) CreateProblem(problem *db.Problem) (int64, error) {
 	result := pr.db_.Create(problem)
 	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
+		logrus.Errorf("create problem failed: %s", result.Error.Error())
 		return -1, status.Errorf(codes.Internal, "create problem failed")
 	}
 	return problem.ID, nil

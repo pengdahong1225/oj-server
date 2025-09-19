@@ -6,7 +6,7 @@ import (
 	"oj-server/global"
 	"oj-server/module/gPool"
 	"oj-server/module/mq"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/data"
 )

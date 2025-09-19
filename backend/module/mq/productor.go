@@ -1,6 +1,7 @@
 package mq
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"time"
@@ -22,11 +23,11 @@ func NewProducer(exKind, exName, quName, routingKey string) *Producer {
 	}
 }
 
-func (receiver *Producer) Publish(msg []byte) bool {
+func (receiver *Producer) Publish(msg []byte) error {
 	channel := newChannel(receiver.exName, receiver.exKind, receiver.queName, receiver.routingKey)
 	if channel == nil {
-		logrus.Errorln("获取channel失败")
-		return false
+		logrus.Errorf("获取channel失败")
+		return fmt.Errorf("获取channel失败")
 	}
 	defer channel.Close()
 
@@ -43,7 +44,8 @@ func (receiver *Producer) Publish(msg []byte) bool {
 		},
 	)
 	if err != nil {
-		return false
+		logrus.Errorf("发布消息失败:%s", err.Error())
+		return err
 	}
-	return true
+	return nil
 }

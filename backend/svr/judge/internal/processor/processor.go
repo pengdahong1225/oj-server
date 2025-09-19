@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/gPool"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"strings"
 	"sync"
@@ -39,7 +39,7 @@ func NewProcessor(language string, uc *biz.JudgeUseCase) (*BasicProcessor, error
 
 	// 查询sandbox地址
 	var addr string
-	for _, item := range configManager.AppConf.SandBoxCfg {
+	for _, item := range configs.AppConf.SandBoxCfg {
 		if item.Type == language {
 			addr = fmt.Sprintf("http://%s:%d", item.Host, item.Port)
 			break

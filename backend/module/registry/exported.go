@@ -4,7 +4,7 @@ import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 )
 
 var (
@@ -15,8 +15,8 @@ func Init() error {
 	instance = new(Registry)
 
 	// 配置中心地址
-	server_cfg := configManager.ServerConf
-	app_cfg := configManager.AppConf.RegistryCfg
+	server_cfg := configs.ServerConf
+	app_cfg := configs.AppConf.RegistryCfg
 	dsn := fmt.Sprintf("%s:%d", app_cfg.Host, app_cfg.Port)
 	consulConf := consulapi.DefaultConfig()
 	consulConf.Address = dsn

@@ -3,12 +3,12 @@ package handler
 import (
 	"net/http"
 	"oj-server/module/captcha"
-	"oj-server/svr/gateway/internal/repository"
+	"oj-server/svr/gateway/internal/repo"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/gateway/internal/model"
 )
 
@@ -72,7 +72,7 @@ func HandleGetSmsCode(ctx *gin.Context) {
 		return
 	}
 	// 缓存验证码
-	err = repository.SetSmsCaptcha(form.Mobile, c)
+	err = repo.SetSmsCaptcha(form.Mobile, c)
 	if err != nil {
 		logrus.Errorf("缓存验证码失败: %v", err)
 		resp.ErrCode = pb.Error_EN_ServiceBusy

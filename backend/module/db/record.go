@@ -2,7 +2,7 @@ package db
 
 import (
 	"gorm.io/gorm"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 )
 
 type SubmitRecord struct {

@@ -32,13 +32,3 @@ type Comment struct {
 func (receiver *Comment) TableName() string {
 	return "comment"
 }
-
-func NewComment() *Comment {
-	return &Comment{
-		Status:     1,
-		ReplyCount: 0,
-		LikeCount:  0,
-		ChildCount: 0,
-		PubStamp:   time.Now().Unix(),
-	}
-}

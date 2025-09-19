@@ -12,7 +12,7 @@ import (
 	"oj-server/global"
 	"oj-server/module/db"
 	"oj-server/module/mq"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
 	"oj-server/utils"
@@ -53,8 +53,8 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 		Level:        in.Level,
 		Tags:         []byte(utils.SpliceStringWithX(in.Tags, "#")),
 		Description:  in.Description,
-		CreateBy:     0,
 		CommentCount: 0,
+		Status:       0, // 未发布
 	}
 
 	id, err := ps.uc.CreateProblem(problem)
@@ -118,16 +118,11 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 		Size:     fileSize,
 	})
 }
-func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProblemRequest) (*pb.PublishProblemResponse, error) {
-	resp := &pb.PublishProblemResponse{}
-
-	err := ps.uc.UpdateProblemStatus(in.Id, 1)
-	if err != nil {
+func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProblemRequest) (*emptypb.Empty, error) {
+	if err := ps.uc.UpdateProblemStatus(in.Id, 1); err != nil {
 		return nil, err
 	}
-	resp.Id = in.Id
-	resp.Result = "publish problem success"
-	return resp, nil
+	return nil, nil
 }
 
 // 更新题目基础信息
@@ -230,8 +225,8 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		return nil, status.Errorf(codes.Internal, "marshal failed")
 	}
 	// 提交到mq
-	if !ps.problem_producer.Publish(form_data) {
-		logrus.Errorf("publish to mq failed")
+	if err = ps.problem_producer.Publish(form_data); err != nil {
+		logrus.Errorf("publish to mq failed: %v", err)
 		_ = ps.uc.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "服务器错误")
 	}

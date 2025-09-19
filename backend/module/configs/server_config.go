@@ -1,4 +1,4 @@
-package configManager
+package configs
 
 type ServerConfig struct {
 	NodeType string `yaml:"node_type"`

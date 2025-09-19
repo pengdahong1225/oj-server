@@ -2,9 +2,9 @@ package server
 
 import (
 	"fmt"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/registry"
-	"oj-server/svr/gateway/internal/repository"
+	"oj-server/svr/gateway/internal/repo"
 	"oj-server/svr/gateway/internal/router"
 
 	"github.com/sirupsen/logrus"
@@ -18,7 +18,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	err := repository.Init()
+	err := repo.Init()
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (s *Server) Run() {
 	}
 
 	// 启动
-	server_cfg := configManager.ServerConf
+	server_cfg := configs.ServerConf
 	engine := router.Router()
 	dsn := fmt.Sprintf(":%d", server_cfg.Port)
 	err = engine.Run(dsn)

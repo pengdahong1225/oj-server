@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 	"oj-server/global"
-	"oj-server/module/proto/pb"
 	"oj-server/module/registry"
+	"oj-server/proto/pb"
 	"oj-server/svr/gateway/internal/model"
 	"path/filepath"
 	"strconv"
@@ -37,7 +37,7 @@ func HandleGetProblemTagList(ctx *gin.Context) {
 		logrus.Errorf("获取题目标签列表失败: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
 		resp.Message = "获取题目标签列表失败"
-		ctx.JSON(http.StatusOK, resp)
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 
@@ -198,20 +198,16 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// 获取判题任务结果
-// 拿到判题任务结果，再去获取任务的output
-func HandleGetSubmitResult(ctx *gin.Context) {}
-
 // 创建题目信息
 func HandleCreateProblem(ctx *gin.Context) {
-	form, ret := validateWithForm(ctx, model.CreateProblemForm{})
+	resp := &model.Response{
+		ErrCode: pb.Error_EN_Success,
+		Message: "success",
+	}
+	form, ret := validateWithJson(ctx, model.CreateProblemForm{})
 	if !ret {
 		return
 	}
-	resp := &model.Response{
-		ErrCode: pb.Error_EN_Success,
-	}
-
 	// 调用problem服务
 	conn, err := registry.GetGrpcConnection(global.ProblemService)
 	if err != nil {
@@ -222,18 +218,18 @@ func HandleCreateProblem(ctx *gin.Context) {
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
-	req := &pb.CreateProblemRequest{
+	request := &pb.CreateProblemRequest{
 		Title:       form.Title,
 		Description: form.Description,
 		Level:       form.Level,
 		Tags:        form.Tags,
 	}
-	rpc_resp, err := client.CreateProblem(context.Background(), req)
+	rpc_resp, err := client.CreateProblem(context.Background(), request)
 	if err != nil {
-		logrus.Errorf("problem服务创建题目失败:%s", err.Error())
+		logrus.Errorf("创建题目失败:%s", err.Error())
 		resp.ErrCode = pb.Error_EN_Failed
 		resp.Message = "创建题目失败"
-		ctx.JSON(http.StatusOK, resp)
+		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	resp.ErrCode = pb.Error_EN_Success
@@ -246,10 +242,10 @@ func HandleCreateProblem(ctx *gin.Context) {
 func HandleUploadConfig(ctx *gin.Context) {
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 	// 获取元数据
-	problemIdStr := ctx.PostForm("problem_id")
-	problemId, err := strconv.ParseInt(problemIdStr, 10, 64)
+	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil || problemId <= 0 {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "无效的 problem_id"
@@ -306,7 +302,7 @@ func HandleUploadConfig(ctx *gin.Context) {
 		return
 	}
 	// 分片读取并流式传输
-	buffer := make([]byte, 1<<20) // 1MB分片
+	buffer := make([]byte, 0, 1<<20) // 1MB分片
 	for {
 		n, err := file.Read(buffer)
 		if err == io.EOF {
@@ -321,11 +317,10 @@ func HandleUploadConfig(ctx *gin.Context) {
 			return
 		}
 		// 发送分片到Problem服务
-		err = stream.Send(&pb.UploadConfigFileChunk{
+		if err = stream.Send(&pb.UploadConfigFileChunk{
 			Content:   buffer[:n],
 			ProblemId: problemId,
-		})
-		if err != nil {
+		}); err != nil {
 			logrus.Errorf("file send error:%s", err.Error())
 			_ = stream.CloseSend()
 			resp.ErrCode = pb.Error_EN_ServiceBusy
@@ -353,6 +348,7 @@ func HandleUploadConfig(ctx *gin.Context) {
 func HandlePublishProblem(ctx *gin.Context) {
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 	// 获取元数据
 	problem_id, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
@@ -375,16 +371,13 @@ func HandlePublishProblem(ctx *gin.Context) {
 	req := &pb.PublishProblemRequest{
 		Id: problem_id,
 	}
-	rpc_resp, err := client.PublishProblem(ctx, req)
-	if err != nil {
-		logrus.Errorf("PublishProblem Failed: %s", err.Error())
+	if _, err = client.PublishProblem(ctx, req); err != nil {
+		logrus.Errorf("发布失败: %s", err.Error())
 		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务器错误"
+		resp.Message = "发布失败"
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	resp.Data = rpc_resp
-	resp.Message = "发布成功"
 	ctx.JSON(http.StatusOK, resp)
 }
 

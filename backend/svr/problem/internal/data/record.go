@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"oj-server/global"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/db"
 )
 
@@ -18,7 +18,7 @@ type RecordRepo struct {
 }
 
 func NewRecordRepo() (*RecordRepo, error) {
-	mysql_cfg := configManager.AppConf.MysqlCfg
+	mysql_cfg := configs.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
 	db_, err := db.NewMysqlCli(dsn, global.LogPath)
@@ -26,7 +26,7 @@ func NewRecordRepo() (*RecordRepo, error) {
 		return nil, err
 	}
 
-	redis_cfg := configManager.AppConf.RedisCfg
+	redis_cfg := configs.AppConf.RedisCfg
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
 	rdb_, err := db.NewRedisCli(dsn)
 	if err != nil {

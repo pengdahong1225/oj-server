@@ -1,6 +1,6 @@
 package model
 
-import "oj-server/module/proto/pb"
+import "oj-server/proto/pb"
 
 // 统一返回格式
 type Response struct {

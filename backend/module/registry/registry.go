@@ -5,7 +5,7 @@ import (
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"sync"
 )
 
@@ -19,7 +19,7 @@ type Registry struct {
 }
 
 func (r *Registry) registerService() error {
-	cfg := configManager.ServerConf
+	cfg := configs.ServerConf
 
 	logrus.Debugf("注册服务: %s:%d", cfg.Host, cfg.Port)
 
@@ -68,7 +68,7 @@ func (r *Registry) registerService() error {
 }
 
 func (r *Registry) unRegister() error {
-	cfg := configManager.ServerConf
+	cfg := configs.ServerConf
 	id := fmt.Sprintf("%s:%d", cfg.NodeType, cfg.NodeId)
 	err := r.client.Agent().ServiceDeregister(id)
 	if err != nil {

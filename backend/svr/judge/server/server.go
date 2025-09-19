@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/registry"
 	"oj-server/svr/judge/internal/service"
 )
@@ -35,7 +35,7 @@ func (s *Server) Run() {
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
-	cfg := configManager.ServerConf
+	cfg := configs.ServerConf
 	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
 		if req.Method == "GET" {

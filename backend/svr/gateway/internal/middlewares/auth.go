@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"oj-server/module/configManager"
-	"oj-server/module/proto/pb"
+	"oj-server/module/configs"
+	"oj-server/proto/pb"
 	"oj-server/svr/gateway/internal/model"
 	"strings"
 	"time"
@@ -26,7 +26,7 @@ func AuthLogin() gin.HandlerFunc {
 			return
 		}
 		token = strings.TrimPrefix(token, "Bearer ")
-		signingKey := configManager.AppConf.JwtCfg.SigningKey
+		signingKey := configs.AppConf.JwtCfg.SigningKey
 		j := JWTCreator{
 			SigningKey: []byte(signingKey),
 		}

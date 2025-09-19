@@ -1,23 +1,21 @@
 package handler
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"oj-server/global"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/registry"
 	"regexp"
-	"strconv"
 	"time"
 
-	"oj-server/svr/gateway/internal/repository"
+	"oj-server/svr/gateway/internal/repo"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/gateway/internal/middlewares"
 	"oj-server/svr/gateway/internal/model"
 )
@@ -114,7 +112,7 @@ func HandleUserLoginBySms(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := repository.GetSmsCaptcha(form.Mobile)
+	code, err := repo.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"
@@ -195,7 +193,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 		return
 	}
 	j := middlewares.JWTCreator{
-		SigningKey: []byte(configManager.AppConf.JwtCfg.SigningKey),
+		SigningKey: []byte(configs.AppConf.JwtCfg.SigningKey),
 	}
 	claims, err := j.ParseToken(refreshToken)
 	if err != nil {
@@ -227,7 +225,7 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := configManager.AppConf.JwtCfg.SigningKey
+	signingKey := configs.AppConf.JwtCfg.SigningKey
 	j := middlewares.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
@@ -245,7 +243,7 @@ func createRefreshAccessToken(uid int64, mobile string, role int32) (string, err
 	return j.CreateToken(claims)
 }
 func createAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := configManager.AppConf.JwtCfg.SigningKey
+	signingKey := configs.AppConf.JwtCfg.SigningKey
 	j := middlewares.JWTCreator{
 		SigningKey: []byte(signingKey),
 	}
@@ -335,7 +333,7 @@ func HandleUserResetPassword(ctx *gin.Context) {
 		return
 	}
 	// 验证码校验
-	code, err := repository.GetSmsCaptcha(form.Mobile)
+	code, err := repo.GetSmsCaptcha(form.Mobile)
 	if err != nil {
 		resp.ErrCode = pb.Error_EN_FormValidateFailed
 		resp.Message = "验证码已过期"
@@ -409,97 +407,3 @@ func HandleGetUserProfile(ctx *gin.Context) {
 	resp.Message = "获取用户信息成功"
 	ctx.JSON(http.StatusOK, resp)
 }
-
-// 处理获取用户某个提交记录的具体信息
-func HandleGetUserRecord(ctx *gin.Context) {
-	resp := &model.Response{
-		ErrCode: pb.Error_EN_Success,
-	}
-
-	id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
-	if err != nil || id <= 0 {
-		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "提交记录id不能为空"
-		ctx.JSON(http.StatusBadRequest, resp)
-		return
-	}
-	// 调用题目服务
-	conn, err := registry.GetGrpcConnection(global.ProblemService)
-	if err != nil {
-		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务繁忙"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewProblemServiceClient(conn)
-	request := &pb.GetSubmitRecordRequest{
-		Id: id,
-	}
-	rpc_resp, err := client.GetSubmitRecordData(ctx, request)
-	if err != nil {
-		logrus.Errorf("调用题目服务失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_Failed
-		resp.Message = "查询失败"
-		ctx.JSON(http.StatusOK, resp)
-		return
-	}
-
-	resp.ErrCode = pb.Error_EN_Success
-	resp.Data = rpc_resp.Data
-	resp.Message = "获取提交记录成功"
-	ctx.JSON(http.StatusOK, resp)
-}
-
-// 处理获取用户历史提交记录
-// 偏移量分页
-func HandleGetUserRecordList(ctx *gin.Context) {
-	resp := &model.Response{
-		ErrCode: pb.Error_EN_Success,
-	}
-
-	// 获取元数据
-	uid := ctx.GetInt64("uid")
-
-	// 查询参数校验
-	var params model.QueryUserRecordListParams
-	if err := ctx.ShouldBindQuery(&params); err != nil {
-		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "参数验证失败"
-		ctx.JSON(http.StatusBadRequest, resp)
-		return
-	}
-
-	// 调用题目服务
-	conn, err := registry.GetGrpcConnection(global.ProblemService)
-	if err != nil {
-		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务繁忙"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewProblemServiceClient(conn)
-	req := &pb.GetSubmitRecordListRequest{
-		Uid:      uid,
-		Page:     params.Page,
-		PageSize: params.PageSize,
-	}
-	rpc_resp, err := client.GetSubmitRecordList(context.Background(), req)
-	if err != nil {
-		logrus.Errorf("problem服务获取提交记录列表失败:%s", err.Error())
-		resp.ErrCode = pb.Error_EN_Failed
-		resp.Message = "获取提交记录列表失败"
-		ctx.JSON(http.StatusOK, resp)
-		return
-	}
-	resp.Data = rpc_resp
-	resp.Message = "获取提交记录列表成功"
-	resp.ErrCode = pb.Error_EN_Success
-	ctx.JSON(http.StatusOK, resp)
-}
-
-// 处理获取用户的AC题目列表
-func HandleGetUserSolvedList(ctx *gin.Context) {}

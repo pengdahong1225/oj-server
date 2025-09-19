@@ -10,7 +10,7 @@ service ProblemService {
   // 上传配置文件
   rpc UploadConfig(stream UploadConfigFileChunk) returns (UploadConfigResponse);
   // 发布题目
-  rpc PublishProblem(PublishProblemRequest) returns (PublishProblemResponse);
+  rpc PublishProblem(PublishProblemRequest) returns (google.protobuf.Empty);
   // 更新题目信息
   rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse);
   // 删除题目
@@ -87,10 +87,6 @@ message UploadConfigResponse {
 // 发布题目
 message PublishProblemRequest {
   int64 id = 1;
-}
-message PublishProblemResponse {
-  int64 id = 1;
-  string result = 2;
 }
 
 // 更新题目

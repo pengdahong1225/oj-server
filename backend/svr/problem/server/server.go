@@ -7,9 +7,9 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"oj-server/module/configManager"
-	"oj-server/module/proto/pb"
+	"oj-server/module/configs"
 	"oj-server/module/registry"
+	"oj-server/proto/pb"
 	"oj-server/svr/problem/internal/service"
 )
 
@@ -42,7 +42,7 @@ func (s *Server) Run() {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
 	// 监听
-	cfg := configManager.ServerConf
+	cfg := configs.ServerConf
 	netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {

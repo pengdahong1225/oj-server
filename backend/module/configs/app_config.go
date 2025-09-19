@@ -1,4 +1,4 @@
-package configManager
+package configs
 
 type AppConfig struct {
 	SandBoxCfg  []*SandBox `yaml:"sandbox"`

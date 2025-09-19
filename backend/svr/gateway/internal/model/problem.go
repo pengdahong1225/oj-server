@@ -1,5 +1,6 @@
 package model
 
+// 题目基础信息
 type Problem struct {
 	ID          int64    `json:"problem_id"`
 	CreateAt    string   `json:"create_at"`
@@ -10,23 +11,16 @@ type Problem struct {
 	Status      int32    `json:"status"`
 }
 
-// binding的逗号之间不能有空格
-
-// 创建题目表单
-type CreateProblemForm struct {
-	Title       string   `form:"title" binding:"required"`
-	Level       int32    `form:"level" binding:"required"`
-	Tags        []string `form:"tags" binding:"required"`
-	Description string   `form:"description" binding:"required"`
-}
-
 // 题目配置文件模型
 type ProblemConfig struct {
-	TestCases    []TestCase `json:"test_cases" form:"test_cases" binding:"required"`
-	CompileLimit Limit      `json:"compile_limit" form:"compile_config" binding:"required"`
-	RunLimit     Limit      `json:"run_limit" form:"run_config" binding:"required"`
+	TestCases    []TestCase `json:"test_cases"`
+	CompileLimit Limit      `json:"compile_limit"`
+	RunLimit     Limit      `json:"run_limit"`
 }
-
+type TestCase struct {
+	Input  string `json:"input"`
+	Output string `json:"output"`
+}
 type Limit struct {
 	CpuLimit    int64 `json:"cpu_limit"`
 	ClockLimit  int64 `json:"clock_limit"`
@@ -35,9 +29,14 @@ type Limit struct {
 	ProcLimit   int64 `json:"proc_limit"`
 }
 
-type TestCase struct {
-	Input  string `json:"input"`
-	Output string `json:"output"`
+// binding的逗号之间不能有空格
+
+// 创建题目表单
+type CreateProblemForm struct {
+	Title       string   `json:"title" binding:"required"`
+	Level       int32    `json:"level" binding:"required"`
+	Tags        []string `json:"tags" binding:"required"`
+	Description string   `json:"description" binding:"required"`
 }
 
 // 代码提交表单

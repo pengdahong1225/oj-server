@@ -43,8 +43,6 @@ func initRouters(engine *gin.Engine) {
 	})
 
 	v1 := engine.Group("/api/v1")
-	// 排行榜
-	v1.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
 
 	// 验证码 api/v1/captcha
 	captchaRouter := v1.Group("/captcha")
@@ -63,9 +61,6 @@ func initRouters(engine *gin.Engine) {
 		userRouter.POST("/register", handler.HandleUserRegister)
 		userRouter.POST("/reset_password", handler.HandleUserResetPassword)
 		userRouter.GET("/profile", middlewares.AuthLogin(), handler.HandleGetUserProfile)
-		userRouter.GET("/record", middlewares.AuthLogin(), handler.HandleGetUserRecord)
-		userRouter.GET("/record_list", middlewares.AuthLogin(), handler.HandleGetUserRecordList) // 历史提交记录列表
-		userRouter.GET("/solved_list", middlewares.AuthLogin(), handler.HandleGetUserSolvedList)
 	}
 
 	// 题目相关 api/v1/problem
@@ -76,7 +71,6 @@ func initRouters(engine *gin.Engine) {
 		problemRouter.GET("/detail", handler.HandleGetProblemDetail)
 
 		problemRouter.POST("/submit", middlewares.AuthLogin(), handler.HandleSubmitProblem)
-		problemRouter.GET("/result", middlewares.AuthLogin(), handler.HandleGetSubmitResult) // 本次提交的结果
 
 		problemRouter.POST("/add", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleCreateProblem)
 		problemRouter.POST("/upload_config", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUploadConfig)
@@ -85,15 +79,26 @@ func initRouters(engine *gin.Engine) {
 		problemRouter.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUpdateProblem)
 	}
 
+	// record相关 api/v1/record
+	recordRouter := v1.Group("/record")
+	{
+		// 排行榜
+		recordRouter.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
+		recordRouter.GET("/result", middlewares.AuthLogin(), handler.HandleGetSubmitResult)        // 本次提交的结果
+		recordRouter.GET("/record_list", middlewares.AuthLogin(), handler.HandleGetUserRecordList) // 历史提交记录
+		recordRouter.GET("/record", middlewares.AuthLogin(), handler.HandleGetUserRecord)          // 提交记录详情
+		recordRouter.GET("/solved_list", middlewares.AuthLogin(), handler.HandleGetUserSolvedList) // 已解决题目
+	}
+
 	// 评论 api/v1/comment
 	commentRouter := v1.Group("/comment")
 	commentRouter.Use(middlewares.AuthLogin())
 	{
+		commentRouter.POST("/add", handler.HandleCreateComment)
 		commentRouter.GET("/root_list", handler.HandleGetRootCommentList)
 		commentRouter.GET("/child_list", handler.HandleGetChildCommentList)
-		commentRouter.POST("/add", handler.HandleCreateComment)
-		commentRouter.DELETE("", handler.HandleDeleteComment)
 		commentRouter.POST("/like", handler.HandleLikeComment)
+		commentRouter.DELETE("", handler.HandleDeleteComment)
 	}
 
 	// notice api/v1/notice

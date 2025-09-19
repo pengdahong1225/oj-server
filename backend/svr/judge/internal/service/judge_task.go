@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
 	"oj-server/module/db"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/processor"
 	"oj-server/utils"

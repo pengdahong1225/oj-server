@@ -11,7 +11,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"oj-server/module/db"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 )
 
 type UserService struct {
@@ -27,9 +27,6 @@ func NewUserService() *UserService {
 		logrus.Fatalf("NewUserService failed, err:%s", err.Error())
 	}
 	s.uc = biz.NewUserUseCase(up) // 注入实现
-	if err != nil {
-		logrus.Fatalf("NewUserService failed, err:%s", err.Error())
-	}
 	return s
 }
 

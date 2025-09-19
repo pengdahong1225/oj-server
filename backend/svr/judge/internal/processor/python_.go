@@ -1,7 +1,7 @@
 package processor
 
 import (
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 )
 

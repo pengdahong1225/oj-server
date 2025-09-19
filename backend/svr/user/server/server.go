@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 	"net"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/registry"
 	"oj-server/svr/user/internal/service"
 
@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"oj-server/module/proto/pb"
+	"oj-server/proto/pb"
 )
 
 type Server struct {
@@ -36,7 +36,7 @@ func (s *Server) Run() {
 	}
 
 	// 监听
-	cfg := configManager.ServerConf
+	cfg := configs.ServerConf
 	netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {

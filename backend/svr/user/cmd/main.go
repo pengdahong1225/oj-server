@@ -1,14 +1,12 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
-	"oj-server/module/configManager"
+	"oj-server/module/configs"
 	"oj-server/module/logger"
 	"oj-server/module/registry"
-	"oj-server/svr/common"
 	"oj-server/svr/user/server"
 	"os"
 	"os/signal"
@@ -17,35 +15,20 @@ import (
 )
 
 func main() {
-	var (
-		server_config string
-		help          bool
-		srv           common.IServer
-	)
-	flag.StringVar(&server_config, "f", "server_config.yaml", "server config")
-	flag.BoolVar(&help, "h", false, "help")
-	flag.Parse()
-
-	actualArgs := len(os.Args[1:])
-	if actualArgs < 1 || help {
-		flag.Usage()
-		os.Exit(1)
-	}
-
 	// 加载配置
-	configPath := fmt.Sprintf("%s/%s", global.ConfigPath, server_config)
-	err := configManager.LoadServerConfigFile(configPath)
+	configPath := fmt.Sprintf("%s/%s", global.ConfigPath, "server_config.yaml")
+	err := configs.LoadServerConfigFile(configPath)
 	if err != nil {
 		panic(err)
 	}
 	appCfgPath := fmt.Sprintf("%s/%s", global.ConfigPath, "app_config.yaml")
-	err = configManager.LoadAppConfigFile(appCfgPath)
+	err = configs.LoadAppConfigFile(appCfgPath)
 	if err != nil {
 		panic(err)
 	}
 
 	// 初始化日志
-	serverCfg := configManager.ServerConf
+	serverCfg := configs.ServerConf
 	err = logger.Init(global.LogPath, serverCfg.NodeType, logrus.DebugLevel)
 	if err != nil {
 		panic(err)
@@ -58,8 +41,8 @@ func main() {
 	}
 	logrus.Debugf("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------", serverCfg.NodeType, serverCfg.NodeId, serverCfg.Host, serverCfg.Port, serverCfg.Scheme)
 
-	srv = server.NewServer()
-	if err = srv.Init(); err != nil {
+	app := server.NewServer()
+	if err = app.Init(); err != nil {
 		logrus.Fatalf("Failed to init server: %v", err)
 	}
 
@@ -68,11 +51,11 @@ func main() {
 	go func() {
 		sig := <-sigChan
 		logrus.Errorf("Recv signal: %v", sig)
-		srv.Stop()
+		app.Stop()
 		time.Sleep(time.Second)
 		os.Exit(0)
 	}()
 
 	// 启动
-	srv.Run()
+	app.Run()
 }
