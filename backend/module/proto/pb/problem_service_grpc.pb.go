@@ -20,19 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProblemService_CreateProblem_FullMethodName       = "/ProblemService/CreateProblem"
-	ProblemService_UploadConfig_FullMethodName        = "/ProblemService/UploadConfig"
-	ProblemService_PublishProblem_FullMethodName      = "/ProblemService/PublishProblem"
-	ProblemService_UpdateProblem_FullMethodName       = "/ProblemService/UpdateProblem"
-	ProblemService_DeleteProblem_FullMethodName       = "/ProblemService/DeleteProblem"
-	ProblemService_GetProblemList_FullMethodName      = "/ProblemService/GetProblemList"
-	ProblemService_GetProblemData_FullMethodName      = "/ProblemService/GetProblemData"
-	ProblemService_GetProblemConfig_FullMethodName    = "/ProblemService/GetProblemConfig"
-	ProblemService_GetTagList_FullMethodName          = "/ProblemService/GetTagList"
-	ProblemService_SubmitProblem_FullMethodName       = "/ProblemService/SubmitProblem"
-	ProblemService_GetSubmitRecordList_FullMethodName = "/ProblemService/GetSubmitRecordList"
-	ProblemService_GetSubmitRecordData_FullMethodName = "/ProblemService/GetSubmitRecordData"
-	ProblemService_QueryJudgeResult_FullMethodName    = "/ProblemService/QueryJudgeResult"
+	ProblemService_CreateProblem_FullMethodName    = "/ProblemService/CreateProblem"
+	ProblemService_UploadConfig_FullMethodName     = "/ProblemService/UploadConfig"
+	ProblemService_PublishProblem_FullMethodName   = "/ProblemService/PublishProblem"
+	ProblemService_UpdateProblem_FullMethodName    = "/ProblemService/UpdateProblem"
+	ProblemService_DeleteProblem_FullMethodName    = "/ProblemService/DeleteProblem"
+	ProblemService_GetProblemList_FullMethodName   = "/ProblemService/GetProblemList"
+	ProblemService_GetProblemData_FullMethodName   = "/ProblemService/GetProblemData"
+	ProblemService_GetProblemConfig_FullMethodName = "/ProblemService/GetProblemConfig"
+	ProblemService_GetTagList_FullMethodName       = "/ProblemService/GetTagList"
+	ProblemService_SubmitProblem_FullMethodName    = "/ProblemService/SubmitProblem"
 )
 
 // ProblemServiceClient is the client API for ProblemService service.
@@ -61,12 +58,6 @@ type ProblemServiceClient interface {
 	GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error)
 	// 提交
 	SubmitProblem(ctx context.Context, in *SubmitProblemRequest, opts ...grpc.CallOption) (*SubmitProblemResponse, error)
-	// 查询提交记录列表
-	GetSubmitRecordList(ctx context.Context, in *GetSubmitRecordListRequest, opts ...grpc.CallOption) (*GetSubmitRecordListResponse, error)
-	// 查询提交记录详情
-	GetSubmitRecordData(ctx context.Context, in *GetSubmitRecordRequest, opts ...grpc.CallOption) (*GetSubmitRecordResponse, error)
-	// 查询判题结果
-	QueryJudgeResult(ctx context.Context, in *QueryJudgeResultRequest, opts ...grpc.CallOption) (*QueryJudgeResultResponse, error)
 }
 
 type problemServiceClient struct {
@@ -180,36 +171,6 @@ func (c *problemServiceClient) SubmitProblem(ctx context.Context, in *SubmitProb
 	return out, nil
 }
 
-func (c *problemServiceClient) GetSubmitRecordList(ctx context.Context, in *GetSubmitRecordListRequest, opts ...grpc.CallOption) (*GetSubmitRecordListResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetSubmitRecordListResponse)
-	err := c.cc.Invoke(ctx, ProblemService_GetSubmitRecordList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *problemServiceClient) GetSubmitRecordData(ctx context.Context, in *GetSubmitRecordRequest, opts ...grpc.CallOption) (*GetSubmitRecordResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetSubmitRecordResponse)
-	err := c.cc.Invoke(ctx, ProblemService_GetSubmitRecordData_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *problemServiceClient) QueryJudgeResult(ctx context.Context, in *QueryJudgeResultRequest, opts ...grpc.CallOption) (*QueryJudgeResultResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryJudgeResultResponse)
-	err := c.cc.Invoke(ctx, ProblemService_QueryJudgeResult_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ProblemServiceServer is the server API for ProblemService service.
 // All implementations must embed UnimplementedProblemServiceServer
 // for forward compatibility.
@@ -236,12 +197,6 @@ type ProblemServiceServer interface {
 	GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error)
 	// 提交
 	SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error)
-	// 查询提交记录列表
-	GetSubmitRecordList(context.Context, *GetSubmitRecordListRequest) (*GetSubmitRecordListResponse, error)
-	// 查询提交记录详情
-	GetSubmitRecordData(context.Context, *GetSubmitRecordRequest) (*GetSubmitRecordResponse, error)
-	// 查询判题结果
-	QueryJudgeResult(context.Context, *QueryJudgeResultRequest) (*QueryJudgeResultResponse, error)
 	mustEmbedUnimplementedProblemServiceServer()
 }
 
@@ -281,15 +236,6 @@ func (UnimplementedProblemServiceServer) GetTagList(context.Context, *emptypb.Em
 }
 func (UnimplementedProblemServiceServer) SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitProblem not implemented")
-}
-func (UnimplementedProblemServiceServer) GetSubmitRecordList(context.Context, *GetSubmitRecordListRequest) (*GetSubmitRecordListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSubmitRecordList not implemented")
-}
-func (UnimplementedProblemServiceServer) GetSubmitRecordData(context.Context, *GetSubmitRecordRequest) (*GetSubmitRecordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSubmitRecordData not implemented")
-}
-func (UnimplementedProblemServiceServer) QueryJudgeResult(context.Context, *QueryJudgeResultRequest) (*QueryJudgeResultResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryJudgeResult not implemented")
 }
 func (UnimplementedProblemServiceServer) mustEmbedUnimplementedProblemServiceServer() {}
 func (UnimplementedProblemServiceServer) testEmbeddedByValue()                        {}
@@ -481,60 +427,6 @@ func _ProblemService_SubmitProblem_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProblemService_GetSubmitRecordList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSubmitRecordListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProblemServiceServer).GetSubmitRecordList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProblemService_GetSubmitRecordList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).GetSubmitRecordList(ctx, req.(*GetSubmitRecordListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProblemService_GetSubmitRecordData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSubmitRecordRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProblemServiceServer).GetSubmitRecordData(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProblemService_GetSubmitRecordData_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).GetSubmitRecordData(ctx, req.(*GetSubmitRecordRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProblemService_QueryJudgeResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryJudgeResultRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProblemServiceServer).QueryJudgeResult(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProblemService_QueryJudgeResult_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).QueryJudgeResult(ctx, req.(*QueryJudgeResultRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // ProblemService_ServiceDesc is the grpc.ServiceDesc for ProblemService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -577,18 +469,6 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SubmitProblem",
 			Handler:    _ProblemService_SubmitProblem_Handler,
-		},
-		{
-			MethodName: "GetSubmitRecordList",
-			Handler:    _ProblemService_GetSubmitRecordList_Handler,
-		},
-		{
-			MethodName: "GetSubmitRecordData",
-			Handler:    _ProblemService_GetSubmitRecordData_Handler,
-		},
-		{
-			MethodName: "QueryJudgeResult",
-			Handler:    _ProblemService_QueryJudgeResult_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

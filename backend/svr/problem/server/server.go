@@ -14,8 +14,10 @@ import (
 )
 
 type Server struct {
-	listener   net.Listener
-	problemSrv *service.ProblemService
+	listener       net.Listener
+	problemService *service.ProblemService
+	recordService  *service.RecordService
+	commentService *service.CommentService
 }
 
 func NewServer() *Server {
@@ -23,18 +25,22 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	s.problemSrv = service.NewProblemService()
+	s.problemService = service.NewProblemService()
+	s.recordService = service.NewRecordService()
+	s.commentService = service.NewCommentService()
 
 	return nil
 }
 
 func (s *Server) Run() {
+	// 评论任务消费
+	go s.commentService.ConsumeComment()
+
 	// 服务注册
 	err := registry.RegisterService()
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
 	}
-
 	// 监听
 	cfg := configManager.ServerConf
 	netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
@@ -45,14 +51,12 @@ func (s *Server) Run() {
 	defer listener.Close()
 	s.listener = listener
 
-	// 启动
-	go s.problemSrv.StartCommentConsume()
-
 	grpcServer := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
-	pb.RegisterProblemServiceServer(grpcServer, s.problemSrv)
-	err = grpcServer.Serve(listener)
-	if err != nil {
+	pb.RegisterProblemServiceServer(grpcServer, s.problemService)
+	pb.RegisterRecordServiceServer(grpcServer, s.recordService)
+	pb.RegisterCommentServiceServer(grpcServer, s.commentService)
+	if err = grpcServer.Serve(listener); err != nil {
 		logrus.Errorf("%s", err)
 		_ = registry.DeregisterService()
 	}

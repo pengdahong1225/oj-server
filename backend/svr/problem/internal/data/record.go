@@ -1,7 +1,6 @@
 package data
 
 import (
-	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -11,7 +10,6 @@ import (
 	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/db"
-	"time"
 )
 
 type RecordRepo struct {
@@ -77,11 +75,4 @@ func (rr *RecordRepo) QuerySubmitRecord(id int64) (*db.SubmitRecord, error) {
 		return nil, status.Errorf(codes.NotFound, "record not found")
 	}
 	return &record, nil
-}
-
-func (rr *RecordRepo) Lock(key string, ttl time.Duration) (bool, error) {
-	return rr.rdb_.SetNX(context.Background(), key, "locked", ttl).Result()
-}
-func (rr *RecordRepo) UnLock(key string) error {
-	return rr.rdb_.Del(context.Background(), key).Err()
 }

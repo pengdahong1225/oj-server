@@ -36,12 +36,12 @@ func NewJudgeService() *JudgeService {
 }
 
 func (s *JudgeService) ConsumeJudgeTask() {
-	consumer := s.consumer
-	deliveries := consumer.Consume()
+	deliveries := s.consumer.Consume()
 	if deliveries == nil {
-		logrus.Errorln("消费失败")
+		logrus.Errorf("获取deliveries失败")
 		return
 	}
+	defer s.consumer.Close()
 
 	for d := range deliveries {
 		// 处理任务

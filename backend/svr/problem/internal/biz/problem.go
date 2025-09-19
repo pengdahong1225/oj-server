@@ -2,6 +2,7 @@ package biz
 
 import (
 	"oj-server/module/db"
+	"time"
 )
 
 // 仓库接口由data层去实现
@@ -20,6 +21,11 @@ type ProblemRepo interface {
 	DeleteProblem(id int64) error
 	// 查询标签列表
 	QueryTagList() ([]string, error)
+
+	// 加锁
+	Lock(key string, ttl time.Duration) (bool, error)
+	// 解锁
+	UnLock(key string) error
 }
 
 type ProblemUseCase struct {
@@ -52,4 +58,10 @@ func (pc *ProblemUseCase) DeleteProblem(id int64) error {
 }
 func (pc *ProblemUseCase) QueryTagList() ([]string, error) {
 	return pc.repo.QueryTagList()
+}
+func (pc *ProblemUseCase) Lock(key string, ttl time.Duration) (bool, error) {
+	return pc.repo.Lock(key, ttl)
+}
+func (pc *ProblemUseCase) UnLock(key string) error {
+	return pc.repo.UnLock(key)
 }

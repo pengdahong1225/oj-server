@@ -79,7 +79,16 @@ func (s *JudgeService) preAction(form *pb.SubmitForm) (bool, *biz.Param) {
 
 	param.Uid = form.Uid
 	param.UserName = form.UserName
-	param.ProblemData = utils.Transform(problem)
+	param.ProblemData = &pb.Problem{
+		Id:          problem.ID,
+		Title:       problem.Title,
+		Description: problem.Description,
+		Level:       problem.Level,
+		Tags:        utils.SplitStringWithX(string(problem.Tags), "#"),
+		CreateBy:    problem.CreateBy,
+		CreateAt:    problem.CreateAt.String(),
+		Status:      problem.Status,
+	}
 	param.Code = form.Code
 	param.Language = form.Lang
 	param.ProblemConfig = &cfg

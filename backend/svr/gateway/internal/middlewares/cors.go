@@ -2,9 +2,7 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
-	"time"
 )
 
 func Cors() gin.HandlerFunc {
@@ -20,16 +18,5 @@ func Cors() gin.HandlerFunc {
 		if method == "OPTIONS" {
 			ctx.AbortWithStatus(http.StatusNoContent)
 		}
-	}
-}
-
-// 统计请求处理时耗
-func statCost() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		start := time.Now()
-		ctx.Set("midName", "statCost")
-		ctx.Next()
-		cost := time.Since(start)
-		log.Printf("----------- cost: %v -----------", cost)
 	}
 }

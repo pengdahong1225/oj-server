@@ -42,8 +42,7 @@ func (s *Server) Run() {
 			_, _ = res.Write([]byte("ok"))
 		}
 	})
-	err = http.ListenAndServe(dsn, nil)
-	if err != nil {
+	if err = http.ListenAndServe(dsn, nil); err != nil {
 		logrus.Errorf("%s", err)
 		_ = registry.DeregisterService()
 	}

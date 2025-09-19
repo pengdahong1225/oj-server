@@ -11,6 +11,7 @@ import (
 	"oj-server/global"
 	"oj-server/module/configManager"
 	"oj-server/module/db"
+	"time"
 )
 
 type ProblemRepo struct {
@@ -178,4 +179,11 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 	}
 
 	return tagList, nil
+}
+
+func (pr *ProblemRepo) Lock(key string, ttl time.Duration) (bool, error) {
+	return pr.rdb_.SetNX(context.Background(), key, "locked", ttl).Result()
+}
+func (pr *ProblemRepo) UnLock(key string) error {
+	return pr.rdb_.Del(context.Background(), key).Err()
 }

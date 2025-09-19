@@ -3,7 +3,6 @@ option go_package = "./;pb";
 
 import "google/protobuf/empty.proto";
 
-
 // 题目服务接口
 service ProblemService {
   // 新增题目
@@ -27,12 +26,6 @@ service ProblemService {
 
   // 提交
   rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse);
-  // 查询提交记录列表
-  rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse);
-  // 查询提交记录详情
-  rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse);
-  // 查询判题结果
-  rpc QueryJudgeResult(QueryJudgeResultRequest) returns (QueryJudgeResultResponse);
 }
 
 // 题目基础信息
@@ -163,43 +156,3 @@ message SubmitProblemResponse {
   string message = 2;
 }
 
-// 提交记录
-message SubmitRecord{
-  int64 uid = 1;
-  int64 problem_id = 2;
-  string problem_name = 3;
-  string status = 4;
-  bytes result = 5; // []PBResult 二进制数据
-  string code = 6;
-  string lang = 7;
-
-  int64 id = 8;
-  int64 created_at = 9;
-  int32 problem_level = 10;
-  string user_name = 11;
-}
-// 查询提交记录列表 使用偏移量分页
-message GetSubmitRecordListRequest {
-  int64 uid = 1;
-  int32 page = 2;
-  int32 page_size = 3;
-}
-message GetSubmitRecordListResponse {
-  int32 total = 1;
-  repeated SubmitRecord data = 2;
-}
-// 查询提交记录详情
-message GetSubmitRecordRequest {
-  int64 id = 1;
-}
-message GetSubmitRecordResponse {
-  SubmitRecord data = 1;
-}
-
-message QueryJudgeResultRequest {
-  int64 task_id = 1;
-}
-message QueryJudgeResultResponse {
-  string status = 1;
-  string message = 2;
-}

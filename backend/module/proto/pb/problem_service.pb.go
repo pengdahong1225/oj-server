@@ -1311,429 +1311,6 @@ func (x *SubmitProblemResponse) GetMessage() string {
 	return ""
 }
 
-// 提交记录
-type SubmitRecord struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	ProblemId     int64                  `protobuf:"varint,2,opt,name=problem_id,json=problemId,proto3" json:"problem_id,omitempty"`
-	ProblemName   string                 `protobuf:"bytes,3,opt,name=problem_name,json=problemName,proto3" json:"problem_name,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
-	Result        []byte                 `protobuf:"bytes,5,opt,name=result,proto3" json:"result,omitempty"` // []PBResult 二进制数据
-	Code          string                 `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
-	Lang          string                 `protobuf:"bytes,7,opt,name=lang,proto3" json:"lang,omitempty"`
-	Id            int64                  `protobuf:"varint,8,opt,name=id,proto3" json:"id,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ProblemLevel  int32                  `protobuf:"varint,10,opt,name=problem_level,json=problemLevel,proto3" json:"problem_level,omitempty"`
-	UserName      string                 `protobuf:"bytes,11,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SubmitRecord) Reset() {
-	*x = SubmitRecord{}
-	mi := &file_problem_service_proto_msgTypes[23]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SubmitRecord) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SubmitRecord) ProtoMessage() {}
-
-func (x *SubmitRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[23]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SubmitRecord.ProtoReflect.Descriptor instead.
-func (*SubmitRecord) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{23}
-}
-
-func (x *SubmitRecord) GetUid() int64 {
-	if x != nil {
-		return x.Uid
-	}
-	return 0
-}
-
-func (x *SubmitRecord) GetProblemId() int64 {
-	if x != nil {
-		return x.ProblemId
-	}
-	return 0
-}
-
-func (x *SubmitRecord) GetProblemName() string {
-	if x != nil {
-		return x.ProblemName
-	}
-	return ""
-}
-
-func (x *SubmitRecord) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *SubmitRecord) GetResult() []byte {
-	if x != nil {
-		return x.Result
-	}
-	return nil
-}
-
-func (x *SubmitRecord) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-func (x *SubmitRecord) GetLang() string {
-	if x != nil {
-		return x.Lang
-	}
-	return ""
-}
-
-func (x *SubmitRecord) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *SubmitRecord) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
-}
-
-func (x *SubmitRecord) GetProblemLevel() int32 {
-	if x != nil {
-		return x.ProblemLevel
-	}
-	return 0
-}
-
-func (x *SubmitRecord) GetUserName() string {
-	if x != nil {
-		return x.UserName
-	}
-	return ""
-}
-
-// 查询提交记录列表 使用偏移量分页
-type GetSubmitRecordListRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSubmitRecordListRequest) Reset() {
-	*x = GetSubmitRecordListRequest{}
-	mi := &file_problem_service_proto_msgTypes[24]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSubmitRecordListRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSubmitRecordListRequest) ProtoMessage() {}
-
-func (x *GetSubmitRecordListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[24]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSubmitRecordListRequest.ProtoReflect.Descriptor instead.
-func (*GetSubmitRecordListRequest) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{24}
-}
-
-func (x *GetSubmitRecordListRequest) GetUid() int64 {
-	if x != nil {
-		return x.Uid
-	}
-	return 0
-}
-
-func (x *GetSubmitRecordListRequest) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *GetSubmitRecordListRequest) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-type GetSubmitRecordListResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Data          []*SubmitRecord        `protobuf:"bytes,2,rep,name=data,proto3" json:"data,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSubmitRecordListResponse) Reset() {
-	*x = GetSubmitRecordListResponse{}
-	mi := &file_problem_service_proto_msgTypes[25]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSubmitRecordListResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSubmitRecordListResponse) ProtoMessage() {}
-
-func (x *GetSubmitRecordListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[25]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSubmitRecordListResponse.ProtoReflect.Descriptor instead.
-func (*GetSubmitRecordListResponse) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{25}
-}
-
-func (x *GetSubmitRecordListResponse) GetTotal() int32 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-func (x *GetSubmitRecordListResponse) GetData() []*SubmitRecord {
-	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-// 查询提交记录详情
-type GetSubmitRecordRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSubmitRecordRequest) Reset() {
-	*x = GetSubmitRecordRequest{}
-	mi := &file_problem_service_proto_msgTypes[26]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSubmitRecordRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSubmitRecordRequest) ProtoMessage() {}
-
-func (x *GetSubmitRecordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[26]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSubmitRecordRequest.ProtoReflect.Descriptor instead.
-func (*GetSubmitRecordRequest) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{26}
-}
-
-func (x *GetSubmitRecordRequest) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetSubmitRecordResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          *SubmitRecord          `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetSubmitRecordResponse) Reset() {
-	*x = GetSubmitRecordResponse{}
-	mi := &file_problem_service_proto_msgTypes[27]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetSubmitRecordResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetSubmitRecordResponse) ProtoMessage() {}
-
-func (x *GetSubmitRecordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[27]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetSubmitRecordResponse.ProtoReflect.Descriptor instead.
-func (*GetSubmitRecordResponse) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{27}
-}
-
-func (x *GetSubmitRecordResponse) GetData() *SubmitRecord {
-	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-type QueryJudgeResultRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TaskId        int64                  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *QueryJudgeResultRequest) Reset() {
-	*x = QueryJudgeResultRequest{}
-	mi := &file_problem_service_proto_msgTypes[28]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *QueryJudgeResultRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*QueryJudgeResultRequest) ProtoMessage() {}
-
-func (x *QueryJudgeResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[28]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use QueryJudgeResultRequest.ProtoReflect.Descriptor instead.
-func (*QueryJudgeResultRequest) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{28}
-}
-
-func (x *QueryJudgeResultRequest) GetTaskId() int64 {
-	if x != nil {
-		return x.TaskId
-	}
-	return 0
-}
-
-type QueryJudgeResultResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *QueryJudgeResultResponse) Reset() {
-	*x = QueryJudgeResultResponse{}
-	mi := &file_problem_service_proto_msgTypes[29]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *QueryJudgeResultResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*QueryJudgeResultResponse) ProtoMessage() {}
-
-func (x *QueryJudgeResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_problem_service_proto_msgTypes[29]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use QueryJudgeResultResponse.ProtoReflect.Descriptor instead.
-func (*QueryJudgeResultResponse) Descriptor() ([]byte, []int) {
-	return file_problem_service_proto_rawDescGZIP(), []int{29}
-}
-
-func (x *QueryJudgeResultResponse) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *QueryJudgeResultResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 var File_problem_service_proto protoreflect.FileDescriptor
 
 const file_problem_service_proto_rawDesc = "" +
@@ -1824,38 +1401,7 @@ const file_problem_service_proto_rawDesc = "" +
 	"\x04code\x18\x04 \x01(\tR\x04code\"J\n" +
 	"\x15SubmitProblemResponse\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xab\x02\n" +
-	"\fSubmitRecord\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1d\n" +
-	"\n" +
-	"problem_id\x18\x02 \x01(\x03R\tproblemId\x12!\n" +
-	"\fproblem_name\x18\x03 \x01(\tR\vproblemName\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x16\n" +
-	"\x06result\x18\x05 \x01(\fR\x06result\x12\x12\n" +
-	"\x04code\x18\x06 \x01(\tR\x04code\x12\x12\n" +
-	"\x04lang\x18\a \x01(\tR\x04lang\x12\x0e\n" +
-	"\x02id\x18\b \x01(\x03R\x02id\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\t \x01(\x03R\tcreatedAt\x12#\n" +
-	"\rproblem_level\x18\n" +
-	" \x01(\x05R\fproblemLevel\x12\x1b\n" +
-	"\tuser_name\x18\v \x01(\tR\buserName\"_\n" +
-	"\x1aGetSubmitRecordListRequest\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"V\n" +
-	"\x1bGetSubmitRecordListResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12!\n" +
-	"\x04data\x18\x02 \x03(\v2\r.SubmitRecordR\x04data\"(\n" +
-	"\x16GetSubmitRecordRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"<\n" +
-	"\x17GetSubmitRecordResponse\x12!\n" +
-	"\x04data\x18\x01 \x01(\v2\r.SubmitRecordR\x04data\"2\n" +
-	"\x17QueryJudgeResultRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"L\n" +
-	"\x18QueryJudgeResultResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xfb\x06\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\x96\x05\n" +
 	"\x0eProblemService\x12>\n" +
 	"\rCreateProblem\x12\x15.CreateProblemRequest\x1a\x16.CreateProblemResponse\x12?\n" +
 	"\fUploadConfig\x12\x16.UploadConfigFileChunk\x1a\x15.UploadConfigResponse(\x01\x12A\n" +
@@ -1867,10 +1413,7 @@ const file_problem_service_proto_rawDesc = "" +
 	"\x10GetProblemConfig\x12\x18.GetProblemConfigRequest\x1a\x19.GetProblemConfigResponse\x129\n" +
 	"\n" +
 	"GetTagList\x12\x16.google.protobuf.Empty\x1a\x13.GetTagListResponse\x12>\n" +
-	"\rSubmitProblem\x12\x15.SubmitProblemRequest\x1a\x16.SubmitProblemResponse\x12P\n" +
-	"\x13GetSubmitRecordList\x12\x1b.GetSubmitRecordListRequest\x1a\x1c.GetSubmitRecordListResponse\x12H\n" +
-	"\x13GetSubmitRecordData\x12\x17.GetSubmitRecordRequest\x1a\x18.GetSubmitRecordResponse\x12G\n" +
-	"\x10QueryJudgeResult\x12\x18.QueryJudgeResultRequest\x1a\x19.QueryJudgeResultResponseB\aZ\x05./;pbb\x06proto3"
+	"\rSubmitProblem\x12\x15.SubmitProblemRequest\x1a\x16.SubmitProblemResponseB\aZ\x05./;pbb\x06proto3"
 
 var (
 	file_problem_service_proto_rawDescOnce sync.Once
@@ -1884,39 +1427,32 @@ func file_problem_service_proto_rawDescGZIP() []byte {
 	return file_problem_service_proto_rawDescData
 }
 
-var file_problem_service_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
+var file_problem_service_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_problem_service_proto_goTypes = []any{
-	(*Problem)(nil),                     // 0: Problem
-	(*ProblemConfig)(nil),               // 1: ProblemConfig
-	(*Limit)(nil),                       // 2: Limit
-	(*TestCase)(nil),                    // 3: TestCase
-	(*CreateProblemRequest)(nil),        // 4: CreateProblemRequest
-	(*CreateProblemResponse)(nil),       // 5: CreateProblemResponse
-	(*UploadConfigFileChunk)(nil),       // 6: UploadConfigFileChunk
-	(*UploadConfigResponse)(nil),        // 7: UploadConfigResponse
-	(*PublishProblemRequest)(nil),       // 8: PublishProblemRequest
-	(*PublishProblemResponse)(nil),      // 9: PublishProblemResponse
-	(*UpdateProblemRequest)(nil),        // 10: UpdateProblemRequest
-	(*UpdateProblemResponse)(nil),       // 11: UpdateProblemResponse
-	(*DeleteProblemRequest)(nil),        // 12: DeleteProblemRequest
-	(*DeleteProblemResponse)(nil),       // 13: DeleteProblemResponse
-	(*GetProblemListRequest)(nil),       // 14: GetProblemListRequest
-	(*GetProblemListResponse)(nil),      // 15: GetProblemListResponse
-	(*GetProblemRequest)(nil),           // 16: GetProblemRequest
-	(*GetProblemResponse)(nil),          // 17: GetProblemResponse
-	(*GetProblemConfigRequest)(nil),     // 18: GetProblemConfigRequest
-	(*GetProblemConfigResponse)(nil),    // 19: GetProblemConfigResponse
-	(*GetTagListResponse)(nil),          // 20: GetTagListResponse
-	(*SubmitProblemRequest)(nil),        // 21: SubmitProblemRequest
-	(*SubmitProblemResponse)(nil),       // 22: SubmitProblemResponse
-	(*SubmitRecord)(nil),                // 23: SubmitRecord
-	(*GetSubmitRecordListRequest)(nil),  // 24: GetSubmitRecordListRequest
-	(*GetSubmitRecordListResponse)(nil), // 25: GetSubmitRecordListResponse
-	(*GetSubmitRecordRequest)(nil),      // 26: GetSubmitRecordRequest
-	(*GetSubmitRecordResponse)(nil),     // 27: GetSubmitRecordResponse
-	(*QueryJudgeResultRequest)(nil),     // 28: QueryJudgeResultRequest
-	(*QueryJudgeResultResponse)(nil),    // 29: QueryJudgeResultResponse
-	(*emptypb.Empty)(nil),               // 30: google.protobuf.Empty
+	(*Problem)(nil),                  // 0: Problem
+	(*ProblemConfig)(nil),            // 1: ProblemConfig
+	(*Limit)(nil),                    // 2: Limit
+	(*TestCase)(nil),                 // 3: TestCase
+	(*CreateProblemRequest)(nil),     // 4: CreateProblemRequest
+	(*CreateProblemResponse)(nil),    // 5: CreateProblemResponse
+	(*UploadConfigFileChunk)(nil),    // 6: UploadConfigFileChunk
+	(*UploadConfigResponse)(nil),     // 7: UploadConfigResponse
+	(*PublishProblemRequest)(nil),    // 8: PublishProblemRequest
+	(*PublishProblemResponse)(nil),   // 9: PublishProblemResponse
+	(*UpdateProblemRequest)(nil),     // 10: UpdateProblemRequest
+	(*UpdateProblemResponse)(nil),    // 11: UpdateProblemResponse
+	(*DeleteProblemRequest)(nil),     // 12: DeleteProblemRequest
+	(*DeleteProblemResponse)(nil),    // 13: DeleteProblemResponse
+	(*GetProblemListRequest)(nil),    // 14: GetProblemListRequest
+	(*GetProblemListResponse)(nil),   // 15: GetProblemListResponse
+	(*GetProblemRequest)(nil),        // 16: GetProblemRequest
+	(*GetProblemResponse)(nil),       // 17: GetProblemResponse
+	(*GetProblemConfigRequest)(nil),  // 18: GetProblemConfigRequest
+	(*GetProblemConfigResponse)(nil), // 19: GetProblemConfigResponse
+	(*GetTagListResponse)(nil),       // 20: GetTagListResponse
+	(*SubmitProblemRequest)(nil),     // 21: SubmitProblemRequest
+	(*SubmitProblemResponse)(nil),    // 22: SubmitProblemResponse
+	(*emptypb.Empty)(nil),            // 23: google.protobuf.Empty
 }
 var file_problem_service_proto_depIdxs = []int32{
 	2,  // 0: ProblemConfig.compile_limit:type_name -> Limit
@@ -1926,39 +1462,31 @@ var file_problem_service_proto_depIdxs = []int32{
 	0,  // 4: GetProblemListResponse.data:type_name -> Problem
 	0,  // 5: GetProblemResponse.problem:type_name -> Problem
 	1,  // 6: GetProblemConfigResponse.problem_config:type_name -> ProblemConfig
-	23, // 7: GetSubmitRecordListResponse.data:type_name -> SubmitRecord
-	23, // 8: GetSubmitRecordResponse.data:type_name -> SubmitRecord
-	4,  // 9: ProblemService.CreateProblem:input_type -> CreateProblemRequest
-	6,  // 10: ProblemService.UploadConfig:input_type -> UploadConfigFileChunk
-	8,  // 11: ProblemService.PublishProblem:input_type -> PublishProblemRequest
-	10, // 12: ProblemService.UpdateProblem:input_type -> UpdateProblemRequest
-	12, // 13: ProblemService.DeleteProblem:input_type -> DeleteProblemRequest
-	14, // 14: ProblemService.GetProblemList:input_type -> GetProblemListRequest
-	16, // 15: ProblemService.GetProblemData:input_type -> GetProblemRequest
-	18, // 16: ProblemService.GetProblemConfig:input_type -> GetProblemConfigRequest
-	30, // 17: ProblemService.GetTagList:input_type -> google.protobuf.Empty
-	21, // 18: ProblemService.SubmitProblem:input_type -> SubmitProblemRequest
-	24, // 19: ProblemService.GetSubmitRecordList:input_type -> GetSubmitRecordListRequest
-	26, // 20: ProblemService.GetSubmitRecordData:input_type -> GetSubmitRecordRequest
-	28, // 21: ProblemService.QueryJudgeResult:input_type -> QueryJudgeResultRequest
-	5,  // 22: ProblemService.CreateProblem:output_type -> CreateProblemResponse
-	7,  // 23: ProblemService.UploadConfig:output_type -> UploadConfigResponse
-	9,  // 24: ProblemService.PublishProblem:output_type -> PublishProblemResponse
-	11, // 25: ProblemService.UpdateProblem:output_type -> UpdateProblemResponse
-	13, // 26: ProblemService.DeleteProblem:output_type -> DeleteProblemResponse
-	15, // 27: ProblemService.GetProblemList:output_type -> GetProblemListResponse
-	17, // 28: ProblemService.GetProblemData:output_type -> GetProblemResponse
-	19, // 29: ProblemService.GetProblemConfig:output_type -> GetProblemConfigResponse
-	20, // 30: ProblemService.GetTagList:output_type -> GetTagListResponse
-	22, // 31: ProblemService.SubmitProblem:output_type -> SubmitProblemResponse
-	25, // 32: ProblemService.GetSubmitRecordList:output_type -> GetSubmitRecordListResponse
-	27, // 33: ProblemService.GetSubmitRecordData:output_type -> GetSubmitRecordResponse
-	29, // 34: ProblemService.QueryJudgeResult:output_type -> QueryJudgeResultResponse
-	22, // [22:35] is the sub-list for method output_type
-	9,  // [9:22] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	4,  // 7: ProblemService.CreateProblem:input_type -> CreateProblemRequest
+	6,  // 8: ProblemService.UploadConfig:input_type -> UploadConfigFileChunk
+	8,  // 9: ProblemService.PublishProblem:input_type -> PublishProblemRequest
+	10, // 10: ProblemService.UpdateProblem:input_type -> UpdateProblemRequest
+	12, // 11: ProblemService.DeleteProblem:input_type -> DeleteProblemRequest
+	14, // 12: ProblemService.GetProblemList:input_type -> GetProblemListRequest
+	16, // 13: ProblemService.GetProblemData:input_type -> GetProblemRequest
+	18, // 14: ProblemService.GetProblemConfig:input_type -> GetProblemConfigRequest
+	23, // 15: ProblemService.GetTagList:input_type -> google.protobuf.Empty
+	21, // 16: ProblemService.SubmitProblem:input_type -> SubmitProblemRequest
+	5,  // 17: ProblemService.CreateProblem:output_type -> CreateProblemResponse
+	7,  // 18: ProblemService.UploadConfig:output_type -> UploadConfigResponse
+	9,  // 19: ProblemService.PublishProblem:output_type -> PublishProblemResponse
+	11, // 20: ProblemService.UpdateProblem:output_type -> UpdateProblemResponse
+	13, // 21: ProblemService.DeleteProblem:output_type -> DeleteProblemResponse
+	15, // 22: ProblemService.GetProblemList:output_type -> GetProblemListResponse
+	17, // 23: ProblemService.GetProblemData:output_type -> GetProblemResponse
+	19, // 24: ProblemService.GetProblemConfig:output_type -> GetProblemConfigResponse
+	20, // 25: ProblemService.GetTagList:output_type -> GetTagListResponse
+	22, // 26: ProblemService.SubmitProblem:output_type -> SubmitProblemResponse
+	17, // [17:27] is the sub-list for method output_type
+	7,  // [7:17] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_problem_service_proto_init() }
@@ -1972,7 +1500,7 @@ func file_problem_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_problem_service_proto_rawDesc), len(file_problem_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   30,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

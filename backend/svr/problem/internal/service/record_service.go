@@ -5,15 +5,34 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"oj-server/module/proto/pb"
+	"oj-server/svr/problem/internal/biz"
+	"oj-server/svr/problem/internal/data"
 )
+
+// record服务
+type RecordService struct {
+	pb.UnimplementedRecordServiceServer
+	uc *biz.RecordUseCase
+}
+
+func NewRecordService() *RecordService {
+	repo, err := data.NewRecordRepo()
+	if err != nil {
+		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
+	}
+
+	return &RecordService{
+		uc: biz.NewRecordUseCase(repo),
+	}
+}
 
 // 分页查询用户的提交记录
 // @uid
 // @page
 // @pageSize
-func (ps *ProblemService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubmitRecordListRequest) (*pb.GetSubmitRecordListResponse, error) {
+func (ps *RecordService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubmitRecordListRequest) (*pb.GetSubmitRecordListResponse, error) {
 	offSet := int((in.Page - 1) * in.PageSize)
-	count, records, err := ps.rc.QuerySubmitRecordList(in.Uid, int(in.PageSize), offSet)
+	count, records, err := ps.uc.QuerySubmitRecordList(in.Uid, int(in.PageSize), offSet)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
@@ -36,8 +55,8 @@ func (ps *ProblemService) GetSubmitRecordList(ctx context.Context, in *pb.GetSub
 	return resp, nil
 }
 
-func (ps *ProblemService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubmitRecordRequest) (*pb.GetSubmitRecordResponse, error) {
-	record, err := ps.rc.QuerySubmitRecord(in.Id)
+func (ps *RecordService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubmitRecordRequest) (*pb.GetSubmitRecordResponse, error) {
+	record, err := ps.uc.QuerySubmitRecord(in.Id)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
