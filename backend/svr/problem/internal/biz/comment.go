@@ -1,26 +1,27 @@
 package biz
 
-import "oj-server/module/proto/pb"
+import (
+	"oj-server/module/db"
+)
 
 // 仓库接口由data层去实现
 type CommentRepo interface {
 	// check
 	// obj是否存在
 	AssertObj(id int64) bool
-	// 根评论是否存在，校验root_id和root_comment_id
-	AssertRoot(rootCommentId int64, rootId int64) bool
-	// 回复评论是否存在，校验reply_id和reply_comment_id
-	AssertReply(replyCommentId int64, replyId int64) bool
 
 	// query
 	// 查询根评论列表
-	QueryRootComment(page, pageSize int) (int32, []pb.Comment, error)
+	QueryRootComment(objId int64, page, pageSize int) (int64, []db.Comment, error)
+	// 查询子评论列表
+	QueryChildComment(objId, rootId, rootCommentId int64, cursor int32) (int64, []db.Comment, error)
 
 	// save
 	// 保存根评论
-	SaveRootComment(pbComment *pb.Comment)
+	SaveRootComment(pbComment *db.Comment)
 	// 保存子评论
-	SaveChildComment(pbComment *pb.Comment)
+	SaveChildComment(pbComment *db.Comment)
+	CommentLike(objId, commentId int64)
 }
 
 type CommentUseCase struct {
@@ -35,18 +36,18 @@ func NewCommentUseCase(repo CommentRepo) *CommentUseCase {
 func (uc *CommentUseCase) AssertObj(id int64) bool {
 	return uc.repo.AssertObj(id)
 }
-func (uc *CommentUseCase) AssertRoot(rootCommentId int64, rootId int64) bool {
-	return uc.repo.AssertRoot(rootCommentId, rootId)
+func (uc *CommentUseCase) SaveRootComment(comment *db.Comment) {
+	uc.repo.SaveRootComment(comment)
 }
-func (uc *CommentUseCase) AssertReply(replyCommentId int64, replyId int64) bool {
-	return uc.repo.AssertReply(replyCommentId, replyId)
+func (uc *CommentUseCase) SaveChildComment(comment *db.Comment) {
+	uc.repo.SaveChildComment(comment)
 }
-func (uc *CommentUseCase) SaveRootComment(pbComment *pb.Comment) {
-	uc.repo.SaveRootComment(pbComment)
+func (uc *CommentUseCase) QueryRootComment(objId int64, page, pageSize int) (int64, []db.Comment, error) {
+	return uc.repo.QueryRootComment(objId, page, pageSize)
 }
-func (uc *CommentUseCase) SaveChildComment(pbComment *pb.Comment) {
-	uc.repo.SaveChildComment(pbComment)
+func (uc *CommentUseCase) QueryChildComment(objId, rootId, rootCommentId int64, cursor int32) (int64, []db.Comment, error) {
+	return uc.repo.QueryChildComment(objId, rootId, rootCommentId, cursor)
 }
-func (uc *CommentUseCase) QueryRootComment(page, pageSize int) (int32, []pb.Comment, error) {
-	return uc.repo.QueryRootComment(page, pageSize)
+func (uc *CommentUseCase) CommentLike(objId, commentId int64) {
+	uc.repo.CommentLike(objId, commentId)
 }

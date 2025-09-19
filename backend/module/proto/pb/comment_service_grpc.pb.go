@@ -23,7 +23,6 @@ const (
 	CommentService_QueryRootComment_FullMethodName  = "/CommentService/QueryRootComment"
 	CommentService_QueryChildComment_FullMethodName = "/CommentService/QueryChildComment"
 	CommentService_DeleteComment_FullMethodName     = "/CommentService/DeleteComment"
-	CommentService_SaveComment_FullMethodName       = "/CommentService/SaveComment"
 	CommentService_CommentLike_FullMethodName       = "/CommentService/CommentLike"
 )
 
@@ -36,7 +35,6 @@ type CommentServiceClient interface {
 	QueryRootComment(ctx context.Context, in *QueryRootCommentRequest, opts ...grpc.CallOption) (*QueryRootCommentResponse, error)
 	QueryChildComment(ctx context.Context, in *QueryChildCommentRequest, opts ...grpc.CallOption) (*QueryChildCommentResponse, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	SaveComment(ctx context.Context, in *SaveCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CommentLike(ctx context.Context, in *CommentLikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -78,16 +76,6 @@ func (c *commentServiceClient) DeleteComment(ctx context.Context, in *DeleteComm
 	return out, nil
 }
 
-func (c *commentServiceClient) SaveComment(ctx context.Context, in *SaveCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, CommentService_SaveComment_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *commentServiceClient) CommentLike(ctx context.Context, in *CommentLikeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
@@ -107,7 +95,6 @@ type CommentServiceServer interface {
 	QueryRootComment(context.Context, *QueryRootCommentRequest) (*QueryRootCommentResponse, error)
 	QueryChildComment(context.Context, *QueryChildCommentRequest) (*QueryChildCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error)
-	SaveComment(context.Context, *SaveCommentRequest) (*emptypb.Empty, error)
 	CommentLike(context.Context, *CommentLikeRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedCommentServiceServer()
 }
@@ -127,9 +114,6 @@ func (UnimplementedCommentServiceServer) QueryChildComment(context.Context, *Que
 }
 func (UnimplementedCommentServiceServer) DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteComment not implemented")
-}
-func (UnimplementedCommentServiceServer) SaveComment(context.Context, *SaveCommentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SaveComment not implemented")
 }
 func (UnimplementedCommentServiceServer) CommentLike(context.Context, *CommentLikeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CommentLike not implemented")
@@ -209,24 +193,6 @@ func _CommentService_DeleteComment_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CommentService_SaveComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SaveCommentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CommentServiceServer).SaveComment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CommentService_SaveComment_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommentServiceServer).SaveComment(ctx, req.(*SaveCommentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _CommentService_CommentLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommentLikeRequest)
 	if err := dec(in); err != nil {
@@ -263,10 +229,6 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteComment",
 			Handler:    _CommentService_DeleteComment_Handler,
-		},
-		{
-			MethodName: "SaveComment",
-			Handler:    _CommentService_SaveComment_Handler,
 		},
 		{
 			MethodName: "CommentLike",

@@ -31,7 +31,6 @@ service CommentService{
   rpc QueryRootComment(QueryRootCommentRequest) returns(QueryRootCommentResponse);
   rpc QueryChildComment(QueryChildCommentRequest) returns(QueryChildCommentResponse);
   rpc DeleteComment(DeleteCommentRequest) returns(google.protobuf.Empty);
-  rpc SaveComment(SaveCommentRequest) returns(google.protobuf.Empty);
   rpc CommentLike(CommentLikeRequest) returns(google.protobuf.Empty);
 }
 // 评论接口
@@ -68,9 +67,6 @@ message DeleteCommentRequest{
   int64  user_id = 2;
   int64  root_id = 3;
   int64 reply_id = 4;
-}
-message SaveCommentRequest{
-  Comment data = 1;
 }
 message CommentLikeRequest{
   int64  obj_id = 1;
