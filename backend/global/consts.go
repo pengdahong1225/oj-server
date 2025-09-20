@@ -47,4 +47,13 @@ const (
 
 	// tag list
 	TagListKey = "tag_list_set"
+
+	// 排行榜
+	LeaderboardPrefix        = "leaderboard:"
+	AcTotalLeaderboardKey    = LeaderboardPrefix + "ac_total"
+	AcEasyLeaderboardKey     = LeaderboardPrefix + "ac_easy"
+	AcMediumLeaderboardKey   = LeaderboardPrefix + "ac_medium"
+	AcHardLeaderboardKey     = LeaderboardPrefix + "ac_hard"
+	LeaderboardTTL           = time.Minute * 30
+	LeaderboardLastUpdateKey = LeaderboardPrefix + "last_update"
 )

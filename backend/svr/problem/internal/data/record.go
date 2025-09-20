@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -75,4 +76,27 @@ func (rr *RecordRepo) QuerySubmitRecord(id int64) (*db.SubmitRecord, error) {
 		return nil, status.Errorf(codes.NotFound, "record not found")
 	}
 	return &record, nil
+}
+
+func (rr *RecordRepo) QueryLeaderboardLastUpdate() (int64, error) {
+	result := rr.rdb_.Get(context.Background(), global.LeaderboardLastUpdateKey)
+	if result.Err() != nil {
+		return 0, result.Err()
+	}
+	return result.Int64()
+}
+func (rr *RecordRepo) UpdateLeaderboardLastUpdate(time int64) error {
+	result := rr.rdb_.Set(context.Background(), global.LeaderboardLastUpdateKey, time, redis.KeepTTL)
+	if result.Err() != nil {
+		return result.Err()
+	}
+	return nil
+}
+func (rr *RecordRepo) QueryStatistics(uid int64) (*db.Statistics, error) {
+	var statistics db.Statistics
+	result := rr.db_.Where("uid = ?", uid).First(&statistics)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &statistics, nil
 }

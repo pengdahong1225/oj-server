@@ -12,8 +12,12 @@ import (
 	"strconv"
 )
 
+// 处理排行榜查询
 func HandleGetRankList(ctx *gin.Context) {
-
+	resp := &model.Response{
+		ErrCode: pb.Error_EN_Success,
+		Message: "success",
+	}
 }
 
 // 处理获取用户的AC题目列表

@@ -35,6 +35,8 @@ func (s *Server) Init() error {
 func (s *Server) Run() {
 	// 评论任务消费
 	go s.commentService.ConsumeComment()
+	// 异步维护排行榜
+	go s.recordService.UpdateLeaderboardByScheduled()
 
 	// 服务注册
 	err := registry.RegisterService()
