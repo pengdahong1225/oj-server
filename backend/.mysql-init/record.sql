@@ -36,8 +36,8 @@ create table if not exists user_solution
     INDEX idx_uid(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
 
--- 用户解题统计表 分区
-create table if not exists user_problem_statistics(
+-- 用户解题统计表
+create table if not exists user_problem_statistics_YYYY(
     uid BIGINT not null comment '用户id',
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
@@ -51,5 +51,26 @@ create table if not exists user_problem_statistics(
     medium_problem_count INT DEFAULT 0 comment '通过的中等题目数量',
     hard_problem_count INT DEFAULT 0 comment '通过的困难题目数量',
 
-    PRIMARY KEY(uid, period) -- 复合主键
+    PRIMARY KEY(period, uid) -- 复合主键
 )engine = InnoDB charset = utf8mb4;
+
+-- 统计表分区
+ALTER TABLE user_problem_statistics_YYYY 
+PARTITION BY RANGE COLUMNS(period) (
+    PARTITION p202501 VALUES LESS THAN ('2025-02'),
+    PARTITION p202502 VALUES LESS THAN ('2025-03'),
+    PARTITION p202503 VALUES LESS THAN ('2025-04'),
+    PARTITION p202504 VALUES LESS THAN ('2025-05'),
+    PARTITION p202505 VALUES LESS THAN ('2025-06'),
+    PARTITION p202506 VALUES LESS THAN ('2025-07'),
+    PARTITION p202507 VALUES LESS THAN ('2025-08'),
+    PARTITION p202508 VALUES LESS THAN ('2025-09'),
+    PARTITION p202509 VALUES LESS THAN ('2025-10'),
+    PARTITION p202510 VALUES LESS THAN ('2025-11'),
+    PARTITION p202511 VALUES LESS THAN ('2025-12'),
+    PARTITION p202512 VALUES LESS THAN ('2026-01'),
+    PARTITION p_future VALUES LESS THAN (MAXVALUE)
+);
+-- 添加覆盖索引，优化排序查询
+ALTER TABLE user_problem_statistics_YYYY
+ADD INDEX idx_accomplish_sort (period, accomplish_count DESC, uid);

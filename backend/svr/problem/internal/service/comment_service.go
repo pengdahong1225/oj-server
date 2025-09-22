@@ -53,6 +53,11 @@ func (ps *CommentService) ConsumeComment() {
 	for d := range deliveries {
 		// 处理comment
 		result := func(data []byte) bool {
+			defer func() {
+				if err := recover(); err != nil {
+					logrus.Errorf("consume comment panic: %v", err)
+				}
+			}()
 			comment := &pb.Comment{}
 			err := proto.Unmarshal(data, comment)
 			if err != nil {

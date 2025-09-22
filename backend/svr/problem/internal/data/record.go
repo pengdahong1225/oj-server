@@ -100,3 +100,11 @@ func (rr *RecordRepo) QueryStatistics(uid int64) (*db.Statistics, error) {
 	}
 	return &statistics, nil
 }
+func (rr *RecordRepo) QueryAcTotalLeaderboard() ([]*db.Statistics, error) {
+	var statistics []*db.Statistics
+	result := rr.db_.Order("ac_count desc").Find(&statistics)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return statistics, nil
+}

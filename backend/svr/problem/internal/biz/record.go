@@ -14,6 +14,9 @@ type RecordRepo interface {
 	// 根据uid查询解题统计信息
 	QueryStatistics(uid int64) (*db.Statistics, error)
 
+	// 分别查询统计表中的各个前100名
+	QueryAcTotalLeaderboard() ([]*db.Statistics, error)
+
 	// redis接口
 	// 获取排行榜上次更新时间
 	QueryLeaderboardLastUpdate() (int64, error)
@@ -45,4 +48,7 @@ func (rc *RecordUseCase) UpdateLeaderboardLastUpdate(time int64) error {
 }
 func (rc *RecordUseCase) QueryStatistics(uid int64) (*db.Statistics, error) {
 	return rc.repo.QueryStatistics(uid)
+}
+func (rc *RecordUseCase) QueryAcTotalLeaderboard() ([]*db.Statistics, error) {
+	return rc.repo.QueryAcTotalLeaderboard()
 }
