@@ -37,7 +37,7 @@ create table if not exists user_solution
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题统计表
-create table if not exists user_problem_statistics_YYYY(
+create table if not exists statistics_YYYY(
     uid BIGINT not null comment '用户id',
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delete_at TIMESTAMP,
@@ -51,11 +51,12 @@ create table if not exists user_problem_statistics_YYYY(
     medium_problem_count INT DEFAULT 0 comment '通过的中等题目数量',
     hard_problem_count INT DEFAULT 0 comment '通过的困难题目数量',
 
-    PRIMARY KEY(period, uid) -- 复合主键
+    PRIMARY KEY(period, uid), -- 复合主键
+    INDEX idx_accomplish_sort (period, accomplish_count DESC, uid);
 )engine = InnoDB charset = utf8mb4;
 
 -- 统计表分区
-ALTER TABLE user_problem_statistics_YYYY 
+ALTER TABLE statistics_YYYY
 PARTITION BY RANGE COLUMNS(period) (
     PARTITION p202501 VALUES LESS THAN ('2025-02'),
     PARTITION p202502 VALUES LESS THAN ('2025-03'),
@@ -71,6 +72,3 @@ PARTITION BY RANGE COLUMNS(period) (
     PARTITION p202512 VALUES LESS THAN ('2026-01'),
     PARTITION p_future VALUES LESS THAN (MAXVALUE)
 );
--- 添加覆盖索引，优化排序查询
-ALTER TABLE user_problem_statistics_YYYY
-ADD INDEX idx_accomplish_sort (period, accomplish_count DESC, uid);

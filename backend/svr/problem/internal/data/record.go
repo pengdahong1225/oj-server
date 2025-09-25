@@ -7,10 +7,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 	"gorm.io/gorm"
 	"oj-server/global"
 	"oj-server/module/configs"
 	"oj-server/module/db"
+	"oj-server/proto/pb"
+	"time"
 )
 
 type RecordRepo struct {
@@ -100,11 +103,130 @@ func (rr *RecordRepo) QueryStatistics(uid int64) (*db.Statistics, error) {
 	}
 	return &statistics, nil
 }
-func (rr *RecordRepo) QueryAcTotalLeaderboard() ([]*db.Statistics, error) {
-	var statistics []*db.Statistics
-	result := rr.db_.Order("ac_count desc").Find(&statistics)
+
+// 排行榜临时数据
+type leaderboardData struct {
+	Uid             int64  `gorm:"column:uid"`
+	AccomplishCount int32  `gorm:"column:accomplish_count"`
+	Username        string `gorm:"column:nickname"`
+	Avatar          string `gorm:"column:avatar_url"`
+}
+
+func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error) {
+	var lb_datas []leaderboardData
+	/*
+		SELECT
+		    s.uid, s.accomplish_count,
+		    u.nickname AS username, u.avatar_url AS avatar
+		FROM
+		    statistics s
+		JOIN
+		    user_info u ON s.uid = u.id
+		WHERE
+		    s.period = ?  -- 可以按需添加查询条件
+		ORDER BY
+		    s.accomplish_count DESC  -- 按完成数降序排列
+		LIMIT ? OFFSET ?  -- 分页参数
+	*/
+	result := rr.db_.Table("statistics s").
+		Select(`
+            s.uid, s.accomplish_count,
+            u.nickname AS username, u.avatar_url AS avatar`).
+		Joins("JOIN user_info u ON s.uid = u.id").
+		Where("s.period = ?", period).
+		Order("s.accomplish_count DESC").
+		Limit(limit).
+		Scan(&lb_datas)
 	if result.Error != nil {
+		logrus.Errorf("query failed, err:%v", result.Error)
 		return nil, result.Error
 	}
-	return statistics, nil
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "no data found")
+	}
+
+	lb_list := make([]*pb.LeaderboardUserInfo, 0, len(lb_datas))
+	for _, lb_data := range lb_datas {
+		lb_list = append(lb_list, &pb.LeaderboardUserInfo{
+			Uid:      lb_data.Uid,
+			UserName: lb_data.Username,
+			Avatar:   lb_data.Avatar,
+			Score:    lb_data.AccomplishCount,
+		})
+	}
+	return lb_list, nil
+}
+func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.LeaderboardUserInfo, error) {
+	var lb_datas []leaderboardData
+	/*
+		SELECT
+		    us.uid, COUNT(DISTINCT us.problem_id) AS today_accomplish_count,
+		    u.nickname AS username, u.avatar_url AS avatar
+		FROM
+		    user_solution us
+		JOIN
+		    user_info u ON us.uid = u.id
+		WHERE
+		    DATE(us.create_at) = CURRENT_DATE() // 只统计今天的
+		GROUP BY
+		    us.uid, u.nickname, u.avatar_url
+		ORDER BY
+		    today_accomplish_count DESC
+		LIMIT 200;
+	*/
+	result := rr.db_.Table("user_solution us").
+		Select(`
+            us.uid, COUNT(DISTINCT us.problem_id) AS today_accomplish_count,
+            u.nickname AS username, u.avatar_url AS avatar`).
+		Joins("JOIN user_info u ON us.uid = u.id").
+		Where("DATE(us.create_at) = CURRENT_DATE()").
+		Group("us.uid, u.nickname, u.avatar_url").
+		Order("today_accomplish_count DESC").
+		Limit(limit).
+		Scan(&lb_datas)
+	if result.Error != nil {
+		logrus.Errorf("query failed, err:%v", result.Error)
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "no data found")
+	}
+	lb_list := make([]*pb.LeaderboardUserInfo, 0, len(lb_datas))
+	for _, lb_data := range lb_datas {
+		lb_list = append(lb_list, &pb.LeaderboardUserInfo{
+			Uid:      lb_data.Uid,
+			UserName: lb_data.Username,
+			Avatar:   lb_data.Avatar,
+			Score:    lb_data.AccomplishCount,
+		})
+	}
+	return lb_list, nil
+}
+func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, targetKey string, ttl time.Duration) error {
+	// 使用Pipeline批量操作
+	ctx := context.Background()
+	pipe := rr.rdb_.Pipeline()
+
+	// 批量添加新数据
+	for _, item := range lb_list {
+		member, err := protojson.Marshal(item)
+		if err != nil {
+			logrus.Errorf("failed to marshal leaderboard item: %v", err)
+			return fmt.Errorf("failed to marshal leaderboard item: %w", err)
+		}
+		pipe.ZAdd(ctx, targetKey, redis.Z{
+			Score:  float64(item.Score),
+			Member: member,
+		})
+	}
+
+	pipe.Expire(ctx, targetKey, ttl)
+
+	// 执行Pipeline
+	_, err := pipe.Exec(ctx)
+	if err != nil {
+		logrus.Errorf("failed to synchronize leaderboard: %v", err)
+		return fmt.Errorf("failed to synchronize leaderboard: %w", err)
+	}
+	return nil
 }

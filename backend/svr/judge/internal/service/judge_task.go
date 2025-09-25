@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
 	"oj-server/module/db"
+	"oj-server/module/gPool"
 	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/processor"
@@ -47,6 +48,10 @@ func (s *JudgeService) Handle(form *pb.SubmitForm) {
 		return
 	}
 	s.saveResult(param, results_data)
+	// 异步更新排行榜
+	_ = gPool.Instance().Submit(func() {
+		s.updateLeaderboard(param)
+	})
 }
 
 func (s *JudgeService) preAction(form *pb.SubmitForm) (bool, *biz.Param) {
@@ -126,8 +131,15 @@ func (s *JudgeService) saveResult(param *biz.Param, data []byte) {
 		Result:      data,
 		Lang:        param.Language,
 	}
-	err = s.uc.UpdateUserSubmitRecord(record, param.ProblemData.Level)
-	if err != nil {
+	if err = s.uc.UpdateUserSubmitRecord(record, param.ProblemData.Level); err != nil {
 		logrus.Errorf("更新数据库提交记录失败, err=%s", err.Error())
 	}
+}
+func (s *JudgeService) updateLeaderboard(param *biz.Param) {
+	// 1.查询用户 当日和当月 的解题数量
+
+	// 2.获取榜尾的解题数量
+
+	// 3.更新排行榜
+
 }

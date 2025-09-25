@@ -51,9 +51,8 @@ const (
 	// 排行榜
 	LeaderboardPrefix        = "leaderboard:"
 	AcTotalLeaderboardKey    = LeaderboardPrefix + "ac_total"
-	AcEasyLeaderboardKey     = LeaderboardPrefix + "ac_easy"
-	AcMediumLeaderboardKey   = LeaderboardPrefix + "ac_medium"
-	AcHardLeaderboardKey     = LeaderboardPrefix + "ac_hard"
-	LeaderboardTTL           = time.Minute * 30
 	LeaderboardLastUpdateKey = LeaderboardPrefix + "last_update"
+
+	MonthLeaderboardTTL = time.Hour * 24 * 36 // 月榜key到期时间 36天
+	DailyLeaderboardTTL = time.Hour * 24 * 2  // 日榜key到期时间 2天
 )

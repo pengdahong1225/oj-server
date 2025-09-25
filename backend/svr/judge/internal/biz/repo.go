@@ -9,10 +9,13 @@ type Repo interface {
 	// 查询题目信息
 	QueryProblemData(id int64) (*db.Problem, error)
 
-	// 1.更新用户提交记录表
-	// 2.更新(用户,题目)AC表
-	// 3.更新用户解题情况统计表
+	// 1.更新提交记录表
+	// 2.更新解题记录表
+	// 3.更新统计表
 	UpdateUserSubmitRecord(record *db.SubmitRecord, level int32) error
+
+	// 查询用户 当日和当月 的解题数量
+	QueryUserAcceptCount(uid int64) (int32, int32, error)
 
 	// 解锁
 	UnLock(key string) error
@@ -20,6 +23,9 @@ type Repo interface {
 	SetTaskState(taskId string, state int) error
 	// 设置判题结果
 	SetTaskResult(taskId, result string) error
+
+	// 更新排行榜
+	//UpdateLeaderboard(lb *pb.LeaderboardUserInfo, targetKey string) error
 }
 
 type JudgeUseCase struct {
@@ -45,4 +51,11 @@ func (jc *JudgeUseCase) UnLock(key string) error {
 }
 func (jc *JudgeUseCase) SetTaskResult(taskId, result string) error {
 	return jc.repo.SetTaskResult(taskId, result)
+}
+
+//	func (jc *JudgeUseCase) UpdateLeaderboard(lb *pb.LeaderboardUserInfo, targetKey string) error {
+//		return jc.repo.UpdateLeaderboard(lb, targetKey)
+//	}
+func (jc *JudgeUseCase) QueryUserAcceptCount(uid int64) (int32, int32, error) {
+	return jc.repo.QueryUserAcceptCount(uid)
 }

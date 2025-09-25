@@ -2,6 +2,8 @@ package biz
 
 import (
 	"oj-server/module/db"
+	"oj-server/proto/pb"
+	"time"
 )
 
 // 仓库接口由data层去实现
@@ -14,14 +16,18 @@ type RecordRepo interface {
 	// 根据uid查询解题统计信息
 	QueryStatistics(uid int64) (*db.Statistics, error)
 
-	// 分别查询统计表中的各个前100名
-	QueryAcTotalLeaderboard() ([]*db.Statistics, error)
+	// 查询统计表 -- 月榜
+	QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error)
+	// 查询解题表 -- 日榜
+	QueryDailyAccomplishLeaderboard(limit int) ([]*pb.LeaderboardUserInfo, error)
 
 	// redis接口
 	// 获取排行榜上次更新时间
 	QueryLeaderboardLastUpdate() (int64, error)
 	// 更新排行榜上次更新时间
 	UpdateLeaderboardLastUpdate(time int64) error
+	// 同步排行榜
+	SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, targetKey string, ttl time.Duration) error
 }
 
 type RecordUseCase struct {
@@ -49,6 +55,12 @@ func (rc *RecordUseCase) UpdateLeaderboardLastUpdate(time int64) error {
 func (rc *RecordUseCase) QueryStatistics(uid int64) (*db.Statistics, error) {
 	return rc.repo.QueryStatistics(uid)
 }
-func (rc *RecordUseCase) QueryAcTotalLeaderboard() ([]*db.Statistics, error) {
-	return rc.repo.QueryAcTotalLeaderboard()
+func (rc *RecordUseCase) QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error) {
+	return rc.repo.QueryMonthAccomplishLeaderboard(limit, period)
+}
+func (rc *RecordUseCase) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.LeaderboardUserInfo, error) {
+	return rc.repo.QueryDailyAccomplishLeaderboard(limit)
+}
+func (rc *RecordUseCase) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, targetKey string, ttl time.Duration) error {
+	return rc.repo.SynchronizeLeaderboard(lb_list, targetKey, ttl)
 }
