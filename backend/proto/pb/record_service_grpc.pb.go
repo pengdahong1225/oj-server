@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,9 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RecordService_GetSubmitRecordList_FullMethodName = "/RecordService/GetSubmitRecordList"
-	RecordService_GetSubmitRecordData_FullMethodName = "/RecordService/GetSubmitRecordData"
-	RecordService_QueryJudgeResult_FullMethodName    = "/RecordService/QueryJudgeResult"
+	RecordService_GetLeaderboard_FullMethodName       = "/RecordService/GetLeaderboard"
+	RecordService_QueryJudgeResult_FullMethodName     = "/RecordService/QueryJudgeResult"
+	RecordService_GetSubmitRecordList_FullMethodName  = "/RecordService/GetSubmitRecordList"
+	RecordService_GetSubmitRecordData_FullMethodName  = "/RecordService/GetSubmitRecordData"
+	RecordService_GetSolvedProblemList_FullMethodName = "/RecordService/GetSolvedProblemList"
 )
 
 // RecordServiceClient is the client API for RecordService service.
@@ -30,12 +33,16 @@ const (
 //
 // record 服务接口
 type RecordServiceClient interface {
+	// 查询排行榜
+	GetLeaderboard(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetLeaderboardResponse, error)
+	// 查询判题结果
+	QueryJudgeResult(ctx context.Context, in *QueryJudgeResultRequest, opts ...grpc.CallOption) (*QueryJudgeResultResponse, error)
 	// 查询提交记录列表
 	GetSubmitRecordList(ctx context.Context, in *GetSubmitRecordListRequest, opts ...grpc.CallOption) (*GetSubmitRecordListResponse, error)
 	// 查询提交记录详情
 	GetSubmitRecordData(ctx context.Context, in *GetSubmitRecordRequest, opts ...grpc.CallOption) (*GetSubmitRecordResponse, error)
-	// 查询判题结果
-	QueryJudgeResult(ctx context.Context, in *QueryJudgeResultRequest, opts ...grpc.CallOption) (*QueryJudgeResultResponse, error)
+	// 查询解决题目列表
+	GetSolvedProblemList(ctx context.Context, in *GetSolvedProblemListRequest, opts ...grpc.CallOption) (*GetSolvedProblemListResponse, error)
 }
 
 type recordServiceClient struct {
@@ -44,6 +51,26 @@ type recordServiceClient struct {
 
 func NewRecordServiceClient(cc grpc.ClientConnInterface) RecordServiceClient {
 	return &recordServiceClient{cc}
+}
+
+func (c *recordServiceClient) GetLeaderboard(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetLeaderboardResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLeaderboardResponse)
+	err := c.cc.Invoke(ctx, RecordService_GetLeaderboard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *recordServiceClient) QueryJudgeResult(ctx context.Context, in *QueryJudgeResultRequest, opts ...grpc.CallOption) (*QueryJudgeResultResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryJudgeResultResponse)
+	err := c.cc.Invoke(ctx, RecordService_QueryJudgeResult_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *recordServiceClient) GetSubmitRecordList(ctx context.Context, in *GetSubmitRecordListRequest, opts ...grpc.CallOption) (*GetSubmitRecordListResponse, error) {
@@ -66,10 +93,10 @@ func (c *recordServiceClient) GetSubmitRecordData(ctx context.Context, in *GetSu
 	return out, nil
 }
 
-func (c *recordServiceClient) QueryJudgeResult(ctx context.Context, in *QueryJudgeResultRequest, opts ...grpc.CallOption) (*QueryJudgeResultResponse, error) {
+func (c *recordServiceClient) GetSolvedProblemList(ctx context.Context, in *GetSolvedProblemListRequest, opts ...grpc.CallOption) (*GetSolvedProblemListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryJudgeResultResponse)
-	err := c.cc.Invoke(ctx, RecordService_QueryJudgeResult_FullMethodName, in, out, cOpts...)
+	out := new(GetSolvedProblemListResponse)
+	err := c.cc.Invoke(ctx, RecordService_GetSolvedProblemList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,12 +109,16 @@ func (c *recordServiceClient) QueryJudgeResult(ctx context.Context, in *QueryJud
 //
 // record 服务接口
 type RecordServiceServer interface {
+	// 查询排行榜
+	GetLeaderboard(context.Context, *emptypb.Empty) (*GetLeaderboardResponse, error)
+	// 查询判题结果
+	QueryJudgeResult(context.Context, *QueryJudgeResultRequest) (*QueryJudgeResultResponse, error)
 	// 查询提交记录列表
 	GetSubmitRecordList(context.Context, *GetSubmitRecordListRequest) (*GetSubmitRecordListResponse, error)
 	// 查询提交记录详情
 	GetSubmitRecordData(context.Context, *GetSubmitRecordRequest) (*GetSubmitRecordResponse, error)
-	// 查询判题结果
-	QueryJudgeResult(context.Context, *QueryJudgeResultRequest) (*QueryJudgeResultResponse, error)
+	// 查询解决题目列表
+	GetSolvedProblemList(context.Context, *GetSolvedProblemListRequest) (*GetSolvedProblemListResponse, error)
 	mustEmbedUnimplementedRecordServiceServer()
 }
 
@@ -98,14 +129,20 @@ type RecordServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRecordServiceServer struct{}
 
+func (UnimplementedRecordServiceServer) GetLeaderboard(context.Context, *emptypb.Empty) (*GetLeaderboardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLeaderboard not implemented")
+}
+func (UnimplementedRecordServiceServer) QueryJudgeResult(context.Context, *QueryJudgeResultRequest) (*QueryJudgeResultResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryJudgeResult not implemented")
+}
 func (UnimplementedRecordServiceServer) GetSubmitRecordList(context.Context, *GetSubmitRecordListRequest) (*GetSubmitRecordListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSubmitRecordList not implemented")
 }
 func (UnimplementedRecordServiceServer) GetSubmitRecordData(context.Context, *GetSubmitRecordRequest) (*GetSubmitRecordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSubmitRecordData not implemented")
 }
-func (UnimplementedRecordServiceServer) QueryJudgeResult(context.Context, *QueryJudgeResultRequest) (*QueryJudgeResultResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QueryJudgeResult not implemented")
+func (UnimplementedRecordServiceServer) GetSolvedProblemList(context.Context, *GetSolvedProblemListRequest) (*GetSolvedProblemListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSolvedProblemList not implemented")
 }
 func (UnimplementedRecordServiceServer) mustEmbedUnimplementedRecordServiceServer() {}
 func (UnimplementedRecordServiceServer) testEmbeddedByValue()                       {}
@@ -126,6 +163,42 @@ func RegisterRecordServiceServer(s grpc.ServiceRegistrar, srv RecordServiceServe
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&RecordService_ServiceDesc, srv)
+}
+
+func _RecordService_GetLeaderboard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RecordServiceServer).GetLeaderboard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RecordService_GetLeaderboard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RecordServiceServer).GetLeaderboard(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RecordService_QueryJudgeResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryJudgeResultRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RecordServiceServer).QueryJudgeResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RecordService_QueryJudgeResult_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RecordServiceServer).QueryJudgeResult(ctx, req.(*QueryJudgeResultRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _RecordService_GetSubmitRecordList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -164,20 +237,20 @@ func _RecordService_GetSubmitRecordData_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RecordService_QueryJudgeResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryJudgeResultRequest)
+func _RecordService_GetSolvedProblemList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSolvedProblemListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RecordServiceServer).QueryJudgeResult(ctx, in)
+		return srv.(RecordServiceServer).GetSolvedProblemList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RecordService_QueryJudgeResult_FullMethodName,
+		FullMethod: RecordService_GetSolvedProblemList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RecordServiceServer).QueryJudgeResult(ctx, req.(*QueryJudgeResultRequest))
+		return srv.(RecordServiceServer).GetSolvedProblemList(ctx, req.(*GetSolvedProblemListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -190,6 +263,14 @@ var RecordService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RecordServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetLeaderboard",
+			Handler:    _RecordService_GetLeaderboard_Handler,
+		},
+		{
+			MethodName: "QueryJudgeResult",
+			Handler:    _RecordService_QueryJudgeResult_Handler,
+		},
+		{
 			MethodName: "GetSubmitRecordList",
 			Handler:    _RecordService_GetSubmitRecordList_Handler,
 		},
@@ -198,8 +279,8 @@ var RecordService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _RecordService_GetSubmitRecordData_Handler,
 		},
 		{
-			MethodName: "QueryJudgeResult",
-			Handler:    _RecordService_QueryJudgeResult_Handler,
+			MethodName: "GetSolvedProblemList",
+			Handler:    _RecordService_GetSolvedProblemList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

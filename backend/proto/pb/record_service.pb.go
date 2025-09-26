@@ -7,8 +7,10 @@
 package pb
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,38 +23,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 提交记录
-type SubmitRecord struct {
+// 查询排行榜
+type GetLeaderboardResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	ProblemId     int64                  `protobuf:"varint,2,opt,name=problem_id,json=problemId,proto3" json:"problem_id,omitempty"`
-	ProblemName   string                 `protobuf:"bytes,3,opt,name=problem_name,json=problemName,proto3" json:"problem_name,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
-	Result        []byte                 `protobuf:"bytes,5,opt,name=result,proto3" json:"result,omitempty"` // []PBResult 二进制数据
-	Code          string                 `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
-	Lang          string                 `protobuf:"bytes,7,opt,name=lang,proto3" json:"lang,omitempty"`
-	Id            int64                  `protobuf:"varint,8,opt,name=id,proto3" json:"id,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ProblemLevel  int32                  `protobuf:"varint,10,opt,name=problem_level,json=problemLevel,proto3" json:"problem_level,omitempty"`
-	UserName      string                 `protobuf:"bytes,11,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SubmitRecord) Reset() {
-	*x = SubmitRecord{}
+func (x *GetLeaderboardResponse) Reset() {
+	*x = GetLeaderboardResponse{}
 	mi := &file_record_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SubmitRecord) String() string {
+func (x *GetLeaderboardResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SubmitRecord) ProtoMessage() {}
+func (*GetLeaderboardResponse) ProtoMessage() {}
 
-func (x *SubmitRecord) ProtoReflect() protoreflect.Message {
+func (x *GetLeaderboardResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_record_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -64,86 +55,82 @@ func (x *SubmitRecord) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SubmitRecord.ProtoReflect.Descriptor instead.
-func (*SubmitRecord) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetLeaderboardResponse.ProtoReflect.Descriptor instead.
+func (*GetLeaderboardResponse) Descriptor() ([]byte, []int) {
 	return file_record_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *SubmitRecord) GetUid() int64 {
-	if x != nil {
-		return x.Uid
-	}
-	return 0
+// 获取已解决题目列表
+type GetSolvedProblemListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SubmitRecord) GetProblemId() int64 {
-	if x != nil {
-		return x.ProblemId
-	}
-	return 0
+func (x *GetSolvedProblemListRequest) Reset() {
+	*x = GetSolvedProblemListRequest{}
+	mi := &file_record_service_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
-func (x *SubmitRecord) GetProblemName() string {
-	if x != nil {
-		return x.ProblemName
-	}
-	return ""
+func (x *GetSolvedProblemListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
 }
 
-func (x *SubmitRecord) GetStatus() string {
+func (*GetSolvedProblemListRequest) ProtoMessage() {}
+
+func (x *GetSolvedProblemListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_record_service_proto_msgTypes[1]
 	if x != nil {
-		return x.Status
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return ""
+	return mi.MessageOf(x)
 }
 
-func (x *SubmitRecord) GetResult() []byte {
-	if x != nil {
-		return x.Result
-	}
-	return nil
+// Deprecated: Use GetSolvedProblemListRequest.ProtoReflect.Descriptor instead.
+func (*GetSolvedProblemListRequest) Descriptor() ([]byte, []int) {
+	return file_record_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SubmitRecord) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
+type GetSolvedProblemListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SubmitRecord) GetLang() string {
-	if x != nil {
-		return x.Lang
-	}
-	return ""
+func (x *GetSolvedProblemListResponse) Reset() {
+	*x = GetSolvedProblemListResponse{}
+	mi := &file_record_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
-func (x *SubmitRecord) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
+func (x *GetSolvedProblemListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
 }
 
-func (x *SubmitRecord) GetCreatedAt() int64 {
+func (*GetSolvedProblemListResponse) ProtoMessage() {}
+
+func (x *GetSolvedProblemListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_record_service_proto_msgTypes[2]
 	if x != nil {
-		return x.CreatedAt
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return 0
+	return mi.MessageOf(x)
 }
 
-func (x *SubmitRecord) GetProblemLevel() int32 {
-	if x != nil {
-		return x.ProblemLevel
-	}
-	return 0
-}
-
-func (x *SubmitRecord) GetUserName() string {
-	if x != nil {
-		return x.UserName
-	}
-	return ""
+// Deprecated: Use GetSolvedProblemListResponse.ProtoReflect.Descriptor instead.
+func (*GetSolvedProblemListResponse) Descriptor() ([]byte, []int) {
+	return file_record_service_proto_rawDescGZIP(), []int{2}
 }
 
 // 查询提交记录列表 使用偏移量分页
@@ -158,7 +145,7 @@ type GetSubmitRecordListRequest struct {
 
 func (x *GetSubmitRecordListRequest) Reset() {
 	*x = GetSubmitRecordListRequest{}
-	mi := &file_record_service_proto_msgTypes[1]
+	mi := &file_record_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -170,7 +157,7 @@ func (x *GetSubmitRecordListRequest) String() string {
 func (*GetSubmitRecordListRequest) ProtoMessage() {}
 
 func (x *GetSubmitRecordListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[1]
+	mi := &file_record_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -183,7 +170,7 @@ func (x *GetSubmitRecordListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmitRecordListRequest.ProtoReflect.Descriptor instead.
 func (*GetSubmitRecordListRequest) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{1}
+	return file_record_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetSubmitRecordListRequest) GetUid() int64 {
@@ -217,7 +204,7 @@ type GetSubmitRecordListResponse struct {
 
 func (x *GetSubmitRecordListResponse) Reset() {
 	*x = GetSubmitRecordListResponse{}
-	mi := &file_record_service_proto_msgTypes[2]
+	mi := &file_record_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -229,7 +216,7 @@ func (x *GetSubmitRecordListResponse) String() string {
 func (*GetSubmitRecordListResponse) ProtoMessage() {}
 
 func (x *GetSubmitRecordListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[2]
+	mi := &file_record_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -242,7 +229,7 @@ func (x *GetSubmitRecordListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmitRecordListResponse.ProtoReflect.Descriptor instead.
 func (*GetSubmitRecordListResponse) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{2}
+	return file_record_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetSubmitRecordListResponse) GetTotal() int32 {
@@ -269,7 +256,7 @@ type GetSubmitRecordRequest struct {
 
 func (x *GetSubmitRecordRequest) Reset() {
 	*x = GetSubmitRecordRequest{}
-	mi := &file_record_service_proto_msgTypes[3]
+	mi := &file_record_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -281,7 +268,7 @@ func (x *GetSubmitRecordRequest) String() string {
 func (*GetSubmitRecordRequest) ProtoMessage() {}
 
 func (x *GetSubmitRecordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[3]
+	mi := &file_record_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -294,7 +281,7 @@ func (x *GetSubmitRecordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmitRecordRequest.ProtoReflect.Descriptor instead.
 func (*GetSubmitRecordRequest) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{3}
+	return file_record_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetSubmitRecordRequest) GetId() int64 {
@@ -313,7 +300,7 @@ type GetSubmitRecordResponse struct {
 
 func (x *GetSubmitRecordResponse) Reset() {
 	*x = GetSubmitRecordResponse{}
-	mi := &file_record_service_proto_msgTypes[4]
+	mi := &file_record_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -325,7 +312,7 @@ func (x *GetSubmitRecordResponse) String() string {
 func (*GetSubmitRecordResponse) ProtoMessage() {}
 
 func (x *GetSubmitRecordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[4]
+	mi := &file_record_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -338,7 +325,7 @@ func (x *GetSubmitRecordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmitRecordResponse.ProtoReflect.Descriptor instead.
 func (*GetSubmitRecordResponse) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{4}
+	return file_record_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetSubmitRecordResponse) GetData() *SubmitRecord {
@@ -357,7 +344,7 @@ type QueryJudgeResultRequest struct {
 
 func (x *QueryJudgeResultRequest) Reset() {
 	*x = QueryJudgeResultRequest{}
-	mi := &file_record_service_proto_msgTypes[5]
+	mi := &file_record_service_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -369,7 +356,7 @@ func (x *QueryJudgeResultRequest) String() string {
 func (*QueryJudgeResultRequest) ProtoMessage() {}
 
 func (x *QueryJudgeResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[5]
+	mi := &file_record_service_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -382,7 +369,7 @@ func (x *QueryJudgeResultRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryJudgeResultRequest.ProtoReflect.Descriptor instead.
 func (*QueryJudgeResultRequest) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{5}
+	return file_record_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *QueryJudgeResultRequest) GetTaskId() int64 {
@@ -402,7 +389,7 @@ type QueryJudgeResultResponse struct {
 
 func (x *QueryJudgeResultResponse) Reset() {
 	*x = QueryJudgeResultResponse{}
-	mi := &file_record_service_proto_msgTypes[6]
+	mi := &file_record_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -414,7 +401,7 @@ func (x *QueryJudgeResultResponse) String() string {
 func (*QueryJudgeResultResponse) ProtoMessage() {}
 
 func (x *QueryJudgeResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[6]
+	mi := &file_record_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -427,7 +414,7 @@ func (x *QueryJudgeResultResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryJudgeResultResponse.ProtoReflect.Descriptor instead.
 func (*QueryJudgeResultResponse) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{6}
+	return file_record_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *QueryJudgeResultResponse) GetStatus() string {
@@ -444,103 +431,14 @@ func (x *QueryJudgeResultResponse) GetMessage() string {
 	return ""
 }
 
-// 排行榜数据
-type LeaderboardUserInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	UserName      string                 `protobuf:"bytes,2,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
-	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	Score         int32                  `protobuf:"varint,4,opt,name=score,proto3" json:"score,omitempty"`
-	Mobile        int64                  `protobuf:"varint,5,opt,name=mobile,proto3" json:"mobile,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *LeaderboardUserInfo) Reset() {
-	*x = LeaderboardUserInfo{}
-	mi := &file_record_service_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *LeaderboardUserInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LeaderboardUserInfo) ProtoMessage() {}
-
-func (x *LeaderboardUserInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_record_service_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LeaderboardUserInfo.ProtoReflect.Descriptor instead.
-func (*LeaderboardUserInfo) Descriptor() ([]byte, []int) {
-	return file_record_service_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *LeaderboardUserInfo) GetUid() int64 {
-	if x != nil {
-		return x.Uid
-	}
-	return 0
-}
-
-func (x *LeaderboardUserInfo) GetUserName() string {
-	if x != nil {
-		return x.UserName
-	}
-	return ""
-}
-
-func (x *LeaderboardUserInfo) GetAvatar() string {
-	if x != nil {
-		return x.Avatar
-	}
-	return ""
-}
-
-func (x *LeaderboardUserInfo) GetScore() int32 {
-	if x != nil {
-		return x.Score
-	}
-	return 0
-}
-
-func (x *LeaderboardUserInfo) GetMobile() int64 {
-	if x != nil {
-		return x.Mobile
-	}
-	return 0
-}
-
 var File_record_service_proto protoreflect.FileDescriptor
 
 const file_record_service_proto_rawDesc = "" +
 	"\n" +
-	"\x14record_service.proto\"\xab\x02\n" +
-	"\fSubmitRecord\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1d\n" +
-	"\n" +
-	"problem_id\x18\x02 \x01(\x03R\tproblemId\x12!\n" +
-	"\fproblem_name\x18\x03 \x01(\tR\vproblemName\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x16\n" +
-	"\x06result\x18\x05 \x01(\fR\x06result\x12\x12\n" +
-	"\x04code\x18\x06 \x01(\tR\x04code\x12\x12\n" +
-	"\x04lang\x18\a \x01(\tR\x04lang\x12\x0e\n" +
-	"\x02id\x18\b \x01(\x03R\x02id\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\t \x01(\x03R\tcreatedAt\x12#\n" +
-	"\rproblem_level\x18\n" +
-	" \x01(\x05R\fproblemLevel\x12\x1b\n" +
-	"\tuser_name\x18\v \x01(\tR\buserName\"_\n" +
+	"\x14record_service.proto\x1a\frecord.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\x18\n" +
+	"\x16GetLeaderboardResponse\"\x1d\n" +
+	"\x1bGetSolvedProblemListRequest\"\x1e\n" +
+	"\x1cGetSolvedProblemListResponse\"_\n" +
 	"\x1aGetSubmitRecordListRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
@@ -556,17 +454,13 @@ const file_record_service_proto_rawDesc = "" +
 	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"L\n" +
 	"\x18QueryJudgeResultResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x8a\x01\n" +
-	"\x13LeaderboardUserInfo\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1b\n" +
-	"\tuser_name\x18\x02 \x01(\tR\buserName\x12\x16\n" +
-	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x12\x14\n" +
-	"\x05score\x18\x04 \x01(\x05R\x05score\x12\x16\n" +
-	"\x06mobile\x18\x05 \x01(\x03R\x06mobile2\xf4\x01\n" +
-	"\rRecordService\x12P\n" +
-	"\x13GetSubmitRecordList\x12\x1b.GetSubmitRecordListRequest\x1a\x1c.GetSubmitRecordListResponse\x12H\n" +
-	"\x13GetSubmitRecordData\x12\x17.GetSubmitRecordRequest\x1a\x18.GetSubmitRecordResponse\x12G\n" +
-	"\x10QueryJudgeResult\x12\x18.QueryJudgeResultRequest\x1a\x19.QueryJudgeResultResponseB\aZ\x05./;pbb\x06proto3"
+	"\amessage\x18\x02 \x01(\tR\amessage2\xa6\x04\n" +
+	"\rRecordService\x12e\n" +
+	"\x0eGetLeaderboard\x12\x16.google.protobuf.Empty\x1a\x17.GetLeaderboardResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/record/leaderboard\x12l\n" +
+	"\x10QueryJudgeResult\x12\x18.QueryJudgeResultRequest\x1a\x19.QueryJudgeResultResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/record/judge_result\x12{\n" +
+	"\x13GetSubmitRecordList\x12\x1b.GetSubmitRecordListRequest\x1a\x1c.GetSubmitRecordListResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/record/submit_record_list\x12n\n" +
+	"\x13GetSubmitRecordData\x12\x17.GetSubmitRecordRequest\x1a\x18.GetSubmitRecordResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/record/submit_record\x12S\n" +
+	"\x14GetSolvedProblemList\x12\x1c.GetSolvedProblemListRequest\x1a\x1d.GetSolvedProblemListResponseB\aZ\x05./;pbb\x06proto3"
 
 var (
 	file_record_service_proto_rawDescOnce sync.Once
@@ -580,31 +474,38 @@ func file_record_service_proto_rawDescGZIP() []byte {
 	return file_record_service_proto_rawDescData
 }
 
-var file_record_service_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_record_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_record_service_proto_goTypes = []any{
-	(*SubmitRecord)(nil),                // 0: SubmitRecord
-	(*GetSubmitRecordListRequest)(nil),  // 1: GetSubmitRecordListRequest
-	(*GetSubmitRecordListResponse)(nil), // 2: GetSubmitRecordListResponse
-	(*GetSubmitRecordRequest)(nil),      // 3: GetSubmitRecordRequest
-	(*GetSubmitRecordResponse)(nil),     // 4: GetSubmitRecordResponse
-	(*QueryJudgeResultRequest)(nil),     // 5: QueryJudgeResultRequest
-	(*QueryJudgeResultResponse)(nil),    // 6: QueryJudgeResultResponse
-	(*LeaderboardUserInfo)(nil),         // 7: LeaderboardUserInfo
+	(*GetLeaderboardResponse)(nil),       // 0: GetLeaderboardResponse
+	(*GetSolvedProblemListRequest)(nil),  // 1: GetSolvedProblemListRequest
+	(*GetSolvedProblemListResponse)(nil), // 2: GetSolvedProblemListResponse
+	(*GetSubmitRecordListRequest)(nil),   // 3: GetSubmitRecordListRequest
+	(*GetSubmitRecordListResponse)(nil),  // 4: GetSubmitRecordListResponse
+	(*GetSubmitRecordRequest)(nil),       // 5: GetSubmitRecordRequest
+	(*GetSubmitRecordResponse)(nil),      // 6: GetSubmitRecordResponse
+	(*QueryJudgeResultRequest)(nil),      // 7: QueryJudgeResultRequest
+	(*QueryJudgeResultResponse)(nil),     // 8: QueryJudgeResultResponse
+	(*SubmitRecord)(nil),                 // 9: SubmitRecord
+	(*emptypb.Empty)(nil),                // 10: google.protobuf.Empty
 }
 var file_record_service_proto_depIdxs = []int32{
-	0, // 0: GetSubmitRecordListResponse.data:type_name -> SubmitRecord
-	0, // 1: GetSubmitRecordResponse.data:type_name -> SubmitRecord
-	1, // 2: RecordService.GetSubmitRecordList:input_type -> GetSubmitRecordListRequest
-	3, // 3: RecordService.GetSubmitRecordData:input_type -> GetSubmitRecordRequest
-	5, // 4: RecordService.QueryJudgeResult:input_type -> QueryJudgeResultRequest
-	2, // 5: RecordService.GetSubmitRecordList:output_type -> GetSubmitRecordListResponse
-	4, // 6: RecordService.GetSubmitRecordData:output_type -> GetSubmitRecordResponse
-	6, // 7: RecordService.QueryJudgeResult:output_type -> QueryJudgeResultResponse
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	9,  // 0: GetSubmitRecordListResponse.data:type_name -> SubmitRecord
+	9,  // 1: GetSubmitRecordResponse.data:type_name -> SubmitRecord
+	10, // 2: RecordService.GetLeaderboard:input_type -> google.protobuf.Empty
+	7,  // 3: RecordService.QueryJudgeResult:input_type -> QueryJudgeResultRequest
+	3,  // 4: RecordService.GetSubmitRecordList:input_type -> GetSubmitRecordListRequest
+	5,  // 5: RecordService.GetSubmitRecordData:input_type -> GetSubmitRecordRequest
+	1,  // 6: RecordService.GetSolvedProblemList:input_type -> GetSolvedProblemListRequest
+	0,  // 7: RecordService.GetLeaderboard:output_type -> GetLeaderboardResponse
+	8,  // 8: RecordService.QueryJudgeResult:output_type -> QueryJudgeResultResponse
+	4,  // 9: RecordService.GetSubmitRecordList:output_type -> GetSubmitRecordListResponse
+	6,  // 10: RecordService.GetSubmitRecordData:output_type -> GetSubmitRecordResponse
+	2,  // 11: RecordService.GetSolvedProblemList:output_type -> GetSolvedProblemListResponse
+	7,  // [7:12] is the sub-list for method output_type
+	2,  // [2:7] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_record_service_proto_init() }
@@ -612,13 +513,14 @@ func file_record_service_proto_init() {
 	if File_record_service_proto != nil {
 		return
 	}
+	file_record_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_record_service_proto_rawDesc), len(file_record_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

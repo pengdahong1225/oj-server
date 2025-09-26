@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+// 提交记录
+message SubmitRecord{
+  int64 uid = 1;
+  int64 problem_id = 2;
+  string problem_name = 3;
+  string status = 4;
+  bytes result = 5; // []PBResult 二进制数据
+  string code = 6;
+  string lang = 7;
+
+  int64 id = 8;
+  int64 created_at = 9;
+  int32 problem_level = 10;
+  string user_name = 11;
+}
+
+// 排行榜数据
+message LeaderboardUserInfo {
+  int64 uid = 1;
+  string user_name = 2;
+  string avatar = 3;
+  int32 score = 4;
+  int64 mobile = 5;
+}

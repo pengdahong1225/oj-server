@@ -1,35 +1,45 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
+import "google/api/annotations.proto";
+import "user.proto";
+
 // 用户服务接口
 service UserService {
   // 注册
-  rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse);
+  rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse){
+    option (google.api.http) = {
+      post: "/api/v1/user/register"
+      body: "*"
+    };
+  };
   // 登录-账号密码
-  rpc UserLogin(UserLoginRequest) returns (UserLoginResponse);
+  rpc UserLogin(UserLoginRequest) returns (UserLoginResponse){
+    option (google.api.http) = {
+      post: "/api/v1/user/login"
+      body: "*"
+    };
+  };
   // 登录-验证码
-  rpc UserLoginBySmsCode(UserLoginBySmsCodeRequest) returns (UserLoginResponse);
+  rpc UserLoginBySmsCode(UserLoginBySmsCodeRequest) returns (UserLoginResponse){
+    option (google.api.http) = {
+      post: "/api/v1/user/login_sms"
+      body: "*"
+    };
+  };
   // 重置密码
-  rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse);
+  rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse){
+    option (google.api.http) = {
+      post: "/api/v1/user/reset_password"
+      body: "*"
+    };
+  };
   // 查询用户信息
-  rpc GetUserInfoByUid(GetUserInfoRequest) returns (GetUserInfoResponse);
-  rpc GetUserInfoByMobile(GetUserInfoRequest) returns (GetUserInfoResponse);
-}
-
-// 用户基本数据
-message UserInfo{
-  int64 uid = 1;
-  int64 create_at = 2;
-  int64 delete_at = 3;
-
-  int64 mobile = 4;
-  string nickname = 5;
-  string email = 6;
-  int32 gender = 7;
-  int32 role = 8;
-  string avatar_url = 9;
-
-  string password = 10; // hash
+  rpc GetUserInfoByUid(GetUserInfoRequest) returns (GetUserInfoResponse){
+    option (google.api.http) = {
+      get: "/api/v1/user/profile"
+    };
+  };
 }
 
 // 注册

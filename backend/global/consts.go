@@ -7,9 +7,9 @@ import (
 
 const (
 	GatewayService = "gateway"
-	UserService    = "user"
-	ProblemService = "problem"
-	JudgeService   = "judge"
+	UserService    = "user-service"
+	ProblemService = "problem-service"
+	JudgeService   = "judge-service"
 )
 
 const (

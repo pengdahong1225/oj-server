@@ -1,30 +1,48 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
+import "record.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
 // record 服务接口
 service RecordService {
-  // 查询提交记录列表
-  rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse);
-  // 查询提交记录详情
-  rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse);
+  // 查询排行榜
+  rpc GetLeaderboard(google.protobuf.Empty) returns (GetLeaderboardResponse){
+    option (google.api.http) = {
+      get: "/api/v1/record/leaderboard"
+    };
+  };
   // 查询判题结果
-  rpc QueryJudgeResult(QueryJudgeResultRequest) returns (QueryJudgeResultResponse);
+  rpc QueryJudgeResult(QueryJudgeResultRequest) returns (QueryJudgeResultResponse){
+    option (google.api.http) = {
+      get: "/api/v1/record/judge_result"
+    };
+  };
+  // 查询提交记录列表
+  rpc GetSubmitRecordList(GetSubmitRecordListRequest) returns (GetSubmitRecordListResponse){
+    option (google.api.http) = {
+      get: "/api/v1/record/submit_record_list"
+    };
+  };
+  // 查询提交记录详情
+  rpc GetSubmitRecordData(GetSubmitRecordRequest) returns (GetSubmitRecordResponse){
+    option (google.api.http) = {
+      get: "/api/v1/record/submit_record"
+    };
+  };
+  // 查询解决题目列表
+  rpc GetSolvedProblemList(GetSolvedProblemListRequest) returns (GetSolvedProblemListResponse);
 }
 
-// 提交记录
-message SubmitRecord{
-  int64 uid = 1;
-  int64 problem_id = 2;
-  string problem_name = 3;
-  string status = 4;
-  bytes result = 5; // []PBResult 二进制数据
-  string code = 6;
-  string lang = 7;
+// 查询排行榜
+message GetLeaderboardResponse{
 
-  int64 id = 8;
-  int64 created_at = 9;
-  int32 problem_level = 10;
-  string user_name = 11;
+}
+// 获取已解决题目列表
+message GetSolvedProblemListRequest {
+}
+message GetSolvedProblemListResponse {
 }
 
 // 查询提交记录列表 使用偏移量分页
@@ -51,13 +69,4 @@ message QueryJudgeResultRequest {
 message QueryJudgeResultResponse {
   string status = 1;
   string message = 2;
-}
-
-// 排行榜数据
-message LeaderboardUserInfo {
-  int64 uid = 1;
-  string user_name = 2;
-  string avatar = 3;
-  int32 score = 4;
-  int64 mobile = 5;
 }

@@ -39,7 +39,7 @@ func (r *Registry) createGrpcConnection(name string) (*grpc.ClientConn, error) {
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`), // 负载均衡，轮训策略
 	)
 	if err != nil {
-		logrus.Errorf("Failed to create connection with %s: %v", name, err)
+		logrus.Errorf("failed to create connection with %s: %v", name, err)
 		return nil, err
 	}
 

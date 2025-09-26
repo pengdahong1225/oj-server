@@ -16,6 +16,7 @@ import (
 func HandleGetImageCode(ctx *gin.Context) {
 	resp := model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 	id, b64s, err := captcha.GenerateImageCaptcha()
 	if err != nil {
@@ -30,9 +31,7 @@ func HandleGetImageCode(ctx *gin.Context) {
 		CaptchaID: id,
 		Captcha:   b64s,
 	}
-	resp.ErrCode = pb.Error_EN_Success
 	resp.Data = data
-	resp.Message = "图形验证码生成成功"
 	ctx.JSON(http.StatusOK, resp)
 }
 
@@ -46,6 +45,7 @@ func HandleGetSmsCode(ctx *gin.Context) {
 
 	resp := model.Response{
 		ErrCode: pb.Error_EN_Success,
+		Message: "success",
 	}
 	// 手机号校验
 	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)

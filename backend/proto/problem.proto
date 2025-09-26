@@ -1,6 +1,40 @@
 syntax = "proto3";
 option go_package = "./;pb";
-import 'problem_service.proto';
+
+// 题目基础信息
+message Problem{
+  int64 id = 1;
+  string create_at = 2;
+  string delete_at = 3;
+
+  string title = 4;
+  string description = 5;
+  int32 level = 6;
+  repeated string tags = 7;
+  int64 create_by = 8;
+
+  int32 status = 10; // 是否发布
+}
+// 题目配置信息
+message ProblemConfig{
+  int64 id = 1;
+  int32 level = 2;
+  string name = 3;
+  Limit compile_limit = 4;
+  Limit run_limit = 5;
+  repeated TestCase test_cases = 6;
+}
+message Limit{
+  int64 cpu_limit = 1;
+  int64 clock_limit = 2;
+  int64 memory_limit = 3;
+  int64 stack_limit = 4;
+  int64 proc_limit = 5;
+}
+message TestCase{
+  string input = 1;
+  string output = 2;
+}
 
 // “提交”状态枚举，如果没有查询到状态，就意味着最近没有提交题目or题目提交过期了
 enum SubmitState{

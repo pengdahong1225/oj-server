@@ -25,10 +25,10 @@ const (
 	ProblemService_PublishProblem_FullMethodName   = "/ProblemService/PublishProblem"
 	ProblemService_UpdateProblem_FullMethodName    = "/ProblemService/UpdateProblem"
 	ProblemService_DeleteProblem_FullMethodName    = "/ProblemService/DeleteProblem"
-	ProblemService_GetProblemList_FullMethodName   = "/ProblemService/GetProblemList"
-	ProblemService_GetProblemData_FullMethodName   = "/ProblemService/GetProblemData"
-	ProblemService_GetProblemConfig_FullMethodName = "/ProblemService/GetProblemConfig"
 	ProblemService_GetTagList_FullMethodName       = "/ProblemService/GetTagList"
+	ProblemService_GetProblemList_FullMethodName   = "/ProblemService/GetProblemList"
+	ProblemService_GetProblemDetail_FullMethodName = "/ProblemService/GetProblemDetail"
+	ProblemService_GetProblemConfig_FullMethodName = "/ProblemService/GetProblemConfig"
 	ProblemService_SubmitProblem_FullMethodName    = "/ProblemService/SubmitProblem"
 )
 
@@ -48,14 +48,14 @@ type ProblemServiceClient interface {
 	UpdateProblem(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*UpdateProblemResponse, error)
 	// 删除题目
 	DeleteProblem(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*DeleteProblemResponse, error)
+	// 获取tag列表
+	GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error)
 	// 获取题目列表
 	GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error)
 	// 查询题目详情
-	GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
+	GetProblemDetail(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
 	// 获取题目配置
 	GetProblemConfig(ctx context.Context, in *GetProblemConfigRequest, opts ...grpc.CallOption) (*GetProblemConfigResponse, error)
-	// 获取tag列表
-	GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error)
 	// 提交
 	SubmitProblem(ctx context.Context, in *SubmitProblemRequest, opts ...grpc.CallOption) (*SubmitProblemResponse, error)
 }
@@ -121,6 +121,16 @@ func (c *problemServiceClient) DeleteProblem(ctx context.Context, in *DeleteProb
 	return out, nil
 }
 
+func (c *problemServiceClient) GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTagListResponse)
+	err := c.cc.Invoke(ctx, ProblemService_GetTagList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *problemServiceClient) GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetProblemListResponse)
@@ -131,10 +141,10 @@ func (c *problemServiceClient) GetProblemList(ctx context.Context, in *GetProble
 	return out, nil
 }
 
-func (c *problemServiceClient) GetProblemData(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error) {
+func (c *problemServiceClient) GetProblemDetail(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetProblemResponse)
-	err := c.cc.Invoke(ctx, ProblemService_GetProblemData_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ProblemService_GetProblemDetail_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,16 +155,6 @@ func (c *problemServiceClient) GetProblemConfig(ctx context.Context, in *GetProb
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetProblemConfigResponse)
 	err := c.cc.Invoke(ctx, ProblemService_GetProblemConfig_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *problemServiceClient) GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTagListResponse)
-	err := c.cc.Invoke(ctx, ProblemService_GetTagList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -187,14 +187,14 @@ type ProblemServiceServer interface {
 	UpdateProblem(context.Context, *UpdateProblemRequest) (*UpdateProblemResponse, error)
 	// 删除题目
 	DeleteProblem(context.Context, *DeleteProblemRequest) (*DeleteProblemResponse, error)
+	// 获取tag列表
+	GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error)
 	// 获取题目列表
 	GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error)
 	// 查询题目详情
-	GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
+	GetProblemDetail(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
 	// 获取题目配置
 	GetProblemConfig(context.Context, *GetProblemConfigRequest) (*GetProblemConfigResponse, error)
-	// 获取tag列表
-	GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error)
 	// 提交
 	SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error)
 	mustEmbedUnimplementedProblemServiceServer()
@@ -222,17 +222,17 @@ func (UnimplementedProblemServiceServer) UpdateProblem(context.Context, *UpdateP
 func (UnimplementedProblemServiceServer) DeleteProblem(context.Context, *DeleteProblemRequest) (*DeleteProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProblem not implemented")
 }
+func (UnimplementedProblemServiceServer) GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTagList not implemented")
+}
 func (UnimplementedProblemServiceServer) GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemList not implemented")
 }
-func (UnimplementedProblemServiceServer) GetProblemData(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProblemData not implemented")
+func (UnimplementedProblemServiceServer) GetProblemDetail(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProblemDetail not implemented")
 }
 func (UnimplementedProblemServiceServer) GetProblemConfig(context.Context, *GetProblemConfigRequest) (*GetProblemConfigResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblemConfig not implemented")
-}
-func (UnimplementedProblemServiceServer) GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTagList not implemented")
 }
 func (UnimplementedProblemServiceServer) SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitProblem not implemented")
@@ -337,6 +337,24 @@ func _ProblemService_DeleteProblem_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProblemService_GetTagList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProblemServiceServer).GetTagList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProblemService_GetTagList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProblemServiceServer).GetTagList(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProblemService_GetProblemList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProblemListRequest)
 	if err := dec(in); err != nil {
@@ -355,20 +373,20 @@ func _ProblemService_GetProblemList_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProblemService_GetProblemData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProblemService_GetProblemDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetProblemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProblemServiceServer).GetProblemData(ctx, in)
+		return srv.(ProblemServiceServer).GetProblemDetail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ProblemService_GetProblemData_FullMethodName,
+		FullMethod: ProblemService_GetProblemDetail_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).GetProblemData(ctx, req.(*GetProblemRequest))
+		return srv.(ProblemServiceServer).GetProblemDetail(ctx, req.(*GetProblemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -387,24 +405,6 @@ func _ProblemService_GetProblemConfig_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProblemServiceServer).GetProblemConfig(ctx, req.(*GetProblemConfigRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProblemService_GetTagList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProblemServiceServer).GetTagList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProblemService_GetTagList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProblemServiceServer).GetTagList(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -451,20 +451,20 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProblemService_DeleteProblem_Handler,
 		},
 		{
+			MethodName: "GetTagList",
+			Handler:    _ProblemService_GetTagList_Handler,
+		},
+		{
 			MethodName: "GetProblemList",
 			Handler:    _ProblemService_GetProblemList_Handler,
 		},
 		{
-			MethodName: "GetProblemData",
-			Handler:    _ProblemService_GetProblemData_Handler,
+			MethodName: "GetProblemDetail",
+			Handler:    _ProblemService_GetProblemDetail_Handler,
 		},
 		{
 			MethodName: "GetProblemConfig",
 			Handler:    _ProblemService_GetProblemConfig_Handler,
-		},
-		{
-			MethodName: "GetTagList",
-			Handler:    _ProblemService_GetTagList_Handler,
 		},
 		{
 			MethodName: "SubmitProblem",

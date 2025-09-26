@@ -69,7 +69,6 @@ func initRouters(engine *gin.Engine) {
 		problemRouter.GET("/tag_list", handler.HandleGetProblemTagList)
 		problemRouter.GET("/list", handler.HandleGetProblemList)
 		problemRouter.GET("/detail", handler.HandleGetProblemDetail)
-
 		problemRouter.POST("/submit", middlewares.AuthLogin(), handler.HandleSubmitProblem)
 
 		problemRouter.POST("/add", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleCreateProblem)
@@ -83,7 +82,7 @@ func initRouters(engine *gin.Engine) {
 	recordRouter := v1.Group("/record")
 	{
 		// 排行榜
-		recordRouter.GET("/ranking_list", middlewares.AuthLogin(), handler.HandleGetRankList)
+		recordRouter.GET("/rank", middlewares.AuthLogin(), handler.HandleGetLeaderboard)
 		recordRouter.GET("/result", middlewares.AuthLogin(), handler.HandleGetSubmitResult)        // 本次提交的结果
 		recordRouter.GET("/record_list", middlewares.AuthLogin(), handler.HandleGetUserRecordList) // 历史提交记录
 		recordRouter.GET("/record", middlewares.AuthLogin(), handler.HandleGetUserRecord)          // 提交记录详情

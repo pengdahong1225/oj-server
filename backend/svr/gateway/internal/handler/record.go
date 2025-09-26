@@ -13,7 +13,7 @@ import (
 )
 
 // 处理排行榜查询
-func HandleGetRankList(ctx *gin.Context) {
+func HandleGetLeaderboard(ctx *gin.Context) {
 	resp := &model.Response{
 		ErrCode: pb.Error_EN_Success,
 		Message: "success",

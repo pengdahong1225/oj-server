@@ -1,66 +1,77 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "problem.proto";
 
 // 题目服务接口
 service ProblemService {
   // 新增题目
-  rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse);
+  rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse){
+    option (google.api.http) = {
+      post: "/api/v1/problem/create"
+      body: "*"
+    };
+  };
   // 上传配置文件
-  rpc UploadConfig(stream UploadConfigFileChunk) returns (UploadConfigResponse);
+  rpc UploadConfig(stream UploadConfigFileChunk) returns (UploadConfigResponse){
+    option (google.api.http) = {
+      post: "/api/v1/problem/upload_config"
+      body: "*"
+    };
+  };
   // 发布题目
-  rpc PublishProblem(PublishProblemRequest) returns (google.protobuf.Empty);
+  rpc PublishProblem(PublishProblemRequest) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      post: "/api/v1/problem/publish"
+      body: "*"
+    };
+  };
   // 更新题目信息
-  rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse);
+  rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse){
+    option (google.api.http) = {
+      post: "/api/v1/problem/update"
+      body: "*"
+    };
+  };
   // 删除题目
-  rpc DeleteProblem(DeleteProblemRequest) returns (DeleteProblemResponse);
-  // 获取题目列表
-  rpc GetProblemList(GetProblemListRequest) returns (GetProblemListResponse);
-  // 查询题目详情
-  rpc GetProblemData(GetProblemRequest) returns (GetProblemResponse);
-  // 获取题目配置
-  rpc GetProblemConfig(GetProblemConfigRequest) returns (GetProblemConfigResponse);
+  rpc DeleteProblem(DeleteProblemRequest) returns (DeleteProblemResponse){
+    option (google.api.http) = {
+      delete: "/api/v1/problem"
+    };
+  };
   // 获取tag列表
-  rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse);
-
+  rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse){
+    option (google.api.http) = {
+      get: "/api/v1/problem/tag_list"
+    };
+  };
+  // 获取题目列表
+  rpc GetProblemList(GetProblemListRequest) returns (GetProblemListResponse){
+    option (google.api.http) = {
+      get: "/api/v1/problem/list"
+    };
+  };
+  // 查询题目详情
+  rpc GetProblemDetail(GetProblemRequest) returns (GetProblemResponse){
+    option (google.api.http) = {
+      get: "/api/v1/problem/detail"
+    };
+  };
+  // 获取题目配置
+  rpc GetProblemConfig(GetProblemConfigRequest) returns (GetProblemConfigResponse){
+    option (google.api.http) = {
+      get: "/api/v1/problem/config"
+    };
+  };
   // 提交
-  rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse);
-}
-
-// 题目基础信息
-message Problem{
-  int64 id = 1;
-  string create_at = 2;
-  string delete_at = 3;
-
-  string title = 4;
-  string description = 5;
-  int32 level = 6;
-  repeated string tags = 7;
-  int64 create_by = 8;
-
-  int32 status = 10; // 是否发布
-}
-// 题目配置信息
-message ProblemConfig{
-  int64 id = 1;
-  int32 level = 2;
-  string name = 3;
-  Limit compile_limit = 4;
-  Limit run_limit = 5;
-  repeated TestCase test_cases = 6;
-}
-message Limit{
-  int64 cpu_limit = 1;
-  int64 clock_limit = 2;
-  int64 memory_limit = 3;
-  int64 stack_limit = 4;
-  int64 proc_limit = 5;
-}
-message TestCase{
-  string input = 1;
-  string output = 2;
+  rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse){
+    option (google.api.http) = {
+      post: "/api/v1/problem/submit"
+      body: "*"
+    };
+  };
 }
 
 // 新增题目
@@ -151,4 +162,3 @@ message SubmitProblemResponse {
   string task_id = 1;
   string message = 2;
 }
-
