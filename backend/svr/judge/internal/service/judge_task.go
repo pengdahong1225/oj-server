@@ -161,6 +161,7 @@ func (s *JudgeService) updateLeaderboard(param *biz.Param) {
 		UserName: param.UserInfo.Nickname,
 		Avatar:   param.UserInfo.AvatarUrl,
 		Score:    int32(mouthAc),
+		Mobile:   param.UserInfo.Mobile,
 	}); err != nil {
 		logrus.Errorf("更新排行榜失败, err=%s", err.Error())
 		return
@@ -170,6 +171,7 @@ func (s *JudgeService) updateLeaderboard(param *biz.Param) {
 		UserName: param.UserInfo.Nickname,
 		Avatar:   param.UserInfo.AvatarUrl,
 		Score:    int32(dailyAc),
+		Mobile:   param.UserInfo.Mobile,
 	}); err != nil {
 		logrus.Errorf("更新排行榜失败, err=%s", err.Error())
 		return

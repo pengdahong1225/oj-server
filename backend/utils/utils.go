@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// GetOutboundIP 获取本机的出口IP
+// 获取本机的出口IP
 // UDP 是一种无连接的协议，因此不需要关心连接是否成功到达目的地，一旦尝试发起连接，操作系统将为本次连接设置ip地址。
 func GetOutboundIP() (net.IP, error) {
 	conn, err := net.Dial("udp", "8.8.8.8:53") // 使用 udp 不需要关注是否送达
@@ -39,7 +39,7 @@ func GenerateUUID() (string, error) {
 	return id.String(), nil
 }
 
-// SplitStringWithX 分割字符串
+// 分割字符串
 func SplitStringWithX(src string, X string) []string {
 	// 去除头尾空格
 	str := strings.TrimSpace(src)
@@ -55,7 +55,7 @@ func SplitStringWithX(src string, X string) []string {
 	return result
 }
 
-// SpliceStringWithX 合并字符串，用X做前缀
+// 合并字符串，用X做前缀
 func SpliceStringWithX(src []string, X string) string {
 	builder := strings.Builder{}
 	for _, s := range src {
@@ -65,7 +65,7 @@ func SpliceStringWithX(src []string, X string) string {
 	return builder.String()
 }
 
-// GenerateSmsCode 生成长度指定长度的验证码
+// 生成长度指定长度的验证码
 func GenerateSmsCode(width int) string {
 	numeric := [10]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 	r := len(numeric)
@@ -77,7 +77,7 @@ func GenerateSmsCode(width int) string {
 	return sb.String()
 }
 
-// GenerateSubmitID 生成提交ID
+// 生成提交ID
 func GenerateSubmitID(userID, questionID int) (int64, error) {
 	// 将用户ID和问题ID转换为字符串并连接
 	idString := strconv.Itoa(userID) + strconv.Itoa(questionID)

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -198,7 +199,75 @@ func (r *JudgeRepo) SetTaskResult(taskId, result string) error {
 // 2. 判断当前score是否比当前榜尾score大
 // 3. 插入当前用户
 func (r *JudgeRepo) UpdateLeaderboard(targetKey string, lb *pb.LeaderboardUserInfo) error {
-	script := ``
+	script := `
+-- KEYS[1]: 排行榜的key
+-- ARGV[1]: 用户JSON信息
+-- ARGV[2]: 最大显示数量(200)
+-- ARGV[3]: 最大容错数量(100)
+
+-- 解析参数
+local maxDisplay = tonumber(ARGV[2])
+local maxCapacity = maxDisplay + tonumber(ARGV[3])
+local userData = cjson.decode(ARGV[1])
+local userId = userData.uid
+local newScore = tonumber(userData.score)
+
+-- 获取当前排行榜信息
+local currentCount = redis.call('ZCARD', KEYS[1])
+local currentScore = redis.call('ZSCORE', KEYS[1], userId)
+
+-- 判断用户是否能进入排行榜
+local canEnter = false
+
+-- 情况1: 排行榜未满(小于最大容量)
+if currentCount < maxCapacity then
+    canEnter = true
+-- 情况2: 用户已在排行榜中
+elseif currentScore ~= false then
+    canEnter = true
+-- 情况3: 新分数高于排行榜最低分
+else
+    local lowestScore = redis.call('ZRANGE', KEYS[1], -1, -1, 'WITHSCORES')[2]
+    if newScore > tonumber(lowestScore) then
+        canEnter = true
+    end
+end
+
+-- 只有符合条件的用户才能更新
+if canEnter then
+    -- 更新用户分数和信息
+    redis.call('ZADD', KEYS[1], newScore, userId)
+    redis.call('HSET', KEYS[1] .. ':user_data', userId, ARGV[1])
+    
+    -- 维护排行榜大小(不超过最大容量)
+    local currentCount = redis.call('ZCARD', KEYS[1])
+    if currentCount > maxCapacity then
+        -- 移除超出容量的最低分用户
+        redis.call('ZREMRANGEBYRANK', KEYS[1], 0, currentCount - maxCapacity - 1)
+    end
+end
+
+-- 强制清理超出显示数量的数据(保持严格限制)
+local displayCount = redis.call('ZCARD', KEYS[1])
+if displayCount > maxDisplay then
+    redis.call('ZREMRANGEBYRANK', KEYS[1], 0, displayCount - maxDisplay - 1)
+end
+`
+	// 序列化用户信息
+	userJson, err := json.Marshal(lb)
+	if err != nil {
+		return fmt.Errorf("failed to marshal user info: %v", err)
+	}
+
+	// 执行脚本
+	_, err = r.rdb_.Eval(
+		context.Background(),
+		script,
+		[]string{targetKey},
+		string(userJson),
+		200, // 最大显示数量
+		100, // 容错数量
+	).Result()
 
 	return nil
 }
