@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
 	"oj-server/proto/pb"
@@ -58,8 +57,7 @@ func (ps *RecordService) syncMonthLeaderboard() error {
 		return err
 	}
 	// 写入redis
-	targetKey := fmt.Sprintf("%s:%s", global.AcTotalLeaderboardKey, time.Now().Format("2006_01"))
-	return ps.uc.SynchronizeLeaderboard(lb_list, targetKey, global.MonthLeaderboardTTL)
+	return ps.uc.SynchronizeLeaderboard(lb_list, global.GetMonthLeaderboardKey(), global.MonthLeaderboardTTL)
 }
 func (ps *RecordService) syncDailyLeaderboard() error {
 	// 从数据库中获取数据
@@ -69,8 +67,7 @@ func (ps *RecordService) syncDailyLeaderboard() error {
 		return err
 	}
 	// 写入redis
-	targetKey := fmt.Sprintf("%s:%s", global.AcTotalLeaderboardKey, time.Now().Format("2006_01_02"))
-	return ps.uc.SynchronizeLeaderboard(lb_list, targetKey, global.DailyLeaderboardTTL)
+	return ps.uc.SynchronizeLeaderboard(lb_list, global.GetDailyLeaderboardKey(), global.DailyLeaderboardTTL)
 }
 
 // 分页查询用户的提交记录

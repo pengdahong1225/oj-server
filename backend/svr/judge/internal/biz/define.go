@@ -4,17 +4,15 @@ import "oj-server/proto/pb"
 
 // 判题任务上下文参数
 type Param struct {
-	Uid           int64
-	UserName      string
-	ProblemData   *pb.Problem
+	UserInfo    *pb.UserInfo
+	ProblemData *pb.Problem
+
 	Code          string // 源代码
 	Language      string // 语种
 	ProblemConfig *pb.ProblemConfig
 
-	// 编译结果中读取
-	FileIds map[string]string // 文件id
-
-	Accepted bool
+	FileIds  map[string]string // 文件id, 从编译结果中读取
+	Accepted bool              // 是否通过
 	Message  string
 }
 

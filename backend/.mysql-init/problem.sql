@@ -14,6 +14,7 @@ create table if not exists problem
     comment_count BIGINT DEFAULT 0 comment '评论总数量',
 
     status tinyint DEFAULT 0 comment '状态 1：发布 0：隐藏',
+    config_url VARCHAR(256) DEFAULT '' comment '题目配置文件url',
 
     PRIMARY KEY(id),
     UNIQUE INDEX idx_title(title)

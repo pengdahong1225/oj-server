@@ -27,7 +27,7 @@ type RecordRepo interface {
 	// 更新排行榜上次更新时间
 	UpdateLeaderboardLastUpdate(time int64) error
 	// 同步排行榜
-	SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, targetKey string, ttl time.Duration) error
+	SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, leaderboardKey string, leaderboardKeyTTL time.Duration) error
 }
 
 type RecordUseCase struct {
@@ -61,6 +61,6 @@ func (rc *RecordUseCase) QueryMonthAccomplishLeaderboard(limit int, period strin
 func (rc *RecordUseCase) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.LeaderboardUserInfo, error) {
 	return rc.repo.QueryDailyAccomplishLeaderboard(limit)
 }
-func (rc *RecordUseCase) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, targetKey string, ttl time.Duration) error {
-	return rc.repo.SynchronizeLeaderboard(lb_list, targetKey, ttl)
+func (rc *RecordUseCase) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, leaderboardKey string, leaderboardKeyTTL time.Duration) error {
+	return rc.repo.SynchronizeLeaderboard(lb_list, leaderboardKey, leaderboardKeyTTL)
 }

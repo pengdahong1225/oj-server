@@ -16,6 +16,7 @@ type Problem struct {
 	CreateBy     int64  `gorm:"column:create_by"`
 	CommentCount int64  `gorm:"column:comment_count;type:blob"`
 	Status       int32  `gorm:"column:status"` // 状态 1：发布 0：隐藏（默认值）
+	ConfigUrl    string `gorm:"column:config_url"`
 }
 
 func (p *Problem) TableName() string {

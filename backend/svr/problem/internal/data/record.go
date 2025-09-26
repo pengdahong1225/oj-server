@@ -13,6 +13,7 @@ import (
 	"oj-server/module/configs"
 	"oj-server/module/db"
 	"oj-server/proto/pb"
+	"strconv"
 	"time"
 )
 
@@ -106,10 +107,12 @@ func (rr *RecordRepo) QueryStatistics(uid int64) (*db.Statistics, error) {
 
 // 排行榜临时数据
 type leaderboardData struct {
-	Uid             int64  `gorm:"column:uid"`
-	AccomplishCount int32  `gorm:"column:accomplish_count"`
-	Username        string `gorm:"column:nickname"`
-	Avatar          string `gorm:"column:avatar_url"`
+	Uid             int64 `gorm:"column:uid"`
+	AccomplishCount int32 `gorm:"column:accomplish_count"`
+
+	Mobile   int64  `gorm:"column:mobile"`
+	Username string `gorm:"column:nickname"`
+	Avatar   string `gorm:"column:avatar_url"`
 }
 
 func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error) {
@@ -117,7 +120,7 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 	/*
 		SELECT
 		    s.uid, s.accomplish_count,
-		    u.nickname AS username, u.avatar_url AS avatar
+		    u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile
 		FROM
 		    statistics s
 		JOIN
@@ -131,7 +134,7 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 	result := rr.db_.Table("statistics s").
 		Select(`
             s.uid, s.accomplish_count,
-            u.nickname AS username, u.avatar_url AS avatar`).
+            u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
 		Joins("JOIN user_info u ON s.uid = u.id").
 		Where("s.period = ?", period).
 		Order("s.accomplish_count DESC").
@@ -149,9 +152,10 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 	for _, lb_data := range lb_datas {
 		lb_list = append(lb_list, &pb.LeaderboardUserInfo{
 			Uid:      lb_data.Uid,
+			Score:    lb_data.AccomplishCount,
 			UserName: lb_data.Username,
 			Avatar:   lb_data.Avatar,
-			Score:    lb_data.AccomplishCount,
+			Mobile:   lb_data.Mobile,
 		})
 	}
 	return lb_list, nil
@@ -161,7 +165,7 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 	/*
 		SELECT
 		    us.uid, COUNT(DISTINCT us.problem_id) AS today_accomplish_count,
-		    u.nickname AS username, u.avatar_url AS avatar
+		    u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile
 		FROM
 		    user_solution us
 		JOIN
@@ -169,7 +173,7 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 		WHERE
 		    DATE(us.create_at) = CURRENT_DATE() // 只统计今天的
 		GROUP BY
-		    us.uid, u.nickname, u.avatar_url
+		    us.uid, u.nickname, u.avatar_url, u.mobile
 		ORDER BY
 		    today_accomplish_count DESC
 		LIMIT 200;
@@ -177,10 +181,10 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 	result := rr.db_.Table("user_solution us").
 		Select(`
             us.uid, COUNT(DISTINCT us.problem_id) AS today_accomplish_count,
-            u.nickname AS username, u.avatar_url AS avatar`).
+            u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
 		Joins("JOIN user_info u ON us.uid = u.id").
 		Where("DATE(us.create_at) = CURRENT_DATE()").
-		Group("us.uid, u.nickname, u.avatar_url").
+		Group("us.uid, u.nickname, u.avatar_url, u.mobile").
 		Order("today_accomplish_count DESC").
 		Limit(limit).
 		Scan(&lb_datas)
@@ -198,33 +202,37 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 			UserName: lb_data.Username,
 			Avatar:   lb_data.Avatar,
 			Score:    lb_data.AccomplishCount,
+			Mobile:   lb_data.Mobile,
 		})
 	}
 	return lb_list, nil
 }
-func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, targetKey string, ttl time.Duration) error {
+func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, leaderboardKey string, leaderboardKeyTTL time.Duration) error {
 	// 使用Pipeline批量操作
 	ctx := context.Background()
 	pipe := rr.rdb_.Pipeline()
 
+	// 删除旧榜
+	pipe.Del(ctx, leaderboardKey)
+	pipe.Del(ctx, global.LeaderboardUserInfoKey)
+
 	// 批量添加新数据
 	for _, item := range lb_list {
-		member, err := protojson.Marshal(item)
-		if err != nil {
-			logrus.Errorf("failed to marshal leaderboard item: %v", err)
-			return fmt.Errorf("failed to marshal leaderboard item: %w", err)
-		}
-		pipe.ZAdd(ctx, targetKey, redis.Z{
+		pipe.ZAdd(ctx, leaderboardKey, redis.Z{
 			Score:  float64(item.Score),
-			Member: member,
+			Member: item.Uid,
 		})
+		userInfo, err := protojson.Marshal(item)
+		if err != nil {
+			logrus.Errorf("failed to marshal user info: %v", err)
+			return err
+		}
+		pipe.HSet(ctx, global.LeaderboardUserInfoKey, strconv.FormatInt(item.Uid, 10), userInfo)
 	}
-
-	pipe.Expire(ctx, targetKey, ttl)
+	pipe.Expire(ctx, leaderboardKey, leaderboardKeyTTL)
 
 	// 执行Pipeline
-	_, err := pipe.Exec(ctx)
-	if err != nil {
+	if _, err := pipe.Exec(ctx); err != nil {
 		logrus.Errorf("failed to synchronize leaderboard: %v", err)
 		return fmt.Errorf("failed to synchronize leaderboard: %w", err)
 	}

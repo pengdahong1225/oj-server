@@ -11,6 +11,7 @@ import (
 	"oj-server/global"
 	"oj-server/module/configs"
 	"oj-server/module/db"
+	"oj-server/proto/pb"
 	"time"
 )
 
@@ -39,6 +40,19 @@ func NewRepo() (*JudgeRepo, error) {
 		db_:  db_,
 		rdb_: rdb_,
 	}, nil
+}
+
+func (r *JudgeRepo) QueryUserInfo(uid int64) (*db.UserInfo, error) {
+	var user db.UserInfo
+	result := r.db_.Where("id=?", uid).Find(&user)
+	if result.Error != nil {
+		logrus.Errorf("query user info failed, err:%v", result.Error)
+		return nil, status.Errorf(codes.Internal, "query failed")
+	}
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "user not found")
+	}
+	return &user, nil
 }
 
 func (r *JudgeRepo) QueryProblemData(id int64) (*db.Problem, error) {
@@ -125,18 +139,44 @@ func (r *JudgeRepo) UpdateUserSubmitRecord(record *db.SubmitRecord, level int32)
 	}
 	return nil
 }
-func (r *JudgeRepo) QueryUserAcceptCount(uid int64) (int32, int32, error) {
+func (r *JudgeRepo) QueryUserAcceptCount(uid int64) (int64, int64, error) {
 	var (
-		dailyAcCount   int32
-		monthlyAcCount int32
+		dailyAcCount   int64
+		monthlyAcCount int64
 	)
 
 	// 查询日 accepts
 	/*
-
-	 */
+		select count(DISTINCT problem_id)
+		from user_solution
+		where  uid = ? and create_at DATE(create_at) = CURRENT_DATE()
+		group by uid;
+	*/
+	result := r.db_.Table("user_solution").
+		Where("uid=? and DATE(create_at) = CURRENT_DATE()", uid).
+		Count(&dailyAcCount)
+	if result.Error != nil {
+		logrus.Errorf("query daily ac count failed, err:%v", result.Error)
+		return 0, 0, result.Error
+	}
 
 	// 查询月 accepts
+	/*
+		select accomplish_count
+		from  statistics
+		where period = ? and uid = ?;
+	*/
+	statistic := db.Statistics{
+		Uid:    uid,
+		Period: time.Now().Format("2006-01"),
+	}
+	result = r.db_.Where("period=? and uid=?", statistic.Period, statistic.Uid).
+		First(&statistic)
+	if result.Error != nil {
+		logrus.Errorf("query monthly ac count failed, err:%v", result.Error)
+		return 0, 0, result.Error
+	}
+	monthlyAcCount = int64(statistic.AccomplishCount)
 
 	return dailyAcCount, monthlyAcCount, nil
 }
@@ -151,4 +191,14 @@ func (r *JudgeRepo) SetTaskState(taskId string, state int) error {
 func (r *JudgeRepo) SetTaskResult(taskId, result string) error {
 	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
 	return r.rdb_.SetEx(context.Background(), key, result, global.TaskResultExpired).Err()
+}
+
+// lua 原子操作:
+// 1. 查询当前榜尾score
+// 2. 判断当前score是否比当前榜尾score大
+// 3. 插入当前用户
+func (r *JudgeRepo) UpdateLeaderboard(targetKey string, lb *pb.LeaderboardUserInfo) error {
+	script := ``
+
+	return nil
 }

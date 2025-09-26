@@ -451,6 +451,7 @@ type LeaderboardUserInfo struct {
 	UserName      string                 `protobuf:"bytes,2,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
 	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	Score         int32                  `protobuf:"varint,4,opt,name=score,proto3" json:"score,omitempty"`
+	Mobile        int64                  `protobuf:"varint,5,opt,name=mobile,proto3" json:"mobile,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -513,6 +514,13 @@ func (x *LeaderboardUserInfo) GetScore() int32 {
 	return 0
 }
 
+func (x *LeaderboardUserInfo) GetMobile() int64 {
+	if x != nil {
+		return x.Mobile
+	}
+	return 0
+}
+
 var File_record_service_proto protoreflect.FileDescriptor
 
 const file_record_service_proto_rawDesc = "" +
@@ -548,12 +556,13 @@ const file_record_service_proto_rawDesc = "" +
 	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"L\n" +
 	"\x18QueryJudgeResultResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"r\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x8a\x01\n" +
 	"\x13LeaderboardUserInfo\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1b\n" +
 	"\tuser_name\x18\x02 \x01(\tR\buserName\x12\x16\n" +
 	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x12\x14\n" +
-	"\x05score\x18\x04 \x01(\x05R\x05score2\xf4\x01\n" +
+	"\x05score\x18\x04 \x01(\x05R\x05score\x12\x16\n" +
+	"\x06mobile\x18\x05 \x01(\x03R\x06mobile2\xf4\x01\n" +
 	"\rRecordService\x12P\n" +
 	"\x13GetSubmitRecordList\x12\x1b.GetSubmitRecordListRequest\x1a\x1c.GetSubmitRecordListResponse\x12H\n" +
 	"\x13GetSubmitRecordData\x12\x17.GetSubmitRecordRequest\x1a\x18.GetSubmitRecordResponse\x12G\n" +

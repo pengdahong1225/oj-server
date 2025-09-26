@@ -59,4 +59,5 @@ message LeaderboardUserInfo {
   string user_name = 2;
   string avatar = 3;
   int32 score = 4;
+  int64 mobile = 5;
 }

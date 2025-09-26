@@ -2,10 +2,14 @@ package biz
 
 import (
 	"oj-server/module/db"
+	"oj-server/proto/pb"
 )
 
 // 仓库接口由data层去实现
 type Repo interface {
+	// 查询用户信息
+	QueryUserInfo(uid int64) (*db.UserInfo, error)
+
 	// 查询题目信息
 	QueryProblemData(id int64) (*db.Problem, error)
 
@@ -15,7 +19,7 @@ type Repo interface {
 	UpdateUserSubmitRecord(record *db.SubmitRecord, level int32) error
 
 	// 查询用户 当日和当月 的解题数量
-	QueryUserAcceptCount(uid int64) (int32, int32, error)
+	QueryUserAcceptCount(uid int64) (int64, int64, error)
 
 	// 解锁
 	UnLock(key string) error
@@ -25,7 +29,7 @@ type Repo interface {
 	SetTaskResult(taskId, result string) error
 
 	// 更新排行榜
-	//UpdateLeaderboard(lb *pb.LeaderboardUserInfo, targetKey string) error
+	UpdateLeaderboard(targetKey string, lb *pb.LeaderboardUserInfo) error
 }
 
 type JudgeUseCase struct {
@@ -37,6 +41,10 @@ func NewJudgeUseCase(repo Repo) *JudgeUseCase {
 		repo: repo,
 	}
 }
+func (jc *JudgeUseCase) QueryUserInfo(uid int64) (*db.UserInfo, error) {
+	return jc.repo.QueryUserInfo(uid)
+}
+
 func (jc *JudgeUseCase) QueryProblemData(id int64) (*db.Problem, error) {
 	return jc.repo.QueryProblemData(id)
 }
@@ -53,9 +61,10 @@ func (jc *JudgeUseCase) SetTaskResult(taskId, result string) error {
 	return jc.repo.SetTaskResult(taskId, result)
 }
 
-//	func (jc *JudgeUseCase) UpdateLeaderboard(lb *pb.LeaderboardUserInfo, targetKey string) error {
-//		return jc.repo.UpdateLeaderboard(lb, targetKey)
-//	}
-func (jc *JudgeUseCase) QueryUserAcceptCount(uid int64) (int32, int32, error) {
+func (jc *JudgeUseCase) UpdateLeaderboard(targetKey string, lb *pb.LeaderboardUserInfo) error {
+	return jc.repo.UpdateLeaderboard(targetKey, lb)
+}
+
+func (jc *JudgeUseCase) QueryUserAcceptCount(uid int64) (int64, int64, error) {
 	return jc.repo.QueryUserAcceptCount(uid)
 }
