@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
-	"oj-server/proto/pb"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
 	"time"

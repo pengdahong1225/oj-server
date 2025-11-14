@@ -2,13 +2,6 @@ package model
 
 import "oj-server/proto/pb"
 
-// 统一返回格式
-type Response struct {
-	ErrCode pb.Error `json:"code"` // 业务状态码
-	Message string   `json:"message"`
-	Data    any      `json:"data"`
-}
-
 type RankList struct {
 	Phone     int64  `json:"phone"`
 	NickName  string `json:"nickName"`

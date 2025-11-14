@@ -1,8 +1,8 @@
 package biz
 
 import (
-	"oj-server/module/db"
-	"oj-server/proto/pb"
+	"oj-server/pkg/proto/pb"
+	"oj-server/svr/problem/internal/model"
 	"time"
 )
 
@@ -10,11 +10,11 @@ import (
 type RecordRepo interface {
 	// 数据库接口
 	// 查询提交记录列表
-	QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []db.SubmitRecord, error)
+	QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error)
 	// 查询提交记录
-	QuerySubmitRecord(id int64) (*db.SubmitRecord, error)
+	QuerySubmitRecord(id int64) (*model.SubmitRecord, error)
 	// 根据uid查询解题统计信息
-	QueryStatistics(uid int64) (*db.Statistics, error)
+	QueryStatistics(uid int64) (*model.Statistics, error)
 
 	// 查询统计表 -- 月榜
 	QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error)
@@ -40,10 +40,10 @@ func NewRecordUseCase(repo RecordRepo) *RecordUseCase {
 	}
 }
 
-func (rc *RecordUseCase) QuerySubmitRecordList(uid int64, page, pageSize int) (int64, []db.SubmitRecord, error) {
+func (rc *RecordUseCase) QuerySubmitRecordList(uid int64, page, pageSize int) (int64, []model.SubmitRecord, error) {
 	return rc.repo.QuerySubmitRecordList(uid, pageSize, page)
 }
-func (rc *RecordUseCase) QuerySubmitRecord(id int64) (*db.SubmitRecord, error) {
+func (rc *RecordUseCase) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
 	return rc.repo.QuerySubmitRecord(id)
 }
 func (rc *RecordUseCase) QueryLeaderboardLastUpdate() (int64, error) {
@@ -52,7 +52,7 @@ func (rc *RecordUseCase) QueryLeaderboardLastUpdate() (int64, error) {
 func (rc *RecordUseCase) UpdateLeaderboardLastUpdate(time int64) error {
 	return rc.repo.UpdateLeaderboardLastUpdate(time)
 }
-func (rc *RecordUseCase) QueryStatistics(uid int64) (*db.Statistics, error) {
+func (rc *RecordUseCase) QueryStatistics(uid int64) (*model.Statistics, error) {
 	return rc.repo.QueryStatistics(uid)
 }
 func (rc *RecordUseCase) QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error) {

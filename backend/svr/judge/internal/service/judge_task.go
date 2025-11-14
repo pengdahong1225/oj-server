@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"oj-server/global"
-	"oj-server/module/db"
-	"oj-server/module/gPool"
-	"oj-server/proto/pb"
+	"oj-server/pkg/gPool"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/processor"
 	"oj-server/utils"
@@ -133,7 +132,7 @@ func (s *JudgeService) saveResult(param *biz.Param, data []byte) {
 		logrus.Errorf("保存判题结果失败, err=%s", err.Error())
 	}
 	// 更新数据库
-	record := &db.SubmitRecord{
+	record := &model.SubmitRecord{
 		Uid:         param.UserInfo.Uid,
 		UserName:    param.UserInfo.Nickname,
 		ProblemID:   param.ProblemData.Id,

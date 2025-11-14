@@ -8,12 +8,12 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"oj-server/global"
-	"oj-server/module/db"
-	"oj-server/module/gPool"
-	"oj-server/module/mq"
-	"oj-server/proto/pb"
+	"oj-server/pkg/gPool"
+	"oj-server/pkg/mq"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
+	"oj-server/svr/problem/internal/model"
 )
 
 // comment服务
@@ -86,7 +86,7 @@ func (ps *CommentService) HandleSaveComment(pbComment *pb.Comment) {
 		return
 	}
 	// 评论基本信息
-	comment := &db.Comment{
+	comment := &model.Comment{
 		ObjId:         pbComment.ObjId,
 		UserId:        pbComment.UserId,
 		UserName:      pbComment.UserName,
@@ -115,6 +115,40 @@ func (ps *CommentService) HandleSaveComment(pbComment *pb.Comment) {
 		ps.uc.SaveChildComment(comment) // 第二层
 	}
 }
+
+//// 非楼主评论
+//if form.RootId > 0 && form.RootCommentId > 0 {
+//	pbComment.IsRoot = 0
+//	pbComment.RootId = form.RootId
+//	pbComment.RootCommentId = form.RootCommentId
+//	if form.ReplyId > 0 && form.ReplyCommentId > 0 {
+//		pbComment.ReplyId = form.ReplyId
+//		pbComment.ReplyCommentId = form.ReplyCommentId
+//		pbComment.ReplyUserName = form.ReplyUserName
+//	} else {
+//		// 默认回复楼主
+//		pbComment.ReplyId = form.RootId
+//		pbComment.ReplyCommentId = form.RootCommentId
+//		pbComment.ReplyUserName = form.ReplyUserName
+//	}
+//} else {
+//	// 楼主评论
+//	pbComment.RootId = 0
+//	pbComment.RootCommentId = 0
+//	pbComment.IsRoot = 1
+//	pbComment.ReplyId = 0
+//	pbComment.ReplyCommentId = 0
+//}
+//// 查询ip归属地
+//ip := ctx.ClientIP()
+//info, err := utils.QueryIpGeolocation(ip)
+//if err != nil {
+//	logrus.Errorf("查询ip归属地失败,ip:%s,err:%s", ip, err.Error())
+//	info = &utils.IPInfoResp{
+//		RegionName: "未知地区",
+//	}
+//}
+//pbComment.PubRegion = info.RegionName
 
 func (ps *CommentService) QueryRootComment(ctx context.Context, in *pb.QueryRootCommentRequest) (*pb.QueryRootCommentResponse, error) {
 	// 校验

@@ -4,9 +4,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"oj-server/global"
-	"oj-server/module/gPool"
-	"oj-server/module/mq"
-	"oj-server/proto/pb"
+	"oj-server/pkg/gPool"
+	"oj-server/pkg/mq"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/data"
 )
@@ -19,8 +19,7 @@ type JudgeService struct {
 func NewJudgeService() *JudgeService {
 	repo, err := data.NewRepo()
 	if err != nil {
-		logrus.Errorf("new repo failed, err:%v", err)
-		return nil
+		logrus.Fatalf("new repo failed, err:%v", err)
 	}
 	uc := biz.NewJudgeUseCase(repo)
 

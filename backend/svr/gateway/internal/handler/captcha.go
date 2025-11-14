@@ -1,86 +1,15 @@
 package handler
 
 import (
-	"net/http"
-	"oj-server/module/captcha"
-	"oj-server/svr/gateway/internal/repo"
-	"regexp"
-
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/model"
 )
 
 // 获取图像验证码
 func HandleGetImageCode(ctx *gin.Context) {
-	resp := model.Response{
-		ErrCode: pb.Error_EN_Success,
-		Message: "success",
-	}
-	id, b64s, err := captcha.GenerateImageCaptcha()
-	if err != nil {
-		logrus.Errorf("生成图像验证码失败: %v", err)
-		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务繁忙"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		return
-	}
 
-	data := model.ImageCaptchaData{
-		CaptchaID: id,
-		Captcha:   b64s,
-	}
-	resp.Data = data
-	ctx.JSON(http.StatusOK, resp)
 }
 
 // 获取短信验证码
 func HandleGetSmsCode(ctx *gin.Context) {
-	// 表单校验
-	form, ok := validateWithForm(ctx, model.GetSmsCodeForm{})
-	if !ok {
-		return
-	}
 
-	resp := model.Response{
-		ErrCode: pb.Error_EN_Success,
-		Message: "success",
-	}
-	// 手机号校验
-	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
-	if !ok {
-		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "手机号格式错误"
-		ctx.JSON(http.StatusBadRequest, resp)
-		return
-	}
-	// 图形验证码校验
-	if !captcha.VerifyImageCaptcha(form.CaptchaID, form.CaptchaValue) {
-		resp.ErrCode = pb.Error_EN_FormValidateFailed
-		resp.Message = "图形验证码输入错误"
-		ctx.JSON(http.StatusBadRequest, resp)
-		return
-	}
-
-	// 发送验证码
-	c, err := captcha.SendSmsCode(form.Mobile)
-	if err != nil {
-		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务繁忙"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-	// 缓存验证码
-	err = repo.SetSmsCaptcha(form.Mobile, c)
-	if err != nil {
-		logrus.Errorf("缓存验证码失败: %v", err)
-		resp.ErrCode = pb.Error_EN_ServiceBusy
-		resp.Message = "服务繁忙"
-		ctx.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-	resp.ErrCode = pb.Error_EN_Success
-	resp.Message = "短信验证码发送成功"
-	ctx.JSON(http.StatusOK, resp)
 }

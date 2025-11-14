@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"oj-server/global"
-	"oj-server/module/configs"
-	"oj-server/module/logger"
-	"oj-server/module/registry"
+	"oj-server/svr/problem/internal/configs"
 	"oj-server/svr/problem/server"
 	"os"
 	"os/signal"
@@ -22,40 +19,24 @@ func main() {
 		panic(err)
 	}
 	appCfgPath := fmt.Sprintf("%s/%s", global.ConfigPath, "app_config.yaml")
-	err = configs.LoadAppConfigFile(appCfgPath)
-	if err != nil {
+	if err = configs.LoadAppConfigFile(appCfgPath); err != nil {
 		panic(err)
 	}
 
-	// 初始化日志
-	serverCfg := configs.ServerConf
-	err = logger.Init(global.LogPath, serverCfg.NodeType, logrus.DebugLevel)
-	if err != nil {
-		panic(err)
-	}
-
-	// 初始化注册中心
-	err = registry.Init()
-	if err != nil {
-		panic(err)
-	}
-	logrus.Debugf("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------", serverCfg.NodeType, serverCfg.NodeId, serverCfg.Host, serverCfg.Port, serverCfg.Scheme)
-
+	// 新建服务
 	app := server.NewServer()
 	if err = app.Init(); err != nil {
-		logrus.Fatalf("Failed to init server: %v", err)
+		panic(err)
 	}
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		sig := <-sigChan
-		logrus.Errorf("Recv signal: %v", sig)
+		<-sigChan
 		app.Stop()
 		time.Sleep(time.Second)
 		os.Exit(0)
 	}()
 
-	// 启动
+	// 启动服务
 	app.Run()
 }

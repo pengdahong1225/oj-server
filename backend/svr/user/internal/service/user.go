@@ -10,8 +10,9 @@ import (
 	"oj-server/utils"
 
 	"github.com/sirupsen/logrus"
-	"oj-server/module/db"
-	"oj-server/proto/pb"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"oj-server/pkg/proto/pb"
+	"oj-server/svr/user/internal/model"
 )
 
 type UserService struct {
@@ -38,11 +39,10 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	hash_pwd := utils.HashPassword(in.Password)
 	mobile, err := strconv.ParseInt(in.Mobile, 10, 64)
 	if err != nil {
-		logrus.Errorf("mobile转换失败, err: %s", err.Error())
-		resp.Message = "mobile转换失败: " + err.Error()
+		logrus.Errorf("parse mobile failed: %s", err.Error())
 		return resp, err
 	}
-	newUser := db.UserInfo{
+	newUser := model.UserInfo{
 		Mobile:    mobile,
 		PassWord:  hash_pwd,
 		NickName:  in.Nickname,
@@ -56,11 +56,9 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	id, err = us.uc.CreateNewUser(&newUser)
 	if err != nil {
 		logrus.Infof("创建新用户失败, err: %s", err.Error())
-		resp.Message = "创建新用户失败: " + err.Error()
 		return resp, err
 	}
 	resp.Uid = id
-	resp.Message = "创建新用户成功"
 	return resp, nil
 }
 
@@ -111,17 +109,15 @@ func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginB
 }
 
 // 重置密码
-func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPasswordRequest) (*pb.ResetUserPasswordResponse, error) {
-	resp := &pb.ResetUserPasswordResponse{}
+func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPasswordRequest) (*emptypb.Empty, error) {
 	hash := utils.HashPassword(in.Password)
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
 	err := us.uc.ResetUserPassword(mobile, hash)
 	if err != nil {
 		logrus.Errorf("重置密码失败, err: %s", err.Error())
-		resp.Message = "重置密码失败: " + err.Error()
-		return resp, err
+		return nil, err
 	}
-	return resp, nil
+	return nil, nil
 }
 
 // 获取用户信息

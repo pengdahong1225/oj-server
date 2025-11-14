@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-	"oj-server/module/gPool"
+	"oj-server/pkg/gPool"
 	"oj-server/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"sync"

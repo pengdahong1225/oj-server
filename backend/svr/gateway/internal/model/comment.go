@@ -1,6 +1,6 @@
 package model
 
-import "oj-server/proto/pb"
+import "oj-server/pkg/proto/pb"
 
 type Comment struct {
 	ID             int64  `json:"id"`

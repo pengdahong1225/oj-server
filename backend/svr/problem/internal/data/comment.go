@@ -1,15 +1,22 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"io"
+	"log"
 	"oj-server/global"
-	"oj-server/module/configs"
-	"oj-server/module/db"
+	"oj-server/svr/problem/internal/configs"
+	"oj-server/svr/problem/internal/model"
+	"os"
+	"time"
 )
 
 type CommentRepo struct {
@@ -18,19 +25,42 @@ type CommentRepo struct {
 }
 
 func NewCommentRepo() (*CommentRepo, error) {
+	// mysql
 	mysql_cfg := configs.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
-	db_, err := db.NewMysqlCli(dsn, global.LogPath)
+	timer := time.Now().Format("2006_01_02")
+	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
+	writer := io.MultiWriter(os.Stdout, file)
+	newLogger := logger.New(
+		log.New(writer, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      true,          // Don't include params in the SQL log
+			Colorful:                  false,         // Disable color
+		},
+	)
+	db_, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+		// SkipDefaultTransaction: true, //全局禁用默认事务
+	})
 
+	// redis
 	redis_cfg := configs.AppConf.RedisCfg
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
-	rdb_, err := db.NewRedisCli(dsn)
-	if err != nil {
-		return nil, err
+	rdb_ := redis.NewClient(&redis.Options{
+		Addr:    dsn,
+		Network: "tcp",
+	})
+	st := rdb_.Ping(context.Background())
+	if st.Err() != nil {
+		return nil, st.Err()
 	}
 
 	return &CommentRepo{
@@ -41,7 +71,7 @@ func NewCommentRepo() (*CommentRepo, error) {
 
 func (cr *CommentRepo) AssertObj(id int64) bool {
 	var (
-		p db.Problem
+		p model.Problem
 	)
 	result := cr.db_.Where("id = ?", id).Find(&p)
 	if result.Error != nil {
@@ -55,7 +85,7 @@ func (cr *CommentRepo) AssertObj(id int64) bool {
 	return true
 }
 
-func (cr *CommentRepo) SaveRootComment(comment *db.Comment) {
+func (cr *CommentRepo) SaveRootComment(comment *model.Comment) {
 	err := cr.db_.Transaction(func(tx *gorm.DB) error {
 		// 插入评论
 		result := tx.Omit("ID", "CreateAt", "UpdateAt", "DeletedAt").Create(comment)
@@ -74,7 +104,7 @@ func (cr *CommentRepo) SaveRootComment(comment *db.Comment) {
 		logrus.Errorf("save root comment failed: %s", err.Error())
 	}
 }
-func (cr *CommentRepo) SaveChildComment(comment *db.Comment) {
+func (cr *CommentRepo) SaveChildComment(comment *model.Comment) {
 	err := cr.db_.Transaction(func(tx *gorm.DB) error {
 		if !assertRoot(tx, comment.RootCommentId, comment.RootId) {
 			return fmt.Errorf("assert root comment failed")
@@ -108,7 +138,7 @@ func (cr *CommentRepo) SaveChildComment(comment *db.Comment) {
 		logrus.Errorf("save child comment failed: %s", err.Error())
 	}
 }
-func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64, []db.Comment, error) {
+func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64, []model.Comment, error) {
 	/*
 		select * from comment
 		where obj_id = ? and is_root = 1
@@ -117,7 +147,7 @@ func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64,
 		limit pageSize;
 	*/
 	var count int64
-	result := cr.db_.Model(&db.Comment{}).Where("obj_id = ?", objId).Where("is_root = ?", 1).Count(&count)
+	result := cr.db_.Model(&model.Comment{}).Where("obj_id = ?", objId).Where("is_root = ?", 1).Count(&count)
 	if result.Error != nil {
 		logrus.Errorf("query comment count failed: %s", result.Error.Error())
 		return 0, nil, status.Errorf(codes.Internal, "query comment count failed")
@@ -127,7 +157,7 @@ func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64,
 	}
 
 	offSet := (page - 1) * pageSize
-	var comments []db.Comment
+	var comments []model.Comment
 	result = cr.db_.Where("obj_id = ?", objId).Where("is_root = ?", 1).
 		Order("like_count desc").
 		Offset(offSet).
@@ -141,9 +171,9 @@ func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64,
 	return count, comments, nil
 }
 
-func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cursor int32) (int64, []db.Comment, error) {
+func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cursor int32) (int64, []model.Comment, error) {
 	var count int64
-	result := cr.db_.Model(&db.Comment{}).
+	result := cr.db_.Model(&model.Comment{}).
 		Where("obj_id = ?", objId).
 		Where("is_root = ?", 0).
 		Where("root_id = ?", rootId).
@@ -157,7 +187,7 @@ func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cur
 		return 0, nil, nil
 	}
 
-	var comments []db.Comment
+	var comments []model.Comment
 	result = cr.db_.Where("obj_id = ?", objId).
 		Where("is_root = ?", 0).
 		Where("root_id = ?", rootId).
@@ -177,7 +207,7 @@ func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cur
 // 根评论是否存在，校验root_id和root_comment_id
 func assertRoot(tx *gorm.DB, rootCommentId int64, rootId int64) bool {
 	var (
-		c db.Comment
+		c model.Comment
 	)
 	result := tx.Where("id = ?", rootCommentId).Where("user_id = ?", rootId).Find(&c)
 	if result.Error != nil {
@@ -191,7 +221,7 @@ func assertRoot(tx *gorm.DB, rootCommentId int64, rootId int64) bool {
 	return true
 }
 func (cr *CommentRepo) CommentLike(objId, commentId int64) {
-	result := cr.db_.Model(&db.Comment{}).
+	result := cr.db_.Model(&model.Comment{}).
 		Where("obj_id = ?", objId).
 		Where("id = ?", commentId).
 		Update("like_count", gorm.Expr("like_count + ?", 1))
@@ -208,7 +238,7 @@ func (cr *CommentRepo) CommentLike(objId, commentId int64) {
 // 回复评论是否存在，校验reply_id和reply_comment_id
 func assertReply(tx *gorm.DB, replyCommentId int64, replyId int64) bool {
 	var (
-		c db.Comment
+		c model.Comment
 	)
 	result := tx.Where("id = ?", replyCommentId).Where("user_id = ?", replyId).Find(&c)
 	if result.Error != nil {
@@ -228,7 +258,7 @@ func updateObjCommentCount(tx *gorm.DB, id int64, diff int64) bool {
 		select comment_count from problem
 		where id = ?;
 	*/
-	obj := db.Problem{}
+	obj := model.Problem{}
 	result := tx.Select("comment_count").Where("id = ?", id).Find(&obj)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -262,7 +292,7 @@ func updateRootCommentChildCount(tx *gorm.DB, id int64, diff int) bool {
 		select child_count from comment
 		where id = ?;
 	*/
-	comment := db.Comment{}
+	comment := model.Comment{}
 	result := tx.Select("child_count").Where("id = ?", id).Find(&comment)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -296,7 +326,7 @@ func updateReplyCommentReplyCount(tx *gorm.DB, id int64, diff int) bool {
 		select reply_count from comment
 		where id = ?;
 	*/
-	comment := db.Comment{}
+	comment := model.Comment{}
 	result := tx.Select("reply_count").Where("id = ?", id).Find(&comment)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())

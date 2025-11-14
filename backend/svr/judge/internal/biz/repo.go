@@ -1,22 +1,23 @@
 package biz
 
 import (
-	"oj-server/module/db"
 	"oj-server/proto/pb"
+	model2 "oj-server/svr/problem/internal/model"
+	"oj-server/svr/user/internal/model"
 )
 
 // 仓库接口由data层去实现
 type Repo interface {
 	// 查询用户信息
-	QueryUserInfo(uid int64) (*db.UserInfo, error)
+	QueryUserInfo(uid int64) (*model.UserInfo, error)
 
 	// 查询题目信息
-	QueryProblemData(id int64) (*db.Problem, error)
+	QueryProblemData(id int64) (*model2.Problem, error)
 
 	// 1.更新提交记录表
 	// 2.更新解题记录表
 	// 3.更新统计表
-	UpdateUserSubmitRecord(record *db.SubmitRecord, level int32) error
+	UpdateUserSubmitRecord(record *model2.SubmitRecord, level int32) error
 
 	// 查询用户 当日和当月 的解题数量
 	QueryUserAcceptCount(uid int64) (int64, int64, error)
@@ -41,14 +42,14 @@ func NewJudgeUseCase(repo Repo) *JudgeUseCase {
 		repo: repo,
 	}
 }
-func (jc *JudgeUseCase) QueryUserInfo(uid int64) (*db.UserInfo, error) {
+func (jc *JudgeUseCase) QueryUserInfo(uid int64) (*model.UserInfo, error) {
 	return jc.repo.QueryUserInfo(uid)
 }
 
-func (jc *JudgeUseCase) QueryProblemData(id int64) (*db.Problem, error) {
+func (jc *JudgeUseCase) QueryProblemData(id int64) (*model2.Problem, error) {
 	return jc.repo.QueryProblemData(id)
 }
-func (jc *JudgeUseCase) UpdateUserSubmitRecord(record *db.SubmitRecord, level int32) error {
+func (jc *JudgeUseCase) UpdateUserSubmitRecord(record *model2.SubmitRecord, level int32) error {
 	return jc.repo.UpdateUserSubmitRecord(record, level)
 }
 func (jc *JudgeUseCase) SetTaskState(taskId string, state int) error {

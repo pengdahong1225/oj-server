@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"math/rand"
 	"oj-server/global"
-	"oj-server/module/db"
+	"oj-server/pkg/db"
 	"oj-server/proto/pb"
 	"testing"
 	"time"

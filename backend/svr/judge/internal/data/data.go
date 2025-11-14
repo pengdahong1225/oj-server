@@ -10,9 +10,10 @@ import (
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"oj-server/global"
-	"oj-server/module/configs"
-	"oj-server/module/db"
-	"oj-server/proto/pb"
+
+	"oj-server/pkg/proto/pb"
+	"oj-server/svr/judge/internal/configs"
+	"oj-server/svr/problem/internal/model"
 	"time"
 )
 
@@ -43,8 +44,8 @@ func NewRepo() (*JudgeRepo, error) {
 	}, nil
 }
 
-func (r *JudgeRepo) QueryUserInfo(uid int64) (*db.UserInfo, error) {
-	var user db.UserInfo
+func (r *JudgeRepo) QueryUserInfo(uid int64) (*model.UserInfo, error) {
+	var user model.UserInfo
 	result := r.db_.Where("id=?", uid).Find(&user)
 	if result.Error != nil {
 		logrus.Errorf("query user info failed, err:%v", result.Error)
@@ -56,8 +57,8 @@ func (r *JudgeRepo) QueryUserInfo(uid int64) (*db.UserInfo, error) {
 	return &user, nil
 }
 
-func (r *JudgeRepo) QueryProblemData(id int64) (*db.Problem, error) {
-	var problem db.Problem
+func (r *JudgeRepo) QueryProblemData(id int64) (*model2.Problem, error) {
+	var problem model2.Problem
 	result := r.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -72,7 +73,7 @@ func (r *JudgeRepo) QueryProblemData(id int64) (*db.Problem, error) {
 // 1.更新提交记录表
 // 2.更新解题记录表
 // 3.更新统计表
-func (r *JudgeRepo) UpdateUserSubmitRecord(record *db.SubmitRecord, level int32) error {
+func (r *JudgeRepo) UpdateUserSubmitRecord(record *model2.SubmitRecord, level int32) error {
 	err := r.db_.Transaction(func(tx *gorm.DB) error {
 		// 1.更新用户提交记录表
 		/*
@@ -93,7 +94,7 @@ func (r *JudgeRepo) UpdateUserSubmitRecord(record *db.SubmitRecord, level int32)
 		*/
 		var repeatedAc = true
 		if record.Status == "Accepted" {
-			var userSolution db.UserSolution
+			var userSolution model2.UserSolution
 			result = tx.Where("uid=? and problem_id=?", record.Uid, record.ProblemID).Find(&userSolution)
 			if result.RowsAffected == 0 {
 				repeatedAc = false
@@ -107,7 +108,7 @@ func (r *JudgeRepo) UpdateUserSubmitRecord(record *db.SubmitRecord, level int32)
 			}
 		}
 		// 3.更新统计表
-		var statistic = db.Statistics{
+		var statistic = model2.Statistics{
 			Uid:    record.Uid,
 			Period: time.Now().Format("2006-01"),
 		}
@@ -167,7 +168,7 @@ func (r *JudgeRepo) QueryUserAcceptCount(uid int64) (int64, int64, error) {
 		from  statistics
 		where period = ? and uid = ?;
 	*/
-	statistic := db.Statistics{
+	statistic := model2.Statistics{
 		Uid:    uid,
 		Period: time.Now().Format("2006-01"),
 	}

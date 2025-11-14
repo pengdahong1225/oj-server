@@ -10,11 +10,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"oj-server/global"
-	"oj-server/module/db"
-	"oj-server/module/mq"
-	"oj-server/proto/pb"
+	"oj-server/pkg/mq"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
+	"oj-server/svr/problem/internal/model"
 	"oj-server/utils"
 	"os"
 	"path/filepath"
@@ -48,7 +48,7 @@ func NewProblemService() *ProblemService {
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
 	resp := &pb.CreateProblemResponse{}
 
-	problem := &db.Problem{
+	problem := &model.Problem{
 		Title:        in.Title,
 		Level:        in.Level,
 		Tags:         []byte(utils.SpliceStringWithX(in.Tags, "#")),
@@ -130,7 +130,7 @@ func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProb
 func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
 	resp := &pb.UpdateProblemResponse{}
 
-	problem := &db.Problem{
+	problem := &model.Problem{
 		ID:          in.Data.Id,
 		Title:       in.Data.Title,
 		Level:       in.Data.Level,

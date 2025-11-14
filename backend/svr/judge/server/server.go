@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"oj-server/module/configs"
-	"oj-server/module/registry"
+	"oj-server/pkg/registry"
+	"oj-server/svr/judge/internal/configs"
 	"oj-server/svr/judge/internal/service"
 )
 
@@ -19,36 +19,50 @@ func NewServer() *Server {
 
 func (s *Server) Init() error {
 	s.judgeService = service.NewJudgeService()
-	if s.judgeService == nil {
-		return fmt.Errorf("judge service init failed")
-	}
-
 	return nil
 }
 
 func (s *Server) Run() {
-	// 启动判题任务消费
-	go s.judgeService.ConsumeJudgeTask()
+	server_cfg := configs.ServerConf
+	logrus.Infof("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------",
+		server_cfg.Name, server_cfg.NodeId, server_cfg.Address, server_cfg.Port, server_cfg.Scheme)
 
-	// 服务注册
-	err := registry.RegisterService()
+	// 注册服务
+	err := registry.MyRegistrar.RegisterService(&registry.ServiceInfo{
+		Name:    server_cfg.Name,
+		NodeId:  server_cfg.NodeId,
+		Address: server_cfg.Address,
+		Port:    server_cfg.Port,
+		Scheme:  server_cfg.Scheme,
+	})
 	if err != nil {
 		logrus.Fatalf("注册服务失败: %v", err)
+		return
 	}
-	cfg := configs.ServerConf
-	dsn := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+
+	// 消费判题任务
+	go s.judgeService.ConsumeJudgeTask()
+
+	// 主线程负责响应健康检查
+	dsn := fmt.Sprintf("%s:%d", server_cfg.Address, server_cfg.Port)
 	http.HandleFunc("/health", func(res http.ResponseWriter, req *http.Request) {
 		if req.Method == "GET" {
 			_, _ = res.Write([]byte("ok"))
 		}
 	})
 	if err = http.ListenAndServe(dsn, nil); err != nil {
-		logrus.Errorf("%s", err)
-		_ = registry.DeregisterService()
+		logrus.Fatalf("启动服务失败: %v", err)
 	}
 }
 
 func (s *Server) Stop() {
-	_ = registry.DeregisterService()
-	logrus.Errorf("======================= judge stop =======================")
+	server_cfg := configs.ServerConf
+	_ = registry.MyRegistrar.UnRegister(&registry.ServiceInfo{
+		Name:    server_cfg.Name,
+		NodeId:  server_cfg.NodeId,
+		Address: server_cfg.Address,
+		Port:    server_cfg.Port,
+		Scheme:  server_cfg.Scheme,
+	})
+	logrus.Warnf("======================= judge stop =======================")
 }

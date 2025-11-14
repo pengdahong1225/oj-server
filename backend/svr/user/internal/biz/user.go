@@ -1,16 +1,16 @@
 package biz
 
 import (
-	"oj-server/module/db"
+	"oj-server/svr/user/internal/model"
 )
 
 // 仓库接口由data层去实现
 type UserRepo interface {
 	// 创建用户
-	CreateNewUser(user *db.UserInfo) (int64, error)
+	CreateNewUser(user *model.UserInfo) (int64, error)
 	// 获取用户信息
-	GetUserInfoByUid(uid int64) (*db.UserInfo, error)
-	GetUserInfoByMobile(mobile int64) (*db.UserInfo, error)
+	GetUserInfoByUid(uid int64) (*model.UserInfo, error)
+	GetUserInfoByMobile(mobile int64) (*model.UserInfo, error)
 	// 重置用户密码
 	ResetUserPassword(mobile int64, password string) error
 }
@@ -25,13 +25,13 @@ func NewUserUseCase(repo UserRepo) *UserUseCase {
 	}
 }
 
-func (uc *UserUseCase) CreateNewUser(user *db.UserInfo) (int64, error) {
+func (uc *UserUseCase) CreateNewUser(user *model.UserInfo) (int64, error) {
 	return uc.repo.CreateNewUser(user)
 }
-func (uc *UserUseCase) GetUserInfoByUid(mobile int64) (*db.UserInfo, error) {
+func (uc *UserUseCase) GetUserInfoByUid(mobile int64) (*model.UserInfo, error) {
 	return uc.repo.GetUserInfoByUid(mobile)
 }
-func (uc *UserUseCase) GetUserInfoByMobile(mobile int64) (*db.UserInfo, error) {
+func (uc *UserUseCase) GetUserInfoByMobile(mobile int64) (*model.UserInfo, error) {
 	return uc.repo.GetUserInfoByMobile(mobile)
 }
 func (uc *UserUseCase) ResetUserPassword(mobile int64, password string) error {

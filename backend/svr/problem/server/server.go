@@ -7,9 +7,9 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
-	"oj-server/module/configs"
-	"oj-server/module/registry"
-	"oj-server/proto/pb"
+	"oj-server/pkg/proto/pb"
+	"oj-server/pkg/registry"
+	"oj-server/svr/problem/internal/configs"
 	"oj-server/svr/problem/internal/service"
 )
 
@@ -33,38 +33,58 @@ func (s *Server) Init() error {
 }
 
 func (s *Server) Run() {
+	server_cfg := configs.ServerConf
+	logrus.Infof("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------",
+		server_cfg.Name, server_cfg.NodeId, server_cfg.Address, server_cfg.Port, server_cfg.Scheme)
+
+	// 注册服务
+	err := registry.MyRegistrar.RegisterService(&registry.ServiceInfo{
+		Name:    server_cfg.Name,
+		NodeId:  server_cfg.NodeId,
+		Address: server_cfg.Address,
+		Port:    server_cfg.Port,
+		Scheme:  server_cfg.Scheme,
+	})
+	if err != nil {
+		logrus.Fatalf("注册服务失败: %v", err)
+		return
+	}
+
 	// 评论任务消费
 	go s.commentService.ConsumeComment()
 	// 建立排行榜
 	go s.recordService.SyncLeaderboardByScheduled()
 
-	// 服务注册
-	err := registry.RegisterService()
-	if err != nil {
-		logrus.Fatalf("注册服务失败: %v", err)
-	}
 	// 监听
 	cfg := configs.ServerConf
-	netAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	netAddr := fmt.Sprintf("%s:%d", cfg.Address, cfg.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
-		logrus.Fatalf("监听失败: %v", err)
+		logrus.Fatalf("listen err: %v", err)
+		return
 	}
-	defer listener.Close()
 	s.listener = listener
 
+	// 启动GRPC服务
 	grpcServer := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	pb.RegisterProblemServiceServer(grpcServer, s.problemService)
 	pb.RegisterRecordServiceServer(grpcServer, s.recordService)
 	pb.RegisterCommentServiceServer(grpcServer, s.commentService)
 	if err = grpcServer.Serve(listener); err != nil {
-		logrus.Errorf("%s", err)
-		_ = registry.DeregisterService()
+		logrus.Fatalf("启动GRPC服务失败: %v", err)
 	}
 }
 
 func (s *Server) Stop() {
+	server_cfg := configs.ServerConf
+	_ = registry.MyRegistrar.UnRegister(&registry.ServiceInfo{
+		Name:    server_cfg.Name,
+		NodeId:  server_cfg.NodeId,
+		Address: server_cfg.Address,
+		Port:    server_cfg.Port,
+		Scheme:  server_cfg.Scheme,
+	})
 	_ = s.listener.Close()
-	logrus.Errorf("======================= problem stop =======================")
+	logrus.Warnf("======================= problem stop =======================")
 }

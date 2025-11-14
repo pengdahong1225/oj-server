@@ -3,8 +3,6 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/model"
 )
 
 func Admin() gin.HandlerFunc {
@@ -12,11 +10,10 @@ func Admin() gin.HandlerFunc {
 		claims, _ := ctx.Get("claims")
 		currentUser := claims.(*UserClaims)
 		if currentUser.Authority == 0 {
-			resp := &model.Response{
-				ErrCode: pb.Error_EN_Unauthorized,
-				Message: "无权限",
-			}
-			ctx.JSON(http.StatusUnauthorized, resp)
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"code":    401,
+				"message": "无权限",
+			})
 			ctx.Abort()
 			return
 		}

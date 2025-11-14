@@ -1,15 +1,22 @@
 package data
 
 import (
+	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"io"
+	"log"
 	"oj-server/global"
-	"oj-server/module/configs"
-	"oj-server/module/db"
+	"oj-server/svr/user/internal/configs"
+	"oj-server/svr/user/internal/model"
+	"os"
+	"time"
 )
 
 type UserRepo struct {
@@ -18,19 +25,42 @@ type UserRepo struct {
 }
 
 func NewUserRepo() (*UserRepo, error) {
+	// mysql
 	mysql_cfg := configs.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
-	db_, err := db.NewMysqlCli(dsn, global.LogPath)
+	timer := time.Now().Format("2006_01_02")
+	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
+	writer := io.MultiWriter(os.Stdout, file)
+	newLogger := logger.New(
+		log.New(writer, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      true,          // Don't include params in the SQL log
+			Colorful:                  false,         // Disable color
+		},
+	)
+	db_, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+		// SkipDefaultTransaction: true, //全局禁用默认事务
+	})
 
+	// redis
 	redis_cfg := configs.AppConf.RedisCfg
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
-	rdb_, err := db.NewRedisCli(dsn)
-	if err != nil {
-		return nil, err
+	rdb_ := redis.NewClient(&redis.Options{
+		Addr:    dsn,
+		Network: "tcp",
+	})
+	st := rdb_.Ping(context.Background())
+	if st.Err() != nil {
+		return nil, st.Err()
 	}
 
 	return &UserRepo{
@@ -39,8 +69,8 @@ func NewUserRepo() (*UserRepo, error) {
 	}, nil
 }
 
-func (up *UserRepo) CreateNewUser(user *db.UserInfo) (int64, error) {
-	var u db.UserInfo
+func (up *UserRepo) CreateNewUser(user *model.UserInfo) (int64, error) {
+	var u model.UserInfo
 	result := up.db_.Where("mobile=?", user.Mobile).Find(&u)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
@@ -57,8 +87,8 @@ func (up *UserRepo) CreateNewUser(user *db.UserInfo) (int64, error) {
 	}
 	return user.ID, nil
 }
-func (up *UserRepo) GetUserInfoByUid(mobile int64) (*db.UserInfo, error) {
-	var user db.UserInfo
+func (up *UserRepo) GetUserInfoByUid(mobile int64) (*model.UserInfo, error) {
+	var user model.UserInfo
 	result := up.db_.Where("id=?", mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
@@ -69,8 +99,8 @@ func (up *UserRepo) GetUserInfoByUid(mobile int64) (*db.UserInfo, error) {
 	}
 	return &user, nil
 }
-func (up *UserRepo) GetUserInfoByMobile(mobile int64) (*db.UserInfo, error) {
-	var user db.UserInfo
+func (up *UserRepo) GetUserInfoByMobile(mobile int64) (*model.UserInfo, error) {
+	var user model.UserInfo
 	result := up.db_.Where("mobile=?", mobile).Find(&user)
 	if result.Error != nil {
 		logrus.Errorf("查询错误, err: %s", result.Error.Error())
@@ -87,7 +117,7 @@ func (up *UserRepo) ResetUserPassword(mobile int64, password string) error {
 		update user_info set password = '123456'
 		where mobile = ?;
 	*/
-	result := up.db_.Model(&db.UserInfo{}).Where("mobile=?", mobile).Update("password", password)
+	result := up.db_.Model(&model.UserInfo{}).Where("mobile=?", mobile).Update("password", password)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "update user faild")

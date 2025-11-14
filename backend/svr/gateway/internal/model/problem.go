@@ -46,6 +46,9 @@ type SubmitForm struct {
 	Lang      string `json:"lang" binding:"required"`
 	Code      string `json:"code" binding:"required"`
 }
+type SubmitResult struct {
+	TaskId string `json:"task_id"`
+}
 
 // 修改题目表单
 type UpdateProblemForm struct {

@@ -7,10 +7,15 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"io"
+	"log"
 	"oj-server/global"
-	"oj-server/module/configs"
-	"oj-server/module/db"
+	"oj-server/svr/problem/internal/configs"
+	"oj-server/svr/problem/internal/model"
+	"os"
 	"time"
 )
 
@@ -20,19 +25,42 @@ type ProblemRepo struct {
 }
 
 func NewProblemRepo() (*ProblemRepo, error) {
+	// mysql
 	mysql_cfg := configs.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
-	db_, err := db.NewMysqlCli(dsn, global.LogPath)
+	timer := time.Now().Format("2006_01_02")
+	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
+	writer := io.MultiWriter(os.Stdout, file)
+	newLogger := logger.New(
+		log.New(writer, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      true,          // Don't include params in the SQL log
+			Colorful:                  false,         // Disable color
+		},
+	)
+	db_, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+		// SkipDefaultTransaction: true, //全局禁用默认事务
+	})
 
+	// redis
 	redis_cfg := configs.AppConf.RedisCfg
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
-	rdb_, err := db.NewRedisCli(dsn)
-	if err != nil {
-		return nil, err
+	rdb_ := redis.NewClient(&redis.Options{
+		Addr:    dsn,
+		Network: "tcp",
+	})
+	st := rdb_.Ping(context.Background())
+	if st.Err() != nil {
+		return nil, st.Err()
 	}
 
 	return &ProblemRepo{
@@ -41,7 +69,7 @@ func NewProblemRepo() (*ProblemRepo, error) {
 	}, nil
 }
 
-func (pr *ProblemRepo) CreateProblem(problem *db.Problem) (int64, error) {
+func (pr *ProblemRepo) CreateProblem(problem *model.Problem) (int64, error) {
 	result := pr.db_.Create(problem)
 	if result.Error != nil {
 		logrus.Errorf("create problem failed: %s", result.Error.Error())
@@ -56,14 +84,14 @@ func (pr *ProblemRepo) CreateProblem(problem *db.Problem) (int64, error) {
 // @page_size 单页数量
 // @keyword 关键字
 // @tag 标签
-func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []db.Problem, error) {
+func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error) {
 	/**
 	select COUNT(*) AS count
 	from problem
 	where title like '%name%' AND JSON_CONTAINS(tags, '"哈希表"');
 	*/
 	var count int64 = 0
-	query := pr.db_.Model(&db.Problem{})
+	query := pr.db_.Model(&model.Problem{})
 	if keyword != "" {
 		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
@@ -85,8 +113,8 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 		limit page_size;
 	*/
 	offSet := (page - 1) * pageSize
-	var problemList []db.Problem
-	query = pr.db_.Model(&db.Problem{}).Select("id,title,level,tags,create_at,create_by")
+	var problemList []model.Problem
+	query = pr.db_.Model(&model.Problem{}).Select("id,title,level,tags,create_at,create_by")
 	if keyword != "" {
 		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
@@ -101,8 +129,8 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 	return count, problemList, nil
 }
 
-func (pr *ProblemRepo) QueryProblemData(id int64) (*db.Problem, error) {
-	var problem db.Problem
+func (pr *ProblemRepo) QueryProblemData(id int64) (*model.Problem, error) {
+	var problem model.Problem
 	result := pr.db_.Where("id=?", id).Find(&problem)
 	if result.Error != nil {
 		logrus.Errorf("query problem failed: %s", result.Error.Error())
@@ -114,8 +142,8 @@ func (pr *ProblemRepo) QueryProblemData(id int64) (*db.Problem, error) {
 	return &problem, nil
 }
 
-func (pr *ProblemRepo) UpdateProblem(problem *db.Problem) error {
-	result := pr.db_.Model(&db.Problem{}).Where("id=?", problem.ID).Updates(problem)
+func (pr *ProblemRepo) UpdateProblem(problem *model.Problem) error {
+	result := pr.db_.Model(&model.Problem{}).Where("id=?", problem.ID).Updates(problem)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
@@ -127,7 +155,7 @@ func (pr *ProblemRepo) UpdateProblem(problem *db.Problem) error {
 }
 
 func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
-	result := pr.db_.Model(&db.Problem{}).Where("id=?", id).Update("status", st)
+	result := pr.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", st)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "query failed")
@@ -139,7 +167,7 @@ func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
 }
 
 func (pr *ProblemRepo) DeleteProblem(id int64) error {
-	result := pr.db_.Where("id=?", id).Delete(&db.Problem{})
+	result := pr.db_.Where("id=?", id).Delete(&model.Problem{})
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return status.Errorf(codes.Internal, "delete problem failed")
@@ -164,7 +192,7 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 		/*
 			select tags from problem
 		*/
-		result := pr.db_.Model(&db.Problem{}).Pluck("tags", &tagList)
+		result := pr.db_.Model(&model.Problem{}).Pluck("tags", &tagList)
 		if result.Error != nil {
 			logrus.Errorf("query tag list failed: %s", result.Error.Error())
 			return nil, status.Errorf(codes.Internal, "query failed")

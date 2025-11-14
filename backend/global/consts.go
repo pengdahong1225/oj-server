@@ -18,6 +18,7 @@ const (
 	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7
 	AccessTokenTimeOut  int64 = 60 * 1
 	Issuer                    = "Messi"
+	ProblemConfigPath         = "/data/oj/problem_configs"
 )
 
 // ============================ mq相关 ============================

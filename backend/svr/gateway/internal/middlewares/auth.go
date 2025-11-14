@@ -5,23 +5,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"oj-server/module/configs"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/model"
+	"oj-server/svr/gateway/internal/configs"
 	"strings"
 	"time"
 )
 
 func AuthLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resp := &model.Response{}
-
 		// jwt鉴权头部信息 token
 		token := ctx.GetHeader("Authorization")
 		if token == "" {
-			resp.ErrCode = pb.Error_EN_Unauthorized
-			resp.Message = "未登录"
-			ctx.JSON(http.StatusUnauthorized, resp)
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"code":    401,
+				"message": "未登录",
+			})
 			ctx.Abort()
 			return
 		}
@@ -34,15 +31,17 @@ func AuthLogin() gin.HandlerFunc {
 		claims, err := j.ParseToken(token)
 		if err != nil {
 			if errors.Is(err, TokenExpired) {
-				resp.ErrCode = pb.Error_EN_AccessTokenExpired
-				resp.Message = "授权已过期"
-				ctx.JSON(http.StatusUnauthorized, resp)
+				ctx.JSON(http.StatusUnauthorized, gin.H{
+					"code":    401,
+					"message": "token已过期",
+				})
 				ctx.Abort()
 				return
 			} else {
-				resp.ErrCode = pb.Error_EN_TokenInvalid
-				resp.Message = "token验证失败"
-				ctx.JSON(http.StatusUnauthorized, resp)
+				ctx.JSON(http.StatusUnauthorized, gin.H{
+					"code":    401,
+					"message": "token错误",
+				})
 				ctx.Abort()
 				return
 			}

@@ -8,11 +8,16 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"io"
+	"log"
 	"oj-server/global"
-	"oj-server/module/configs"
-	"oj-server/module/db"
-	"oj-server/proto/pb"
+	"oj-server/pkg/proto/pb"
+	"oj-server/svr/problem/internal/configs"
+	"oj-server/svr/problem/internal/model"
+	"os"
 	"strconv"
 	"time"
 )
@@ -23,19 +28,42 @@ type RecordRepo struct {
 }
 
 func NewRecordRepo() (*RecordRepo, error) {
+	// mysql
 	mysql_cfg := configs.AppConf.MysqlCfg
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
-	db_, err := db.NewMysqlCli(dsn, global.LogPath)
+	timer := time.Now().Format("2006_01_02")
+	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
+	writer := io.MultiWriter(os.Stdout, file)
+	newLogger := logger.New(
+		log.New(writer, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      true,          // Don't include params in the SQL log
+			Colorful:                  false,         // Disable color
+		},
+	)
+	db_, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+		// SkipDefaultTransaction: true, //全局禁用默认事务
+	})
 
+	// redis
 	redis_cfg := configs.AppConf.RedisCfg
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
-	rdb_, err := db.NewRedisCli(dsn)
-	if err != nil {
-		return nil, err
+	rdb_ := redis.NewClient(&redis.Options{
+		Addr:    dsn,
+		Network: "tcp",
+	})
+	st := rdb_.Ping(context.Background())
+	if st.Err() != nil {
+		return nil, st.Err()
 	}
 
 	return &RecordRepo{
@@ -45,7 +73,7 @@ func NewRecordRepo() (*RecordRepo, error) {
 }
 
 // 查询用户的历史提交记录
-func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []db.SubmitRecord, error) {
+func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error) {
 	/*
 		select id, created_at, problem_name, status, lang from user_submit_record
 		where uid = ?
@@ -54,12 +82,12 @@ func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (in
 		limit page_size;
 	*/
 	var count int64 = 0
-	result := rr.db_.Model(&db.SubmitRecord{}).Where("uid = ?", uid).Count(&count)
+	result := rr.db_.Model(&model.SubmitRecord{}).Where("uid = ?", uid).Count(&count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return 0, nil, status.Errorf(codes.Internal, "查询提交记录失败")
 	}
-	var records []db.SubmitRecord
+	var records []model.SubmitRecord
 	result = rr.db_.Where("uid = ?", uid).Order("created_at desc").Offset(offset).Limit(pageSize).Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -69,8 +97,8 @@ func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (in
 }
 
 // 查询某项提交记录的详细信息
-func (rr *RecordRepo) QuerySubmitRecord(id int64) (*db.SubmitRecord, error) {
-	var record db.SubmitRecord
+func (rr *RecordRepo) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
+	var record model.SubmitRecord
 	result := rr.db_.Where("id = ?", id).First(&record)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
@@ -96,8 +124,8 @@ func (rr *RecordRepo) UpdateLeaderboardLastUpdate(time int64) error {
 	}
 	return nil
 }
-func (rr *RecordRepo) QueryStatistics(uid int64) (*db.Statistics, error) {
-	var statistics db.Statistics
+func (rr *RecordRepo) QueryStatistics(uid int64) (*model.Statistics, error) {
+	var statistics model.Statistics
 	result := rr.db_.Where("uid = ?", uid).First(&statistics)
 	if result.Error != nil {
 		return nil, result.Error
