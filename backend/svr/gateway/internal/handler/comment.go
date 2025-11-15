@@ -23,7 +23,7 @@ func HandleCreateComment(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewCommentServiceClient(conn)
@@ -40,19 +40,21 @@ func HandleCreateComment(ctx *gin.Context) {
 		ReplyCommentId: form.ReplyCommentId,
 		ReplyUserName:  form.ReplyUserName,
 	}
+
+	ctx.Set("address", ctx.ClientIP())
 	_, err = client.CreateComment(ctx, request)
 	if err != nil {
 		logrus.Errorf("创建评论失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "创建评论失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", nil)
+	ResponseOK(ctx, nil)
 }
 func HandleGetRootCommentList(ctx *gin.Context) {
 	// 参数校验
 	var params model.QueryRootCommentListParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
-		ResponseWithJson(ctx, http.StatusBadRequest, "参数校验失败", nil)
+		ResponseBadRequest(ctx, "参数校验失败")
 		return
 	}
 
@@ -60,7 +62,7 @@ func HandleGetRootCommentList(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewCommentServiceClient(conn)
@@ -72,7 +74,7 @@ func HandleGetRootCommentList(ctx *gin.Context) {
 	resp, err := client.QueryRootComment(context.Background(), request)
 	if err != nil {
 		logrus.Errorf("获取root评论列表失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "获取root评论列表失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	result := &model.QueryRootCommentListResult{
@@ -84,14 +86,13 @@ func HandleGetRootCommentList(ctx *gin.Context) {
 		comment.FromPbComment(pbComment)
 		result.List = append(result.List, comment)
 	}
-
-	ResponseWithJson(ctx, http.StatusOK, "success", result)
+	ResponseOK(ctx, result)
 }
 func HandleGetChildCommentList(ctx *gin.Context) {
 	// 参数校验
 	var params model.QueryChildCommentListParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
-		ResponseWithJson(ctx, http.StatusBadRequest, "参数校验失败", nil)
+		ResponseBadRequest(ctx, "参数校验失败")
 		return
 	}
 
@@ -99,7 +100,7 @@ func HandleGetChildCommentList(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewCommentServiceClient(conn)
@@ -114,7 +115,7 @@ func HandleGetChildCommentList(ctx *gin.Context) {
 	resp, err := client.QueryChildComment(ctx, request)
 	if err != nil {
 		logrus.Errorf("获取child评论列表失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "获取child评论列表失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	result := model.QueryChildCommentListResult{
@@ -128,7 +129,7 @@ func HandleGetChildCommentList(ctx *gin.Context) {
 		result.List = append(result.List, comment)
 	}
 
-	ResponseWithJson(ctx, http.StatusOK, "success", result)
+	ResponseOK(ctx, http.StatusOK)
 }
 func HandleLikeComment(ctx *gin.Context) {
 	form, ok := validateWithForm(ctx, model.CommentLikeForm{})
@@ -139,7 +140,7 @@ func HandleLikeComment(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewCommentServiceClient(conn)
@@ -149,10 +150,10 @@ func HandleLikeComment(ctx *gin.Context) {
 	}
 	if _, err = client.CommentLike(ctx, request); err != nil {
 		logrus.Errorf("评论点赞: %s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "评论点赞失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", nil)
+	ResponseOK(ctx, nil)
 }
 func HandleDeleteComment(ctx *gin.Context) {
 	form, ok := validateWithForm[model.DeleteCommentForm](ctx, model.DeleteCommentForm{})
@@ -163,7 +164,7 @@ func HandleDeleteComment(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewCommentServiceClient(conn)
@@ -173,9 +174,9 @@ func HandleDeleteComment(ctx *gin.Context) {
 	}
 	if _, err = client.DeleteComment(ctx, request); err != nil {
 		logrus.Errorf("删除评论失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "删除评论失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
-	ResponseWithJson(ctx, http.StatusOK, "success", nil)
+	ResponseOK(ctx, nil)
 }

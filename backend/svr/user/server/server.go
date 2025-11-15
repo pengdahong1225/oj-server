@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"oj-server/global"
+	"oj-server/pkg/logger"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/user/internal/configs"
 )
@@ -24,7 +26,25 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
+	// 初始化日志
+	server_cfg := configs.ServerConf
+	err := logger.Init(global.LogPath, server_cfg.Name, logrus.DebugLevel)
+	if err != nil {
+		return err
+	}
+
+	// 初始化注册中心
+	registry_cfg := configs.AppConf.RegistryCfg
+	dsn := fmt.Sprintf("%s:%d", registry_cfg.Host, registry_cfg.Port)
+	registrar, err := registry.NewRegistrar(dsn)
+	if err != nil {
+		logrus.Errorf("初始化注册中心失败: %v", err)
+		return err
+	}
+	registry.MyRegistrar = registrar
+
 	s.userSrv = service.NewUserService()
+
 	return nil
 }
 

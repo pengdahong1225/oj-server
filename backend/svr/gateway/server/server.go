@@ -27,7 +27,7 @@ func (s *Server) Init() error {
 
 	// 初始化注册中心
 	registry_cfg := configs.AppConf.RegistryCfg
-	dsn := fmt.Sprintf("redis://%s:%d", registry_cfg.Host, registry_cfg.Port)
+	dsn := fmt.Sprintf("%s:%d", registry_cfg.Host, registry_cfg.Port)
 	registrar, err := registry.NewRegistrar(dsn)
 	if err != nil {
 		logrus.Errorf("初始化注册中心失败: %v", err)

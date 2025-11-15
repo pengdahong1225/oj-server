@@ -21,6 +21,8 @@ type CommentRepo interface {
 	SaveRootComment(pbComment *model.Comment)
 	// 保存子评论
 	SaveChildComment(pbComment *model.Comment)
+
+	// like
 	CommentLike(objId, commentId int64)
 }
 

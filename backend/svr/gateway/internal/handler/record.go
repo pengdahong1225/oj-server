@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"oj-server/global"
 	"oj-server/pkg/proto/pb"
 	"oj-server/pkg/registry"
@@ -33,7 +32,7 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 	// 查询参数校验
 	var params model.QueryUserRecordListParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
-		ResponseWithJson(ctx, http.StatusBadRequest, "参数验证失败", nil)
+		ResponseBadRequest(ctx, "参数验证失败")
 		return
 	}
 
@@ -41,7 +40,7 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewRecordServiceClient(conn)
@@ -53,7 +52,7 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 	resp, err := client.GetSubmitRecordList(context.Background(), request)
 	if err != nil {
 		logrus.Errorf("获取提交记录失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "获取提交记录失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	result := &model.QueryUserRecordListResult{
@@ -65,21 +64,21 @@ func HandleGetUserRecordList(ctx *gin.Context) {
 		result.List = append(result.List, record)
 	}
 
-	ResponseWithJson(ctx, http.StatusOK, "success", result)
+	ResponseOK(ctx, result)
 }
 
 // 处理获取用户某个提交记录的具体信息
 func HandleGetUserRecord(ctx *gin.Context) {
 	recordId, err := strconv.ParseInt(ctx.Query("record_id"), 10, 64)
 	if err != nil || recordId <= 0 {
-		ResponseWithJson(ctx, http.StatusBadRequest, "record_id 不能为空", nil)
+		ResponseBadRequest(ctx, "record_id 不能为空")
 		return
 	}
 	// 调用题目服务
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewRecordServiceClient(conn)
@@ -88,11 +87,11 @@ func HandleGetUserRecord(ctx *gin.Context) {
 	})
 	if err != nil {
 		logrus.Errorf("查询提交记录失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "查询提交记录失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
 	record := &model.Record{}
 	record.FromPbRecord(rpc_resp.Data)
-	ResponseWithJson(ctx, http.StatusOK, "success", record)
+	ResponseOK(ctx, record)
 }

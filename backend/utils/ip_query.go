@@ -41,7 +41,9 @@ func QueryIpGeolocation(ip string) (*IPInfoResp, error) {
 	// 发送GET请求
 	resp, err := client.Get(url)
 	if err != nil {
-		return nil, err
+		return &IPInfoResp{
+			RegionName: "未知地区",
+		}, err
 	}
 	defer resp.Body.Close()
 
@@ -49,10 +51,14 @@ func QueryIpGeolocation(ip string) (*IPInfoResp, error) {
 	ipInfo := &IPInfoResp{}
 	err = json.NewDecoder(resp.Body).Decode(&ipInfo)
 	if err != nil {
-		return nil, err
+		return &IPInfoResp{
+			RegionName: "未知地区",
+		}, err
 	}
 	if ipInfo.Status != "success" {
-		return nil, fmt.Errorf("ipInfo.Status != success")
+		return &IPInfoResp{
+			RegionName: "未知地区",
+		}, fmt.Errorf("ipInfo.Status != success")
 	}
 
 	return ipInfo, nil

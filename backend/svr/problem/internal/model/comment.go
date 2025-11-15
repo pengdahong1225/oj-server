@@ -1,6 +1,7 @@
 package model
 
 import (
+	"oj-server/pkg/proto/pb"
 	"time"
 )
 
@@ -31,4 +32,19 @@ type Comment struct {
 
 func (receiver *Comment) TableName() string {
 	return "comment"
+}
+
+func (receiver *Comment) Transform2Pb() *pb.Comment {
+	return &pb.Comment{
+		Id:            receiver.ID,
+		ObjId:         receiver.ObjId,
+		UserId:        receiver.UserId,
+		UserName:      receiver.UserName,
+		UserAvatarUrl: receiver.UserAvatarUrl,
+		Content:       receiver.Content,
+		Status:        int32(receiver.Status),
+		ReplyCount:    int32(receiver.ReplyCount),
+		LikeCount:     int32(receiver.LikeCount),
+		ChildCount:    int32(receiver.ChildCount),
+	}
 }

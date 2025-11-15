@@ -1,6 +1,6 @@
 package model
 
-import "oj-server/proto/pb"
+import "oj-server/pkg/proto/pb"
 
 // ============================ notice 列表 ============================
 type QueryNoticeListParams struct {

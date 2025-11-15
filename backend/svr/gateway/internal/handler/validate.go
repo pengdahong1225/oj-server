@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 	"oj-server/svr/gateway/internal/model"
 )
 
@@ -20,10 +19,10 @@ func validateWithForm[T formTyper](ctx *gin.Context, form T) (*T, bool) {
 		ok := errors.As(err, &errs)
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
-			ResponseWithJson(ctx, http.StatusBadRequest, "表单验证-未知错误", nil)
+			ResponseBadRequest(ctx, "表单验证-未知错误")
 			return nil, false
 		}
-		ResponseWithJson(ctx, http.StatusBadRequest, errs.Error(), nil)
+		ResponseBadRequest(ctx, errs.Error())
 		return nil, false
 	}
 	return &form, true
@@ -39,10 +38,10 @@ func validateWithJson[T jsonTyper](ctx *gin.Context, form T) (*T, bool) {
 		ok := errors.As(err, &errs)
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
-			ResponseWithJson(ctx, http.StatusBadRequest, "表单验证-未知错误", nil)
+			ResponseBadRequest(ctx, "表单验证-未知错误")
 			return nil, false
 		}
-		ResponseWithJson(ctx, http.StatusBadRequest, errs.Error(), nil)
+		ResponseBadRequest(ctx, errs.Error())
 		return nil, false
 	}
 	return &form, true

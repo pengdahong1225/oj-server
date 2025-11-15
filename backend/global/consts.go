@@ -15,8 +15,8 @@ const (
 const (
 	ConfigPath                = "./config"
 	LogPath                   = "./log"
-	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7
-	AccessTokenTimeOut  int64 = 60 * 1
+	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7 // 7天
+	AccessTokenTimeOut  int64 = 60 * 60 * 24     // 24小时
 	Issuer                    = "Messi"
 	ProblemConfigPath         = "/data/oj/problem_configs"
 )

@@ -6,7 +6,6 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"io"
-	"net/http"
 	"oj-server/global"
 	"oj-server/pkg/proto/pb"
 	"oj-server/pkg/registry"
@@ -21,18 +20,18 @@ func HandleGetProblemTagList(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
 	resp, err := client.GetTagList(context.Background(), &empty.Empty{})
 	if err != nil {
 		logrus.Errorf("获取题目标签列表失败: %s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "获取题目标签列表失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
-	ResponseWithJson(ctx, http.StatusOK, "success", resp.Data)
+	ResponseOK(ctx, resp.Data)
 }
 
 // 获取题目列表
@@ -42,7 +41,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	err := ctx.ShouldBindQuery(&params)
 	if err != nil {
 		logrus.Errorf("参数校验失败: %s", err.Error())
-		ResponseWithJson(ctx, http.StatusBadRequest, "参数校验失败", nil)
+		ResponseBadRequest(ctx, "参数验证失败")
 		return
 	}
 
@@ -50,7 +49,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -63,7 +62,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 	resp, err := client.GetProblemList(context.Background(), req)
 	if err != nil {
 		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "获取题目列表失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
@@ -83,7 +82,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 		}
 	}
 
-	ResponseWithJson(ctx, http.StatusOK, "success", result)
+	ResponseOK(ctx, result)
 }
 
 // 获取题目详情
@@ -92,14 +91,14 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 	problem_id, err := strconv.ParseInt(ctx.Query("problem_id"), 10, 64)
 	if err != nil {
 		logrus.Errorf("problem_id validate err: %s", err.Error())
-		ResponseWithJson(ctx, http.StatusBadRequest, "problem_id validate err", nil)
+		ResponseBadRequest(ctx, "problem_id validate err")
 		return
 	}
 	// 调用problem服务
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -107,7 +106,8 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 		Id: problem_id,
 	})
 	if err != nil {
-		ResponseWithJson(ctx, http.StatusInternalServerError, "获取题目详情失败", nil)
+		logrus.Errorf("%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	problem := &model.Problem{
@@ -119,7 +119,7 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 		Status:      resp.Problem.Status,
 		CreateAt:    resp.Problem.CreateAt,
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", problem)
+	ResponseOK(ctx, problem)
 }
 
 // 提交代码
@@ -137,7 +137,7 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -150,14 +150,14 @@ func HandleSubmitProblem(ctx *gin.Context) {
 	resp, err := client.SubmitProblem(context.WithValue(context.Background(), "uid", uid), req)
 	if err != nil {
 		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "提交失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
 	result := &model.SubmitResult{
 		TaskId: resp.TaskId,
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", result)
+	ResponseOK(ctx, result)
 }
 
 // 创建题目信息
@@ -170,7 +170,7 @@ func HandleCreateProblem(ctx *gin.Context) {
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -183,10 +183,10 @@ func HandleCreateProblem(ctx *gin.Context) {
 	resp, err := client.CreateProblem(context.Background(), request)
 	if err != nil {
 		logrus.Errorf("创建题目失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "创建题目失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", gin.H{
+	ResponseOK(ctx, gin.H{
 		"problem_id": resp.Id,
 	})
 }
@@ -196,44 +196,44 @@ func HandleUploadConfig(ctx *gin.Context) {
 	// 获取元数据
 	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil || problemId <= 0 {
-		ResponseWithJson(ctx, http.StatusBadRequest, "无效的 problem_id", nil)
+		ResponseBadRequest(ctx, "无效的 problem_id")
 		return
 	}
 
 	// 获取文件
 	fileHeader, err := ctx.FormFile("config_file")
 	if err != nil {
-		ResponseWithJson(ctx, http.StatusBadRequest, "需要config_file字段", nil)
+		ResponseBadRequest(ctx, "需要config_file字段")
 		return
 	}
 	if filepath.Ext(fileHeader.Filename) != ".json" {
-		ResponseWithJson(ctx, http.StatusBadRequest, "文件格式错误", nil)
+		ResponseBadRequest(ctx, "文件格式错误")
 		return
 	}
 	// 限制文件大小（默认 8MB，可调整）
 	maxSize := int64(8 << 20) // 8MB
 	if fileHeader.Size > maxSize {
-		ResponseWithJson(ctx, http.StatusBadRequest, "文件大小超过限制", nil)
+		ResponseBadRequest(ctx, "文件过大")
 		return
 	}
 	// 打开文件流
 	file, err := fileHeader.Open()
 	if err != nil {
-		ResponseWithJson(ctx, http.StatusBadRequest, "文件打开失败", nil)
+		ResponseError(ctx, pb.Error_EN_Failed, "文件打开失败")
 		return
 	}
 	// 创建gRPC流
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
 	stream, err := client.UploadConfig(ctx)
 	if err != nil {
 		logrus.Errorf("文件上传失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "文件上传失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	// 分片读取并流式传输
@@ -246,7 +246,7 @@ func HandleUploadConfig(ctx *gin.Context) {
 		if err != nil {
 			logrus.Errorf("file read error:%s", err.Error())
 			_ = stream.CloseSend()
-			ResponseWithJson(ctx, http.StatusInternalServerError, "文件上传失败", nil)
+			ResponseError(ctx, pb.Error_EN_Failed, "file read failed")
 			return
 		}
 		// 发送分片到Problem服务
@@ -256,7 +256,7 @@ func HandleUploadConfig(ctx *gin.Context) {
 		}); err != nil {
 			logrus.Errorf("file send error:%s", err.Error())
 			_ = stream.CloseSend()
-			ResponseWithJson(ctx, http.StatusInternalServerError, "文件上传失败", nil)
+			ResponseWithGrpcError(ctx, err)
 			return
 		}
 	}
@@ -264,10 +264,10 @@ func HandleUploadConfig(ctx *gin.Context) {
 	_, err = stream.CloseAndRecv()
 	if err != nil {
 		logrus.Errorf("file save error:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "文件保存失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", nil)
+	ResponseOK(ctx, nil)
 }
 
 // 处理发布题目
@@ -275,14 +275,14 @@ func HandlePublishProblem(ctx *gin.Context) {
 	// 获取元数据
 	problem_id, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil {
-		ResponseWithJson(ctx, http.StatusBadRequest, "无效的 problem_id", nil)
+		ResponseBadRequest(ctx, "无效的 problem_id")
 		return
 	}
 	// 调用problem服务
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
 		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "服务繁忙", nil)
+		ResponseInternalServerError(ctx, "服务繁忙")
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
@@ -290,10 +290,10 @@ func HandlePublishProblem(ctx *gin.Context) {
 		Id: problem_id,
 	}); err != nil {
 		logrus.Errorf("发布失败: %s", err.Error())
-		ResponseWithJson(ctx, http.StatusInternalServerError, "发布失败", nil)
+		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	ResponseWithJson(ctx, http.StatusOK, "success", nil)
+	ResponseOK(ctx, nil)
 }
 
 // 处理删除题目

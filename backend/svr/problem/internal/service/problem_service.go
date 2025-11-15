@@ -232,7 +232,6 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	}
 
 	resp.TaskId = taskId
-	resp.Message = "题目提交成功"
 	return resp, nil
 }
 

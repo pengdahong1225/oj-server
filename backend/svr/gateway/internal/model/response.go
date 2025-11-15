@@ -1,6 +1,6 @@
 package model
 
-import "oj-server/proto/pb"
+import "oj-server/pkg/proto/pb"
 
 type RankList struct {
 	Phone     int64  `json:"phone"`

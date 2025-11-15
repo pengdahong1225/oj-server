@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores'
 import router from '@/router'
 
 // const baseURL = 'http://192.168.201.128/api'
-const baseURL = 'http://localhost:9000'
+const baseURL = 'http://localhost:8080/api/v1'
 
 /**
  * axios
@@ -64,54 +64,78 @@ instance.interceptors.request.use(
  */
 instance.interceptors.response.use(
   (resp) => {
-    if (resp.data.code === 0) {
+    const data = resp.data
+
+    // 业务成功
+    if (data?.code === 0) {
       return resp
     }
-    if (resp.data.message) {
-      ElMessage.error(resp.data.message)
+
+    // HTTP 成功，但业务失败
+    if (data?.message) {
+      ElMessage.error(data.message)
     } else {
       ElMessage.error('服务异常')
     }
-    return Promise.reject(resp.data)
+    return Promise.reject(data)
   },
+  // HTTP失败
   async (err) => {
-    const originalRequest = err.config;
-    // 处理 401 错误（Token 过期）
+    const originalRequest = err.config
+
+    // ---------------------------
+    // 处理 401 Token 过期
+    // ---------------------------
     if (err.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      // 如果正在刷新token，就将请求挂起，等待刷新完成
+      originalRequest._retry = true
+
+      // 若正在刷新 token，则挂起请求
       if (isRefreshing) {
         return new Promise((resolve) => {
-          pendingRequests.push(() => resolve(instance(originalRequest)));
-        });
+          pendingRequests.push(() => resolve(instance(originalRequest)))
+        })
       }
 
-      isRefreshing = true;
+      // 开始刷新
+      isRefreshing = true
       try {
-        const newToken = await refreshToken();
-        isRefreshing = false;
-        
-        // 更新token
-        userStore.setToken(newToken);
+        const newToken = await refreshToken()
+        isRefreshing = false
 
-        // 更新原始请求的 Authorization 头
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        
-        // 重试原始请求并执行挂起的请求
-        const retryResponse = await instance(originalRequest);
-        pendingRequests.forEach(cb => cb());
-        pendingRequests = [];
-        
-        return retryResponse;
-      } catch (err){
-        // 刷新失败，跳转登录页
-        userStore.clearToken();
-        return Promise.reject(err);
+        // 设置 token
+        userStore.setToken(newToken)
+
+        // 更新 header
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+
+        // 先执行挂起请求
+        pendingRequests.forEach((cb) => cb())
+        pendingRequests = []
+
+        // 重试当前请求
+        return instance(originalRequest)
+      } catch (refreshErr) {
+        isRefreshing = false
+        pendingRequests = []
+
+        // 刷新失败 → 清空 token → 跳登录
+        userStore.clearToken()
+        return Promise.reject(refreshErr)
       }
     }
 
-    // 其他错误
-    ElMessage.error(err.response?.data?.message || '服务异常')
+    // ---------------------------
+    // 非 401 错误
+    // ---------------------------
+
+    const msg =
+      err.response?.data?.message ||
+      err.response?.data?.msg ||
+      err.message ||
+      '服务异常'
+
+    ElMessage.error(msg)
+
     return Promise.reject(err)
   }
 )

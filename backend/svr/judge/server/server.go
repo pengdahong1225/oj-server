@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"oj-server/global"
+	"oj-server/pkg/logger"
 	"oj-server/pkg/registry"
 	"oj-server/svr/judge/internal/configs"
 	"oj-server/svr/judge/internal/service"
@@ -18,6 +20,23 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
+	// 初始化日志
+	server_cfg := configs.ServerConf
+	err := logger.Init(global.LogPath, server_cfg.Name, logrus.DebugLevel)
+	if err != nil {
+		return err
+	}
+
+	// 初始化注册中心
+	registry_cfg := configs.AppConf.RegistryCfg
+	dsn := fmt.Sprintf("%s:%d", registry_cfg.Host, registry_cfg.Port)
+	registrar, err := registry.NewRegistrar(dsn)
+	if err != nil {
+		logrus.Errorf("初始化注册中心失败: %v", err)
+		return err
+	}
+	registry.MyRegistrar = registrar
+
 	s.judgeService = service.NewJudgeService()
 	return nil
 }

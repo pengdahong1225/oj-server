@@ -1,8 +1,5 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import xiaoyixian from '@/assets/banner/xiaoyixian.jpg'
-import jiuba from '@/assets/banner/98.png'
-import HongKong from '@/assets/banner/HongKong.png'
 import { Search } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
 import { queryNoticeListService } from '@/api/noticeController'
@@ -52,7 +49,7 @@ const onClick = (index: number) => {
 
 // banner
 const bannerList = [
-    xiaoyixian, jiuba, HongKong
+    '',
 ]
 
 </script>

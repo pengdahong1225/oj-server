@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"oj-server/svr/user/internal/biz"
@@ -10,6 +9,8 @@ import (
 	"oj-server/utils"
 
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/user/internal/model"
@@ -72,7 +73,7 @@ func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (
 	}
 	// 校验密码
 	if utils.HashPassword(in.Password) != userInfo.PassWord {
-		return nil, fmt.Errorf("密码错误")
+		return nil, status.Errorf(codes.Unauthenticated, "密码错误")
 	}
 
 	resp := &pb.UserLoginResponse{

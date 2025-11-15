@@ -9,17 +9,18 @@ import (
 func initProblemRouter(rg *gin.RouterGroup) {
 	// 题目相关
 	problem := rg.Group("/problem")
+	problem.Use(middlewares.AuthLogin())
 	{
 		problem.GET("/tag_list", handler.HandleGetProblemTagList)
 		problem.GET("/list", handler.HandleGetProblemList)
 		problem.GET("/detail", handler.HandleGetProblemDetail)
-		problem.POST("/submit", middlewares.AuthLogin(), handler.HandleSubmitProblem)
+		problem.POST("/submit", handler.HandleSubmitProblem)
 
-		problem.POST("/add", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleCreateProblem)
-		problem.POST("/upload_config", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUploadConfig)
-		problem.POST("/publish", middlewares.AuthLogin(), middlewares.Admin(), handler.HandlePublishProblem)
-		problem.DELETE("", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleDeleteProblem)
-		problem.POST("/update", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleUpdateProblem)
+		problem.POST("/add", middlewares.Admin(), handler.HandleCreateProblem)
+		problem.POST("/upload_config", middlewares.Admin(), handler.HandleUploadConfig)
+		problem.POST("/publish", middlewares.Admin(), handler.HandlePublishProblem)
+		problem.DELETE("", middlewares.Admin(), handler.HandleDeleteProblem)
+		problem.POST("/update", middlewares.Admin(), handler.HandleUpdateProblem)
 	}
 
 	// 评论相关
