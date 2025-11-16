@@ -24,8 +24,8 @@ jwt:
   key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'
 
 sms:
-  accessKeyId: 'LTAI5tKv69qFhZPXbV6vzFGL'
-  accessKeySecret: 'cVwcLxfehs0dTgbhWgMT42L7j2bOz7'
-  endpoint: 'dysmsapi.aliyuncs.com'
-  signName: 'MessiGVB'
-  templateCode: 'SMS_463639205'
+  accessKeyId: ''
+  accessKeySecret: ''
+  endpoint: ''
+  signName: ''
+  templateCode: ''
