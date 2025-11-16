@@ -1,0 +1,31 @@
+mysql:
+  host: 192.168.33.128
+  port: 3306
+  db: oj_online_server
+  user: root
+  password: 1225@pdh
+
+redis:
+  host: 192.168.33.128
+  port: 6379
+
+registry:
+  host: localhost
+  port: 8500
+
+rabbitmq:
+  host: 192.168.33.128
+  port: 5672
+  user: pengdahong
+  password: 1225
+  vhost: '/oj'
+
+jwt:
+  key: 'dAjOs8FF6H^df$BXaY@xG!%#AWMgQRbq'
+
+sms:
+  accessKeyId: 'LTAI5tKv69qFhZPXbV6vzFGL'
+  accessKeySecret: 'cVwcLxfehs0dTgbhWgMT42L7j2bOz7'
+  endpoint: 'dysmsapi.aliyuncs.com'
+  signName: 'MessiGVB'
+  templateCode: 'SMS_463639205'

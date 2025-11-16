@@ -1,0 +1,5 @@
+name: user-service
+node_id: 1
+address: localhost
+port: 8090
+scheme: grpc

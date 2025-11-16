@@ -3,10 +3,4 @@
 *.exe~
 *.log
 *.log.*
-cmake-build-*
 .vscode
-*.o
-*.json
-*.yml
-*.yaml
-keys/
