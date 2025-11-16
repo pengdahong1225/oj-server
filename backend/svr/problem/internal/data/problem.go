@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -179,33 +180,57 @@ func (pr *ProblemRepo) DeleteProblem(id int64) error {
 }
 
 // 查询标签列表
-// 要区分not found 和 err
 func (pr *ProblemRepo) QueryTagList() ([]string, error) {
-	var (
-		tagList []string
-		err     error
-	)
-	// 先查询缓存
-	tagList, err = pr.rdb_.SMembers(context.Background(), global.TagListKey).Result()
-	if err != nil {
-		// 缓存中没有or查询缓存失败，则从数据库中查询
-		/*
-			select tags from problem
-		*/
-		result := pr.db_.Model(&model.Problem{}).Pluck("tags", &tagList)
-		if result.Error != nil {
-			logrus.Errorf("query tag list failed: %s", result.Error.Error())
-			return nil, status.Errorf(codes.Internal, "query failed")
-		}
-		if result.RowsAffected == 0 {
-			return nil, nil // not found
-		}
-		for _, tag := range tagList {
-			// 添加到缓存
-			pr.rdb_.SAdd(context.Background(), global.TagListKey, tag)
-		}
+	ctx := context.Background()
+
+	// 1. 先尝试从缓存读取
+	tagList, err := pr.rdb_.SMembers(ctx, global.TagListKey).Result()
+	if err == nil && len(tagList) > 0 {
+		logrus.Debugf("tag list from cache: %v", tagList)
+		return tagList, nil
 	}
 
+	logrus.Warn("tag list cache miss, querying database ...")
+
+	// 2. 缓存没有 → 查询数据库的所有 tags 字段
+	var tagsJsonList []string
+	result := pr.db_.Model(&model.Problem{}).Pluck("tags", &tagsJsonList)
+	if result.Error != nil {
+		logrus.Errorf("query tag list failed: %s", result.Error.Error())
+		return nil, status.Errorf(codes.Internal, "query failed")
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	// 3.用 map 做去重, 解析 JSON 数组
+	tagSet := make(map[string]struct{})
+	for _, jsonStr := range tagsJsonList {
+		if jsonStr == "" {
+			continue
+		}
+		var arr []string
+		if err = json.Unmarshal([]byte(jsonStr), &arr); err != nil {
+			logrus.Errorf("failed to unmarshal tags: %s", err.Error())
+			continue
+		}
+		for _, t := range arr {
+			tagSet[t] = struct{}{}
+		}
+	}
+	tagList = make([]string, 0, len(tagSet))
+	for t := range tagSet {
+		tagList = append(tagList, t)
+	}
+	// 4. 持久化到 Redis（Set 类型）
+	if len(tagList) > 0 {
+		members := make([]interface{}, 0, len(tagList))
+		for _, t := range tagList {
+			members = append(members, t)
+		}
+		pr.rdb_.SAdd(ctx, global.TagListKey, members...)
+	}
+
+	logrus.Debugf("tag list final: %v", tagList)
 	return tagList, nil
 }
 

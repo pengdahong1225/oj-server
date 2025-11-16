@@ -23,8 +23,8 @@ onMounted(() => {
 })
 const route = useRoute()
 const problem = ref<API.Problem>({
-    id: 0,
-    title: '',
+    problem_id: 0,
+    problem_title: '',
     description: '',
     level: 0,
     tags: [],
@@ -32,8 +32,8 @@ const problem = ref<API.Problem>({
 })
 const getProblemDetail = async () => {
     const res = await queryProblemDetailService(Number(route.params.id))
-    problem.value.id = res.data.data.id
-    problem.value.title = res.data.data.title
+    problem.value.problem_id = res.data.data.id
+    problem.value.problem_title = res.data.data.title
     problem.value.description = res.data.data.description
     problem.value.level = res.data.data.level
     problem.value.tags = res.data.data.tags
@@ -43,7 +43,7 @@ const getProblemDetail = async () => {
     getCommentList()
 }
 const btitle = computed(() => {
-    return problem.value.id + '. ' + problem.value.title
+    return problem.value.problem_id + '. ' + problem.value.problem_title
 })
 const bdescription = computed(() => {
     return marked.parse(problem.value.description)
@@ -62,8 +62,8 @@ const onReset = () => {
 }
 const onSubmit = async () => {
     loading.value = true
-    form.value.problem_id = problem.value.id
-    form.value.title = problem.value.title
+    form.value.problem_id = problem.value.problem_id
+    form.value.title = problem.value.problem_title
     const res = await submitProblemService(form.value)
     console.log(res)
     loading.value = false
@@ -142,9 +142,9 @@ const place = computed(() => {
 const new_comment_text = ref('')
 const onSubmitComment = async () => {
     const form = <API.AddCommentForm>{
-        obj_id: problem.value.id,
+        obj_id: problem.value.problem_id,
         user_id: userStore.userInfo.uid,
-        user_name: userStore.userInfo.nickname,
+        user_name: userStore.userInfo.nick_name,
         user_avatar_url: userStore.userInfo.avatar_url,
         content: new_comment_text.value
     }
@@ -153,9 +153,9 @@ const onSubmitComment = async () => {
         // 立刻渲染一条评论到第一条
         const new_comment = <API.Comment>({
             id: 0,
-            obj_id: problem.value.id,
+            obj_id: problem.value.problem_id,
             user_id: userStore.userInfo.uid,
-            user_name: userStore.userInfo.nickname,
+            user_name: userStore.userInfo.nick_name,
             user_avatar_url: userStore.userInfo.avatar_url,
             content: new_comment_text.value,
             status: 1,
@@ -178,7 +178,7 @@ const root_comment_query_params = ref(<API.QueryRootCommentListParams>{
 const root_comment_list = ref<API.Comment[]>([])
 const root_comment_count = ref(0)
 const getCommentList = async () => {
-    root_comment_query_params.value.obj_id = problem.value.id
+    root_comment_query_params.value.obj_id = problem.value.problem_id
 
     const res = await getRootCommentListService(root_comment_query_params.value)
     if (res.data.data.data) {

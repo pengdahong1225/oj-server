@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -161,21 +162,24 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 	}
 	resp.Total = total
 	for _, problem := range problems {
-		resp.Data = append(resp.Data, &pb.Problem{
+		pbProblem := &pb.Problem{
 			Id:          problem.ID,
 			CreateAt:    problem.CreateAt.String(),
 			Title:       problem.Title,
 			Description: problem.Description,
 			Level:       problem.Level,
-			Tags:        utils.SplitStringWithX(string(problem.Tags), "#"),
 			CreateBy:    problem.CreateBy,
-		})
+		}
+		if err = json.Unmarshal(problem.Tags, &pbProblem.Tags); err != nil {
+			logrus.Errorf("json unmarshal failed:%s", err.Error())
+		}
+		resp.Data = append(resp.Data, pbProblem)
 	}
 
 	return resp, nil
 }
 
-func (ps *ProblemService) GetProblemData(ctx context.Context, in *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
+func (ps *ProblemService) GetProblemDetail(ctx context.Context, in *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	resp := &pb.GetProblemResponse{}
 
 	problem, err := ps.uc.QueryProblemData(in.Id)
@@ -188,10 +192,13 @@ func (ps *ProblemService) GetProblemData(ctx context.Context, in *pb.GetProblemR
 		Title:       problem.Title,
 		Description: problem.Description,
 		Level:       problem.Level,
-		Tags:        utils.SplitStringWithX(string(problem.Tags), "#"),
 		CreateBy:    problem.CreateBy,
 		Status:      problem.Status,
 	}
+	if err = json.Unmarshal(problem.Tags, &resp.Problem.Tags); err != nil {
+		logrus.Errorf("json unmarshal failed:%s", err.Error())
+	}
+
 	return resp, nil
 }
 

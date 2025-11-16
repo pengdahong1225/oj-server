@@ -16,12 +16,12 @@ namespace API {
     }
     
     type Problem = {
-        title: string;
+        problem_title: string;
         description: string;
         level: number;
         tags: string[];
     
-        id: number;
+        problem_id: number;
         status?: number;
         create_at?: string;
         create_by?: number;

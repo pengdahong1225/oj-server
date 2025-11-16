@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/sirupsen/logrus"
 	"io"
 	"oj-server/global"
@@ -24,7 +23,7 @@ func HandleGetProblemTagList(ctx *gin.Context) {
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
-	resp, err := client.GetTagList(context.Background(), &empty.Empty{})
+	resp, err := client.GetTagList(context.Background(), nil)
 	if err != nil {
 		logrus.Errorf("获取题目标签列表失败: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)

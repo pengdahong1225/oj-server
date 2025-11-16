@@ -47,17 +47,26 @@ func Recovery() gin.HandlerFunc {
 }
 
 func Cors() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		method := ctx.Request.Method
+	return func(c *gin.Context) {
 
-		ctx.Header("Access-Control-Allow-Origin", "http://localhost:5173")
-		ctx.Header("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization")
-		ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
-		ctx.Header("Access-Control-Expose-Headers", "Content-Length, Access_Control-Allow-Origin, Access_Control-Headers, Content-Type")
-		ctx.Header("Access-Control-Allow-Credentials", "true")
-
-		if method == "OPTIONS" {
-			ctx.AbortWithStatus(http.StatusNoContent)
+		origin := c.Request.Header.Get("Origin")
+		if origin != "" {
+			// 若需要允许多个 origin，可在这里做白名单校验
+			c.Header("Access-Control-Allow-Origin", origin)
 		}
+
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-CSRF-Token, Token")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Content-Type")
+		c.Header("Access-Control-Max-Age", "86400") // 缓存 preflight
+
+		// 处理 OPTIONS 预检请求
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
 	}
 }

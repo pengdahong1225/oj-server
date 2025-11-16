@@ -27,7 +27,7 @@ const getProblemList = async () => {
     const res = await queryProblemListService(params.value)
     console.log(res)
     total.value = res.data.data.total
-    problemList.value = res.data.data.data
+    problemList.value = res.data.data.list
     loading.value = false
 }
 const getProblemTagList = async () => {
@@ -81,13 +81,13 @@ const onTagClick = (tag: string) => {
                     </template>
                 </el-table-column>
 
-                <el-table-column label="#" prop="id" width="80">
+                <el-table-column label="#" prop="problem_id" width="80">
                     <template #default="{ row }">
                         <el-link type="primary" :underline="false" @click="
                             $router.push({
-                                path: `/problem/${row.id}`
+                                path: `/problem/${row.problem_id}`
                             })
-                            ">{{ row.id }}</el-link>
+                            ">{{ row.problem_id }}</el-link>
                     </template>
                 </el-table-column>
 
@@ -95,9 +95,9 @@ const onTagClick = (tag: string) => {
                     <template #default="{ row }">
                         <el-link type="primary" :underline="false" @click="
                             $router.push({
-                                path: `/problem/${row.id}`
+                                path: `/problem/${row.problem_id}`
                             })
-                            ">{{ row.title }}</el-link>
+                            ">{{ row.problem_title }}</el-link>
                     </template>
                 </el-table-column>
                 <el-table-column label="Level" prop="level">

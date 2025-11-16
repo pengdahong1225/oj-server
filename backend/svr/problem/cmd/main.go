@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// 加载配置
-	configPath := fmt.Sprintf("%s/%s", global.ConfigPath, "server_config.yaml")
+	configPath := fmt.Sprintf("%s/%s", global.ConfigPath, "problem_config.yaml")
 	err := configs.LoadServerConfigFile(configPath)
 	if err != nil {
 		panic(err)
