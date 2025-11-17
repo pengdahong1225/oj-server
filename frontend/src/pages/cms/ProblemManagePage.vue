@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Delete, Edit, Search, Open, TurnOff, UploadFilled } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue'
-import { queryProblemListService, deleteProblemService } from '@/api/problemController'
+import { queryProblemListService, deleteProblemService, publishProblemService, hideProblemService } from '@/api/problemController'
 
 import { formatTime } from '@/utils/format'
 import ProblemEdit from '@/components/problemEdit.vue'
@@ -55,11 +55,23 @@ const onEdit = (row: API.Problem) => {
 const onUploadConfig = () => { 
     console.log("upload config")
 }
-const onPublish = (id: number) => {
-    console.log(`publish: ${id}`)
+const onPublish = async (id: number) => {
+    const resp = await publishProblemService(id)
+    if (resp.data.code === 0) {
+        ElMessage.success("发布成功")
+    } else {
+        ElMessage.error(resp.data.message || '发布失败')
+    }
+    getProblemList()
 }
-const onHide = (id: number) => { 
-    console.log(`hide: ${id}`)
+const onHide = async (id: number) => { 
+    const resp = await hideProblemService(id)
+    if (resp.data.code === 0) {
+        ElMessage.success("隐藏成功")
+    } else {
+        ElMessage.error(resp.data.message || '隐藏失败')
+    }
+    getProblemList()
 }
 const onDelete = async (id: number) => {
     const resp = await deleteProblemService(id)

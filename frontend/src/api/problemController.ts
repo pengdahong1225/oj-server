@@ -96,3 +96,35 @@ export async function deleteProblemService(id: number) {
         params: { problem_id: id }
     })
 }
+
+/**
+ * 发布题目
+ * POST /problem/publish
+ */
+export async function publishProblemService(id: number) {
+    return request('/problem/publish', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: {
+            problem_id: id
+        }
+    })
+}
+
+/**
+ * 隐藏题目
+ * POST /problem/hide
+ */
+export async function hideProblemService(id: number) {
+    return request('/problem/hide', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: {
+            problem_id: id
+        }
+    })
+}

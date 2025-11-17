@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -18,6 +19,7 @@ import (
 	"oj-server/svr/problem/internal/model"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // 题目服务
@@ -127,6 +129,12 @@ func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProb
 	}
 	return nil, nil
 }
+func (ps *ProblemService) HideProblem(ctx context.Context, in *pb.HideProblemRequest) (*emptypb.Empty, error) {
+	if err := ps.uc.UpdateProblemStatus(in.Id, 0); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
 
 // 更新题目基础信息
 // 标题、等级、标签、描述、创建者、状态
@@ -158,7 +166,18 @@ func (ps *ProblemService) DeleteProblem(ctx context.Context, in *pb.DeleteProble
 func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
 	resp := &pb.GetProblemListResponse{}
 
-	total, problems, err := ps.uc.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag)
+	// 获取元数据
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "no metadata found")
+	}
+	roles := md.Get("role")
+	if len(roles) == 0 {
+		return nil, status.Error(codes.Unauthenticated, "role missing")
+	}
+	role, _ := strconv.Atoi(roles[0]) // 转回 int
+
+	total, problems, err := ps.uc.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag, int32(role))
 	if err != nil {
 		return nil, err
 	}

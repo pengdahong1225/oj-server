@@ -54,6 +54,7 @@ func AuthLogin() gin.HandlerFunc {
 		// token通过
 		ctx.Set("claims", claims)
 		ctx.Set("uid", claims.Uid)
+		ctx.Set("role", claims.Authority)
 		ctx.Next()
 	}
 }

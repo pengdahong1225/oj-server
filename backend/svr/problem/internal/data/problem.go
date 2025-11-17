@@ -88,7 +88,7 @@ func (pr *ProblemRepo) CreateProblem(problem *model.Problem) (int64, error) {
 // @page_size 单页数量
 // @keyword 关键字
 // @tag 标签
-func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error) {
+func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string, role int32) (int64, []model.Problem, error) {
 	/**
 	select COUNT(*) AS count
 	from problem
@@ -102,6 +102,9 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 	if tag != "" {
 		str := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, tag)
 		query = query.Where(str)
+	}
+	if role == 0 {
+		query = query.Where("status=?", 1)
 	}
 	result := query.Count(&count)
 	if result.Error != nil {
@@ -124,6 +127,9 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 	}
 	if tag != "" {
 		query = query.Where("JSON_CONTAINS(tags, ?)", tag)
+	}
+	if role == 0 {
+		query = query.Where("status=?", 1)
 	}
 	result = query.Order("id").Offset(offSet).Limit(pageSize).Find(&problemList)
 	if result.Error != nil {
@@ -161,11 +167,11 @@ func (pr *ProblemRepo) UpdateProblem(problem *model.Problem) error {
 func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
 	result := pr.db_.Model(&model.Problem{}).Where("id=?", id).Update("status", st)
 	if result.Error != nil {
-		logrus.Errorln(result.Error.Error())
-		return status.Errorf(codes.Internal, "query failed")
+		logrus.Errorf("update problem status failed: %s", result.Error.Error())
+		return status.Errorf(codes.Internal, "update failed")
 	}
 	if result.RowsAffected == 0 {
-		return status.Errorf(codes.NotFound, "query failed")
+		return status.Errorf(codes.NotFound, "update failed")
 	}
 	return nil
 }

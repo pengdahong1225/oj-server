@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -42,7 +43,9 @@ func HandleUserLogin(ctx *gin.Context) {
 		Mobile:   form.Mobile,
 		Password: form.PassWord,
 	}
-	resp, err := client.UserLogin(ctx, req)
+	c, cancel := context.WithTimeout(context.Background(), global.GrpcTimeout)
+	defer cancel()
+	resp, err := client.UserLogin(c, req)
 	if err != nil {
 		logrus.Errorf("UserLogin Failed: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)

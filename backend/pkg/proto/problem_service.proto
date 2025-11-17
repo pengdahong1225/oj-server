@@ -12,6 +12,8 @@ service ProblemService {
   rpc UploadConfig(stream UploadConfigFileChunk) returns (UploadConfigResponse);
   // 发布题目
   rpc PublishProblem(PublishProblemRequest) returns (google.protobuf.Empty);
+  // 隐藏题目
+  rpc HideProblem(HideProblemRequest) returns (google.protobuf.Empty);
   // 更新题目信息
   rpc UpdateProblem(UpdateProblemRequest) returns (google.protobuf.Empty);
   // 删除题目
@@ -51,6 +53,11 @@ message UploadConfigResponse {
 
 // 发布题目
 message PublishProblemRequest {
+  int64 id = 1;
+}
+
+// 隐藏题目
+message HideProblemRequest {
   int64 id = 1;
 }
 

@@ -14,6 +14,7 @@ func initProblemRouter(rg *gin.RouterGroup) {
 		problem.POST("/add", middlewares.Admin(), handler.HandleCreateProblem)
 		problem.POST("/upload_config", middlewares.Admin(), handler.HandleUploadConfig)
 		problem.POST("/publish", middlewares.Admin(), handler.HandlePublishProblem)
+		problem.POST("/hide", middlewares.Admin(), handler.HandleHideProblem)
 		problem.DELETE("", middlewares.Admin(), handler.HandleDeleteProblem)
 		problem.POST("/update", middlewares.Admin(), handler.HandleUpdateProblem)
 

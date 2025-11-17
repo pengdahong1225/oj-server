@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/metadata"
 	"io"
 	"oj-server/global"
 	"oj-server/pkg/proto/pb"
@@ -44,6 +46,12 @@ func HandleGetProblemList(ctx *gin.Context) {
 		return
 	}
 
+	role, exist := ctx.Get("role")
+	if !exist {
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+
 	// 调用problem服务
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
@@ -58,7 +66,10 @@ func HandleGetProblemList(ctx *gin.Context) {
 		Keyword:  params.Keyword,
 		Tag:      params.Tag,
 	}
-	resp, err := client.GetProblemList(context.Background(), req)
+	md := metadata.Pairs("role", fmt.Sprintf("%d", role.(int32)))
+	c, cancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), md), global.GrpcTimeout)
+	defer cancel()
+	resp, err := client.GetProblemList(c, req)
 	if err != nil {
 		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
@@ -248,10 +259,40 @@ func HandlePublishProblem(ctx *gin.Context) {
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
-	if _, err = client.PublishProblem(ctx, &pb.PublishProblemRequest{
+	c, cancel := context.WithTimeout(context.Background(), global.GrpcTimeout)
+	defer cancel()
+	if _, err = client.PublishProblem(c, &pb.PublishProblemRequest{
 		Id: problem_id,
 	}); err != nil {
 		logrus.Errorf("发布失败: %s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+	ResponseOK(ctx, nil)
+}
+
+// 处理隐藏题目
+func HandleHideProblem(ctx *gin.Context) {
+	// 获取元数据
+	problem_id, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
+	if err != nil {
+		ResponseBadRequest(ctx, "无效的 problem_id")
+		return
+	}
+	// 调用problem服务
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	c, cancel := context.WithTimeout(context.Background(), global.GrpcTimeout)
+	defer cancel()
+	if _, err = client.HideProblem(c, &pb.HideProblemRequest{
+		Id: problem_id,
+	}); err != nil {
+		logrus.Errorf("隐藏失败: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}

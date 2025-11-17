@@ -10,7 +10,7 @@ type ProblemRepo interface {
 	// 创建题目
 	CreateProblem(problem *model.Problem) (int64, error)
 	// 查询题目列表，偏移量分页
-	QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error)
+	QueryProblemList(page, pageSize int, keyword, tag string, role int32) (int64, []model.Problem, error)
 	// 查询题目数据
 	QueryProblemData(id int64) (*model.Problem, error)
 	// 更新题目
@@ -41,8 +41,8 @@ func NewProblemUseCase(repo ProblemRepo) *ProblemUseCase {
 func (pc *ProblemUseCase) CreateProblem(problem *model.Problem) (int64, error) {
 	return pc.repo.CreateProblem(problem)
 }
-func (pc *ProblemUseCase) QueryProblemList(page, pageSize int, keyword, tag string) (int64, []model.Problem, error) {
-	return pc.repo.QueryProblemList(page, pageSize, keyword, tag)
+func (pc *ProblemUseCase) QueryProblemList(page, pageSize int, keyword, tag string, role int32) (int64, []model.Problem, error) {
+	return pc.repo.QueryProblemList(page, pageSize, keyword, tag, role)
 }
 func (pc *ProblemUseCase) QueryProblemData(id int64) (*model.Problem, error) {
 	return pc.repo.QueryProblemData(id)

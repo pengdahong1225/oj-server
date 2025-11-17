@@ -19,6 +19,7 @@ const (
 	AccessTokenTimeOut  int64 = 60 * 60 * 24     // 24小时
 	Issuer                    = "Messi"
 	ProblemConfigPath         = "/data/oj/problem_configs"
+	GrpcTimeout               = time.Second * 3
 )
 
 // ============================ mq相关 ============================
