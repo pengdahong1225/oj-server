@@ -4,13 +4,13 @@ create table if not exists problem
 (
     id BIGINT AUTO_INCREMENT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    delete_at TIMESTAMP,
+    update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    delete_at TIMESTAMP DEFAULT NULL,
 
     title VARCHAR(64) NOT null comment '题目标题',
     level tinyint DEFAULT 0 comment '题目难度 1:简单 2:中等 3:困难',
     tags JSON comment '题目标签',
     description TEXT NOT null comment '题目描述',
-    create_by BIGINT DEFAULT 0 comment '题目创建者',
     comment_count BIGINT DEFAULT 0 comment '评论总数量',
 
     status tinyint DEFAULT 0 comment '状态 1：发布 0：隐藏',

@@ -81,7 +81,7 @@ const onTagClick = (tag: string) => {
                     </template>
                 </el-table-column>
 
-                <el-table-column label="#" prop="problem_id" width="80">
+                <el-table-column label="#" prop="problem_id" width="100">
                     <template #default="{ row }">
                         <el-link type="primary" :underline="false" @click="
                             $router.push({
@@ -91,7 +91,7 @@ const onTagClick = (tag: string) => {
                     </template>
                 </el-table-column>
 
-                <el-table-column label="Title" prop="title">
+                <el-table-column label="Title" prop="title" width="180">
                     <template #default="{ row }">
                         <el-link type="primary" :underline="false" @click="
                             $router.push({
@@ -100,18 +100,23 @@ const onTagClick = (tag: string) => {
                             ">{{ row.problem_title }}</el-link>
                     </template>
                 </el-table-column>
-                <el-table-column label="Level" prop="level">
+                
+                <el-table-column label="Tags" width="500">
+                    <template #default="{ row }">
+                        <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag }}</el-tag>
+                    </template>
+                </el-table-column>
+
+                <el-table-column label="Level" prop="level" width="200">
                     <template #default="{ row }">
                         <el-tag v-if="row.level === 1" type="primary">简单</el-tag>
                         <el-tag v-else-if="row.level === 2" type="warning">中等</el-tag>
                         <el-tag v-else type="danger">困难</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column label="Tags">
-                    <template #default="{ row }">
-                        <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag
-                            }}</el-tag>
-                    </template>
+
+                <el-table-column label="通过率">
+                   
                 </el-table-column>
 
                 <template #empty>

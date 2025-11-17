@@ -32,8 +32,8 @@ const problem = ref<API.Problem>({
 })
 const getProblemDetail = async () => {
     const res = await queryProblemDetailService(Number(route.params.id))
-    problem.value.problem_id = res.data.data.id
-    problem.value.problem_title = res.data.data.title
+    problem.value.problem_id = res.data.data.problem_id
+    problem.value.problem_title = res.data.data.problem_title
     problem.value.description = res.data.data.description
     problem.value.level = res.data.data.level
     problem.value.tags = res.data.data.tags

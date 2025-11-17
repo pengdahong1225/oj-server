@@ -12,5 +12,5 @@ export const formatTime = (time: string | number) => {
         console.warn('无效的时间戳:', time)
         return '' // 返回空字符串或其他默认值
     }
-    return dayjs(timestamp).format('YYYY-MM-DD')
+    return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
 } 

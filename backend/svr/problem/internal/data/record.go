@@ -110,6 +110,7 @@ func (rr *RecordRepo) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
 	return &record, nil
 }
 
+// 查询查询排行榜更新时间
 func (rr *RecordRepo) QueryLeaderboardLastUpdate() (int64, error) {
 	result := rr.rdb_.Get(context.Background(), global.LeaderboardLastUpdateKey)
 	if result.Err() != nil {
@@ -117,6 +118,8 @@ func (rr *RecordRepo) QueryLeaderboardLastUpdate() (int64, error) {
 	}
 	return result.Int64()
 }
+
+// 更新排行榜更新时间
 func (rr *RecordRepo) UpdateLeaderboardLastUpdate(time int64) error {
 	result := rr.rdb_.Set(context.Background(), global.LeaderboardLastUpdateKey, time, redis.KeepTTL)
 	if result.Err() != nil {
@@ -124,8 +127,11 @@ func (rr *RecordRepo) UpdateLeaderboardLastUpdate(time int64) error {
 	}
 	return nil
 }
+
+// 查询用户统计信息，仅查询当前年份的统计信息
 func (rr *RecordRepo) QueryStatistics(uid int64) (*model.Statistics, error) {
 	var statistics model.Statistics
+
 	result := rr.db_.Where("uid = ?", uid).First(&statistics)
 	if result.Error != nil {
 		return nil, result.Error
@@ -143,14 +149,25 @@ type leaderboardData struct {
 	Avatar   string `gorm:"column:avatar_url"`
 }
 
+// 查询月度排行榜
 func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) ([]*pb.LeaderboardUserInfo, error) {
+
+	statistics := &model.Statistics{}
+	if !rr.db_.Migrator().HasTable(statistics.TableName()) {
+		err := rr.db_.Table(statistics.TableName()).AutoMigrate(statistics)
+		if err != nil {
+			logrus.Errorln(err.Error())
+			return nil, status.Errorf(codes.Internal, "migrate table failed")
+		}
+	}
+
 	var lb_datas []leaderboardData
 	/*
 		SELECT
 		    s.uid, s.accomplish_count,
 		    u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile
 		FROM
-		    statistics s
+		    statistics_YYYY s
 		JOIN
 		    user_info u ON s.uid = u.id
 		WHERE
@@ -159,13 +176,13 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 		    s.accomplish_count DESC  -- 按完成数降序排列
 		LIMIT ? OFFSET ?  -- 分页参数
 	*/
-	result := rr.db_.Table("statistics s").
+	result := rr.db_.Model(&model.Statistics{}).
 		Select(`
-            s.uid, s.accomplish_count,
+            uid, accomplish_count,
             u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
-		Joins("JOIN user_info u ON s.uid = u.id").
-		Where("s.period = ?", period).
-		Order("s.accomplish_count DESC").
+		Joins("JOIN user_info u ON uid = u.id").
+		Where("period = ?", period).
+		Order("accomplish_count DESC").
 		Limit(limit).
 		Scan(&lb_datas)
 	if result.Error != nil {
@@ -188,6 +205,8 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 	}
 	return lb_list, nil
 }
+
+// 查询每日排行榜
 func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.LeaderboardUserInfo, error) {
 	var lb_datas []leaderboardData
 	/*
@@ -235,6 +254,8 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 	}
 	return lb_list, nil
 }
+
+// 同步排行榜
 func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, leaderboardKey string, leaderboardKeyTTL time.Duration) error {
 	// 使用Pipeline批量操作
 	ctx := context.Background()

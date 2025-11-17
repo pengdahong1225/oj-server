@@ -79,9 +79,7 @@ func (s *Server) Run() {
 	grpcServer := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
 	pb.RegisterUserServiceServer(grpcServer, s.userSrv)
-	if err = grpcServer.Serve(listener); err != nil {
-		logrus.Fatalf("启动GRPC服务失败: %v", err)
-	}
+	_ = grpcServer.Serve(listener)
 }
 
 func (s *Server) Stop() {

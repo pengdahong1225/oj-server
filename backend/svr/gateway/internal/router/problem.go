@@ -11,16 +11,16 @@ func initProblemRouter(rg *gin.RouterGroup) {
 	problem := rg.Group("/problem")
 	problem.Use(middlewares.AuthLogin())
 	{
-		problem.GET("/tag_list", handler.HandleGetProblemTagList)
-		problem.GET("/list", handler.HandleGetProblemList)
-		problem.GET("/detail", handler.HandleGetProblemDetail)
-		problem.POST("/submit", handler.HandleSubmitProblem)
-
 		problem.POST("/add", middlewares.Admin(), handler.HandleCreateProblem)
 		problem.POST("/upload_config", middlewares.Admin(), handler.HandleUploadConfig)
 		problem.POST("/publish", middlewares.Admin(), handler.HandlePublishProblem)
 		problem.DELETE("", middlewares.Admin(), handler.HandleDeleteProblem)
 		problem.POST("/update", middlewares.Admin(), handler.HandleUpdateProblem)
+
+		problem.GET("/tag_list", handler.HandleGetProblemTagList)
+		problem.GET("/list", handler.HandleGetProblemList)
+		problem.GET("/detail", handler.HandleGetProblemDetail)
+		problem.POST("/submit", handler.HandleSubmitProblem)
 	}
 
 	// 评论相关

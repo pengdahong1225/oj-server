@@ -39,8 +39,6 @@ create table if not exists user_solution
 -- 用户解题统计表
 create table if not exists statistics_YYYY(
     uid BIGINT not null comment '用户id',
-    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    delete_at TIMESTAMP,
 
     period CHAR(7) NOT NULL COMMENT 'YYYY-MM',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -52,7 +50,7 @@ create table if not exists statistics_YYYY(
     hard_problem_count INT DEFAULT 0 comment '通过的困难题目数量',
 
     PRIMARY KEY(period, uid), -- 复合主键
-    INDEX idx_accomplish_sort (period, accomplish_count DESC, uid);
+    INDEX idx_accomplish_sort (period, accomplish_count DESC, uid)
 )engine = InnoDB charset = utf8mb4;
 
 -- 统计表分区

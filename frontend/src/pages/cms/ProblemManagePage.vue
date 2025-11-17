@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Delete, Edit, Search } from '@element-plus/icons-vue'
-import { onMounted, ref, watch } from 'vue'
-import { queryProblemListService } from '@/api/problemController'
+import { Delete, Edit, Search, Open, TurnOff, UploadFilled } from '@element-plus/icons-vue'
+import { onMounted, ref } from 'vue'
+import { queryProblemListService, deleteProblemService } from '@/api/problemController'
 
 import { formatTime } from '@/utils/format'
 import ProblemEdit from '@/components/problemEdit.vue'
@@ -26,9 +26,8 @@ const params = ref(<API.QueryProblemListParams>{
 const getProblemList = async () => {
     loading.value = true
     const resp = await queryProblemListService(params.value)
-    console.log(resp)
     total.value = resp.data.data.total
-    problemList.value = resp.data.data.data
+    problemList.value = resp.data.data.list
     loading.value = false
 }
 const handleCurrentChange = (page: number) => {
@@ -51,10 +50,25 @@ const onAddProblem = () => {
     problemEditRef.value.open("create", {})
 }
 const onEdit = (row: API.Problem) => {
-    problemEditRef.value.open("update", row)
+    problemEditRef.value.open("update", row.problem_id)
 }
-const onDelete = (row: API.Problem) => {
-    console.log(row)
+const onUploadConfig = () => { 
+    console.log("upload config")
+}
+const onPublish = (id: number) => {
+    console.log(`publish: ${id}`)
+}
+const onHide = (id: number) => { 
+    console.log(`hide: ${id}`)
+}
+const onDelete = async (id: number) => {
+    const resp = await deleteProblemService(id)
+    if (resp.data.code === 0) {
+        ElMessage.success("删除成功")
+        getProblemList()
+    } else {
+        ElMessage.error(resp.data.message || '删除失败')
+    }
 }
 // 添加/编辑的回调
 const onSuccess = (mode: string) => {
@@ -90,28 +104,27 @@ const onSuccess = (mode: string) => {
 
         <!-- 表格区域 -->
         <el-table v-loading="loading" :data="problemList">
-            <el-table-column label="#" prop="id" width="80">
+            <el-table-column label="#" prop="id" width="60">
                 <template #default="{ row }">
-                    {{ row.id }}
+                    {{ row.problem_id }}
                 </template>
             </el-table-column>
 
-            <el-table-column label="Title" prop="title">
+            <el-table-column label="Title" prop="title" width="150">
                 <template #default="{ row }">
-                    {{ row.title }}
+                    {{ row.problem_title }}
                 </template>
             </el-table-column>
-            <el-table-column label="Level" prop="level">
+            <el-table-column label="Level" prop="level" width="100">
                 <template #default="{ row }">
                     <el-tag v-if="row.level === 1" type="primary">简单</el-tag>
                     <el-tag v-else-if="row.level === 2" type="warning">中等</el-tag>
                     <el-tag v-else type="danger">困难</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="Tags">
+            <el-table-column label="Tags" width="500">
                 <template #default="{ row }">
-                    <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag
-                        }}</el-tag>
+                    <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag }}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="Created At">
@@ -119,15 +132,18 @@ const onSuccess = (mode: string) => {
                     {{ formatTime(row.create_at) }}
                 </template>
             </el-table-column>
-            <el-table-column label="Created By">
+            <el-table-column label="Updated At">
                 <template #default="{ row }">
-                    {{ row.create_by }}
+                    {{ formatTime(row.update_at) }}
                 </template>
             </el-table-column>
             <el-table-column label="操作">
                 <template #default="{ row }">
                     <el-button circle plain type="primary" :icon="Edit" @click="onEdit(row)"></el-button>
-                    <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row)"></el-button>
+                    <el-button circle plain type="primary" :icon="UploadFilled" @click="onUploadConfig"></el-button>
+                    <el-button v-if="row.status === 1" circle plain type="success" :icon="Open" @click="onHide(row.problem_id)"></el-button>
+                    <el-button v-else circle plain type="info" :icon="TurnOff" @click="onPublish(row.problem_id)"></el-button>
+                    <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.problem_id)"></el-button>
                 </template>
             </el-table-column>
 

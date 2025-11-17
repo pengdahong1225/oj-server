@@ -13,9 +13,9 @@ service ProblemService {
   // 发布题目
   rpc PublishProblem(PublishProblemRequest) returns (google.protobuf.Empty);
   // 更新题目信息
-  rpc UpdateProblem(UpdateProblemRequest) returns (UpdateProblemResponse);
+  rpc UpdateProblem(UpdateProblemRequest) returns (google.protobuf.Empty);
   // 删除题目
-  rpc DeleteProblem(DeleteProblemRequest) returns (DeleteProblemResponse);
+  rpc DeleteProblem(DeleteProblemRequest) returns (google.protobuf.Empty);
   // 获取tag列表
   rpc GetTagList(google.protobuf.Empty) returns (GetTagListResponse);
   // 获取题目列表
@@ -58,17 +58,10 @@ message PublishProblemRequest {
 message UpdateProblemRequest {
   Problem data = 1;
 }
-message UpdateProblemResponse {
-  int64 id = 1;
-  string message = 2;
-}
 
 // 删除题目
 message DeleteProblemRequest {
   int64 id = 1;
-}
-message DeleteProblemResponse {
-  string message = 1;
 }
 
 // 查询题目列表

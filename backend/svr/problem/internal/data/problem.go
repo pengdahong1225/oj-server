@@ -51,6 +51,9 @@ func NewProblemRepo() (*ProblemRepo, error) {
 		Logger: newLogger,
 		// SkipDefaultTransaction: true, //全局禁用默认事务
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// redis
 	redis_cfg := configs.AppConf.RedisCfg
@@ -115,7 +118,7 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string)
 	*/
 	offSet := (page - 1) * pageSize
 	var problemList []model.Problem
-	query = pr.db_.Model(&model.Problem{}).Select("id,title,level,tags,create_at,create_by")
+	query = pr.db_.Model(&model.Problem{}).Select("id,title,level,tags,create_at,update_at,status")
 	if keyword != "" {
 		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
@@ -168,6 +171,7 @@ func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
 }
 
 func (pr *ProblemRepo) DeleteProblem(id int64) error {
+	//result := pr.db_.Where("id=?", id).Update("delete_at", time.Now().String()) // 软删除
 	result := pr.db_.Where("id=?", id).Delete(&model.Problem{})
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())

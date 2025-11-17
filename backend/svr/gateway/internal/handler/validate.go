@@ -8,7 +8,7 @@ import (
 )
 
 type formTyper interface {
-	model.RegisterForm | model.LoginFrom | model.GetSmsCodeForm | model.UpdateProblemForm |
+	model.RegisterForm | model.LoginFrom | model.GetSmsCodeForm |
 		model.CommentLikeForm | model.LoginWithSmsForm | model.ResetPasswordForm |
 		model.DeleteCommentForm
 }
@@ -29,7 +29,7 @@ func validateWithForm[T formTyper](ctx *gin.Context, form T) (*T, bool) {
 }
 
 type jsonTyper interface {
-	model.SubmitForm | model.CreateCommentForm | model.CreateProblemForm
+	model.SubmitForm | model.CreateCommentForm | model.CreateProblemForm | model.UpdateProblemForm
 }
 
 func validateWithJson[T jsonTyper](ctx *gin.Context, form T) (*T, bool) {

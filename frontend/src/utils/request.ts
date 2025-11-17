@@ -2,7 +2,6 @@ import axios from 'axios'
 import { useUserStore } from '@/stores'
 import router from '@/router'
 
-// const baseURL = 'http://192.168.201.128/api'
 const baseURL = 'http://localhost:8080/api/v1'
 
 /**

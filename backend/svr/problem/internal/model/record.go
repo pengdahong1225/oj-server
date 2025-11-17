@@ -49,31 +49,24 @@ func (UserSolution) TableName() string {
 	return "user_solution"
 }
 
+// * 在多个字段上同时声明 primaryKey 标签, GORM 会自动把它们组合成复合主键
+// * 多个字段使用同一个索引名将创建复合索引，使用 priority 指定复合索引的顺序，
+// 默认优先级值是 10，如果优先级值相同，则顺序取决于模型结构体字段的顺序
 type Statistics struct {
-	Uid                int64     `gorm:"column:uid;primaryKey"`
-	Period             string    `gorm:"column:period;primaryKey;size:7;index:idx_period"`
-	CreateAt           time.Time `gorm:"column:create_at;autoCreateTime;index:idx_create_at"`
-	UpdatedAt          time.Time `gorm:"column:updated_at;autoUpdateTime"`
-	SubmitCount        int32     `gorm:"column:submit_count;default:0"`
-	AccomplishCount    int32     `gorm:"column:accomplish_count;default:0;index:idx_accomplish"`
-	EasyProblemCount   int32     `gorm:"column:easy_problem_count;default:0"`
-	MediumProblemCount int32     `gorm:"column:medium_problem_count;default:0"`
-	HardProblemCount   int32     `gorm:"column:hard_problem_count;default:0"`
+	// 复合主键：(UID, Period)
+	// 复合索引: idx_accomplish_sort,sort:desc (period, accomplish_count DESC, uid)
+
+	UID       int64     `gorm:"column:uid;primaryKey;not null;comment:用户id;index:idx_accomplish_sort,sort:desc,priority:3"`
+	Period    string    `gorm:"column:period;type:char(7);primaryKey;index:idx_accomplish_sort,sort:desc,priority:1;not null;comment:YYYY-MM"`
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;comment:更新时间"`
+
+	SubmitCount        int `gorm:"column:submit_count;default:0;comment:提交数量"`
+	AccomplishCount    int `gorm:"column:accomplish_count;default:0;comment:通过数量;index:idx_accomplish_sort,sort:desc,priority:2;"`
+	EasyProblemCount   int `gorm:"column:easy_problem_count;default:0;comment:简单通过数"`
+	MediumProblemCount int `gorm:"column:medium_problem_count;default:0;comment:中等通过数"`
+	HardProblemCount   int `gorm:"column:hard_problem_count;default:0;comment:困难通过数"`
 }
 
 func (s *Statistics) TableName() string {
-	// 从Period字段中提取年份
-	year := ""
-	if len(s.Period) >= 4 {
-		year = s.Period[:4]
-	} else {
-		// 如果Period格式不正确，使用当前年份作为后备
-		year = time.Now().Format("2006")
-	}
-	// 验证年份是否有效
-	if _, err := time.Parse("2006", year); err != nil {
-		year = time.Now().Format("2006")
-	}
-
-	return fmt.Sprintf("statistics_%s", year)
+	return fmt.Sprintf("statistics_%s", time.Now().Format("2006"))
 }

@@ -23,19 +23,19 @@ namespace API {
     
         problem_id: number;
         status?: number;
-        create_at?: string;
-        create_by?: number;
+        create_at?: number;
+        update_at?: number;
         config?: string;
     }
     type CreateProblemForm = {
-        title: string;
+        problem_title: string;
         level: number;
         tags: string[];
         description: string;
     }
     type UpdateProblemForm = {
-        id: number;
-        title: string;
+        problem_id: number;
+        problem_title: string;
         level: number;
         tags: string[];
         description: string;

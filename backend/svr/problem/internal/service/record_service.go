@@ -30,11 +30,11 @@ func NewRecordService() *RecordService {
 
 // 系统启动时，先全量同步一次
 func (ps *RecordService) SyncLeaderboardByScheduled() {
-	defer func() {
-		if err := recover(); err != nil {
-			logrus.Errorf("update leaderboard panic: %v", err)
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		logrus.Errorf("update leaderboard panic: %v", err)
+	//	}
+	//}()
 	if err := ps.syncMonthLeaderboard(); err != nil {
 		logrus.Errorf("全量同步月榜失败, err:%s", err.Error())
 	}
@@ -56,6 +56,7 @@ func (ps *RecordService) syncMonthLeaderboard() error {
 		logrus.Errorf("查询排行榜数据失败, err:%s", err.Error())
 		return err
 	}
+	logrus.Debugf("获取月榜数据:%+v", lb_list)
 	// 写入redis
 	return ps.uc.SynchronizeLeaderboard(lb_list, global.GetMonthLeaderboardKey(), global.MonthLeaderboardTTL)
 }
@@ -66,6 +67,7 @@ func (ps *RecordService) syncDailyLeaderboard() error {
 		logrus.Errorf("查询排行榜数据失败, err:%s", err.Error())
 		return err
 	}
+	logrus.Debugf("获取日榜数据:%+v", lb_list)
 	// 写入redis
 	return ps.uc.SynchronizeLeaderboard(lb_list, global.GetDailyLeaderboardKey(), global.DailyLeaderboardTTL)
 }

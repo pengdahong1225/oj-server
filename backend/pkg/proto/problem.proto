@@ -4,16 +4,15 @@ option go_package = "./;pb";
 // 题目基础信息
 message Problem{
   int64 id = 1;
-  string create_at = 2;
-  string delete_at = 3;
+  int64 create_at = 2;
+  int64  update_at = 3;
+  string delete_at = 4;
 
-  string title = 4;
-  string description = 5;
-  int32 level = 6;
-  repeated string tags = 7;
-  int64 create_by = 8;
-
-  int32 status = 10; // 是否发布
+  string title = 5;
+  string description = 6;
+  int32 level = 7;
+  repeated string tags = 8;
+  int32 status = 9;
 }
 // 题目配置信息
 message ProblemConfig{

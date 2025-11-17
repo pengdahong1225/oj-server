@@ -16,7 +16,6 @@ import (
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/data"
 	"oj-server/svr/problem/internal/model"
-	"oj-server/utils"
 	"os"
 	"path/filepath"
 )
@@ -50,12 +49,15 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 	resp := &pb.CreateProblemResponse{}
 
 	problem := &model.Problem{
-		Title:        in.Title,
-		Level:        in.Level,
-		Tags:         []byte(utils.SpliceStringWithX(in.Tags, "#")),
-		Description:  in.Description,
-		CommentCount: 0,
-		Status:       0, // 未发布
+		Title:       in.Title,
+		Level:       int8(in.Level),
+		Description: in.Description,
+	}
+	var err error
+	problem.Tags, err = json.Marshal(in.Tags)
+	if err != nil {
+		logrus.Errorf("json marshal failed:%s", err.Error())
+		return nil, err
 	}
 
 	id, err := ps.uc.CreateProblem(problem)
@@ -128,29 +130,29 @@ func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProb
 
 // 更新题目基础信息
 // 标题、等级、标签、描述、创建者、状态
-func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProblemRequest) (*pb.UpdateProblemResponse, error) {
-	resp := &pb.UpdateProblemResponse{}
-
+func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProblemRequest) (*emptypb.Empty, error) {
 	problem := &model.Problem{
 		ID:          in.Data.Id,
 		Title:       in.Data.Title,
-		Level:       in.Data.Level,
-		Tags:        []byte(utils.SpliceStringWithX(in.Data.Tags, "#")),
+		Level:       int8(in.Data.Level),
 		Description: in.Data.Description,
-		CreateBy:    in.Data.CreateBy,
-		Status:      in.Data.Status,
 	}
-	err := ps.uc.UpdateProblem(problem)
+	var err error
+	problem.Tags, err = json.Marshal(in.Data.Tags)
 	if err != nil {
+		logrus.Errorf("json marshal failed:%s", err.Error())
+		return nil, err
+	}
+
+	if err = ps.uc.UpdateProblem(problem); err != nil {
 		logrus.Errorf("UpdateProblem failed, err:%s", err.Error())
 		return nil, err
 	}
-	return resp, nil
+	return nil, nil
 }
 
-func (ps *ProblemService) DeleteProblem(ctx context.Context, in *pb.DeleteProblemRequest) (*pb.DeleteProblemResponse, error) {
-	resp := &pb.DeleteProblemResponse{}
-	return resp, ps.uc.DeleteProblem(in.Id)
+func (ps *ProblemService) DeleteProblem(ctx context.Context, in *pb.DeleteProblemRequest) (*emptypb.Empty, error) {
+	return nil, ps.uc.DeleteProblem(in.Id)
 }
 
 func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
@@ -164,11 +166,12 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 	for _, problem := range problems {
 		pbProblem := &pb.Problem{
 			Id:          problem.ID,
-			CreateAt:    problem.CreateAt.String(),
+			CreateAt:    problem.CreateAt.Unix(),
+			UpdateAt:    problem.UpdateAt.Unix(),
 			Title:       problem.Title,
 			Description: problem.Description,
-			Level:       problem.Level,
-			CreateBy:    problem.CreateBy,
+			Level:       int32(problem.Level),
+			Status:      int32(problem.Status),
 		}
 		if err = json.Unmarshal(problem.Tags, &pbProblem.Tags); err != nil {
 			logrus.Errorf("json unmarshal failed:%s", err.Error())
@@ -188,12 +191,12 @@ func (ps *ProblemService) GetProblemDetail(ctx context.Context, in *pb.GetProble
 	}
 	resp.Problem = &pb.Problem{
 		Id:          problem.ID,
-		CreateAt:    problem.CreateAt.String(),
+		CreateAt:    problem.CreateAt.Unix(),
+		UpdateAt:    problem.UpdateAt.Unix(),
 		Title:       problem.Title,
 		Description: problem.Description,
-		Level:       problem.Level,
-		CreateBy:    problem.CreateBy,
-		Status:      problem.Status,
+		Level:       int32(problem.Level),
+		Status:      int32(problem.Status),
 	}
 	if err = json.Unmarshal(problem.Tags, &resp.Problem.Tags); err != nil {
 		logrus.Errorf("json unmarshal failed:%s", err.Error())

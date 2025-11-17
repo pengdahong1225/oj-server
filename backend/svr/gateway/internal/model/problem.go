@@ -3,7 +3,8 @@ package model
 // 题目基础信息
 type Problem struct {
 	ID          int64    `json:"problem_id"`
-	CreateAt    string   `json:"create_at"`
+	CreateAt    int64    `json:"create_at"`
+	UpdateAt    int64    `json:"update_at"`
 	Title       string   `json:"problem_title"`
 	Level       int32    `json:"level"`
 	Description string   `json:"description"`
@@ -29,11 +30,9 @@ type Limit struct {
 	ProcLimit   int64 `json:"proc_limit"`
 }
 
-// binding的逗号之间不能有空格
-
 // 创建题目表单
 type CreateProblemForm struct {
-	Title       string   `json:"title" binding:"required"`
+	Title       string   `json:"problem_title" binding:"required"`
 	Level       int32    `json:"level" binding:"required"`
 	Tags        []string `json:"tags" binding:"required"`
 	Description string   `json:"description" binding:"required"`
@@ -52,11 +51,11 @@ type SubmitResult struct {
 
 // 修改题目表单
 type UpdateProblemForm struct {
-	Title  string   `json:"title" form:"title" binding:"required"`
-	Level  int32    `json:"level" form:"level" binding:"required"`
-	Tags   []string `json:"tags" form:"tags" binding:"required"`
-	Desc   string   `json:"description" form:"description" binding:"required"`
-	Config string   `json:"config" form:"config" binding:"required"`
+	ProblemID int64    `json:"problem_id" binding:"required"`
+	Title     string   `json:"problem_title"  binding:"required"`
+	Level     int32    `json:"level" binding:"required"`
+	Tags      []string `json:"tags"  binding:"required"`
+	Desc      string   `json:"description" binding:"required"`
 }
 
 // 题目列表分页查询参数

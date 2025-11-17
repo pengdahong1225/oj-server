@@ -45,23 +45,24 @@ func Recovery() gin.HandlerFunc {
 		ctx.Next()
 	}
 }
-
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		origin := c.Request.Header.Get("Origin")
 		if origin != "" {
-			// 若需要允许多个 origin，可在这里做白名单校验
+			// 可以加白名单校验
 			c.Header("Access-Control-Allow-Origin", origin)
 		}
 
 		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-CSRF-Token, Token")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		c.Header("Access-Control-Expose-Headers", "Content-Length, Content-Type")
+		c.Header("Access-Control-Allow-Headers",
+			"Content-Type, Authorization, X-Requested-With, X-CSRF-Token, Token, Accept, Origin")
+		c.Header("Access-Control-Allow-Methods",
+			"GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Header("Access-Control-Expose-Headers",
+			"Content-Length, Content-Type")
 		c.Header("Access-Control-Max-Age", "86400") // 缓存 preflight
 
-		// 处理 OPTIONS 预检请求
+		// OPTIONS 请求直接返回，不继续执行 handler
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
 			return

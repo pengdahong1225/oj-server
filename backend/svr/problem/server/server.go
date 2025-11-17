@@ -88,9 +88,7 @@ func (s *Server) Run() {
 	pb.RegisterProblemServiceServer(grpcServer, s.problemService)
 	pb.RegisterRecordServiceServer(grpcServer, s.recordService)
 	pb.RegisterCommentServiceServer(grpcServer, s.commentService)
-	if err = grpcServer.Serve(listener); err != nil {
-		logrus.Fatalf("启动GRPC服务失败: %v", err)
-	}
+	_ = grpcServer.Serve(listener)
 }
 
 func (s *Server) Stop() {

@@ -78,6 +78,7 @@ func HandleGetProblemList(ctx *gin.Context) {
 			Tags:        v.Tags,
 			Status:      v.Status,
 			CreateAt:    v.CreateAt,
+			UpdateAt:    v.UpdateAt,
 		}
 	}
 
@@ -119,44 +120,6 @@ func HandleGetProblemDetail(ctx *gin.Context) {
 		CreateAt:    resp.Problem.CreateAt,
 	}
 	ResponseOK(ctx, problem)
-}
-
-// 提交代码
-func HandleSubmitProblem(ctx *gin.Context) {
-	// 表单验证
-	form, ok := validateWithJson(ctx, model.SubmitForm{})
-	if !ok {
-		return
-	}
-
-	// 获取元数据
-	uid := ctx.GetInt64("uid")
-
-	// 调用题目服务
-	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
-	if err != nil {
-		logrus.Errorf("problem服务连接失败:%s", err.Error())
-		ResponseInternalServerError(ctx, "服务繁忙")
-		return
-	}
-	client := pb.NewProblemServiceClient(conn)
-	req := &pb.SubmitProblemRequest{
-		ProblemId: form.ProblemID,
-		Title:     form.Title,
-		Lang:      form.Lang,
-		Code:      form.Code,
-	}
-	resp, err := client.SubmitProblem(context.WithValue(context.Background(), "uid", uid), req)
-	if err != nil {
-		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
-		ResponseWithGrpcError(ctx, err)
-		return
-	}
-
-	result := &model.SubmitResult{
-		TaskId: resp.TaskId,
-	}
-	ResponseOK(ctx, result)
 }
 
 // 创建题目信息
@@ -295,8 +258,97 @@ func HandlePublishProblem(ctx *gin.Context) {
 	ResponseOK(ctx, nil)
 }
 
-// 处理删除题目
-func HandleDeleteProblem(ctx *gin.Context) {}
-
 // 处理更新题目信息
-func HandleUpdateProblem(ctx *gin.Context) {}
+func HandleUpdateProblem(ctx *gin.Context) {
+	form, ret := validateWithJson(ctx, model.UpdateProblemForm{})
+	if !ret {
+		return
+	}
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	_, err = client.UpdateProblem(ctx, &pb.UpdateProblemRequest{
+		Data: &pb.Problem{
+			Id:          form.ProblemID,
+			Title:       form.Title,
+			Description: form.Desc,
+			Level:       form.Level,
+			Tags:        form.Tags,
+		},
+	})
+	if err != nil {
+		logrus.Errorf("更新题目失败:%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+	ResponseOK(ctx, nil)
+}
+
+// 处理删除题目
+func HandleDeleteProblem(ctx *gin.Context) {
+	// 获取元数据
+	problem_id, err := strconv.ParseInt(ctx.Query("problem_id"), 10, 64)
+	if err != nil {
+		ResponseBadRequest(ctx, "无效的 problem_id")
+		return
+	}
+	// 调用problem服务
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	_, err = client.DeleteProblem(ctx, &pb.DeleteProblemRequest{
+		Id: problem_id,
+	})
+	if err != nil {
+		logrus.Errorf("删除题目失败:%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+	ResponseOK(ctx, nil)
+}
+
+// 提交代码
+func HandleSubmitProblem(ctx *gin.Context) {
+	// 表单验证
+	form, ok := validateWithJson(ctx, model.SubmitForm{})
+	if !ok {
+		return
+	}
+
+	// 获取元数据
+	uid := ctx.GetInt64("uid")
+
+	// 调用题目服务
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
+	if err != nil {
+		logrus.Errorf("problem服务连接失败:%s", err.Error())
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+	client := pb.NewProblemServiceClient(conn)
+	req := &pb.SubmitProblemRequest{
+		ProblemId: form.ProblemID,
+		Title:     form.Title,
+		Lang:      form.Lang,
+		Code:      form.Code,
+	}
+	resp, err := client.SubmitProblem(context.WithValue(context.Background(), "uid", uid), req)
+	if err != nil {
+		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+
+	result := &model.SubmitResult{
+		TaskId: resp.TaskId,
+	}
+	ResponseOK(ctx, result)
+}

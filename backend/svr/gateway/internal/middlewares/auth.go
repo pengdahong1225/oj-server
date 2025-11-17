@@ -49,7 +49,7 @@ func AuthLogin() gin.HandlerFunc {
 
 		// 剩余时间
 		remain := claims.ExpiresAt - time.Now().Unix()
-		logrus.Debugf("剩余：%v, [%v天]\n", remain, remain/86400)
+		logrus.Debugf("剩余：%v, [%v天]", remain, remain/86400)
 
 		// token通过
 		ctx.Set("claims", claims)

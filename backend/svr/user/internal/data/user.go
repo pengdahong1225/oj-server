@@ -50,6 +50,9 @@ func NewUserRepo() (*UserRepo, error) {
 		Logger: newLogger,
 		// SkipDefaultTransaction: true, //全局禁用默认事务
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// redis
 	redis_cfg := configs.AppConf.RedisCfg
