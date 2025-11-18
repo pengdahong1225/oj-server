@@ -103,9 +103,7 @@ const handleCommand = (command: string) => {
             <el-header>
                 <!-- 用户基本信息 -->
                 <div>
-                    管理员：<strong>{{
-                        userStore.userInfo.nickname || userStore.userInfo.mobile
-                    }}</strong>
+                    管理员：<strong>{{ userStore.userInfo.nick_name || userStore.userInfo.mobile }}</strong>
                 </div>
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">

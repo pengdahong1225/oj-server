@@ -20,6 +20,7 @@ const (
 	Issuer                    = "Messi"
 	ProblemConfigPath         = "/data/oj/problem_configs"
 	GrpcTimeout               = time.Second * 3
+	GrpcStreamTimeout         = time.Second * 30
 )
 
 // ============================ mq相关 ============================

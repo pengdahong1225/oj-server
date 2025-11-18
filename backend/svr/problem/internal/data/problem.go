@@ -175,6 +175,17 @@ func (pr *ProblemRepo) UpdateProblemStatus(id int64, st int32) error {
 	}
 	return nil
 }
+func (pr *ProblemRepo) UpdateProblemConfig(id int64, configURL string) error {
+	result := pr.db_.Model(&model.Problem{}).Where("id=?", id).Update("config_url", configURL)
+	if result.Error != nil {
+		logrus.Errorf("update problem config failed: %s", result.Error.Error())
+		return status.Errorf(codes.Internal, "update failed")
+	}
+	if result.RowsAffected == 0 {
+		return status.Errorf(codes.NotFound, "update failed")
+	}
+	return nil
+}
 
 func (pr *ProblemRepo) DeleteProblem(id int64) error {
 	//result := pr.db_.Where("id=?", id).Update("delete_at", time.Now().String()) // 软删除

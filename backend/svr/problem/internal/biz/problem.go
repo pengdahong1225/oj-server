@@ -17,6 +17,8 @@ type ProblemRepo interface {
 	UpdateProblem(problem *model.Problem) error
 	// 更新题目状态
 	UpdateProblemStatus(id int64, st int32) error
+	// 更新题目配置路径
+	UpdateProblemConfig(id int64, configURL string) error
 	// 删除题目
 	DeleteProblem(id int64) error
 	// 查询标签列表
@@ -52,6 +54,9 @@ func (pc *ProblemUseCase) UpdateProblem(problem *model.Problem) error {
 }
 func (pc *ProblemUseCase) UpdateProblemStatus(id int64, st int32) error {
 	return pc.repo.UpdateProblemStatus(id, st)
+}
+func (pc *ProblemUseCase) UpdateProblemConfig(id int64, configURL string) error {
+	return pc.repo.UpdateProblemConfig(id, configURL)
 }
 func (pc *ProblemUseCase) DeleteProblem(id int64) error {
 	return pc.repo.DeleteProblem(id)

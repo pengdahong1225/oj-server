@@ -128,3 +128,14 @@ export async function hideProblemService(id: number) {
         }
     })
 }
+
+/**
+ * 上传题目配置
+ * POST /problem/upload_config
+ */
+export async function uploadProblemConfigService(data: FormData) {
+    return request('/problem/upload_config', {
+        method: 'POST',
+        data: data
+    })
+}

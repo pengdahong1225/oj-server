@@ -42,6 +42,7 @@ declare module 'vue' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     NoticeDialog: typeof import('./src/components/noticeDialog.vue')['default']
     PageContainer: typeof import('./src/components/PageContainer.vue')['default']
     ProblemEdit: typeof import('./src/components/problemEdit.vue')['default']

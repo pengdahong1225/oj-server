@@ -3,8 +3,9 @@ package registry
 import (
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
+	_ "github.com/mbobakov/grpc-consul-resolver" // It's important
 	"google.golang.org/grpc"
-	"sync"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -22,9 +23,6 @@ type ServiceInfo struct {
 type Registrar struct {
 	dsn    string
 	client *consulapi.Client
-
-	servicesMap map[string]*grpc.ClientConn // 服务连接池
-	mux         sync.RWMutex
 }
 
 func NewRegistrar(dsn string) (*Registrar, error) {
@@ -36,9 +34,8 @@ func NewRegistrar(dsn string) (*Registrar, error) {
 	}
 
 	registrar := &Registrar{
-		dsn:         dsn,
-		client:      client,
-		servicesMap: make(map[string]*grpc.ClientConn),
+		dsn:    dsn,
+		client: client,
 	}
 
 	return registrar, nil
@@ -89,4 +86,13 @@ func (r *Registrar) UnRegister(serviceInfo *ServiceInfo) error {
 	id := fmt.Sprintf("%s:%d", serviceInfo.Name, serviceInfo.NodeId)
 
 	return r.client.Agent().ServiceDeregister(id)
+}
+
+func (r *Registrar) GetGrpcConnection(name string) (*grpc.ClientConn, error) {
+	target := fmt.Sprintf("consul://%s/%s?wait=10s&healthy=true", r.dsn, name)
+	return grpc.NewClient(
+		target,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),                // 无认证连接
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`), // 负载均衡，轮训策略
+	)
 }

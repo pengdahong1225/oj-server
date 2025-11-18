@@ -189,12 +189,14 @@ func HandleUploadConfig(ctx *gin.Context) {
 		ResponseBadRequest(ctx, "文件过大")
 		return
 	}
+
 	// 打开文件流
 	file, err := fileHeader.Open()
 	if err != nil {
 		ResponseError(ctx, pb.Error_EN_Failed, "文件打开失败")
 		return
 	}
+
 	// 创建gRPC流
 	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
 	if err != nil {
@@ -203,14 +205,17 @@ func HandleUploadConfig(ctx *gin.Context) {
 		return
 	}
 	client := pb.NewProblemServiceClient(conn)
-	stream, err := client.UploadConfig(ctx)
+	md := metadata.Pairs("problem_id", fmt.Sprintf("%d", problemId))
+	c, cancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), md), global.GrpcStreamTimeout)
+	defer cancel()
+	stream, err := client.UploadConfig(c)
 	if err != nil {
 		logrus.Errorf("文件上传失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	// 分片读取并流式传输
-	buffer := make([]byte, 0, 1<<20) // 1MB分片
+	buffer := make([]byte, 1<<20) // 1MB分片
 	for {
 		n, err := file.Read(buffer)
 		if err == io.EOF {
@@ -234,12 +239,18 @@ func HandleUploadConfig(ctx *gin.Context) {
 		}
 	}
 	// 获取Problem服务响应
-	_, err = stream.CloseAndRecv()
+	resp, err := stream.CloseAndRecv()
 	if err != nil {
 		logrus.Errorf("file save error:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
+	if resp.Size != fileHeader.Size {
+		logrus.Errorf("file save error, file size[%d] != save size[%d]", fileHeader.Size, resp.Size)
+		ResponseError(ctx, pb.Error_EN_Failed, "file save failed")
+		return
+	}
+
 	ResponseOK(ctx, nil)
 }
 

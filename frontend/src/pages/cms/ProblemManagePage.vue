@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Delete, Edit, Search, Open, TurnOff, UploadFilled } from '@element-plus/icons-vue'
+import { Delete, Edit, Search, Open, TurnOff, Upload } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue'
 import { queryProblemListService, deleteProblemService, publishProblemService, hideProblemService } from '@/api/problemController'
 
 import { formatTime } from '@/utils/format'
 import ProblemEdit from '@/components/problemEdit.vue'
+import { useUserStore } from '@/stores'
 
 onMounted(() => {
     getProblemList()
@@ -52,9 +53,6 @@ const onAddProblem = () => {
 const onEdit = (row: API.Problem) => {
     problemEditRef.value.open("update", row.problem_id)
 }
-const onUploadConfig = () => { 
-    console.log("upload config")
-}
 const onPublish = async (id: number) => {
     const resp = await publishProblemService(id)
     if (resp.data.code === 0) {
@@ -64,7 +62,7 @@ const onPublish = async (id: number) => {
     }
     getProblemList()
 }
-const onHide = async (id: number) => { 
+const onHide = async (id: number) => {
     const resp = await hideProblemService(id)
     if (resp.data.code === 0) {
         ElMessage.success("隐藏成功")
@@ -80,6 +78,17 @@ const onDelete = async (id: number) => {
         getProblemList()
     } else {
         ElMessage.error(resp.data.message || '删除失败')
+    }
+}
+const uploadHeaders = {
+    Authorization: 'Bearer ' + useUserStore().token
+}
+// 上传回调
+const onUploadSuccess = (response: any, file: any, row: API.Problem) => {
+    if (response.code === 0) {
+        ElMessage.success(`题目 ${row.problem_id} 上传成功`)
+    } else {
+        ElMessage.error(response.message || '上传失败')
     }
 }
 // 添加/编辑的回调
@@ -136,26 +145,42 @@ const onSuccess = (mode: string) => {
             </el-table-column>
             <el-table-column label="Tags" width="500">
                 <template #default="{ row }">
-                    <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag }}</el-tag>
+                    <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag
+                    }}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="Created At">
+            <el-table-column label="Created At" with="100">
                 <template #default="{ row }">
                     {{ formatTime(row.create_at) }}
                 </template>
             </el-table-column>
-            <el-table-column label="Updated At">
+            <el-table-column label="Updated At" with="100">
                 <template #default="{ row }">
                     {{ formatTime(row.update_at) }}
                 </template>
             </el-table-column>
             <el-table-column label="操作">
                 <template #default="{ row }">
+                    <!-- 编辑 -->
                     <el-button circle plain type="primary" :icon="Edit" @click="onEdit(row)"></el-button>
-                    <el-button circle plain type="primary" :icon="UploadFilled" @click="onUploadConfig"></el-button>
-                    <el-button v-if="row.status === 1" circle plain type="success" :icon="Open" @click="onHide(row.problem_id)"></el-button>
-                    <el-button v-else circle plain type="info" :icon="TurnOff" @click="onPublish(row.problem_id)"></el-button>
+                    <!-- 发布 -->
+                    <el-button v-if="row.status === 1" circle plain type="success" :icon="Open"
+                        @click="onHide(row.problem_id)"></el-button>
+                    <!-- 隐藏 -->
+                    <el-button v-else circle plain type="info" :icon="TurnOff"
+                        @click="onPublish(row.problem_id)"></el-button>
+                    <!-- 删除 -->
                     <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.problem_id)"></el-button>
+                    <!-- 上传配置 -->
+                    <!-- 上传配置 -->
+                    <el-upload :action="`http://localhost:8080/api/v1/problem/upload_config`" :headers="uploadHeaders"
+                        :data="{problem_id: row.problem_id}"
+                        :name="'config_file'"
+                        :show-file-list="false" :on-success="(resp, file) => onUploadSuccess(resp, file, row)"
+                        accept=".json">
+                        <el-button circle plain type="warning" :icon="Upload">
+                        </el-button>
+                    </el-upload>
                 </template>
             </el-table-column>
 
