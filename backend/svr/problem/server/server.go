@@ -72,6 +72,9 @@ func (s *Server) Run() {
 	// 建立排行榜
 	go s.recordService.SyncLeaderboardByScheduled()
 
+	// 消费judge-result队列
+	go s.problemService.ConsumeJudgeResult()
+
 	// 监听
 	cfg := configs.ServerConf
 	netAddr := fmt.Sprintf("%s:%d", cfg.Address, cfg.Port)

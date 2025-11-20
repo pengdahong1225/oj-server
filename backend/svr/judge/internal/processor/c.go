@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 	"oj-server/pkg/gPool"
-	"oj-server/proto/pb"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"sync"
 )
@@ -157,8 +157,8 @@ func (cp *CProcessor) Run(param *biz.Param) {
 	}
 	wg.Wait()
 }
-func (cp *CProcessor) Judge() []*pb.PBResult {
-	var results []*pb.PBResult
+func (cp *CProcessor) Judge() []*pb.JudgeResultItem {
+	var results []*pb.JudgeResultItem
 	for runResult := range cp.runResultsChan {
 		pbResult := translatePBResult(runResult.Result)
 		// status不为Accepted的，不用检测结果

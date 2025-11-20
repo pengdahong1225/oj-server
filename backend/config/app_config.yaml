@@ -29,3 +29,11 @@ sms:
   endpoint: ''
   signName: ''
   templateCode: ''
+
+sandbox:
+  - type: c
+    host: 192.168.2.129
+    port: 5050
+  - type: cpp
+    host: 192.168.2.129
+    port: 5050

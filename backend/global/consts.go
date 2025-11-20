@@ -28,8 +28,12 @@ const (
 	RabbitMqExchangeKind = "direct"
 	RabbitMqExchangeName = "amq.direct"
 
-	RabbitMqJudgeKey     = "judge"
-	RabbitMqJudgeQueue   = "judge-task-queue"
+	RabbitMqJudgeSubmitKey   = "judge-submit"
+	RabbitMqJudgeSubmitQueue = "judge-submit-queue"
+
+	RabbitMqJudgeResultKey   = "judge-result"
+	RabbitMqJudgeResultQueue = "judge-result-queue"
+
 	RabbitMqCommentKey   = "comment"
 	RabbitMqCommentQueue = "comment-task-queue"
 )

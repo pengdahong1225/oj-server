@@ -392,7 +392,10 @@ func HandleSubmitProblem(ctx *gin.Context) {
 		Lang:      form.Lang,
 		Code:      form.Code,
 	}
-	resp, err := client.SubmitProblem(context.WithValue(context.Background(), "uid", uid), req)
+	md := metadata.Pairs("uid", fmt.Sprintf("%d", uid))
+	c, cancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), md), global.GrpcTimeout)
+	defer cancel()
+	resp, err := client.SubmitProblem(c, req)
 	if err != nil {
 		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)

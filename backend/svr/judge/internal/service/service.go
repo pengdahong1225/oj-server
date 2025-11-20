@@ -7,45 +7,43 @@ import (
 	"oj-server/pkg/gPool"
 	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
-	"oj-server/svr/judge/internal/biz"
-	"oj-server/svr/judge/internal/data"
 )
 
 type JudgeService struct {
-	uc       *biz.JudgeUseCase
-	consumer *mq.Consumer
+	problem_consumer *mq.Consumer // 判题任务消费者
+	result_producer  *mq.Producer // 判题结果生产者
 }
 
 func NewJudgeService() *JudgeService {
-	repo, err := data.NewRepo()
-	if err != nil {
-		logrus.Fatalf("new repo failed, err:%v", err)
-	}
-	uc := biz.NewJudgeUseCase(repo)
-
 	return &JudgeService{
-		uc: uc,
-		consumer: mq.NewConsumer(
+		problem_consumer: mq.NewConsumer(
 			global.RabbitMqExchangeKind,
 			global.RabbitMqExchangeName,
-			global.RabbitMqJudgeQueue,
-			global.RabbitMqJudgeKey,
-			""), // 消费者标签，用于区别不同的消费者
+			global.RabbitMqJudgeSubmitQueue,
+			global.RabbitMqJudgeSubmitKey,
+			"", // 消费者标签，用于区别不同的消费者
+		),
+		result_producer: mq.NewProducer(
+			global.RabbitMqExchangeKind,
+			global.RabbitMqExchangeName,
+			global.RabbitMqJudgeResultQueue,
+			global.RabbitMqJudgeResultKey,
+		),
 	}
 }
 
 func (s *JudgeService) ConsumeJudgeTask() {
-	deliveries := s.consumer.Consume()
+	deliveries := s.problem_consumer.Consume()
 	if deliveries == nil {
 		logrus.Errorf("获取deliveries失败")
 		return
 	}
-	defer s.consumer.Close()
+	defer s.problem_consumer.Close()
 
 	for d := range deliveries {
 		// 处理任务
 		result := func(data []byte) bool {
-			task := &pb.SubmitForm{}
+			task := new(pb.JudgeSubmission)
 			err := proto.Unmarshal(data, task)
 			if err != nil {
 				logrus.Errorln("解析judge task err：", err.Error())

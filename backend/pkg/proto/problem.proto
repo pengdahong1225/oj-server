@@ -43,17 +43,24 @@ enum SubmitState{
   UPStateExited = 3;        // 已退出 -> 如何查询到这个状态，意味着可以查询结果了
 }
 
-message SubmitForm{
+// 题目服务->判题服务
+message JudgeSubmission{
   int64 problem_id = 1;
   string title = 2;
   string lang = 3;
   string code = 4;
   int64 uid = 5;
-  string user_name = 6;
-  string problem_name = 7;
+  string config_url = 6;
 }
 
-message PBResult{
+// 判题服务->题目服务
+message JudgeResult{
+  repeated JudgeResultItem items = 1;
+  int64 uid = 2;
+  int64 problem_id = 3;
+}
+
+message JudgeResultItem{
   // api返回字段
   string status = 1;
   string err_msg = 2;                // 详细错误信息

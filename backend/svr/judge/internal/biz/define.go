@@ -4,9 +4,6 @@ import "oj-server/pkg/proto/pb"
 
 // 判题任务上下文参数
 type Param struct {
-	UserInfo    *pb.UserInfo
-	ProblemData *pb.Problem
-
 	Code          string // 源代码
 	Language      string // 语种
 	ProblemConfig *pb.ProblemConfig

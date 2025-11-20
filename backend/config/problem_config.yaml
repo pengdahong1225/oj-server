@@ -1,5 +1,5 @@
 name: problem-service
 node_id: 1
 address: localhost
-port: 8100
+port: 9010
 scheme: grpc

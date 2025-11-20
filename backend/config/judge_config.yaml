@@ -1,5 +1,5 @@
-name: gateway
+name: judge-service
 node_id: 1
 address: localhost
-port: 9000
+port: 9020
 scheme: http

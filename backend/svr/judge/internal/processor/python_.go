@@ -1,7 +1,7 @@
 package processor
 
 import (
-	"oj-server/proto/pb"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 )
 
@@ -14,6 +14,6 @@ func (cp *PyProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error
 }
 func (cp *PyProcessor) Run(param *biz.Param) {
 }
-func (cp *PyProcessor) Judge() []*pb.PBResult {
+func (cp *PyProcessor) Judge() []*pb.JudgeResultItem {
 	return nil
 }

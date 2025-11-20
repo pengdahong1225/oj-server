@@ -12,6 +12,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"oj-server/global"
+	"oj-server/pkg/gPool"
 	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
@@ -28,6 +29,7 @@ type ProblemService struct {
 	uc *biz.ProblemUseCase
 
 	problem_producer *mq.Producer // 判题任务生产者
+	result_consumer  *mq.Consumer // 判题结果消费者
 }
 
 func NewProblemService() *ProblemService {
@@ -41,10 +43,54 @@ func NewProblemService() *ProblemService {
 		problem_producer: mq.NewProducer(
 			global.RabbitMqExchangeKind,
 			global.RabbitMqExchangeName,
-			global.RabbitMqJudgeQueue,
-			global.RabbitMqJudgeKey,
+			global.RabbitMqJudgeSubmitQueue,
+			global.RabbitMqJudgeSubmitKey,
+		),
+		result_consumer: mq.NewConsumer(
+			global.RabbitMqExchangeKind,
+			global.RabbitMqExchangeName,
+			global.RabbitMqJudgeResultQueue,
+			global.RabbitMqJudgeResultKey,
+			"", // 消费者标签，用于区别不同的消费者
 		),
 	}
+}
+
+func (ps *ProblemService) ConsumeJudgeResult() {
+	deliveries := ps.result_consumer.Consume()
+	if deliveries == nil {
+		logrus.Errorf("获取deliveries失败")
+		return
+	}
+	defer ps.result_consumer.Close()
+
+	for d := range deliveries {
+		// 处理任务
+		result := func(data []byte) bool {
+			result := new(pb.JudgeResult)
+			err := proto.Unmarshal(data, result)
+			if err != nil {
+				logrus.Errorln("解析judge task err：", err.Error())
+				return false
+			}
+			// 异步处理
+			_ = gPool.Instance().Submit(func() {
+				ps.handleJudgeResult(result)
+			})
+			return true
+		}(d.Body)
+
+		// 确认
+		if result {
+			_ = d.Ack(false)
+		} else {
+			_ = d.Reject(false)
+		}
+	}
+}
+
+func (ps *ProblemService) handleJudgeResult(result *pb.JudgeResult) {
+	//...
 }
 
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
@@ -244,13 +290,19 @@ func (ps *ProblemService) GetProblemDetail(ctx context.Context, in *pb.GetProble
 
 func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProblemRequest) (*pb.SubmitProblemResponse, error) {
 	// 获取元数据
-	uid := ctx.Value("uid").(int64)
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "no metadata found")
+	}
+	vals := md.Get("uid")
+	if len(vals) == 0 {
+		return nil, status.Error(codes.Unauthenticated, "uid missing")
+	}
+	uid, _ := strconv.Atoi(vals[0])
+
 	taskId := fmt.Sprintf("%d_%d", uid, in.ProblemId)
 
-	resp := &pb.SubmitProblemResponse{}
-
-	// todo 加锁，在超时or判题服务处理完后 才释放锁
-	// 重复提交时会触发加锁失败
+	// 获取分布式锁
 	key := fmt.Sprintf("%s:%d", global.UserLockPrefix, uid)
 	_, err := ps.uc.Lock(key, global.UserLockTTL)
 	if err != nil {
@@ -258,28 +310,29 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		return nil, fmt.Errorf("判题中")
 	}
 
-	form := pb.SubmitForm{
-		Uid:       uid,
+	task := &pb.JudgeSubmission{
+		Uid:       int64(uid),
 		ProblemId: in.ProblemId,
 		Title:     in.Title,
 		Lang:      in.Lang,
 		Code:      in.Code,
 	}
-	form_data, err := proto.Marshal(&form)
+	task_data, err := proto.Marshal(task)
 	if err != nil {
 		logrus.Errorf("marshal failed:%s", err.Error())
 		_ = ps.uc.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "marshal failed")
 	}
 	// 提交到mq
-	if err = ps.problem_producer.Publish(form_data); err != nil {
+	if err = ps.problem_producer.Publish(task_data); err != nil {
 		logrus.Errorf("publish to mq failed: %v", err)
 		_ = ps.uc.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "服务器错误")
 	}
 
-	resp.TaskId = taskId
-	return resp, nil
+	return &pb.SubmitProblemResponse{
+		TaskId: taskId,
+	}, nil
 }
 
 func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) (*pb.GetTagListResponse, error) {

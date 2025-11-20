@@ -3,11 +3,10 @@ package processor
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"oj-server/global"
 	"oj-server/pkg/gPool"
-	"oj-server/proto/pb"
-	"oj-server/svr/gateway/internal/configs"
+	"oj-server/pkg/proto/pb"
 	"oj-server/svr/judge/internal/biz"
+	"oj-server/svr/judge/internal/configs"
 	"strings"
 	"sync"
 )
@@ -16,11 +15,11 @@ import (
 type IProcessor interface {
 	Compile(param *biz.Param) (*biz.SandBoxApiResponse, error)
 	Run(param *biz.Param)
-	Judge() []*pb.PBResult
+	Judge() []*pb.JudgeResultItem
 }
 
 // 处理器工厂
-func NewProcessor(language string, uc *biz.JudgeUseCase) (*BasicProcessor, error) {
+func NewProcessor(language string) (*BasicProcessor, error) {
 	var processor IProcessor
 
 	language = strings.ToLower(language)
@@ -50,7 +49,6 @@ func NewProcessor(language string, uc *biz.JudgeUseCase) (*BasicProcessor, error
 	}
 
 	return &BasicProcessor{
-		uc:             uc,
 		impl:           processor,
 		sandBoxUrl:     addr,
 		runResultsChan: make(chan *biz.RunResultInChan, 100),
@@ -62,77 +60,39 @@ type BasicProcessor struct {
 	impl           IProcessor                // 注入具体实现
 	param          *biz.Param                // 上下文参数
 	sandBoxUrl     string                    // 判题沙箱地址
-	uc             *biz.JudgeUseCase         // 仓库
 	runResultsChan chan *biz.RunResultInChan // 判题结果
 }
 
 // 模板方法
 // 判题逻辑入口
-func (b *BasicProcessor) HandleJudgeTask(form *pb.SubmitForm, param *biz.Param) []*pb.PBResult {
-	taskId := fmt.Sprintf("%d-%d", form.Uid, form.ProblemId)
-	results := make([]*pb.PBResult, 0, 10)
-	// 退出之后，需要将本次任务的状态置为UPStateExited，并且释放锁
-	defer func() {
-		_ = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateExited))
-		key := fmt.Sprintf("%s:%d", global.UserLockPrefix, form.Uid)
-		_ = b.uc.UnLock(key) // 释放锁
-	}()
-	// 初始化任务状态
-	err := b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateNormal))
-	if err != nil {
-		logrus.Errorf("初始化任务状态失败, err=%s", err.Error())
-		results = append(results, &pb.PBResult{
-			Status: biz.InternalError,
-			ErrMsg: "初始化任务状态失败",
-		})
-		return results
-	}
-	// 设置题目状态[编译]
-	err = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateCompiling))
-	if err != nil {
-		logrus.Errorf("设置题目[%d]状态失败, err=%s", param.ProblemData.Id, err.Error())
-		results = append(results, &pb.PBResult{
-			Status: biz.InternalError,
-			ErrMsg: "task状态设置失败",
-		})
-		return results
-	}
+func (b *BasicProcessor) HandleJudgeTask(task *pb.JudgeSubmission, param *biz.Param) []*pb.JudgeResultItem {
+	results := make([]*pb.JudgeResultItem, 0, 10)
+
+	// 编译
 	compileResult, err := b.impl.Compile(param)
 	if err != nil {
 		logrus.Errorf("请求编译发生意外, err=%s", err.Error())
-		results = append(results, &pb.PBResult{
+		results = append(results, &pb.JudgeResultItem{
 			Status: biz.InternalError,
-			ErrMsg: "请求编译发生意外",
+			ErrMsg: "编译发生意外",
 		})
 		return results
 	}
-	logrus.Debugln("编译结果:", *compileResult)
 
 	// 需要将result类型转换为pb.PBResult
-	pbResult := translatePBResult(compileResult)
+	result := translatePBResult(compileResult)
 	if compileResult.Status != biz.Accepted {
-		pbResult.Content = "Compile Error"
-		results = append(results, pbResult)
-		// 更新状态
-		err = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateExited))
-		if err != nil {
-			logrus.Errorln(err.Error())
-			return nil
-		}
+		result.Content = "Compile Error"
+		results = append(results, result)
 		return results
 	}
-	pbResult.Content = "Compile Success"
-	results = append(results, pbResult)
+	result.Content = "Compile Success"
+	results = append(results, result)
 
 	// 保存可执行文件的文件ID
 	param.FileIds = compileResult.FileIds
 
-	// 设置题目状态[判题中]
-	// 运行和判题并行处理
-	err = b.uc.SetTaskState(taskId, int(pb.SubmitState_UPStateJudging))
-	if err != nil {
-		logrus.Errorln(err.Error())
-	}
+	// 判题
 	wgRun := new(sync.WaitGroup)
 	wgRun.Add(1)
 	_ = gPool.Instance().Submit(func() {
@@ -159,8 +119,8 @@ func (b *BasicProcessor) CheckAnswer(X string, Y string) bool {
 	X = strings.Replace(X, "\n", "", -1)
 	return X == Y
 }
-func translatePBResult(resp *biz.SandBoxApiResponse) *pb.PBResult {
-	return &pb.PBResult{
+func translatePBResult(resp *biz.SandBoxApiResponse) *pb.JudgeResultItem {
+	return &pb.JudgeResultItem{
 		Status:     resp.Status,
 		Content:    resp.ErrMsg,
 		Memory:     resp.Memory,
