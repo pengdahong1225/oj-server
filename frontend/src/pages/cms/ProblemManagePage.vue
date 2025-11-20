@@ -84,9 +84,9 @@ const uploadHeaders = {
     Authorization: 'Bearer ' + useUserStore().token
 }
 // 上传回调
-const onUploadSuccess = (response: any, file: any, row: API.Problem) => {
+const onUploadSuccess = (response: any, row: API.Problem) => {
     if (response.code === 0) {
-        ElMessage.success(`题目 ${row.problem_id} 上传成功`)
+        ElMessage.success(`题目 ${row.problem_id} 配置上传成功`)
     } else {
         ElMessage.error(response.message || '上传失败')
     }
@@ -173,10 +173,10 @@ const onSuccess = (mode: string) => {
                     <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.problem_id)"></el-button>
                     <!-- 上传配置 -->
                     <!-- 上传配置 -->
-                    <el-upload :action="`http://localhost:8080/api/v1/problem/upload_config`" :headers="uploadHeaders"
+                    <el-upload :action="`http://localhost:9000/api/v1/problem/upload_config`" :headers="uploadHeaders"
                         :data="{problem_id: row.problem_id}"
                         :name="'config_file'"
-                        :show-file-list="false" :on-success="(resp, file) => onUploadSuccess(resp, file, row)"
+                        :show-file-list="false" :on-success="(resp) => onUploadSuccess(resp, row)"
                         accept=".json">
                         <el-button circle plain type="warning" :icon="Upload">
                         </el-button>

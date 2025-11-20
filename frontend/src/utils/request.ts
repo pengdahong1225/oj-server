@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useUserStore } from '@/stores'
 import router from '@/router'
 
-const baseURL = 'http://localhost:8080/api/v1'
+const baseURL = 'http://localhost:9000/api/v1'
 
 /**
  * axios
