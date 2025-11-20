@@ -7,6 +7,7 @@ import (
 	"oj-server/pkg/gPool"
 	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
+	"oj-server/svr/judge/internal/configs"
 )
 
 type JudgeService struct {
@@ -15,20 +16,33 @@ type JudgeService struct {
 }
 
 func NewJudgeService() *JudgeService {
+	mqCfg := configs.AppConf.MQCfg
+	amqpClient := mq.NewClient(
+		&mq.Options{
+			Host:     mqCfg.Host,
+			Port:     mqCfg.Port,
+			User:     mqCfg.User,
+			PassWord: mqCfg.PassWord,
+			VHost:    mqCfg.VHost,
+		},
+	)
+
 	return &JudgeService{
-		problem_consumer: mq.NewConsumer(
-			global.RabbitMqExchangeKind,
-			global.RabbitMqExchangeName,
-			global.RabbitMqJudgeSubmitQueue,
-			global.RabbitMqJudgeSubmitKey,
-			"", // 消费者标签，用于区别不同的消费者
-		),
-		result_producer: mq.NewProducer(
-			global.RabbitMqExchangeKind,
-			global.RabbitMqExchangeName,
-			global.RabbitMqJudgeResultQueue,
-			global.RabbitMqJudgeResultKey,
-		),
+		problem_consumer: &mq.Consumer{
+			AmqpClient: amqpClient, // 注入client
+			ExKind:     global.RabbitMqExchangeKind,
+			ExName:     global.RabbitMqExchangeName,
+			RoutingKey: global.RabbitMqJudgeSubmitKey,
+			QueName:    global.RabbitMqJudgeSubmitQueue,
+			CTag:       "", // 消费者标签，用于区别不同的消费者
+		},
+		result_producer: &mq.Producer{
+			AmqpClient: amqpClient, // 注入client
+			ExKind:     global.RabbitMqExchangeKind,
+			ExName:     global.RabbitMqExchangeName,
+			QueName:    global.RabbitMqJudgeResultQueue,
+			RoutingKey: global.RabbitMqJudgeResultKey,
+		},
 	}
 }
 

@@ -16,6 +16,7 @@ import (
 	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
+	"oj-server/svr/problem/internal/configs"
 	"oj-server/svr/problem/internal/data"
 	"oj-server/svr/problem/internal/model"
 	"os"
@@ -38,21 +39,34 @@ func NewProblemService() *ProblemService {
 		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
 	}
 
+	mqCfg := configs.AppConf.MQCfg
+	amqpClient := mq.NewClient(
+		&mq.Options{
+			Host:     mqCfg.Host,
+			Port:     mqCfg.Port,
+			User:     mqCfg.User,
+			PassWord: mqCfg.PassWord,
+			VHost:    mqCfg.VHost,
+		},
+	)
+
 	return &ProblemService{
 		uc: biz.NewProblemUseCase(repo), // 注入实现
-		problem_producer: mq.NewProducer(
-			global.RabbitMqExchangeKind,
-			global.RabbitMqExchangeName,
-			global.RabbitMqJudgeSubmitQueue,
-			global.RabbitMqJudgeSubmitKey,
-		),
-		result_consumer: mq.NewConsumer(
-			global.RabbitMqExchangeKind,
-			global.RabbitMqExchangeName,
-			global.RabbitMqJudgeResultQueue,
-			global.RabbitMqJudgeResultKey,
-			"", // 消费者标签，用于区别不同的消费者
-		),
+		problem_producer: &mq.Producer{
+			AmqpClient: amqpClient, // 注入client
+			ExName:     global.RabbitMqExchangeKind,
+			ExKind:     global.RabbitMqExchangeName,
+			QueName:    global.RabbitMqJudgeSubmitQueue,
+			RoutingKey: global.RabbitMqJudgeSubmitKey,
+		},
+		result_consumer: &mq.Consumer{
+			AmqpClient: amqpClient, // 注入client
+			ExKind:     global.RabbitMqExchangeKind,
+			ExName:     global.RabbitMqExchangeName,
+			QueName:    global.RabbitMqJudgeResultQueue,
+			RoutingKey: global.RabbitMqJudgeResultKey,
+			CTag:       "", // 消费者标签，用于区别不同的消费者
+		},
 	}
 }
 

@@ -5,10 +5,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var (
-	MyAmqpClient *Client
-)
-
 // amqp client
 type Client struct {
 	options *Options
