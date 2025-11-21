@@ -17,6 +17,7 @@ func initUserRouter(rg *gin.RouterGroup) {
 		user.POST("/register", handler.HandleUserRegister)
 		user.POST("/reset_password", handler.HandleUserResetPassword)
 		user.GET("/profile", middlewares.AuthLogin(), handler.HandleGetUserProfile)
+		user.GET("/list", middlewares.AuthLogin(), middlewares.Admin(), handler.HandleGetUserList)
 	}
 
 	// 验证码

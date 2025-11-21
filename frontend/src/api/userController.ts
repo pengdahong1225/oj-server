@@ -60,3 +60,17 @@ export async function queryRecordService(id: number) {
         params: { id }
     })
 }
+
+
+/**
+ * 获取用户列表
+ * GET /user/list
+ */
+export async function queryUserListService(params: API.QueryUserListParams) {
+    return request('/user/list', {
+        method: 'GET',
+        params: {
+            ...params
+        }
+    })
+}

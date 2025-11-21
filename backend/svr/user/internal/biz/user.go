@@ -13,6 +13,8 @@ type UserRepo interface {
 	GetUserInfoByMobile(mobile int64) (*model.UserInfo, error)
 	// 重置用户密码
 	ResetUserPassword(mobile int64, password string) error
+	// 查询用户列表
+	QueryUserList(page, pageSize int, keyword string) (int64, []model.UserInfo, error)
 }
 
 type UserUseCase struct {
@@ -36,4 +38,7 @@ func (uc *UserUseCase) GetUserInfoByMobile(mobile int64) (*model.UserInfo, error
 }
 func (uc *UserUseCase) ResetUserPassword(mobile int64, password string) error {
 	return uc.repo.ResetUserPassword(mobile, password)
+}
+func (uc *UserUseCase) QueryUserList(page, pageSize int, keyword string) (int64, []model.UserInfo, error) {
+	return uc.repo.QueryUserList(page, pageSize, keyword)
 }

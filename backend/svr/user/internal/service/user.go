@@ -146,27 +146,24 @@ func (us *UserService) GetUserInfoByUid(ctx context.Context, in *pb.GetUserInfoR
 	return resp, nil
 }
 
-// 获取用户信息
-func (us *UserService) GetUserInfoByMobile(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
-	// 拉取用户信息
-	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
+func (us *UserService) GetUserList(ctx context.Context, in *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
+	resp := &pb.GetUserListResponse{}
+	total, users, err := us.uc.QueryUserList(int(in.Page), int(in.PageSize), in.Keyword)
 	if err != nil {
-		logrus.Errorf("获取用户信息失败, err: %s", err.Error())
 		return nil, err
 	}
-	u := pb.UserInfo{
-		Uid:       userInfo.ID,
-		CreateAt:  userInfo.CreateAt.Unix(),
-		Mobile:    userInfo.Mobile,
-		Nickname:  userInfo.NickName,
-		Email:     userInfo.Email,
-		Gender:    userInfo.Gender,
-		Role:      userInfo.Role,
-		AvatarUrl: userInfo.AvatarUrl,
-	}
-	resp := &pb.GetUserInfoResponse{
-		Data: &u,
+	resp.Total = total
+
+	for _, user := range users {
+		u := pb.UserInfo{
+			Uid:      user.ID,
+			CreateAt: user.CreateAt.Unix(),
+			Mobile:   user.Mobile,
+			Nickname: user.NickName,
+			Email:    user.Email,
+			Role:     user.Role,
+		}
+		resp.Data = append(resp.Data, &u)
 	}
 
 	return resp, nil

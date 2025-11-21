@@ -23,6 +23,8 @@ type ProblemRepo interface {
 	DeleteProblem(id int64) error
 	// 查询标签列表
 	QueryTagList() ([]string, error)
+	// 查询题目配置地址
+	QueryProblemConfigUrl(id int64) (string, error)
 
 	// 加锁
 	Lock(key string, ttl time.Duration) (bool, error)
@@ -63,6 +65,9 @@ func (pc *ProblemUseCase) DeleteProblem(id int64) error {
 }
 func (pc *ProblemUseCase) QueryTagList() ([]string, error) {
 	return pc.repo.QueryTagList()
+}
+func (pc *ProblemUseCase) QueryProblemConfigUrl(id int64) (string, error) {
+	return pc.repo.QueryProblemConfigUrl(id)
 }
 func (pc *ProblemUseCase) Lock(key string, ttl time.Duration) (bool, error) {
 	return pc.repo.Lock(key, ttl)

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Delete, Edit, Search, Open, TurnOff, Upload } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue'
-import { queryProblemListService, deleteProblemService, publishProblemService, hideProblemService } from '@/api/problemController'
 
+import { queryProblemListService, deleteProblemService, publishProblemService, hideProblemService } from '@/api/problemController'
 import { formatTime } from '@/utils/format'
 import ProblemEdit from '@/components/problemEdit.vue'
 import { useUserStore } from '@/stores'
@@ -106,7 +106,7 @@ const onSuccess = (mode: string) => {
 </script>
 
 <template>
-    <page-container title="题目列表">
+    <page-container title="题目管理">
         <template #extra>
             <el-button type="primary" @click="onAddProblem">添加题目</el-button>
         </template>
@@ -171,7 +171,6 @@ const onSuccess = (mode: string) => {
                         @click="onPublish(row.problem_id)"></el-button>
                     <!-- 删除 -->
                     <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.problem_id)"></el-button>
-                    <!-- 上传配置 -->
                     <!-- 上传配置 -->
                     <el-upload :action="`http://localhost:9000/api/v1/problem/upload_config`" :headers="uploadHeaders"
                         :data="{problem_id: row.problem_id}"

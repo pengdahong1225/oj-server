@@ -130,3 +130,29 @@ func (up *UserRepo) ResetUserPassword(mobile int64, password string) error {
 	}
 	return nil
 }
+
+// 分页查询用户列表
+// 查询{id，mobile，nickname，create_at, role}
+// @page 页码
+// @page_size 单页数量
+// @keyword 关键字(昵称)
+func (up *UserRepo) QueryUserList(page, pageSize int, keyword string) (int64, []model.UserInfo, error) {
+	var count int64
+	query := up.db_.Model(&model.UserInfo{})
+	if keyword != "" {
+		query = query.Where("nickname LIKE ?", "%"+keyword+"%")
+	}
+	result := query.Count(&count)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return -1, nil, status.Errorf(codes.Internal, "query failed")
+	}
+	offSet := (page - 1) * pageSize
+	var users []model.UserInfo
+	result = query.Select("id, mobile, nickname, email, create_at, role").Offset(offSet).Limit(pageSize).Find(&users)
+	if result.Error != nil {
+		logrus.Errorf("query user list failed: %s", result.Error.Error())
+		return -1, nil, status.Errorf(codes.Internal, "query failed")
+	}
+	return count, users, nil
+}

@@ -316,9 +316,16 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 
 	taskId := fmt.Sprintf("%d_%d", uid, in.ProblemId)
 
+	// 查询题目配置地址
+	configUrl, err := ps.uc.QueryProblemConfigUrl(in.ProblemId)
+	if err != nil {
+		logrus.Errorf("query problem config url failed:%s", err.Error())
+		return nil, err
+	}
+
 	// 获取分布式锁
 	key := fmt.Sprintf("%s:%d", global.UserLockPrefix, uid)
-	_, err := ps.uc.Lock(key, global.UserLockTTL)
+	_, err = ps.uc.Lock(key, global.UserLockTTL)
 	if err != nil {
 		logrus.Errorf("lock user failed:%s", err.Error())
 		return nil, fmt.Errorf("判题中")
@@ -330,6 +337,7 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		Title:     in.Title,
 		Lang:      in.Lang,
 		Code:      in.Code,
+		ConfigUrl: configUrl,
 	}
 	task_data, err := proto.Marshal(task)
 	if err != nil {

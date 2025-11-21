@@ -1,12 +1,12 @@
 mysql:
-  host: 192.168.33.128
+  host: 192.168.2.135
   port: 3306
   db: oj_online_server
   user: root
-  password: 1225@pdh
+  password: 1225@PDH
 
 redis:
-  host: 192.168.33.128
+  host: 192.168.2.135
   port: 6379
 
 registry:
@@ -14,7 +14,7 @@ registry:
   port: 8500
 
 rabbitmq:
-  host: 192.168.33.128
+  host: 192.168.2.135
   port: 5672
   user: pengdahong
   password: 1225@pdh

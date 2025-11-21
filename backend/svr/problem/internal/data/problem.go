@@ -100,8 +100,7 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string,
 		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
 	if tag != "" {
-		str := fmt.Sprintf(`JSON_CONTAINS(tags, '"%s"')`, tag)
-		query = query.Where(str)
+		query = query.Where("JSON_CONTAINS(tags, JSON_QUOTE(?))", tag)
 	}
 	if role == 0 {
 		query = query.Where("status=?", 1)
@@ -126,7 +125,7 @@ func (pr *ProblemRepo) QueryProblemList(page, pageSize int, keyword, tag string,
 		query = query.Where("title LIKE ?", "%"+keyword+"%")
 	}
 	if tag != "" {
-		query = query.Where("JSON_CONTAINS(tags, ?)", tag)
+		query = query.Where("JSON_CONTAINS(tags, JSON_QUOTE(?))", tag)
 	}
 	if role == 0 {
 		query = query.Where("status=?", 1)
@@ -207,7 +206,6 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 	// 1. 先尝试从缓存读取
 	tagList, err := pr.rdb_.SMembers(ctx, global.TagListKey).Result()
 	if err == nil && len(tagList) > 0 {
-		logrus.Debugf("tag list from cache: %v", tagList)
 		return tagList, nil
 	}
 
@@ -251,8 +249,18 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 		pr.rdb_.SAdd(ctx, global.TagListKey, members...)
 	}
 
-	logrus.Debugf("tag list final: %v", tagList)
 	return tagList, nil
+}
+
+func (pr *ProblemRepo) QueryProblemConfigUrl(id int64) (string, error) {
+	var configURL string
+	result := pr.db_.Model(&model.Problem{}).Select("config_url").
+		Where("id=?", id).Scan(&configURL)
+	if result.Error != nil {
+		logrus.Errorln(result.Error.Error())
+		return "", status.Errorf(codes.Internal, "query failed")
+	}
+	return configURL, nil
 }
 
 func (pr *ProblemRepo) Lock(key string, ttl time.Duration) (bool, error) {

@@ -600,6 +600,119 @@ func (x *GetUserInfoResponse) GetData() *UserInfo {
 	return nil
 }
 
+// 查询用户列表
+type GetUserListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Keyword       string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserListRequest) Reset() {
+	*x = GetUserListRequest{}
+	mi := &file_user_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserListRequest) ProtoMessage() {}
+
+func (x *GetUserListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserListRequest.ProtoReflect.Descriptor instead.
+func (*GetUserListRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetUserListRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUserListRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *GetUserListRequest) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+type GetUserListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Data          []*UserInfo            `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserListResponse) Reset() {
+	*x = GetUserListResponse{}
+	mi := &file_user_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserListResponse) ProtoMessage() {}
+
+func (x *GetUserListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserListResponse.ProtoReflect.Descriptor instead.
+func (*GetUserListResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetUserListResponse) GetData() []*UserInfo {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *GetUserListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_user_service_proto protoreflect.FileDescriptor
 
 const file_user_service_proto_rawDesc = "" +
@@ -647,13 +760,21 @@ const file_user_service_proto_rawDesc = "" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x16\n" +
 	"\x06mobile\x18\x02 \x01(\tR\x06mobile\"4\n" +
 	"\x13GetUserInfoResponse\x12\x1d\n" +
-	"\x04data\x18\x01 \x01(\v2\t.UserInfoR\x04data2\xcb\x02\n" +
+	"\x04data\x18\x01 \x01(\v2\t.UserInfoR\x04data\"_\n" +
+	"\x12GetUserListRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x18\n" +
+	"\akeyword\x18\x03 \x01(\tR\akeyword\"J\n" +
+	"\x13GetUserListResponse\x12\x1d\n" +
+	"\x04data\x18\x01 \x03(\v2\t.UserInfoR\x04data\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total2\x85\x03\n" +
 	"\vUserService\x12;\n" +
 	"\fUserRegister\x12\x14.UserRegisterRequest\x1a\x15.UserRegisterResponse\x122\n" +
 	"\tUserLogin\x12\x11.UserLoginRequest\x1a\x12.UserLoginResponse\x12D\n" +
 	"\x12UserLoginBySmsCode\x12\x1a.UserLoginBySmsCodeRequest\x1a\x12.UserLoginResponse\x12F\n" +
 	"\x11ResetUserPassword\x12\x19.ResetUserPasswordRequest\x1a\x16.google.protobuf.Empty\x12=\n" +
-	"\x10GetUserInfoByUid\x12\x13.GetUserInfoRequest\x1a\x14.GetUserInfoResponseB\aZ\x05./;pbb\x06proto3"
+	"\x10GetUserInfoByUid\x12\x13.GetUserInfoRequest\x1a\x14.GetUserInfoResponse\x128\n" +
+	"\vGetUserList\x12\x13.GetUserListRequest\x1a\x14.GetUserListResponseB\aZ\x05./;pbb\x06proto3"
 
 var (
 	file_user_service_proto_rawDescOnce sync.Once
@@ -667,7 +788,7 @@ func file_user_service_proto_rawDescGZIP() []byte {
 	return file_user_service_proto_rawDescData
 }
 
-var file_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_user_service_proto_goTypes = []any{
 	(*UserRegisterRequest)(nil),       // 0: UserRegisterRequest
 	(*UserRegisterResponse)(nil),      // 1: UserRegisterResponse
@@ -678,26 +799,31 @@ var file_user_service_proto_goTypes = []any{
 	(*ResetUserPasswordRequest)(nil),  // 6: ResetUserPasswordRequest
 	(*GetUserInfoRequest)(nil),        // 7: GetUserInfoRequest
 	(*GetUserInfoResponse)(nil),       // 8: GetUserInfoResponse
-	(*UserInfo)(nil),                  // 9: UserInfo
-	(*emptypb.Empty)(nil),             // 10: google.protobuf.Empty
+	(*GetUserListRequest)(nil),        // 9: GetUserListRequest
+	(*GetUserListResponse)(nil),       // 10: GetUserListResponse
+	(*UserInfo)(nil),                  // 11: UserInfo
+	(*emptypb.Empty)(nil),             // 12: google.protobuf.Empty
 }
 var file_user_service_proto_depIdxs = []int32{
-	9,  // 0: GetUserInfoResponse.data:type_name -> UserInfo
-	0,  // 1: UserService.UserRegister:input_type -> UserRegisterRequest
-	2,  // 2: UserService.UserLogin:input_type -> UserLoginRequest
-	3,  // 3: UserService.UserLoginBySmsCode:input_type -> UserLoginBySmsCodeRequest
-	6,  // 4: UserService.ResetUserPassword:input_type -> ResetUserPasswordRequest
-	7,  // 5: UserService.GetUserInfoByUid:input_type -> GetUserInfoRequest
-	1,  // 6: UserService.UserRegister:output_type -> UserRegisterResponse
-	4,  // 7: UserService.UserLogin:output_type -> UserLoginResponse
-	4,  // 8: UserService.UserLoginBySmsCode:output_type -> UserLoginResponse
-	10, // 9: UserService.ResetUserPassword:output_type -> google.protobuf.Empty
-	8,  // 10: UserService.GetUserInfoByUid:output_type -> GetUserInfoResponse
-	6,  // [6:11] is the sub-list for method output_type
-	1,  // [1:6] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	11, // 0: GetUserInfoResponse.data:type_name -> UserInfo
+	11, // 1: GetUserListResponse.data:type_name -> UserInfo
+	0,  // 2: UserService.UserRegister:input_type -> UserRegisterRequest
+	2,  // 3: UserService.UserLogin:input_type -> UserLoginRequest
+	3,  // 4: UserService.UserLoginBySmsCode:input_type -> UserLoginBySmsCodeRequest
+	6,  // 5: UserService.ResetUserPassword:input_type -> ResetUserPasswordRequest
+	7,  // 6: UserService.GetUserInfoByUid:input_type -> GetUserInfoRequest
+	9,  // 7: UserService.GetUserList:input_type -> GetUserListRequest
+	1,  // 8: UserService.UserRegister:output_type -> UserRegisterResponse
+	4,  // 9: UserService.UserLogin:output_type -> UserLoginResponse
+	4,  // 10: UserService.UserLoginBySmsCode:output_type -> UserLoginResponse
+	12, // 11: UserService.ResetUserPassword:output_type -> google.protobuf.Empty
+	8,  // 12: UserService.GetUserInfoByUid:output_type -> GetUserInfoResponse
+	10, // 13: UserService.GetUserList:output_type -> GetUserListResponse
+	8,  // [8:14] is the sub-list for method output_type
+	2,  // [2:8] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_service_proto_init() }
@@ -712,7 +838,7 @@ func file_user_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_proto_rawDesc), len(file_user_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

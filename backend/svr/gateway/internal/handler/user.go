@@ -292,3 +292,48 @@ func HandleGetUserProfile(ctx *gin.Context) {
 	}
 	ResponseOK(ctx, resp.Data)
 }
+
+func HandleGetUserList(ctx *gin.Context) {
+	// 查询参数校验
+	var params model.QueryUserListParams
+	err := ctx.ShouldBindQuery(&params)
+	if err != nil {
+		logrus.Errorf("参数校验失败: %s", err.Error())
+		ResponseBadRequest(ctx, "参数验证失败")
+		return
+	}
+	// 调用用户服务
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.UserService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+	client := pb.NewUserServiceClient(conn)
+	resp, err := client.GetUserList(ctx, &pb.GetUserListRequest{
+		Page:     params.Page,
+		PageSize: params.PageSize,
+		Keyword:  params.Keyword,
+	})
+	if err != nil {
+		logrus.Errorf("用户服务获取用户列表失败:%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+	result := &model.QueryUserListResult{
+		Total: resp.Total,
+	}
+	for _, v := range resp.Data {
+		result.List = append(result.List, &model.UserInfo{
+			Uid:      v.Uid,
+			Mobile:   v.Mobile,
+			Nickname: v.Nickname,
+			Email:    v.Email,
+			Gender:   v.Gender,
+			CreateAt: v.CreateAt,
+			Role:     v.Role,
+		})
+	}
+
+	ResponseOK(ctx, result)
+}

@@ -25,14 +25,12 @@ const getProblemList = async () => {
     }
     loading.value = true
     const res = await queryProblemListService(params.value)
-    console.log(res)
     total.value = res.data.data.total
     problemList.value = res.data.data.list
     loading.value = false
 }
 const getProblemTagList = async () => {
     const res = await getProblemTagListService()
-    console.log(res)
     if (Array.isArray(res.data.data) && res.data.data.length > 0) {
         tag_list.value = res.data.data
     }
@@ -131,7 +129,7 @@ const onTagClick = (tag: string) => {
         </el-card>
         <!-- 右侧tag池区域 -->
         <el-card class="tag-pool" shadow="hover" header="Tag Pool">
-            <el-button v-for="item in tag_list" :key="item" type="info" plain round="true" @click="onTagClick(item)">
+            <el-button v-for="item in tag_list" :key="item" type="info" plain round @click="onTagClick(item)">
                 {{ item }}</el-button>
         </el-card>
     </div>
