@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -315,7 +316,23 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 
 	// 更新result到redis
 	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
-	rr.rdb_.Set(context.Background(), key, record.Result, global.TaskResultExpired)
+	value := map[string]string{
+		"accepted": strconv.FormatBool(record.Accepted),
+		"message":  record.Message,
+	}
+	jsonValue, err := json.Marshal(value)
+	if err != nil {
+		logrus.Errorf("failed to marshal result: %v", err)
+		return err
+	}
+	rr.rdb_.Set(context.Background(), key, jsonValue, global.TaskResultExpired)
 
 	return nil
+}
+
+func (rr *RecordRepo) Lock(key string, ttl time.Duration) (bool, error) {
+	return rr.rdb_.SetNX(context.Background(), key, "locked", ttl).Result()
+}
+func (rr *RecordRepo) UnLock(key string) error {
+	return rr.rdb_.Del(context.Background(), key).Err()
 }

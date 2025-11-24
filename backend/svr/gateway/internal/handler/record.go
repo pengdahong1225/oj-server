@@ -21,7 +21,13 @@ func HandleGetUserSolvedList(ctx *gin.Context) {}
 
 // 获取判题任务结果
 // 拿到判题任务结果，再去获取任务的output
-func HandleGetSubmitResult(ctx *gin.Context) {}
+func HandleGetSubmitResult(ctx *gin.Context) {
+	recordId, err := strconv.ParseInt(ctx.Query("task_id"), 10, 64)
+	if err != nil || recordId <= 0 {
+		ResponseBadRequest(ctx, "task_id 不能为空")
+		return
+	}
+}
 
 // 处理获取用户历史提交记录
 // 偏移量分页

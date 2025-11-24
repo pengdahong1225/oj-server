@@ -39,8 +39,7 @@ func initProblemRouter(rg *gin.RouterGroup) {
 	record := rg.Group("/record")
 	record.Use(middlewares.AuthLogin())
 	{
-		// 排行榜
-		record.GET("/rank", handler.HandleGetLeaderboard)
+		record.GET("/rank", handler.HandleGetLeaderboard)           // 排行榜
 		record.GET("/result", handler.HandleGetSubmitResult)        // 本次提交的结果
 		record.GET("/record_list", handler.HandleGetUserRecordList) // 历史提交记录
 		record.GET("/record", handler.HandleGetUserRecord)          // 提交记录详情

@@ -64,36 +64,31 @@ const onSubmit = async () => {
     loading.value = true
     form.value.problem_id = problem.value.problem_id
     form.value.title = problem.value.problem_title
-    const res = await submitProblemService(form.value)
-    console.log(res)
+    form.value.lang = langMap[form.value.lang]  // 一行搞定
+    const resp = await submitProblemService(form.value)
     loading.value = false
 
     // 轮训判题结果
     running.value = true
     timer = setInterval(() => {
-        checkResult()
+        checkResult(resp.data.data.task_id)
     }, 500)
+}
+const langMap: Record<string, string> = {
+    c: 'c',
+    c_cpp: 'cpp',
+    java: 'java',
+    python: 'python',
+    golang: 'go',
 }
 
 // 轮训判题结果
 let timer = 0
 const running = ref(false)
-const checkResult = async () => {
-    const res = await queryResultService(Number(route.params.id))
-    switch (res.data.message) {
-        case 'running...':
-            break
-        case 'OK':
-            clearInterval(timer)
-            running.value = false
-            result.value = res.data.data
-            break
-        default:
-            clearInterval(timer)
-            running.value = false
-            console.log(res.data.message)
-            break
-    }
+const checkResult = async (task_id: number) => {
+    const resp = await queryResultService(task_id)
+    console.log(resp)
+    clearInterval(timer)
 }
 const result = ref('')
 const btype = computed(() => {

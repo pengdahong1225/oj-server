@@ -31,6 +31,10 @@ type RecordRepo interface {
 	UpdateLeaderboardLastUpdate(time int64) error
 	// 同步排行榜
 	SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, leaderboardKey string, leaderboardKeyTTL time.Duration) error
+	// 加锁
+	Lock(key string, ttl time.Duration) (bool, error)
+	// 解锁
+	UnLock(key string) error
 }
 
 type RecordUseCase struct {
@@ -69,4 +73,10 @@ func (rc *RecordUseCase) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInf
 }
 func (rc *RecordUseCase) UpdateSubmitRecord(taskId string, record *model.SubmitRecord) error {
 	return rc.repo.UpdateSubmitRecord(taskId, record)
+}
+func (rc *RecordUseCase) Lock(key string, ttl time.Duration) (bool, error) {
+	return rc.repo.Lock(key, ttl)
+}
+func (rc *RecordUseCase) UnLock(key string) error {
+	return rc.repo.UnLock(key)
 }

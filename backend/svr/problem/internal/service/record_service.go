@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 	"oj-server/global"
@@ -88,6 +89,14 @@ func (ps *RecordService) ConsumeJudgeResult() {
 }
 
 func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
+	// 释放锁
+	key := fmt.Sprintf("%s:%d", global.UserLockPrefix, result.Uid)
+	err := ps.uc.UnLock(key)
+	if err != nil {
+		logrus.Errorf("释放锁失败, err:%s", err.Error())
+	}
+
+	// 更新数据库
 	record := &model.SubmitRecord{
 		Uid:       result.Uid,
 		ProblemID: result.ProblemId,
@@ -99,7 +108,6 @@ func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
 	judgeResultStore := &pb.JudgeResultStore{
 		Items: result.Items,
 	}
-	var err error
 	record.Result, err = proto.Marshal(judgeResultStore)
 	if err != nil {
 		logrus.Errorf("proto marshal err：%s", err.Error())

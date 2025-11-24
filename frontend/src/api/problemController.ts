@@ -51,10 +51,10 @@ export async function submitProblemService(form: API.SubmitForm) {
  * 查询提交结果
  * GET /problem/result
  */
-export async function queryResultService(id: number) {
+export async function queryResultService(task_id: number) {
     return request('/problem/result', {
         method: 'GET',
-        params: { "problem_id": id }
+        params: { "task_id": task_id }
     })
 }
 
