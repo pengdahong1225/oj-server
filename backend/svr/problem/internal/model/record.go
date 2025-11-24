@@ -41,7 +41,6 @@ type UserSolution struct {
 	Uid       int64     `gorm:"column:uid"`
 	ProblemID int64     `gorm:"column:problem_id"`
 	CreateAt  time.Time `gorm:"<-:false;column:create_at"`
-	DeletedAt time.Time `gorm:"<-:false;column:delete_at"`
 }
 
 func (UserSolution) TableName() string {

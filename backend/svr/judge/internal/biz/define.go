@@ -12,6 +12,7 @@ type Param struct {
 	Accepted bool              // 是否通过
 	Message  string
 	TaskId   string
+	Level    int32
 }
 
 // 沙箱接口表单

@@ -17,7 +17,7 @@ create table if not exists user_submit_record
     lang VARCHAR(64) DEFAULT '' comment '语言',
 
     PRIMARY KEY(id),
-    INDEX idx_uid(uid)
+    UNIQUE INDEX uk_user_problem(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题表
@@ -29,10 +29,9 @@ create table if not exists user_solution
     level tinyint DEFAULT 0 comment '题目难度 1:简单 2:中等 3:困难',
 
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    delete_at TIMESTAMP,
 
     PRIMARY KEY(id),
-    INDEX idx_uid(uid, problem_id)
+    NIQUE INDEX uk_user_problem(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题统计表

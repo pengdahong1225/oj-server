@@ -22,7 +22,7 @@ type RecordRepo interface {
 	QueryDailyAccomplishLeaderboard(limit int) ([]*pb.LeaderboardUserInfo, error)
 
 	// 更新用户提交记录
-	UpdateSubmitRecord(taskId string, record *model.SubmitRecord) error
+	UpdateSubmitRecord(taskId string, record *model.SubmitRecord, level int32) error
 
 	// redis接口
 	// 获取排行榜上次更新时间
@@ -71,8 +71,8 @@ func (rc *RecordUseCase) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leade
 func (rc *RecordUseCase) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, leaderboardKey string, leaderboardKeyTTL time.Duration) error {
 	return rc.repo.SynchronizeLeaderboard(lb_list, leaderboardKey, leaderboardKeyTTL)
 }
-func (rc *RecordUseCase) UpdateSubmitRecord(taskId string, record *model.SubmitRecord) error {
-	return rc.repo.UpdateSubmitRecord(taskId, record)
+func (rc *RecordUseCase) UpdateSubmitRecord(taskId string, record *model.SubmitRecord, level int32) error {
+	return rc.repo.UpdateSubmitRecord(taskId, record, level)
 }
 func (rc *RecordUseCase) Lock(key string, ttl time.Duration) (bool, error) {
 	return rc.repo.Lock(key, ttl)

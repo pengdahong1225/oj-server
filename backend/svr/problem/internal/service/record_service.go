@@ -113,7 +113,7 @@ func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
 		logrus.Errorf("proto marshal err：%s", err.Error())
 		return
 	}
-	if err = ps.uc.UpdateSubmitRecord(result.TaskId, record); err != nil {
+	if err = ps.uc.UpdateSubmitRecord(result.TaskId, record, result.Level); err != nil {
 		logrus.Errorf("更新record失败, err:%s", err.Error())
 	}
 }

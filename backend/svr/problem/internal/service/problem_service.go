@@ -271,7 +271,7 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	taskId := fmt.Sprintf("%d_%d", uid, in.ProblemId)
 
 	// 查询题目配置地址
-	configUrl, err := ps.uc.QueryProblemConfigUrl(in.ProblemId)
+	problem, err := ps.uc.QueryProblemData(in.ProblemId)
 	if err != nil {
 		logrus.Errorf("query problem config url failed:%s", err.Error())
 		return nil, err
@@ -291,8 +291,9 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		Title:     in.Title,
 		Lang:      in.Lang,
 		Code:      in.Code,
-		ConfigUrl: configUrl,
+		ConfigUrl: problem.ConfigURL,
 		TaskId:    taskId,
+		Level:     int32(problem.Level),
 	}
 	task_data, err := proto.Marshal(task)
 	if err != nil {

@@ -57,6 +57,7 @@ func (s *JudgeService) Handle(task *pb.JudgeSubmission) {
 	judgeResult.Code = param.Code
 	judgeResult.Lang = param.Language
 	judgeResult.TaskId = param.TaskId
+	judgeResult.Level = param.Level
 
 	// 推送到队列
 	err := s.sendJudgeResult2MQ(judgeResult)
@@ -71,6 +72,7 @@ func (s *JudgeService) preAction(task *pb.JudgeSubmission) (bool, *biz.Param) {
 	param.Code = task.Code
 	param.Language = task.Lang
 	param.TaskId = task.TaskId
+	param.Level = task.Level
 
 	// 读取题目配置文件
 	cfg_path := task.ConfigUrl

@@ -292,20 +292,63 @@ func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, 
 // 1.保存record到数据库
 // 2.更新用户解题表和统计表
 // 3.更新result到redis
-func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitRecord) error {
+func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitRecord, level int32) error {
 	err := rr.db_.Transaction(func(tx *gorm.DB) error {
-		var err error
 		// 查询是否存在record
-
-		// 创建record
-		if err = tx.Create(record).Error; err != nil {
-			logrus.Errorf("failed to create record: %v", err)
-			return err
+		var count int64
+		result := tx.Model(&model.SubmitRecord{}).Where("uid = ? and problem_id = ?", record.Uid, record.ProblemID).Count(&count)
+		if result.Error != nil {
+			logrus.Errorf("query failed, err: %s", result.Error)
+			return result.Error
+		}
+		if count == 0 {
+			// 创建record
+			if err := tx.Create(record).Error; err != nil {
+				logrus.Errorf("failed to create record: %v", err)
+				return err
+			}
+			// 更新用户解题表
+			rs := &model.UserSolution{
+				Uid:       record.Uid,
+				ProblemID: record.ProblemID,
+			}
+			result = tx.Create(rs)
+			if result.Error != nil {
+				logrus.Errorf("create user solution failed,err:%s", result.Error)
+				return result.Error
+			}
 		}
 
-		// 更新用户解题表
-
 		// 更新统计表
+		statistics := &model.Statistics{
+			UID:    record.Uid,
+			Period: time.Now().Format("2006_01"),
+		}
+		result = tx.FirstOrCreate(statistics)
+		if result.Error != nil {
+			logrus.Errorln(result.Error)
+			return result.Error
+		}
+		statistics.SubmitCount += 1
+		if count == 0 {
+			statistics.AccomplishCount += 1
+			switch level {
+			case 1:
+				statistics.EasyProblemCount += 1
+			case 2:
+				statistics.MediumProblemCount += 1
+			case 3:
+				statistics.HardProblemCount += 1
+			default:
+				logrus.Warningf("unkonwn level[%d]", level)
+			}
+		}
+
+		result = tx.Updates(statistics)
+		if result.Error != nil {
+			logrus.Errorf("update statistics failed, err:%s", result.Error)
+			return result.Error
+		}
 
 		return nil
 	})

@@ -50,6 +50,7 @@ message JudgeSubmission{
   int64 uid = 5;
   string config_url = 6;
   string task_id = 7;
+  int32 level = 8;
 }
 
 // 判题服务->题目服务
@@ -62,6 +63,7 @@ message JudgeResult{
   string code = 6;
   string lang = 7;
   string task_id = 8;
+  int32 level = 9;
 }
 
 message JudgeResultItem{

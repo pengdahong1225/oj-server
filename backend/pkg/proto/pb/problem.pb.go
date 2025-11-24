@@ -390,6 +390,7 @@ type JudgeSubmission struct {
 	Uid           int64                  `protobuf:"varint,5,opt,name=uid,proto3" json:"uid,omitempty"`
 	ConfigUrl     string                 `protobuf:"bytes,6,opt,name=config_url,json=configUrl,proto3" json:"config_url,omitempty"`
 	TaskId        string                 `protobuf:"bytes,7,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	Level         int32                  `protobuf:"varint,8,opt,name=level,proto3" json:"level,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -473,6 +474,13 @@ func (x *JudgeSubmission) GetTaskId() string {
 	return ""
 }
 
+func (x *JudgeSubmission) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
 // 判题服务->题目服务
 type JudgeResult struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -484,6 +492,7 @@ type JudgeResult struct {
 	Code          string                 `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
 	Lang          string                 `protobuf:"bytes,7,opt,name=lang,proto3" json:"lang,omitempty"`
 	TaskId        string                 `protobuf:"bytes,8,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	Level         int32                  `protobuf:"varint,9,opt,name=level,proto3" json:"level,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -572,6 +581,13 @@ func (x *JudgeResult) GetTaskId() string {
 		return x.TaskId
 	}
 	return ""
+}
+
+func (x *JudgeResult) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
 }
 
 type JudgeResultItem struct {
@@ -752,7 +768,7 @@ const file_problem_proto_rawDesc = "" +
 	"proc_limit\x18\x05 \x01(\x03R\tprocLimit\"8\n" +
 	"\bTestCase\x12\x14\n" +
 	"\x05input\x18\x01 \x01(\tR\x05input\x12\x16\n" +
-	"\x06output\x18\x02 \x01(\tR\x06output\"\xb8\x01\n" +
+	"\x06output\x18\x02 \x01(\tR\x06output\"\xce\x01\n" +
 	"\x0fJudgeSubmission\x12\x1d\n" +
 	"\n" +
 	"problem_id\x18\x01 \x01(\x03R\tproblemId\x12\x14\n" +
@@ -762,7 +778,8 @@ const file_problem_proto_rawDesc = "" +
 	"\x03uid\x18\x05 \x01(\x03R\x03uid\x12\x1d\n" +
 	"\n" +
 	"config_url\x18\x06 \x01(\tR\tconfigUrl\x12\x17\n" +
-	"\atask_id\x18\a \x01(\tR\x06taskId\"\xdd\x01\n" +
+	"\atask_id\x18\a \x01(\tR\x06taskId\x12\x14\n" +
+	"\x05level\x18\b \x01(\x05R\x05level\"\xf3\x01\n" +
 	"\vJudgeResult\x12&\n" +
 	"\x05items\x18\x01 \x03(\v2\x10.JudgeResultItemR\x05items\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\x03R\x03uid\x12\x1d\n" +
@@ -772,7 +789,8 @@ const file_problem_proto_rawDesc = "" +
 	"\amessage\x18\x05 \x01(\tR\amessage\x12\x12\n" +
 	"\x04code\x18\x06 \x01(\tR\x04code\x12\x12\n" +
 	"\x04lang\x18\a \x01(\tR\x04lang\x12\x17\n" +
-	"\atask_id\x18\b \x01(\tR\x06taskId\"\xe9\x01\n" +
+	"\atask_id\x18\b \x01(\tR\x06taskId\x12\x14\n" +
+	"\x05level\x18\t \x01(\x05R\x05level\"\xe9\x01\n" +
 	"\x0fJudgeResultItem\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x17\n" +
 	"\aerr_msg\x18\x02 \x01(\tR\x06errMsg\x12\x1e\n" +
