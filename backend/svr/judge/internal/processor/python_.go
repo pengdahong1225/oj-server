@@ -6,7 +6,7 @@ import (
 )
 
 type PyProcessor struct {
-	BasicProcessor
+	*BasicProcessor
 }
 
 func (cp *PyProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error) {

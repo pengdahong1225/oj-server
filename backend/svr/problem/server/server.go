@@ -73,7 +73,7 @@ func (s *Server) Run() {
 	go s.recordService.SyncLeaderboardByScheduled()
 
 	// 消费judge-result队列
-	go s.problemService.ConsumeJudgeResult()
+	go s.recordService.ConsumeJudgeResult()
 
 	// 监听
 	cfg := configs.ServerConf

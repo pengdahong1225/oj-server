@@ -187,11 +187,9 @@ func (x *Problem) GetStatus() int32 {
 type ProblemConfig struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Level         int32                  `protobuf:"varint,2,opt,name=level,proto3" json:"level,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	CompileLimit  *Limit                 `protobuf:"bytes,4,opt,name=compile_limit,json=compileLimit,proto3" json:"compile_limit,omitempty"`
-	RunLimit      *Limit                 `protobuf:"bytes,5,opt,name=run_limit,json=runLimit,proto3" json:"run_limit,omitempty"`
-	TestCases     []*TestCase            `protobuf:"bytes,6,rep,name=test_cases,json=testCases,proto3" json:"test_cases,omitempty"`
+	CompileLimit  *Limit                 `protobuf:"bytes,2,opt,name=compile_limit,json=compileLimit,proto3" json:"compile_limit,omitempty"`
+	RunLimit      *Limit                 `protobuf:"bytes,3,opt,name=run_limit,json=runLimit,proto3" json:"run_limit,omitempty"`
+	TestCases     []*TestCase            `protobuf:"bytes,4,rep,name=test_cases,json=testCases,proto3" json:"test_cases,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -233,20 +231,6 @@ func (x *ProblemConfig) GetId() int64 {
 	return 0
 }
 
-func (x *ProblemConfig) GetLevel() int32 {
-	if x != nil {
-		return x.Level
-	}
-	return 0
-}
-
-func (x *ProblemConfig) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
 func (x *ProblemConfig) GetCompileLimit() *Limit {
 	if x != nil {
 		return x.CompileLimit
@@ -270,11 +254,11 @@ func (x *ProblemConfig) GetTestCases() []*TestCase {
 
 type Limit struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CpuLimit      int64                  `protobuf:"varint,1,opt,name=cpu_limit,json=cpuLimit,proto3" json:"cpu_limit,omitempty"`
-	ClockLimit    int64                  `protobuf:"varint,2,opt,name=clock_limit,json=clockLimit,proto3" json:"clock_limit,omitempty"`
-	MemoryLimit   int64                  `protobuf:"varint,3,opt,name=memory_limit,json=memoryLimit,proto3" json:"memory_limit,omitempty"`
-	StackLimit    int64                  `protobuf:"varint,4,opt,name=stack_limit,json=stackLimit,proto3" json:"stack_limit,omitempty"`
-	ProcLimit     int64                  `protobuf:"varint,5,opt,name=proc_limit,json=procLimit,proto3" json:"proc_limit,omitempty"`
+	CpuLimit      int64                  `protobuf:"varint,1,opt,name=cpu_limit,json=cpuLimit,proto3" json:"cpu_limit,omitempty"`          // CPU时间限制，单位纳秒
+	ClockLimit    int64                  `protobuf:"varint,2,opt,name=clock_limit,json=clockLimit,proto3" json:"clock_limit,omitempty"`    // 等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）
+	MemoryLimit   int64                  `protobuf:"varint,3,opt,name=memory_limit,json=memoryLimit,proto3" json:"memory_limit,omitempty"` // 内存限制，单位 byte
+	StackLimit    int64                  `protobuf:"varint,4,opt,name=stack_limit,json=stackLimit,proto3" json:"stack_limit,omitempty"`    // 栈内存限制，单位 byte
+	ProcLimit     int64                  `protobuf:"varint,5,opt,name=proc_limit,json=procLimit,proto3" json:"proc_limit,omitempty"`       // 线程数量限制
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -405,6 +389,7 @@ type JudgeSubmission struct {
 	Code          string                 `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`
 	Uid           int64                  `protobuf:"varint,5,opt,name=uid,proto3" json:"uid,omitempty"`
 	ConfigUrl     string                 `protobuf:"bytes,6,opt,name=config_url,json=configUrl,proto3" json:"config_url,omitempty"`
+	TaskId        string                 `protobuf:"bytes,7,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -481,12 +466,24 @@ func (x *JudgeSubmission) GetConfigUrl() string {
 	return ""
 }
 
+func (x *JudgeSubmission) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
 // 判题服务->题目服务
 type JudgeResult struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*JudgeResultItem     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	Uid           int64                  `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
 	ProblemId     int64                  `protobuf:"varint,3,opt,name=problem_id,json=problemId,proto3" json:"problem_id,omitempty"`
+	Accepted      bool                   `protobuf:"varint,4,opt,name=accepted,proto3" json:"accepted,omitempty"`
+	Message       string                 `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	Code          string                 `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
+	Lang          string                 `protobuf:"bytes,7,opt,name=lang,proto3" json:"lang,omitempty"`
+	TaskId        string                 `protobuf:"bytes,8,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -540,6 +537,41 @@ func (x *JudgeResult) GetProblemId() int64 {
 		return x.ProblemId
 	}
 	return 0
+}
+
+func (x *JudgeResult) GetAccepted() bool {
+	if x != nil {
+		return x.Accepted
+	}
+	return false
+}
+
+func (x *JudgeResult) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *JudgeResult) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *JudgeResult) GetLang() string {
+	if x != nil {
+		return x.Lang
+	}
+	return ""
+}
+
+func (x *JudgeResult) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
 }
 
 type JudgeResultItem struct {
@@ -644,6 +676,50 @@ func (x *JudgeResultItem) GetTestCase() *TestCase {
 	return nil
 }
 
+type JudgeResultStore struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*JudgeResultItem     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JudgeResultStore) Reset() {
+	*x = JudgeResultStore{}
+	mi := &file_problem_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JudgeResultStore) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JudgeResultStore) ProtoMessage() {}
+
+func (x *JudgeResultStore) ProtoReflect() protoreflect.Message {
+	mi := &file_problem_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JudgeResultStore.ProtoReflect.Descriptor instead.
+func (*JudgeResultStore) Descriptor() ([]byte, []int) {
+	return file_problem_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *JudgeResultStore) GetItems() []*JudgeResultItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 var File_problem_proto protoreflect.FileDescriptor
 
 const file_problem_proto_rawDesc = "" +
@@ -658,15 +734,13 @@ const file_problem_proto_rawDesc = "" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x14\n" +
 	"\x05level\x18\a \x01(\x05R\x05level\x12\x12\n" +
 	"\x04tags\x18\b \x03(\tR\x04tags\x12\x16\n" +
-	"\x06status\x18\t \x01(\x05R\x06status\"\xc5\x01\n" +
+	"\x06status\x18\t \x01(\x05R\x06status\"\x9b\x01\n" +
 	"\rProblemConfig\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
-	"\x05level\x18\x02 \x01(\x05R\x05level\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12+\n" +
-	"\rcompile_limit\x18\x04 \x01(\v2\x06.LimitR\fcompileLimit\x12#\n" +
-	"\trun_limit\x18\x05 \x01(\v2\x06.LimitR\brunLimit\x12(\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12+\n" +
+	"\rcompile_limit\x18\x02 \x01(\v2\x06.LimitR\fcompileLimit\x12#\n" +
+	"\trun_limit\x18\x03 \x01(\v2\x06.LimitR\brunLimit\x12(\n" +
 	"\n" +
-	"test_cases\x18\x06 \x03(\v2\t.TestCaseR\ttestCases\"\xa8\x01\n" +
+	"test_cases\x18\x04 \x03(\v2\t.TestCaseR\ttestCases\"\xa8\x01\n" +
 	"\x05Limit\x12\x1b\n" +
 	"\tcpu_limit\x18\x01 \x01(\x03R\bcpuLimit\x12\x1f\n" +
 	"\vclock_limit\x18\x02 \x01(\x03R\n" +
@@ -678,7 +752,7 @@ const file_problem_proto_rawDesc = "" +
 	"proc_limit\x18\x05 \x01(\x03R\tprocLimit\"8\n" +
 	"\bTestCase\x12\x14\n" +
 	"\x05input\x18\x01 \x01(\tR\x05input\x12\x16\n" +
-	"\x06output\x18\x02 \x01(\tR\x06output\"\x9f\x01\n" +
+	"\x06output\x18\x02 \x01(\tR\x06output\"\xb8\x01\n" +
 	"\x0fJudgeSubmission\x12\x1d\n" +
 	"\n" +
 	"problem_id\x18\x01 \x01(\x03R\tproblemId\x12\x14\n" +
@@ -687,12 +761,18 @@ const file_problem_proto_rawDesc = "" +
 	"\x04code\x18\x04 \x01(\tR\x04code\x12\x10\n" +
 	"\x03uid\x18\x05 \x01(\x03R\x03uid\x12\x1d\n" +
 	"\n" +
-	"config_url\x18\x06 \x01(\tR\tconfigUrl\"f\n" +
+	"config_url\x18\x06 \x01(\tR\tconfigUrl\x12\x17\n" +
+	"\atask_id\x18\a \x01(\tR\x06taskId\"\xdd\x01\n" +
 	"\vJudgeResult\x12&\n" +
 	"\x05items\x18\x01 \x03(\v2\x10.JudgeResultItemR\x05items\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\x03R\x03uid\x12\x1d\n" +
 	"\n" +
-	"problem_id\x18\x03 \x01(\x03R\tproblemId\"\xe9\x01\n" +
+	"problem_id\x18\x03 \x01(\x03R\tproblemId\x12\x1a\n" +
+	"\baccepted\x18\x04 \x01(\bR\baccepted\x12\x18\n" +
+	"\amessage\x18\x05 \x01(\tR\amessage\x12\x12\n" +
+	"\x04code\x18\x06 \x01(\tR\x04code\x12\x12\n" +
+	"\x04lang\x18\a \x01(\tR\x04lang\x12\x17\n" +
+	"\atask_id\x18\b \x01(\tR\x06taskId\"\xe9\x01\n" +
 	"\x0fJudgeResultItem\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x17\n" +
 	"\aerr_msg\x18\x02 \x01(\tR\x06errMsg\x12\x1e\n" +
@@ -703,7 +783,9 @@ const file_problem_proto_rawDesc = "" +
 	"\x06memory\x18\x05 \x01(\x03R\x06memory\x12\x18\n" +
 	"\arunTime\x18\x06 \x01(\x03R\arunTime\x12\x18\n" +
 	"\acontent\x18\a \x01(\tR\acontent\x12%\n" +
-	"\btestCase\x18\b \x01(\v2\t.TestCaseR\btestCase*]\n" +
+	"\btestCase\x18\b \x01(\v2\t.TestCaseR\btestCase\":\n" +
+	"\x10JudgeResultStore\x12&\n" +
+	"\x05items\x18\x01 \x03(\v2\x10.JudgeResultItemR\x05items*]\n" +
 	"\vSubmitState\x12\x11\n" +
 	"\rUPStateNormal\x10\x00\x12\x14\n" +
 	"\x10UPStateCompiling\x10\x01\x12\x12\n" +
@@ -723,16 +805,17 @@ func file_problem_proto_rawDescGZIP() []byte {
 }
 
 var file_problem_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_problem_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_problem_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_problem_proto_goTypes = []any{
-	(SubmitState)(0),        // 0: SubmitState
-	(*Problem)(nil),         // 1: Problem
-	(*ProblemConfig)(nil),   // 2: ProblemConfig
-	(*Limit)(nil),           // 3: Limit
-	(*TestCase)(nil),        // 4: TestCase
-	(*JudgeSubmission)(nil), // 5: JudgeSubmission
-	(*JudgeResult)(nil),     // 6: JudgeResult
-	(*JudgeResultItem)(nil), // 7: JudgeResultItem
+	(SubmitState)(0),         // 0: SubmitState
+	(*Problem)(nil),          // 1: Problem
+	(*ProblemConfig)(nil),    // 2: ProblemConfig
+	(*Limit)(nil),            // 3: Limit
+	(*TestCase)(nil),         // 4: TestCase
+	(*JudgeSubmission)(nil),  // 5: JudgeSubmission
+	(*JudgeResult)(nil),      // 6: JudgeResult
+	(*JudgeResultItem)(nil),  // 7: JudgeResultItem
+	(*JudgeResultStore)(nil), // 8: JudgeResultStore
 }
 var file_problem_proto_depIdxs = []int32{
 	3, // 0: ProblemConfig.compile_limit:type_name -> Limit
@@ -740,11 +823,12 @@ var file_problem_proto_depIdxs = []int32{
 	4, // 2: ProblemConfig.test_cases:type_name -> TestCase
 	7, // 3: JudgeResult.items:type_name -> JudgeResultItem
 	4, // 4: JudgeResultItem.testCase:type_name -> TestCase
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	7, // 5: JudgeResultStore.items:type_name -> JudgeResultItem
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_problem_proto_init() }
@@ -758,7 +842,7 @@ func file_problem_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_problem_proto_rawDesc), len(file_problem_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

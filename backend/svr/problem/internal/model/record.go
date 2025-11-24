@@ -9,14 +9,13 @@ import (
 
 type SubmitRecord struct {
 	gorm.Model
-	Uid         int64  `gorm:"column:uid;index:idx_uid" json:"uid"`
-	UserName    string `gorm:"column:user_name" json:"user_name"`
-	ProblemID   int64  `gorm:"column:problem_id" json:"problem_id"`
-	ProblemName string `gorm:"column:problem_name" json:"problem_name"`
-	Status      string `gorm:"column:status" json:"status"`
-	Code        string `gorm:"column:code" json:"code"`
-	Result      []byte `gorm:"column:result" json:"result"`
-	Lang        string `gorm:"column:lang" json:"lang"`
+	Uid       int64  `gorm:"column:uid;index:idx_uid" json:"uid"`
+	ProblemID int64  `gorm:"column:problem_id" json:"problem_id"`
+	Accepted  bool   `gorm:"column:accepted" json:"accepted"`
+	Message   string `gorm:"column:message" json:"message"`
+	Code      string `gorm:"column:code" json:"code"`
+	Result    []byte `gorm:"column:result" json:"result"`
+	Lang      string `gorm:"column:lang" json:"lang"`
 }
 
 func (receiver *SubmitRecord) TableName() string {
@@ -25,15 +24,15 @@ func (receiver *SubmitRecord) TableName() string {
 
 func (receiver *SubmitRecord) Transform() *pb.SubmitRecord {
 	return &pb.SubmitRecord{
-		Id:          int64(receiver.ID),
-		CreatedAt:   receiver.CreatedAt.Unix(),
-		Uid:         receiver.Uid,
-		UserName:    receiver.UserName,
-		ProblemId:   receiver.ProblemID,
-		ProblemName: receiver.ProblemName,
-		Status:      receiver.Status,
-		Code:        receiver.Code,
-		Result:      receiver.Result,
+		Id:        int64(receiver.ID),
+		CreatedAt: receiver.CreatedAt.Unix(),
+		Uid:       receiver.Uid,
+		ProblemId: receiver.ProblemID,
+		Message:   receiver.Message,
+		Code:      receiver.Code,
+		Results:   receiver.Result,
+		Lang:      receiver.Lang,
+		Accepted:  receiver.Accepted,
 	}
 }
 

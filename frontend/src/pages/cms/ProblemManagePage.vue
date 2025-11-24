@@ -80,6 +80,8 @@ const onDelete = async (id: number) => {
         ElMessage.error(resp.data.message || '删除失败')
     }
 }
+
+const uploadUrl = 'http://localhost:9000/api/v1/problem/upload_config'
 const uploadHeaders = {
     Authorization: 'Bearer ' + useUserStore().token
 }
@@ -172,7 +174,7 @@ const onSuccess = (mode: string) => {
                     <!-- 删除 -->
                     <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.problem_id)"></el-button>
                     <!-- 上传配置 -->
-                    <el-upload :action="`http://localhost:9000/api/v1/problem/upload_config`" :headers="uploadHeaders"
+                    <el-upload :action="uploadUrl" :headers="uploadHeaders"
                         :data="{problem_id: row.problem_id}"
                         :name="'config_file'"
                         :show-file-list="false" :on-success="(resp) => onUploadSuccess(resp, row)"

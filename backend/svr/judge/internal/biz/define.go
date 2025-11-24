@@ -11,6 +11,7 @@ type Param struct {
 	FileIds  map[string]string // 文件id, 从编译结果中读取
 	Accepted bool              // 是否通过
 	Message  string
+	TaskId   string
 }
 
 // 沙箱接口表单

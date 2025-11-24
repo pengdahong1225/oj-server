@@ -14,7 +14,7 @@ import (
 )
 
 type CProcessor struct {
-	BasicProcessor
+	*BasicProcessor
 }
 
 func (cp *CProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error) {

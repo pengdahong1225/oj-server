@@ -1,0 +1,31 @@
+{
+  "id": 6,
+  "compile_limit": {
+    "cpu_limit": 1000000000,
+    "clock_limit": 2000000000,
+    "memory_limit": 134217728,
+    "stack_limit": 8388608,
+    "proc_limit": 1
+  },
+  "run_limit": {
+    "cpu_limit": 2000000000,
+    "clock_limit": 4000000000,
+    "memory_limit": 268435456,
+    "stack_limit": 8388608,
+    "proc_limit": 1
+  },
+  "test_cases": [
+    {
+      "input": "1 2",
+      "output": "3"
+    },
+    {
+      "input": "5 7",
+      "output": "12"
+    },
+    {
+      "input": "12 23",
+      "output": "35"
+    }
+  ]
+}

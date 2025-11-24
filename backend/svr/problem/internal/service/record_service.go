@@ -4,10 +4,15 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 	"oj-server/global"
+	"oj-server/pkg/gPool"
+	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
+	"oj-server/svr/problem/internal/configs"
 	"oj-server/svr/problem/internal/data"
+	"oj-server/svr/problem/internal/model"
 	"time"
 )
 
@@ -15,6 +20,8 @@ import (
 type RecordService struct {
 	pb.UnimplementedRecordServiceServer
 	uc *biz.RecordUseCase
+
+	result_consumer *mq.Consumer // 判题结果消费者
 }
 
 func NewRecordService() *RecordService {
@@ -23,8 +30,83 @@ func NewRecordService() *RecordService {
 		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
 	}
 
+	mqCfg := configs.AppConf.MQCfg
+	amqpClient := mq.NewClient(
+		&mq.Options{
+			Host:     mqCfg.Host,
+			Port:     mqCfg.Port,
+			User:     mqCfg.User,
+			PassWord: mqCfg.PassWord,
+			VHost:    mqCfg.VHost,
+		},
+	)
+
 	return &RecordService{
 		uc: biz.NewRecordUseCase(repo),
+		result_consumer: &mq.Consumer{
+			AmqpClient: amqpClient, // 注入client
+			ExKind:     global.RabbitMqExchangeKind,
+			ExName:     global.RabbitMqExchangeName,
+			QueName:    global.RabbitMqJudgeResultQueue,
+			RoutingKey: global.RabbitMqJudgeResultKey,
+			CTag:       "", // 消费者标签，用于区别不同的消费者
+		},
+	}
+}
+
+func (ps *RecordService) ConsumeJudgeResult() {
+	deliveries := ps.result_consumer.Consume()
+	if deliveries == nil {
+		logrus.Errorf("获取deliveries失败")
+		return
+	}
+	defer ps.result_consumer.Close()
+
+	for d := range deliveries {
+		// 处理任务
+		result := func(data []byte) bool {
+			result := new(pb.JudgeResult)
+			err := proto.Unmarshal(data, result)
+			if err != nil {
+				logrus.Errorln("解析judge task err：", err.Error())
+				return false
+			}
+			// 异步处理
+			_ = gPool.Instance().Submit(func() {
+				ps.handleJudgeResult(result)
+			})
+			return true
+		}(d.Body)
+
+		// 确认
+		if result {
+			_ = d.Ack(false)
+		} else {
+			_ = d.Reject(false)
+		}
+	}
+}
+
+func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
+	record := &model.SubmitRecord{
+		Uid:       result.Uid,
+		ProblemID: result.ProblemId,
+		Accepted:  result.Accepted,
+		Message:   result.Message,
+		Lang:      result.Lang,
+		Code:      result.Code,
+	}
+	judgeResultStore := &pb.JudgeResultStore{
+		Items: result.Items,
+	}
+	var err error
+	record.Result, err = proto.Marshal(judgeResultStore)
+	if err != nil {
+		logrus.Errorf("proto marshal err：%s", err.Error())
+		return
+	}
+	if err = ps.uc.UpdateSubmitRecord(result.TaskId, record); err != nil {
+		logrus.Errorf("更新record失败, err:%s", err.Error())
 	}
 }
 
@@ -87,11 +169,13 @@ func (ps *RecordService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubm
 	}
 	for i, record := range records {
 		resp.Data[i] = &pb.SubmitRecord{
-			Id:          int64(record.ID),
-			CreatedAt:   record.CreatedAt.Unix(),
-			ProblemName: record.ProblemName,
-			Lang:        record.Lang,
-			Status:      record.Status,
+			Id:        int64(record.ID),
+			CreatedAt: record.CreatedAt.Unix(),
+			Lang:      record.Lang,
+			Accepted:  record.Accepted,
+			Message:   record.Message,
+			Uid:       record.Uid,
+			ProblemId: record.ProblemID,
 		}
 	}
 

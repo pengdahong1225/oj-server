@@ -27,14 +27,15 @@ type SubmitRecord struct {
 	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	ProblemId     int64                  `protobuf:"varint,2,opt,name=problem_id,json=problemId,proto3" json:"problem_id,omitempty"`
 	ProblemName   string                 `protobuf:"bytes,3,opt,name=problem_name,json=problemName,proto3" json:"problem_name,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
-	Result        []byte                 `protobuf:"bytes,5,opt,name=result,proto3" json:"result,omitempty"` // []PBResult 二进制数据
+	Message       string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	Results       []byte                 `protobuf:"bytes,5,opt,name=results,proto3" json:"results,omitempty"` // []PBResult 二进制数据
 	Code          string                 `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
 	Lang          string                 `protobuf:"bytes,7,opt,name=lang,proto3" json:"lang,omitempty"`
 	Id            int64                  `protobuf:"varint,8,opt,name=id,proto3" json:"id,omitempty"`
 	CreatedAt     int64                  `protobuf:"varint,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	ProblemLevel  int32                  `protobuf:"varint,10,opt,name=problem_level,json=problemLevel,proto3" json:"problem_level,omitempty"`
 	UserName      string                 `protobuf:"bytes,11,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
+	Accepted      bool                   `protobuf:"varint,12,opt,name=accepted,proto3" json:"accepted,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,16 +91,16 @@ func (x *SubmitRecord) GetProblemName() string {
 	return ""
 }
 
-func (x *SubmitRecord) GetStatus() string {
+func (x *SubmitRecord) GetMessage() string {
 	if x != nil {
-		return x.Status
+		return x.Message
 	}
 	return ""
 }
 
-func (x *SubmitRecord) GetResult() []byte {
+func (x *SubmitRecord) GetResults() []byte {
 	if x != nil {
-		return x.Result
+		return x.Results
 	}
 	return nil
 }
@@ -144,6 +145,13 @@ func (x *SubmitRecord) GetUserName() string {
 		return x.UserName
 	}
 	return ""
+}
+
+func (x *SubmitRecord) GetAccepted() bool {
+	if x != nil {
+		return x.Accepted
+	}
+	return false
 }
 
 // 排行榜数据
@@ -227,14 +235,14 @@ var File_record_proto protoreflect.FileDescriptor
 
 const file_record_proto_rawDesc = "" +
 	"\n" +
-	"\frecord.proto\"\xab\x02\n" +
+	"\frecord.proto\"\xcb\x02\n" +
 	"\fSubmitRecord\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1d\n" +
 	"\n" +
 	"problem_id\x18\x02 \x01(\x03R\tproblemId\x12!\n" +
-	"\fproblem_name\x18\x03 \x01(\tR\vproblemName\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x16\n" +
-	"\x06result\x18\x05 \x01(\fR\x06result\x12\x12\n" +
+	"\fproblem_name\x18\x03 \x01(\tR\vproblemName\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\x12\x18\n" +
+	"\aresults\x18\x05 \x01(\fR\aresults\x12\x12\n" +
 	"\x04code\x18\x06 \x01(\tR\x04code\x12\x12\n" +
 	"\x04lang\x18\a \x01(\tR\x04lang\x12\x0e\n" +
 	"\x02id\x18\b \x01(\x03R\x02id\x12\x1d\n" +
@@ -242,7 +250,8 @@ const file_record_proto_rawDesc = "" +
 	"created_at\x18\t \x01(\x03R\tcreatedAt\x12#\n" +
 	"\rproblem_level\x18\n" +
 	" \x01(\x05R\fproblemLevel\x12\x1b\n" +
-	"\tuser_name\x18\v \x01(\tR\buserName\"\x8a\x01\n" +
+	"\tuser_name\x18\v \x01(\tR\buserName\x12\x1a\n" +
+	"\baccepted\x18\f \x01(\bR\baccepted\"\x8a\x01\n" +
 	"\x13LeaderboardUserInfo\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1b\n" +
 	"\tuser_name\x18\x02 \x01(\tR\buserName\x12\x16\n" +

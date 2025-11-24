@@ -14,7 +14,7 @@ import (
 )
 
 type GoProcessor struct {
-	BasicProcessor
+	*BasicProcessor
 }
 
 func (cp *GoProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error) {

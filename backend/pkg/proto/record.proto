@@ -6,8 +6,8 @@ message SubmitRecord{
   int64 uid = 1;
   int64 problem_id = 2;
   string problem_name = 3;
-  string status = 4;
-  bytes result = 5; // []PBResult 二进制数据
+  string message = 4;
+  bytes results = 5; // []PBResult 二进制数据
   string code = 6;
   string lang = 7;
 
@@ -15,6 +15,7 @@ message SubmitRecord{
   int64 created_at = 9;
   int32 problem_level = 10;
   string user_name = 11;
+  bool accepted = 12;
 }
 
 // 排行榜数据

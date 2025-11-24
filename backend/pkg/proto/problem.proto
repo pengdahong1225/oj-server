@@ -17,18 +17,16 @@ message Problem{
 // 题目配置信息
 message ProblemConfig{
   int64 id = 1;
-  int32 level = 2;
-  string name = 3;
-  Limit compile_limit = 4;
-  Limit run_limit = 5;
-  repeated TestCase test_cases = 6;
+  Limit compile_limit = 2;
+  Limit run_limit = 3;
+  repeated TestCase test_cases = 4;
 }
 message Limit{
-  int64 cpu_limit = 1;
-  int64 clock_limit = 2;
-  int64 memory_limit = 3;
-  int64 stack_limit = 4;
-  int64 proc_limit = 5;
+  int64 cpu_limit = 1;    // CPU时间限制，单位纳秒
+  int64 clock_limit = 2;  // 等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）
+  int64 memory_limit = 3; // 内存限制，单位 byte
+  int64 stack_limit = 4;  // 栈内存限制，单位 byte
+  int64 proc_limit = 5;   // 线程数量限制
 }
 message TestCase{
   string input = 1;
@@ -51,6 +49,7 @@ message JudgeSubmission{
   string code = 4;
   int64 uid = 5;
   string config_url = 6;
+  string task_id = 7;
 }
 
 // 判题服务->题目服务
@@ -58,6 +57,11 @@ message JudgeResult{
   repeated JudgeResultItem items = 1;
   int64 uid = 2;
   int64 problem_id = 3;
+  bool accepted = 4;
+  string message = 5;
+  string code = 6;
+  string lang = 7;
+  string task_id = 8;
 }
 
 message JudgeResultItem{
@@ -71,4 +75,7 @@ message JudgeResultItem{
   // 其他字段
   string content = 7;
   TestCase testCase = 8;
+}
+message JudgeResultStore {
+  repeated JudgeResultItem items = 1;
 }

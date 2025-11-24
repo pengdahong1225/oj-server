@@ -287,3 +287,35 @@ func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, 
 	}
 	return nil
 }
+
+// 1.保存record到数据库
+// 2.更新用户解题表和统计表
+// 3.更新result到redis
+func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitRecord) error {
+	err := rr.db_.Transaction(func(tx *gorm.DB) error {
+		var err error
+		// 查询是否存在record
+
+		// 创建record
+		if err = tx.Create(record).Error; err != nil {
+			logrus.Errorf("failed to create record: %v", err)
+			return err
+		}
+
+		// 更新用户解题表
+
+		// 更新统计表
+
+		return nil
+	})
+	if err != nil {
+		logrus.Errorf("failed to update record: %v", err)
+		return err
+	}
+
+	// 更新result到redis
+	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
+	rr.rdb_.Set(context.Background(), key, record.Result, global.TaskResultExpired)
+
+	return nil
+}

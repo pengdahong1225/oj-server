@@ -51,8 +51,6 @@ const (
 	CaptchaExpired = 60 * time.Second
 
 	// 判题任务
-	TaskStatePrefix   = OjPrefix + "task_state"
-	TaskStateExpired  = 60 * 2 * time.Second     // 任务状态持续2min
 	TaskResultPrefix  = OjPrefix + "task_result" // 判题结果前缀
 	TaskResultExpired = 60 * time.Second         // 判题结果持续1min
 

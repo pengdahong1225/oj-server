@@ -52,6 +52,11 @@ func (s *JudgeService) Handle(task *pb.JudgeSubmission) {
 			break
 		}
 	}
+	judgeResult.Accepted = param.Accepted
+	judgeResult.Message = param.Message
+	judgeResult.Code = param.Code
+	judgeResult.Lang = param.Language
+	judgeResult.TaskId = param.TaskId
 
 	// 推送到队列
 	err := s.sendJudgeResult2MQ(judgeResult)
@@ -65,6 +70,7 @@ func (s *JudgeService) preAction(task *pb.JudgeSubmission) (bool, *biz.Param) {
 
 	param.Code = task.Code
 	param.Language = task.Lang
+	param.TaskId = task.TaskId
 
 	// 读取题目配置文件
 	cfg_path := task.ConfigUrl

@@ -294,7 +294,7 @@ const handleCurrentChange = (page: number) => {
                 <div class="comment-list">
                     <!-- 顶层评论 -->
                     <div class="comment-item" v-for="item in root_comment_list" :key="item.id">
-                        <RootCommentItem :comment_data="item" :obj_id="problem.id"></RootCommentItem>
+                        <RootCommentItem :comment_data="item" :obj_id="problem.problem_id"></RootCommentItem>
                     </div>
                     <!-- 分页 -->
                     <el-pagination v-model:current-page="root_comment_query_params.page"

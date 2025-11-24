@@ -20,22 +20,9 @@ type IProcessor interface {
 
 // 处理器工厂
 func NewProcessor(language string) (*BasicProcessor, error) {
-	var processor IProcessor
-
-	language = strings.ToLower(language)
-	switch language {
-	case "c":
-		processor = &CProcessor{}
-	case "cpp":
-		processor = &CProcessor{}
-	case "go":
-		processor = &GoProcessor{}
-	case "python":
-		processor = &PyProcessor{}
-	default:
-		return nil, fmt.Errorf("language not supported, language=%s", language)
+	basicProcessor := &BasicProcessor{
+		runResultsChan: make(chan *biz.RunResultInChan, 100),
 	}
-
 	// 查询sandbox地址
 	var addr string
 	for _, item := range configs.AppConf.SandBoxCfg {
@@ -47,12 +34,35 @@ func NewProcessor(language string) (*BasicProcessor, error) {
 	if addr == "" {
 		return nil, fmt.Errorf("target sandbox config not found, language=%s", language)
 	}
+	logrus.Debugf("sandbox url: %s", addr)
+	basicProcessor.sandBoxUrl = addr
 
-	return &BasicProcessor{
-		impl:           processor,
-		sandBoxUrl:     addr,
-		runResultsChan: make(chan *biz.RunResultInChan, 100),
-	}, nil
+	// 生成处理器
+	var processor IProcessor
+	language = strings.ToLower(language)
+	switch language {
+	case "c":
+		processor = &CProcessor{
+			BasicProcessor: basicProcessor,
+		}
+	case "cpp":
+		processor = &CPPProcessor{
+			BasicProcessor: basicProcessor,
+		}
+	case "go":
+		processor = &GoProcessor{
+			BasicProcessor: basicProcessor,
+		}
+	case "python":
+		processor = &PyProcessor{
+			BasicProcessor: basicProcessor,
+		}
+	default:
+		return nil, fmt.Errorf("language not supported, language=%s", language)
+	}
+	basicProcessor.impl = processor
+
+	return basicProcessor, nil
 }
 
 // 模板处理器

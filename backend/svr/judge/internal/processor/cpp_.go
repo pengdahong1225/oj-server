@@ -14,7 +14,7 @@ import (
 )
 
 type CPPProcessor struct {
-	BasicProcessor
+	*BasicProcessor
 }
 
 func (cp *CPPProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error) {

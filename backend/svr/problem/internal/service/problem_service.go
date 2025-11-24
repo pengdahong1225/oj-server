@@ -12,7 +12,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"oj-server/global"
-	"oj-server/pkg/gPool"
 	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
@@ -30,7 +29,6 @@ type ProblemService struct {
 	uc *biz.ProblemUseCase
 
 	problem_producer *mq.Producer // 判题任务生产者
-	result_consumer  *mq.Consumer // 判题结果消费者
 }
 
 func NewProblemService() *ProblemService {
@@ -54,57 +52,13 @@ func NewProblemService() *ProblemService {
 		uc: biz.NewProblemUseCase(repo), // 注入实现
 		problem_producer: &mq.Producer{
 			AmqpClient: amqpClient, // 注入client
-			ExName:     global.RabbitMqExchangeKind,
-			ExKind:     global.RabbitMqExchangeName,
+			ExKind:     global.RabbitMqExchangeKind,
+			ExName:     global.RabbitMqExchangeName,
+
 			QueName:    global.RabbitMqJudgeSubmitQueue,
 			RoutingKey: global.RabbitMqJudgeSubmitKey,
 		},
-		result_consumer: &mq.Consumer{
-			AmqpClient: amqpClient, // 注入client
-			ExKind:     global.RabbitMqExchangeKind,
-			ExName:     global.RabbitMqExchangeName,
-			QueName:    global.RabbitMqJudgeResultQueue,
-			RoutingKey: global.RabbitMqJudgeResultKey,
-			CTag:       "", // 消费者标签，用于区别不同的消费者
-		},
 	}
-}
-
-func (ps *ProblemService) ConsumeJudgeResult() {
-	deliveries := ps.result_consumer.Consume()
-	if deliveries == nil {
-		logrus.Errorf("获取deliveries失败")
-		return
-	}
-	defer ps.result_consumer.Close()
-
-	for d := range deliveries {
-		// 处理任务
-		result := func(data []byte) bool {
-			result := new(pb.JudgeResult)
-			err := proto.Unmarshal(data, result)
-			if err != nil {
-				logrus.Errorln("解析judge task err：", err.Error())
-				return false
-			}
-			// 异步处理
-			_ = gPool.Instance().Submit(func() {
-				ps.handleJudgeResult(result)
-			})
-			return true
-		}(d.Body)
-
-		// 确认
-		if result {
-			_ = d.Ack(false)
-		} else {
-			_ = d.Reject(false)
-		}
-	}
-}
-
-func (ps *ProblemService) handleJudgeResult(result *pb.JudgeResult) {
-	//...
 }
 
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
@@ -338,6 +292,7 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		Lang:      in.Lang,
 		Code:      in.Code,
 		ConfigUrl: configUrl,
+		TaskId:    taskId,
 	}
 	task_data, err := proto.Marshal(task)
 	if err != nil {
