@@ -43,7 +43,7 @@ export async function getUserInfoService(uid: number) {
  * GET /user/record_list
  */
 export async function queryRecordListService(params: API.QueryRecordListParams) {
-    return request('/user/record_list', {
+    return request('/record/record_list', {
         method: 'GET',
         params: {
             ...params
@@ -55,7 +55,7 @@ export async function queryRecordListService(params: API.QueryRecordListParams) 
  * GET /user/record
  */
 export async function queryRecordService(id: number) {
-    return request('/user/record', {
+    return request('/record/record', {
         method: 'GET',
         params: { id }
     })

@@ -143,7 +143,7 @@ func (cp *CPPProcessor) Run(param *biz.Param) {
 
 			// 将结果放入管道
 			var results []*biz.SandBoxApiResponse
-			if err := json.Unmarshal(respBody, &results); err != nil {
+			if err = json.Unmarshal(respBody, &results); err != nil {
 				logrus.Errorln("Error unmarshalling JSON:", err)
 				return
 			}

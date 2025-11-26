@@ -23,7 +23,6 @@ func initProblemRouter(rg *gin.RouterGroup) {
 		problem.GET("/list", handler.HandleGetProblemList)
 		problem.GET("/detail", handler.HandleGetProblemDetail)
 		problem.POST("/submit", handler.HandleSubmitProblem)
-
 	}
 
 	// 评论相关

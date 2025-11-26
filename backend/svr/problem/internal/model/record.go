@@ -2,20 +2,26 @@ package model
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"oj-server/pkg/proto/pb"
 	"time"
 )
 
 type SubmitRecord struct {
-	gorm.Model
-	Uid       int64  `gorm:"column:uid;index:idx_uid" json:"uid"`
-	ProblemID int64  `gorm:"column:problem_id" json:"problem_id"`
-	Accepted  bool   `gorm:"column:accepted" json:"accepted"`
-	Message   string `gorm:"column:message" json:"message"`
-	Code      string `gorm:"column:code" json:"code"`
-	Result    []byte `gorm:"column:result" json:"result"`
-	Lang      string `gorm:"column:lang" json:"lang"`
+	ID        int64     `gorm:"primaryKey;autoIncrement"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+
+	UID         int64  `gorm:"type:BIGINT;not null;comment:用户id"`
+	UserName    string `gorm:"type:varchar(64);not null;comment:用户名"`
+	ProblemID   int64  `gorm:"type:BIGINT;not null;comment:题目id"`
+	ProblemName string `gorm:"type:varchar(64);not null;comment:题目名称"`
+
+	Lang string `gorm:"type:varchar(64);default:'';comment:语言"`
+	Code string `gorm:"type:text;not null;comment:提交的代码"`
+
+	Accepted bool   `gorm:"default:false;comment:是否通过"`
+	Message  string `gorm:"type:varchar(256);default:'';comment:测评结果描述"`
+	Result   []byte `gorm:"type:blob;not null;comment:运行结果集"`
 }
 
 func (receiver *SubmitRecord) TableName() string {
@@ -26,7 +32,7 @@ func (receiver *SubmitRecord) Transform() *pb.SubmitRecord {
 	return &pb.SubmitRecord{
 		Id:        int64(receiver.ID),
 		CreatedAt: receiver.CreatedAt.Unix(),
-		Uid:       receiver.Uid,
+		Uid:       receiver.UID,
 		ProblemId: receiver.ProblemID,
 		Message:   receiver.Message,
 		Code:      receiver.Code,

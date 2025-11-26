@@ -3,18 +3,22 @@ package model
 import "oj-server/pkg/proto/pb"
 
 type Record struct {
+	Id          int64  `json:"id"`
 	Uid         int64  `json:"uid"`
 	UserName    string `json:"user_name"`
 	ProblemID   int64  `json:"problem_id"`
 	ProblemName string `json:"problem_name"`
-	Message     string `json:"message"`
-	Accepted    bool   `json:"accepted"`
-	Code        string `json:"code"`
-	Result      []byte `json:"result"`
-	Lang        string `json:"lang"`
+	CreatedAt   int64  `json:"created_at"`
+	// 结果信息
+	Accepted bool   `json:"accepted"`
+	Message  string `json:"message"`
+	Code     string `json:"code"`
+	Lang     string `json:"lang"`
+	Result   []byte `json:"result"`
 }
 
 func (r *Record) FromPbRecord(pbRecord *pb.SubmitRecord) {
+	r.Id = pbRecord.Id
 	r.Uid = pbRecord.Uid
 	r.UserName = pbRecord.UserName
 	r.ProblemID = pbRecord.ProblemId
@@ -24,6 +28,7 @@ func (r *Record) FromPbRecord(pbRecord *pb.SubmitRecord) {
 	r.Accepted = pbRecord.Accepted
 	r.Result = pbRecord.Results
 	r.Lang = pbRecord.Lang
+	r.CreatedAt = pbRecord.CreatedAt
 }
 
 // 查询用户历史提交记录参数

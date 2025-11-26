@@ -98,12 +98,14 @@ func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
 
 	// 更新数据库
 	record := &model.SubmitRecord{
-		Uid:       result.Uid,
-		ProblemID: result.ProblemId,
-		Accepted:  result.Accepted,
-		Message:   result.Message,
-		Lang:      result.Lang,
-		Code:      result.Code,
+		UID:         result.Uid,
+		UserName:    result.UserName,
+		ProblemID:   result.ProblemId,
+		ProblemName: result.ProblemName,
+		Accepted:    result.Accepted,
+		Message:     result.Message,
+		Lang:        result.Lang,
+		Code:        result.Code,
 	}
 	judgeResultStore := &pb.JudgeResultStore{
 		Items: result.Items,
@@ -164,8 +166,7 @@ func (ps *RecordService) syncDailyLeaderboard() error {
 
 // 分页查询用户的提交记录
 func (ps *RecordService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubmitRecordListRequest) (*pb.GetSubmitRecordListResponse, error) {
-	offSet := int((in.Page - 1) * in.PageSize)
-	count, records, err := ps.uc.QuerySubmitRecordList(in.Uid, int(in.PageSize), offSet)
+	count, records, err := ps.uc.QuerySubmitRecordList(in.Uid, int(in.Page), int(in.PageSize))
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
@@ -177,13 +178,15 @@ func (ps *RecordService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubm
 	}
 	for i, record := range records {
 		resp.Data[i] = &pb.SubmitRecord{
-			Id:        int64(record.ID),
-			CreatedAt: record.CreatedAt.Unix(),
-			Lang:      record.Lang,
-			Accepted:  record.Accepted,
-			Message:   record.Message,
-			Uid:       record.Uid,
-			ProblemId: record.ProblemID,
+			Id:          record.ID,
+			CreatedAt:   record.CreatedAt.Unix(),
+			Uid:         record.UID,
+			UserName:    record.UserName,
+			ProblemId:   record.ProblemID,
+			ProblemName: record.ProblemName,
+			Lang:        record.Lang,
+			Accepted:    record.Accepted,
+			Message:     record.Message,
 		}
 	}
 
@@ -210,7 +213,6 @@ func (ps *RecordService) QueryJudgeResult(ctx context.Context, in *pb.QueryJudge
 		logrus.Errorln(err.Error())
 		return nil, err
 	}
-	logrus.Debugf("获取判题结果:%+v", result)
 	return &pb.QueryJudgeResultResponse{
 		Accepted: result.Accepted,
 		Message:  result.Message,

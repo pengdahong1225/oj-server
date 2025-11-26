@@ -13,8 +13,10 @@ import (
 
 func (s *JudgeService) Handle(task *pb.JudgeSubmission) {
 	judgeResult := &pb.JudgeResult{
-		Uid:       task.Uid,
-		ProblemId: task.ProblemId,
+		Uid:         task.Uid,
+		UserName:    task.UserName,
+		ProblemId:   task.ProblemId,
+		ProblemName: task.ProblemName,
 	}
 
 	// 预处理，构造上下文参数

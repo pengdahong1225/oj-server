@@ -10,7 +10,7 @@ import (
 type RecordRepo interface {
 	// 数据库接口
 	// 查询提交记录列表
-	QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error)
+	QuerySubmitRecordList(uid int64, page int, pageSize int) (int64, []model.SubmitRecord, error)
 	// 查询提交记录
 	QuerySubmitRecord(id int64) (*model.SubmitRecord, error)
 	// 根据uid查询解题统计信息
@@ -54,8 +54,8 @@ func NewRecordUseCase(repo RecordRepo) *RecordUseCase {
 	}
 }
 
-func (rc *RecordUseCase) QuerySubmitRecordList(uid int64, page, pageSize int) (int64, []model.SubmitRecord, error) {
-	return rc.repo.QuerySubmitRecordList(uid, pageSize, page)
+func (rc *RecordUseCase) QuerySubmitRecordList(uid int64, page int, pageSize int) (int64, []model.SubmitRecord, error) {
+	return rc.repo.QuerySubmitRecordList(uid, page, pageSize)
 }
 func (rc *RecordUseCase) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
 	return rc.repo.QuerySubmitRecord(id)

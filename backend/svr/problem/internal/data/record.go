@@ -76,9 +76,9 @@ func NewRecordRepo() (*RecordRepo, error) {
 }
 
 // 查询用户的历史提交记录
-func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (int64, []model.SubmitRecord, error) {
+func (rr *RecordRepo) QuerySubmitRecordList(uid int64, page int, pageSize int) (int64, []model.SubmitRecord, error) {
 	/*
-		select id, created_at, problem_name, status, lang from user_submit_record
+		select id, uid, user_name, problem_id, problem_name, created_at, accepted, message, lang from user_submit_record
 		where uid = ?
 		order by created_at desc
 		offset off_set
@@ -90,11 +90,22 @@ func (rr *RecordRepo) QuerySubmitRecordList(uid int64, pageSize, offset int) (in
 		logrus.Errorln(result.Error.Error())
 		return 0, nil, status.Errorf(codes.Internal, "查询提交记录失败")
 	}
+	if count <= 0 {
+		return 0, nil, nil
+	}
+
+	offSet := (page - 1) * pageSize
 	var records []model.SubmitRecord
-	result = rr.db_.Where("uid = ?", uid).Order("created_at desc").Offset(offset).Limit(pageSize).Find(&records)
+	result = rr.db_.Where("uid = ?", uid).
+		Select("id, uid, user_name, problem_id, problem_name, created_at, accepted, message, lang").
+		Order("created_at desc").Offset(offSet).Limit(pageSize).
+		Find(&records)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return 0, nil, status.Errorf(codes.Internal, "查询提交记录失败")
+	}
+	if result.RowsAffected == 0 {
+		return 0, nil, status.Errorf(codes.NotFound, "not found")
 	}
 	return count, records, nil
 }
@@ -304,7 +315,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 
 		// 查询是否已经ac
 		var count int64
-		result := tx.Model(&model.UserSolution{}).Where("uid = ? AND problem_id = ?", record.Uid, record.ProblemID).Count(&count)
+		result := tx.Model(&model.UserSolution{}).Where("uid = ? AND problem_id = ?", record.UID, record.ProblemID).Count(&count)
 		if result.Error != nil {
 			logrus.Errorf("query user solution failed,err:%s", result.Error)
 			return result.Error
@@ -312,7 +323,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 		if record.Accepted && count == 0 {
 			// 插入用户解题表
 			rs := &model.UserSolution{
-				Uid:       record.Uid,
+				Uid:       record.UID,
 				ProblemID: record.ProblemID,
 			}
 			result = tx.Create(rs)
@@ -324,7 +335,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 
 		// 更新统计表
 		statistics := &model.Statistics{
-			UID:    record.Uid,
+			UID:    record.UID,
 			Period: time.Now().Format("2006_01"),
 		}
 		result = tx.FirstOrCreate(statistics)

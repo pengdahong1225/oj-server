@@ -14,6 +14,7 @@ import (
 	"oj-server/global"
 	"oj-server/pkg/mq"
 	"oj-server/pkg/proto/pb"
+	"oj-server/pkg/registry"
 	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/configs"
 	"oj-server/svr/problem/internal/data"
@@ -266,11 +267,22 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	if len(vals) == 0 {
 		return nil, status.Error(codes.Unauthenticated, "uid missing")
 	}
-	uid, _ := strconv.Atoi(vals[0])
+	uid, err := strconv.ParseInt(vals[0], 10, 64)
+	if err != nil {
+		logrus.Errorf("parse uid failed:%s", err.Error())
+		return nil, err
+	}
 
 	taskId := fmt.Sprintf("%d_%d", uid, in.ProblemId)
 
-	// 查询题目配置地址
+	// 查询用户名
+	username, err := ps.queryUserName(uid)
+	if err != nil {
+		logrus.Errorf("query user name failed:%s", err.Error())
+		return nil, err
+	}
+
+	// 查询题目信息
 	problem, err := ps.uc.QueryProblemData(in.ProblemId)
 	if err != nil {
 		logrus.Errorf("query problem config url failed:%s", err.Error())
@@ -286,14 +298,16 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	}
 
 	task := &pb.JudgeSubmission{
-		Uid:       int64(uid),
-		ProblemId: in.ProblemId,
-		Title:     in.Title,
-		Lang:      in.Lang,
-		Code:      in.Code,
-		ConfigUrl: problem.ConfigURL,
-		TaskId:    taskId,
-		Level:     int32(problem.Level),
+		Uid:         int64(uid),
+		ProblemId:   in.ProblemId,
+		Title:       in.Title,
+		Lang:        in.Lang,
+		Code:        in.Code,
+		ConfigUrl:   problem.ConfigURL,
+		TaskId:      taskId,
+		Level:       int32(problem.Level),
+		ProblemName: problem.Title,
+		UserName:    username,
 	}
 	task_data, err := proto.Marshal(task)
 	if err != nil {
@@ -311,6 +325,25 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	return &pb.SubmitProblemResponse{
 		TaskId: taskId,
 	}, nil
+}
+
+func (ps *ProblemService) queryUserName(uid int64) (string, error) {
+	// 调用用户服务
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.UserService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		return "", err
+	}
+	client := pb.NewUserServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), global.GrpcTimeout)
+	defer cancel()
+	resp, err := client.GetUserInfoByUid(ctx, &pb.GetUserInfoRequest{
+		Uid: uid,
+	})
+	if err != nil {
+		return "", err
+	}
+	return resp.Data.Nickname, nil
 }
 
 func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) (*pb.GetTagListResponse, error) {

@@ -3,19 +3,24 @@ namespace API {
     type QueryRecordListParams = {
         page?: number;
         page_size?: number;
-        status?: string;
     }
     // 记录
     type Record = {
         id: number;
-        create_at: number;
         uid: number;
         problem_id: number;
-        problem_name: string;
+        created_at: number;
+        problem_name?: string;
+        user_name?: string;
+        // 结果信息
+        accepted: boolean;
+        message: string;
         status: string;
-        results: Result[];
-        code: string;
         lang: string;
+        clock: number;
+        memory: number;
+        code?: string;
+        results?: Result[];
     }
     type Result = {
         status: string;

@@ -82,7 +82,7 @@ const onSubmit = async () => {
     loading.value = true
     form.value.problem_id = problem.value.problem_id
     form.value.title = problem.value.problem_title
-    form.value.lang = langMap[form.value.lang]  // 一行搞定
+    form.value.lang = langMap[form.value.lang]
     const resp = await submitProblemService(form.value)
     loading.value = false
 
