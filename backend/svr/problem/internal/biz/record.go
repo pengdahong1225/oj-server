@@ -35,6 +35,13 @@ type RecordRepo interface {
 	Lock(key string, ttl time.Duration) (bool, error)
 	// 解锁
 	UnLock(key string) error
+	// 查询判题结果
+	QueryJudgeResult(taskId string) (*JudgeResultAbstract, error)
+}
+
+type JudgeResultAbstract struct {
+	Accepted bool   `json:"accepted"`
+	Message  string `json:"message"`
 }
 
 type RecordUseCase struct {
@@ -79,4 +86,7 @@ func (rc *RecordUseCase) Lock(key string, ttl time.Duration) (bool, error) {
 }
 func (rc *RecordUseCase) UnLock(key string) error {
 	return rc.repo.UnLock(key)
+}
+func (rc *RecordUseCase) QueryJudgeResult(taskId string) (*JudgeResultAbstract, error) {
+	return rc.repo.QueryJudgeResult(taskId)
 }

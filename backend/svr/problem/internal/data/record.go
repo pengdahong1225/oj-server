@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -16,6 +17,7 @@ import (
 	"log"
 	"oj-server/global"
 	"oj-server/pkg/proto/pb"
+	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/configs"
 	"oj-server/svr/problem/internal/model"
 	"os"
@@ -294,20 +296,21 @@ func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, 
 // 3.更新result到redis
 func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitRecord, level int32) error {
 	err := rr.db_.Transaction(func(tx *gorm.DB) error {
-		// 查询是否存在record
+		// 创建record
+		if err := tx.Create(record).Error; err != nil {
+			logrus.Errorf("failed to create record: %v", err)
+			return err
+		}
+
+		// 查询是否已经ac
 		var count int64
-		result := tx.Model(&model.SubmitRecord{}).Where("uid = ? and problem_id = ?", record.Uid, record.ProblemID).Count(&count)
+		result := tx.Model(&model.UserSolution{}).Where("uid = ? AND problem_id = ?", record.Uid, record.ProblemID).Count(&count)
 		if result.Error != nil {
-			logrus.Errorf("query failed, err: %s", result.Error)
+			logrus.Errorf("query user solution failed,err:%s", result.Error)
 			return result.Error
 		}
-		if count == 0 {
-			// 创建record
-			if err := tx.Create(record).Error; err != nil {
-				logrus.Errorf("failed to create record: %v", err)
-				return err
-			}
-			// 更新用户解题表
+		if record.Accepted && count == 0 {
+			// 插入用户解题表
 			rs := &model.UserSolution{
 				Uid:       record.Uid,
 				ProblemID: record.ProblemID,
@@ -330,7 +333,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 			return result.Error
 		}
 		statistics.SubmitCount += 1
-		if count == 0 {
+		if record.Accepted && count == 0 {
 			statistics.AccomplishCount += 1
 			switch level {
 			case 1:
@@ -359,9 +362,9 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 
 	// 更新result到redis
 	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
-	value := map[string]string{
-		"accepted": strconv.FormatBool(record.Accepted),
-		"message":  record.Message,
+	value := biz.JudgeResultAbstract{
+		Accepted: record.Accepted,
+		Message:  record.Message,
 	}
 	jsonValue, err := json.Marshal(value)
 	if err != nil {
@@ -378,4 +381,22 @@ func (rr *RecordRepo) Lock(key string, ttl time.Duration) (bool, error) {
 }
 func (rr *RecordRepo) UnLock(key string) error {
 	return rr.rdb_.Del(context.Background(), key).Err()
+}
+
+func (rr *RecordRepo) QueryJudgeResult(taskId string) (*biz.JudgeResultAbstract, error) {
+	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
+	value, err := rr.rdb_.Get(context.Background(), key).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, status.Errorf(codes.NotFound, "no found")
+		}
+		return nil, err
+	}
+	var result biz.JudgeResultAbstract
+
+	if err = json.Unmarshal([]byte(value), &result); err != nil {
+		logrus.Errorf("failed to unmarshal result: %v", err)
+		return nil, err
+	}
+	return &result, nil
 }

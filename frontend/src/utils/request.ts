@@ -28,7 +28,6 @@ const refreshToken = async () => {
     const resp = await instance.post('/user/refresh_token', null, {
       withCredentials: true, // 确保携带 Cookie
     });
-    console.log(resp)
     
     if (resp.data.code === 0) {
         return resp.data.data.access_token;
@@ -98,10 +97,14 @@ instance.interceptors.response.use(
       // 开始刷新
       isRefreshing = true
       try {
+        // 删除过期token
+        userStore.clearToken()
+
+        // 刷新
         const newToken = await refreshToken()
         isRefreshing = false
 
-        // 设置 token
+        // 设置新token
         userStore.setToken(newToken)
 
         // 更新 header

@@ -14,6 +14,11 @@ namespace API {
         lang: string;
         code: string;
     }
+    // 判题结果摘要
+    type JudgeResultAbstract = {
+        acceptd: boolean;
+        message: string;
+    }
     
     type Problem = {
         problem_title: string;

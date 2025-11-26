@@ -7,7 +7,8 @@ type Record struct {
 	UserName    string `json:"user_name"`
 	ProblemID   int64  `json:"problem_id"`
 	ProblemName string `json:"problem_name"`
-	Status      string `json:"status"`
+	Message     string `json:"message"`
+	Accepted    bool   `json:"accepted"`
 	Code        string `json:"code"`
 	Result      []byte `json:"result"`
 	Lang        string `json:"lang"`
@@ -18,9 +19,10 @@ func (r *Record) FromPbRecord(pbRecord *pb.SubmitRecord) {
 	r.UserName = pbRecord.UserName
 	r.ProblemID = pbRecord.ProblemId
 	r.ProblemName = pbRecord.ProblemName
-	r.Status = pbRecord.Status
+	r.Message = pbRecord.Message
 	r.Code = pbRecord.Code
-	r.Result = pbRecord.Result
+	r.Accepted = pbRecord.Accepted
+	r.Result = pbRecord.Results
 	r.Lang = pbRecord.Lang
 }
 
@@ -32,4 +34,9 @@ type QueryUserRecordListParams struct {
 type QueryUserRecordListResult struct {
 	Total int64    `json:"total"`
 	List  []Record `json:"list"`
+}
+
+type JudgeResultAbstract struct {
+	Accepted bool   `json:"accepted"`
+	Message  string `json:"message"`
 }

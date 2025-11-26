@@ -46,6 +46,7 @@ func (cp *CProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error)
 		logrus.Errorln("Error marshalling JSON:", err.Error())
 		return nil, err
 	}
+	logrus.Debugln("Request SandBoxApiBody:", string(data))
 	// POST请求
 	req, err := http.NewRequest("POST", cp.sandBoxUrl+"/run", bytes.NewBuffer(data))
 	if err != nil {
@@ -72,7 +73,7 @@ func (cp *CProcessor) Compile(param *biz.Param) (*biz.SandBoxApiResponse, error)
 	logrus.Debugln("Response SandBoxApiBody:", string(respBody))
 
 	var result []*biz.SandBoxApiResponse
-	if err := json.Unmarshal(respBody, &result); err != nil {
+	if err = json.Unmarshal(respBody, &result); err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
 	}

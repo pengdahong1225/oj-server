@@ -13,6 +13,7 @@ func initProblemRouter(rg *gin.RouterGroup) {
 	{
 		problem.POST("/add", middlewares.Admin(), handler.HandleCreateProblem)
 		problem.POST("/upload_config", middlewares.Admin(), handler.HandleUploadConfig)
+		problem.GET("/download_config", middlewares.Admin(), handler.HandleDownloadConfig)
 		problem.POST("/publish", middlewares.Admin(), handler.HandlePublishProblem)
 		problem.POST("/hide", middlewares.Admin(), handler.HandleHideProblem)
 		problem.DELETE("", middlewares.Admin(), handler.HandleDeleteProblem)
@@ -22,6 +23,7 @@ func initProblemRouter(rg *gin.RouterGroup) {
 		problem.GET("/list", handler.HandleGetProblemList)
 		problem.GET("/detail", handler.HandleGetProblemDetail)
 		problem.POST("/submit", handler.HandleSubmitProblem)
+
 	}
 
 	// 评论相关

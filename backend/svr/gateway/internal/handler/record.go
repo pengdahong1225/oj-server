@@ -22,11 +22,35 @@ func HandleGetUserSolvedList(ctx *gin.Context) {}
 // 获取判题任务结果
 // 拿到判题任务结果，再去获取任务的output
 func HandleGetSubmitResult(ctx *gin.Context) {
-	recordId, err := strconv.ParseInt(ctx.Query("task_id"), 10, 64)
-	if err != nil || recordId <= 0 {
+	taskId, exists := ctx.GetQuery("task_id")
+	if !exists || taskId == "" {
 		ResponseBadRequest(ctx, "task_id 不能为空")
 		return
 	}
+	// 调用题目服务
+	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
+	if err != nil {
+		logrus.Errorf("用户服务连接失败:%s", err.Error())
+		ResponseInternalServerError(ctx, "服务繁忙")
+		return
+	}
+	client := pb.NewRecordServiceClient(conn)
+	request := &pb.QueryJudgeResultRequest{
+		TaskId: taskId,
+	}
+	resp, err := client.QueryJudgeResult(ctx, request)
+	if err != nil {
+		logrus.Errorf("获取判题结果失败:%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+
+	result := &model.JudgeResultAbstract{
+		Accepted: resp.Accepted,
+		Message:  resp.Message,
+	}
+
+	ResponseOK(ctx, result)
 }
 
 // 处理获取用户历史提交记录
@@ -88,7 +112,7 @@ func HandleGetUserRecord(ctx *gin.Context) {
 		return
 	}
 	client := pb.NewRecordServiceClient(conn)
-	rpc_resp, err := client.GetSubmitRecordData(ctx, &pb.GetSubmitRecordRequest{
+	resp, err := client.GetSubmitRecordData(ctx, &pb.GetSubmitRecordRequest{
 		Id: recordId,
 	})
 	if err != nil {
@@ -98,6 +122,6 @@ func HandleGetUserRecord(ctx *gin.Context) {
 	}
 
 	record := &model.Record{}
-	record.FromPbRecord(rpc_resp.Data)
+	record.FromPbRecord(resp.Data)
 	ResponseOK(ctx, record)
 }

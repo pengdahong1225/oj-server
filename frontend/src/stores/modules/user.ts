@@ -7,16 +7,17 @@ import { ref } from 'vue'
  */
 export const useUserStore = defineStore('user', () => {
     const token = ref('')
-    const userInfo = ref<API.UserProfile>({
+    const userInfo = ref<API.UserInfo>({
         uid: 0,
-        nick_name: '',
+        nickname: '',
         avatar_url: '',
         mobile: 0,
         email: '',
         role: 0,
-        gender: 0
+        gender: 0,
+        create_at: 0,
     })
-    const setUserInfo = (value: API.UserProfile) => {
+    const setUserInfo = (value: API.UserInfo) => {
         userInfo.value = value
     }
     const setToken = (value: string) => {
@@ -27,12 +28,13 @@ export const useUserStore = defineStore('user', () => {
     }
     const clearUserInfo = () => {
         userInfo.value.uid = 0
-        userInfo.value.nick_name = ''
+        userInfo.value.nickname = ''
         userInfo.value.avatar_url = ''
         userInfo.value.mobile = 0
         userInfo.value.email = ''
         userInfo.value.role = 0
         userInfo.value.gender = 0
+        userInfo.value.create_at = 0
         token.value = ''
     }
 

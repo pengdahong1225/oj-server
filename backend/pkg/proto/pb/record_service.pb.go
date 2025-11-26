@@ -336,7 +336,7 @@ func (x *GetSubmitRecordResponse) GetData() *SubmitRecord {
 
 type QueryJudgeResultRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TaskId        int64                  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -371,16 +371,16 @@ func (*QueryJudgeResultRequest) Descriptor() ([]byte, []int) {
 	return file_record_service_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *QueryJudgeResultRequest) GetTaskId() int64 {
+func (x *QueryJudgeResultRequest) GetTaskId() string {
 	if x != nil {
 		return x.TaskId
 	}
-	return 0
+	return ""
 }
 
 type QueryJudgeResultResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Accepted      bool                   `protobuf:"varint,1,opt,name=accepted,proto3" json:"accepted,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -416,11 +416,11 @@ func (*QueryJudgeResultResponse) Descriptor() ([]byte, []int) {
 	return file_record_service_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *QueryJudgeResultResponse) GetStatus() string {
+func (x *QueryJudgeResultResponse) GetAccepted() bool {
 	if x != nil {
-		return x.Status
+		return x.Accepted
 	}
-	return ""
+	return false
 }
 
 func (x *QueryJudgeResultResponse) GetMessage() string {
@@ -450,9 +450,9 @@ const file_record_service_proto_rawDesc = "" +
 	"\x17GetSubmitRecordResponse\x12!\n" +
 	"\x04data\x18\x01 \x01(\v2\r.SubmitRecordR\x04data\"2\n" +
 	"\x17QueryJudgeResultRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"L\n" +
-	"\x18QueryJudgeResultResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\"P\n" +
+	"\x18QueryJudgeResultResponse\x12\x1a\n" +
+	"\baccepted\x18\x01 \x01(\bR\baccepted\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage2\x8c\x03\n" +
 	"\rRecordService\x12A\n" +
 	"\x0eGetLeaderboard\x12\x16.google.protobuf.Empty\x1a\x17.GetLeaderboardResponse\x12G\n" +

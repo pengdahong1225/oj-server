@@ -16,8 +16,7 @@ create table if not exists user_submit_record
     result blob NOT null comment '运行结果集',
     lang VARCHAR(64) DEFAULT '' comment '语言',
 
-    PRIMARY KEY(id),
-    UNIQUE INDEX uk_user_problem(uid, problem_id)
+    PRIMARY KEY(id)
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题表
@@ -31,7 +30,7 @@ create table if not exists user_solution
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY(id),
-    NIQUE INDEX uk_user_problem(uid, problem_id)
+    UNIQUE INDEX uk_user_problem(uid, problem_id)
 )engine = InnoDB charset = utf8mb4;
 
 -- 用户解题统计表

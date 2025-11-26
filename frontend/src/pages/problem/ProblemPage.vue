@@ -1,18 +1,36 @@
 <script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
+import { marked } from 'marked'
+import { UploadFilled } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores'
 import { useRoute } from 'vue-router'
 import { queryProblemDetailService, submitProblemService, queryResultService } from '@/api/problemController'
 import { getRootCommentListService, addCommentService } from '@/api/commentController'
-import { UploadFilled } from '@element-plus/icons-vue'
+// Ace Editor
 import { VAceEditor } from 'vue3-ace-editor'
+import ace from 'ace-builds'
+
+// 设置 Ace 资源路径
+ace.config.set('basePath', '/ace')
+
+// 基础扩展
+import 'ace-builds/src-noconflict/ext-language_tools'
+
+// 语言文件
 import 'ace-builds/src-noconflict/mode-c_cpp'
 import 'ace-builds/src-noconflict/mode-golang'
 import 'ace-builds/src-noconflict/mode-python'
 import 'ace-builds/src-noconflict/mode-java'
+
+// 主题
 import 'ace-builds/src-noconflict/theme-github'
 import 'ace-builds/src-noconflict/theme-xcode'
-import { marked } from 'marked'
-import { useUserStore } from '@/stores'
+
+// snippets
+import 'ace-builds/src-noconflict/snippets/c_cpp'
+import 'ace-builds/src-noconflict/snippets/golang'
+import 'ace-builds/src-noconflict/snippets/java'
+import 'ace-builds/src-noconflict/snippets/python'
 
 const userStore = useUserStore()
 
@@ -72,7 +90,7 @@ const onSubmit = async () => {
     running.value = true
     timer = setInterval(() => {
         checkResult(resp.data.data.task_id)
-    }, 500)
+    }, 1000)
 }
 const langMap: Record<string, string> = {
     c: 'c',
@@ -84,15 +102,36 @@ const langMap: Record<string, string> = {
 
 // 轮训判题结果
 let timer = 0
+const MAX_RETRY = 20
+let retryCount = 0
 const running = ref(false)
 const checkResult = async (task_id: number) => {
+    retryCount++
+
     const resp = await queryResultService(task_id)
-    console.log(resp)
-    clearInterval(timer)
+    if (resp.data.data !== null) {
+        result_abstract.value = resp.data.data
+        clearInterval(timer)
+        running.value = false
+        retryCount = 0
+        return
+    }
+
+    // 超时判定
+    if (retryCount >= MAX_RETRY) {
+        clearInterval(timer)
+        running.value = false
+        retryCount = 0
+
+        ElMessage({
+            message: '请求超时，请稍后重试或查看记录',
+            type: 'warning'
+        })
+    }
 }
-const result = ref('')
+const result_abstract = ref<API.JudgeResultAbstract>()
 const btype = computed(() => {
-    if (result.value === 'Accepted') {
+    if (result_abstract.value?.acceptd) {
         return 'success'
     } else {
         return 'danger'
@@ -100,6 +139,21 @@ const btype = computed(() => {
 })
 
 // ACE主题和配置
+ace.require('ace/ext/language_tools')
+
+const editorOptions = ref({
+    fontSize: '20px',
+    showPrintMargin: false,
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
+    highlightActiveLine: false,
+    enableSnippets: true,
+    wrap: true, // 自动换行
+    showGutter: true, // 显示行号
+});
+
+const theme = ref('xcode');
+
 const lang_list = [
     { label: 'C', value: 'c' },
     { label: 'C++', value: 'c_cpp' },
@@ -114,17 +168,6 @@ const lang_computed = computed(() => {
         return form.value.lang
     }
 })
-const theme = ref('xcode');
-const editorOptions = ref({
-    fontSize: '20px',
-    showPrintMargin: false,
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true,
-    highlightActiveLine: false,
-    enableSnippets: true,
-    wrap: true, // 自动换行
-    showGutter: true, // 显示行号
-});
 
 // 评论区
 const place = computed(() => {
@@ -139,7 +182,7 @@ const onSubmitComment = async () => {
     const form = <API.AddCommentForm>{
         obj_id: problem.value.problem_id,
         user_id: userStore.userInfo.uid,
-        user_name: userStore.userInfo.nick_name,
+        user_name: userStore.userInfo.nickname,
         user_avatar_url: userStore.userInfo.avatar_url,
         content: new_comment_text.value
     }
@@ -150,7 +193,7 @@ const onSubmitComment = async () => {
             id: 0,
             obj_id: problem.value.problem_id,
             user_id: userStore.userInfo.uid,
-            user_name: userStore.userInfo.nick_name,
+            user_name: userStore.userInfo.nickname,
             user_avatar_url: userStore.userInfo.avatar_url,
             content: new_comment_text.value,
             status: 1,
@@ -242,10 +285,10 @@ const handleCurrentChange = (page: number) => {
 
             <div class="submit-area-foot">
                 <div class="result-area">
-                    <div v-if="result !== ''">
+                    <div v-if="result_abstract !== null">
                         <el-tag :type="btype" size="large">
                             <template #default>
-                                <strong>{{ result }}</strong>
+                                <strong>{{ result_abstract?.message }}</strong>
                             </template>
                         </el-tag>
                     </div>

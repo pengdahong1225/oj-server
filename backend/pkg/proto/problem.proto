@@ -26,7 +26,7 @@ message Limit{
   int64 clock_limit = 2;  // 等待时间限制，单位纳秒 （通常为 cpuLimit 两倍）
   int64 memory_limit = 3; // 内存限制，单位 byte
   int64 stack_limit = 4;  // 栈内存限制，单位 byte
-  int64 proc_limit = 5;   // 线程数量限制
+  int64 proc_limit = 5;   // 线程数量限制，默认50
 }
 message TestCase{
   string input = 1;

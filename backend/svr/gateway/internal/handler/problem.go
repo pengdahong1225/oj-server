@@ -254,6 +254,16 @@ func HandleUploadConfig(ctx *gin.Context) {
 	ResponseOK(ctx, nil)
 }
 
+// 下载题目配置文件
+func HandleDownloadConfig(ctx *gin.Context) {
+	// 获取元数据
+	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
+	if err != nil || problemId <= 0 {
+		ResponseBadRequest(ctx, "无效的 problem_id")
+		return
+	}
+}
+
 // 处理发布题目
 func HandlePublishProblem(ctx *gin.Context) {
 	// 获取元数据

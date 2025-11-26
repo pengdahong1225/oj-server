@@ -47,9 +47,9 @@ message GetSubmitRecordResponse {
 }
 
 message QueryJudgeResultRequest {
-  int64 task_id = 1;
+  string task_id = 1;
 }
 message QueryJudgeResultResponse {
-  string status = 1;
+  bool accepted = 1;
   string message = 2;
 }

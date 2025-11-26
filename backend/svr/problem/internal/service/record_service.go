@@ -203,3 +203,16 @@ func (ps *RecordService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubm
 
 	return resp, nil
 }
+
+func (ps *RecordService) QueryJudgeResult(ctx context.Context, in *pb.QueryJudgeResultRequest) (*pb.QueryJudgeResultResponse, error) {
+	result, err := ps.uc.QueryJudgeResult(in.TaskId)
+	if err != nil {
+		logrus.Errorln(err.Error())
+		return nil, err
+	}
+	logrus.Debugf("获取判题结果:%+v", result)
+	return &pb.QueryJudgeResultResponse{
+		Accepted: result.Accepted,
+		Message:  result.Message,
+	}, nil
+}
