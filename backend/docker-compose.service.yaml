@@ -1,0 +1,75 @@
+version: '3'
+
+networks:
+  net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+
+services:
+  sandbox:
+    image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-service:v1.0.0
+    container_name: sandbox
+    privileged: true
+    restart: always
+    ports:
+      - "5050:5050"
+      - "5051:5051"
+    networks:
+      - net
+
+  gateway-service:
+    container_name: gateway-service
+    privileged: true
+    build:
+      context: ./ # 路径
+      dockerfile: gateway.dockerfile
+    volumes:
+      - /data/oj/log:/app/log
+    ports:
+      - "9000:9000"
+    networks:
+      - net
+
+  user-service:
+    container_name: user-service
+    privileged: true
+    build:
+      context: ./ # 路径
+      dockerfile: user.dockerfile
+    volumes:
+      - /data/oj/log:/app/log
+    ports:
+      - "9010:9010"
+    networks:
+      - net
+
+  judge-service:
+    container_name: judge-service
+    privileged: true
+    build:
+      context: ./ # 路径
+      dockerfile: judge.dockerfile
+    volumes:
+      - /data/oj/log:/app/log
+    ports:
+      - "9020:9020"
+    networks:
+      - net
+    depends_on: # 本地服务的依赖，控制启动先后顺序
+      - sandbox
+
+  problem-service:
+    container_name: problem-service
+    privileged: true
+    build:
+      context: ./ # 路径
+      dockerfile: problem.dockerfile
+    volumes:
+      - /data/oj/log:/app/log
+    ports:
+      - "9030:9030"
+    networks:
+      - net

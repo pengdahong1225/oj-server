@@ -2,6 +2,7 @@ package configs
 
 import (
 	"gopkg.in/yaml.v3"
+	"oj-server/utils"
 	"os"
 )
 
@@ -22,6 +23,11 @@ func LoadServerConfigFile(path string) error {
 		return err
 	}
 	err = yaml.Unmarshal(fileData, ServerConf)
+	if err != nil {
+		return err
+	}
+
+	ServerConf.Address, err = utils.GetOutboundIPString()
 	if err != nil {
 		return err
 	}

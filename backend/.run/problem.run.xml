@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="problem" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="backend" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="GOOS" value="linux" />
+    </envs>
+    <kind value="DIRECTORY" />
+    <package value="oj-server" />
+    <directory value="$PROJECT_DIR$/svr/problem/cmd" />
+    <filePath value="$PROJECT_DIR$" />
+    <output_directory value="$PROJECT_DIR$/bin" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>
