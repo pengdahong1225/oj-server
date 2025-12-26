@@ -26,5 +26,5 @@ func Instance() *ants.Pool {
 func panicHandler(i interface{}) {
 	var buf [4096]byte
 	n := runtime.Stack(buf[:], false)
-	logrus.Errorln("worker exits from panic: %s", string(buf[:n]))
+	logrus.Errorf("worker exits from panic: %s", string(buf[:n]))
 }

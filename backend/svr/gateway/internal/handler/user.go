@@ -13,8 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"oj-server/pkg/proto/pb"
 	"oj-server/svr/gateway/internal/configs"
-	"oj-server/svr/gateway/internal/middlewares"
 	"oj-server/svr/gateway/internal/model"
+	"oj-server/pkg/jwt_utils"
 )
 
 func HandleUserLogin(ctx *gin.Context) {
@@ -134,12 +134,13 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 		ResponseBadRequest(ctx, "refresh_token不存在")
 		return
 	}
-	j := middlewares.JWTCreator{
+	// 解析refresh_token
+	jwt_builder := jwt_utils.JWTBuilder{
 		SigningKey: []byte(configs.AppConf.JwtCfg.SigningKey),
 	}
-	claims, err := j.ParseToken(refreshToken)
-	if err != nil {
-		if errors.Is(err, middlewares.TokenExpired) {
+	claims := new(model.UserClaims)
+	if err = jwt_builder.ParseToken(refreshToken, claims); err != nil {
+		if errors.Is(err, jwt_utils.TokenExpired) {
 			logrus.Errorf("refresh_token已过期:%s", err.Error())
 			ResponseUnauthorized(ctx, "refresh_token已过期")
 			return
@@ -162,11 +163,10 @@ func HandleReFreshAccessToken(ctx *gin.Context) {
 	})
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := configs.AppConf.JwtCfg.SigningKey
-	j := middlewares.JWTCreator{
-		SigningKey: []byte(signingKey),
+	jwt_builder := jwt_utils.JWTBuilder{
+		SigningKey: []byte(configs.AppConf.JwtCfg.SigningKey),
 	}
-	claims := &middlewares.UserClaims{
+	claims := &model.UserClaims{
 		Uid:       uid,
 		Mobile:    mobile,
 		Authority: role,
@@ -177,25 +177,24 @@ func createRefreshAccessToken(uid int64, mobile string, role int32) (string, err
 			Issuer:    global.Issuer,                                  // 签名机构
 		},
 	}
-	return j.CreateToken(claims)
+	return jwt_builder.CreateToken(claims)
 }
 func createAccessToken(uid int64, mobile string, role int32) (string, error) {
-	signingKey := configs.AppConf.JwtCfg.SigningKey
-	j := middlewares.JWTCreator{
-		SigningKey: []byte(signingKey),
+	jwt_builder := jwt_utils.JWTBuilder{
+		SigningKey: []byte(configs.AppConf.JwtCfg.SigningKey),
 	}
-	claims := &middlewares.UserClaims{
+	claims := &model.UserClaims{
 		Uid:       uid,
 		Mobile:    mobile,
 		Authority: role,
 		Type:      "access",
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),                             // 签名生效时间
-			ExpiresAt: time.Now().Unix() + global.AccessTokenTimeOut, // 15分钟过期
+			ExpiresAt: time.Now().Unix() + global.AccessTokenTimeOut, // 过期时间
 			Issuer:    global.Issuer,                                 // 签名机构
 		},
 	}
-	return j.CreateToken(claims)
+	return jwt_builder.CreateToken(claims)
 }
 
 func HandleUserRegister(ctx *gin.Context) {

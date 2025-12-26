@@ -8,11 +8,12 @@ import (
 	"oj-server/svr/gateway/internal/configs"
 	"strings"
 	"time"
+	"oj-server/pkg/jwt_utils"
+	"oj-server/svr/gateway/internal/model"
 )
 
 func AuthLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// jwt鉴权头部信息 token
 		token := ctx.GetHeader("Authorization")
 		if token == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -23,14 +24,16 @@ func AuthLogin() gin.HandlerFunc {
 			return
 		}
 		token = strings.TrimPrefix(token, "Bearer ")
-		signingKey := configs.AppConf.JwtCfg.SigningKey
-		j := JWTCreator{
-			SigningKey: []byte(signingKey),
-		}
+
 		// 解析token包含的信息
-		claims, err := j.ParseToken(token)
+		jwt_builder := jwt_utils.JWTBuilder{
+			SigningKey: []byte(configs.AppConf.JwtCfg.SigningKey), // 密钥
+		}
+		claims := new(model.UserClaims)
+
+		err := jwt_builder.ParseToken(token, claims)
 		if err != nil {
-			if errors.Is(err, TokenExpired) {
+			if errors.Is(err, jwt_utils.TokenExpired) {
 				ctx.JSON(http.StatusUnauthorized, gin.H{
 					"code":    401,
 					"message": "token已过期",
