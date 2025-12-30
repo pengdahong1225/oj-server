@@ -56,83 +56,83 @@ const onTagClick = (tag: string) => {
 </script>
 
 <template>
-    <div class="container">
-        <!-- 题目列表区域 -->
-        <el-card class="problem-list" shadow="hover">
-            <!-- 表单区域 -->
-            <el-form inline class="form">
-                <el-form-item style="margin-right: 15px;">
-                    <el-input v-model="params.keyword" style="width: 240px" placeholder="problem name"
-                        :suffix-icon="Search" />
-                </el-form-item>
-                <el-form-item>
-                    <el-button @click="onSearch" type="primary">搜索</el-button>
-                    <el-button @click="onReset">重置</el-button>
-                </el-form-item>
-            </el-form>
+    <!-- 题目列表区域 -->
+    <el-card class="problem-list" shadow="hover">
+        <!-- 表单区域 -->
+        <el-form inline class="form">
+            <el-form-item style="margin-right: 15px;">
+                <el-input v-model="params.keyword" style="width: 240px" placeholder="problem name"
+                    :suffix-icon="Search" />
+            </el-form-item>
+            <el-form-item>
+                <el-button @click="onSearch" type="primary">搜索</el-button>
+                <el-button @click="onReset">重置</el-button>
+            </el-form-item>
+        </el-form>
 
-            <!-- 表格区域 -->
-            <el-table v-loading="loading" :data="problemList">
-                <el-table-column label="Status" prop="status" width="80" align="center">
-                    <template #default="{ row }">
-                        <el-icon v-if="row.status === 1" color="green" size="18"><Select /></el-icon>
-                    </template>
-                </el-table-column>
-
-                <el-table-column label="#" prop="problem_id" width="100">
-                    <template #default="{ row }">
-                        <el-link type="primary" :underline="false" @click="
-                            $router.push({
-                                path: `/problem/${row.problem_id}`
-                            })
-                            ">{{ row.problem_id }}</el-link>
-                    </template>
-                </el-table-column>
-
-                <el-table-column label="Title" prop="title" width="180">
-                    <template #default="{ row }">
-                        <el-link type="primary" :underline="false" @click="
-                            $router.push({
-                                path: `/problem/${row.problem_id}`
-                            })
-                            ">{{ row.problem_title }}</el-link>
-                    </template>
-                </el-table-column>
-                
-                <el-table-column label="Tags" width="500">
-                    <template #default="{ row }">
-                        <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag }}</el-tag>
-                    </template>
-                </el-table-column>
-
-                <el-table-column label="Level" prop="level" width="200">
-                    <template #default="{ row }">
-                        <el-tag v-if="row.level === 1" type="primary">简单</el-tag>
-                        <el-tag v-else-if="row.level === 2" type="warning">中等</el-tag>
-                        <el-tag v-else type="danger">困难</el-tag>
-                    </template>
-                </el-table-column>
-
-                <el-table-column label="通过率">
-                   
-                </el-table-column>
-
-                <template #empty>
-                    <el-empty description="没有数据"></el-empty>
+        <!-- 表格区域 -->
+        <el-table v-loading="loading" :data="problemList">
+            <!-- 状态：固定 -->
+            <el-table-column label="Status" width="80" align="center">
+                <template #default="{ row }">
+                    <el-icon v-if="row.status === 1" color="green" size="18">
+                        <Select />
+                    </el-icon>
                 </template>
-            </el-table>
+            </el-table-column>
 
-            <!-- 分页 -->
-            <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size" :total="total"
-                :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
-                style="margin-top: 20px; justify-content: flex-end;" />
-        </el-card>
-        <!-- 右侧tag池区域 -->
-        <el-card class="tag-pool" shadow="hover" header="Tag Pool">
-            <el-button v-for="item in tag_list" :key="item" type="info" plain round @click="onTagClick(item)">
-                {{ item }}</el-button>
-        </el-card>
-    </div>
+            <!-- ID：固定 -->
+            <el-table-column label="#" width="100">
+                <template #default="{ row }">
+                    <el-link type="primary" :underline="false" @click="$router.push(`/problem/${row.problem_id}`)">
+                        {{ row.problem_id }}
+                    </el-link>
+                </template>
+            </el-table-column>
+
+            <!-- Title：自适应 -->
+            <el-table-column label="Title">
+                <template #default="{ row }">
+                    <el-link type="primary" :underline="false" @click="$router.push(`/problem/${row.problem_id}`)">
+                        {{ row.problem_title }}
+                    </el-link>
+                </template>
+            </el-table-column>
+
+            <!-- Tags：自适应（重点） -->
+            <el-table-column label="Tags">
+                <template #default="{ row }">
+                    <el-tag v-for="tag in row.tags" :key="tag" effect="plain" @click="onTagClick(tag)" style="
+                        margin: 1px 2px;
+                        cursor: pointer;">
+                        {{ tag }}
+                    </el-tag>
+                </template>
+            </el-table-column>
+
+            <!-- Level：固定 -->
+            <el-table-column label="Level" width="120" align="center">
+                <template #default="{ row }">
+                    <el-tag v-if="row.level === 1" type="primary">简单</el-tag>
+                    <el-tag v-else-if="row.level === 2" type="warning">中等</el-tag>
+                    <el-tag v-else type="danger">困难</el-tag>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="通过率">
+
+            </el-table-column>
+
+            <template #empty>
+                <el-empty description="没有数据"></el-empty>
+            </template>
+        </el-table>
+
+        <!-- 分页 -->
+        <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size" :total="total"
+            :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
+            style="margin-top: 20px; justify-content: flex-end;" />
+    </el-card>
 </template>
 
 <style lang="less" scoped>
@@ -140,23 +140,6 @@ const onTagClick = (tag: string) => {
     display: flex;
     width: 100%;
     align-items: flex-start;
-    /* 确保卡片顶部对齐，而不会拉伸高度 */
-
-    .problem-list {
-        width: 75%;
-        /* 占 70% 的宽度 */
-        margin-right: 6px;
-    }
-
-    .tag-pool {
-        width: 25%;
-        /* 占 30% 的宽度 */
-        margin-left: 6px;
-
-        .el-button {
-            margin: 5px;
-        }
-    }
 }
 
 .form {
@@ -166,4 +149,9 @@ const onTagClick = (tag: string) => {
         margin-bottom: 0;
     }
 }
+
+:deep(.el-table .cell) {
+    white-space: normal;
+}
+
 </style>

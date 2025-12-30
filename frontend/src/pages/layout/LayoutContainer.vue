@@ -51,7 +51,10 @@ const handleCommand = (command: string) => {
       <span class="logo">PGOJ</span>
 
       <!-- 菜单栏 -->
-      <el-menu mode="horizontal" :default-active="$route.path" router>
+      <el-menu 
+        mode="horizontal" 
+        :default-active="$route.path" 
+        router>
         <el-menu-item index="/home">Home</el-menu-item>
         <el-menu-item index="/problems">Problems</el-menu-item>
         <el-menu-item index="/contest">Contests</el-menu-item>
@@ -89,22 +92,42 @@ const handleCommand = (command: string) => {
 
 <style lang="less" scoped>
 .layout-container {
-  height: auto;
-  background-color: #fff;
+  height: 100vh;
+  background-color: #f5f5f5;
 
   .top {
     display: flex;
+    background-color: #e8e8e8;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+
+    // 添加渐变效果
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: linear-gradient(to bottom, rgba(232, 232, 232, 0.8), rgba(245, 245, 245, 0));
+      pointer-events: none;
+    }
 
     .logo {
       font-size: 24px;
       font-weight: bold;
-      color: #333;
       padding: 0 24px;
       line-height: 60px;
+      background: linear-gradient(135deg, #000 0%, #ffd700 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .el-menu {
       flex: 1;
+      background-color: transparent;
     }
 
     .el-dropdown {
@@ -125,12 +148,27 @@ const handleCommand = (command: string) => {
     }
   }
 
+  .el-main {
+    background-color: #f5f5f5;
+    min-height: 0;
+  }
+
   .el-footer {
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     color: #666;
+  }
+}
+
+// 深度选择器，覆盖Element Plus菜单的选中状态颜色为黑色
+:deep(.el-menu--horizontal) {
+  .el-menu-item {
+    &.is-active {
+      color: #000 !important;
+      border-bottom-color: #000 !important;
+    }
   }
 }
 </style>

@@ -149,4 +149,13 @@ const bannerList = [
         }
     }
 }
+
+// 深度选择器，将链接颜色改为黑色
+:deep(.el-link--primary) {
+    color: #000 !important;
+    
+    &:hover {
+        color: #333 !important;
+    }
+}
 </style>
