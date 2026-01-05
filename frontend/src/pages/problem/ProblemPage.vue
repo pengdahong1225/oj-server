@@ -218,11 +218,11 @@ const root_comment_count = ref(0)
 const getCommentList = async () => {
     root_comment_query_params.value.obj_id = problem.value.problem_id
 
-    const res = await getRootCommentListService(root_comment_query_params.value)
-    if (res.data.data.data) {
-        root_comment_list.value = res.data.data.data
+    const resp = await getRootCommentListService(root_comment_query_params.value)
+    if (resp.data.data.list) {
+        root_comment_list.value = resp.data.data.list
     }
-    root_comment_count.value = res.data.data.total
+    root_comment_count.value = resp.data.data.total
 }
 const handleCurrentChange = (page: number) => {
     root_comment_query_params.value.page = page
@@ -254,7 +254,9 @@ const handleCurrentChange = (page: number) => {
 
         <!-- 题目详情区域 -->
         <div class="description-box">
+            
             <div class="description" v-html="bdescription"></div>
+
             <div class="statistic">
                 <div>通过次数 6.1M</div>
                 <el-divider direction="vertical" border-style="dashed" />
@@ -284,21 +286,20 @@ const handleCurrentChange = (page: number) => {
                 :options="editorOptions" />
 
             <div class="submit-area-foot">
-                <div class="result-area">
-                    <div v-if="result_abstract !== null">
-                        <el-tag :type="btype" size="large">
-                            <template #default>
-                                <strong>{{ result_abstract?.message }}</strong>
-                            </template>
-                        </el-tag>
-                    </div>
+                <div class="result-area" v-if="result_abstract">
+                    <el-tag :type="btype" size="large">
+                        <template #default>
+                            <strong>{{ result_abstract?.message }}</strong>
+                        </template>
+                    </el-tag>
                 </div>
 
                 <div class="submit-btn-area">
                     <el-button class="submit-btn" type="warning" :loading="loading" @click="onSubmit">
                         <el-icon>
                             <UploadFilled />
-                        </el-icon>Submit
+                        </el-icon>
+                        &nbsp;Submit
                     </el-button>
                 </div>
             </div>
@@ -347,7 +348,7 @@ const handleCurrentChange = (page: number) => {
 
 <style lang="less" scoped>
 .container {
-    width: 90%;
+    width: 95%;
     height: auto;
     margin: auto;
 
@@ -395,8 +396,23 @@ const handleCurrentChange = (page: number) => {
         width: 100%;
 
         .editor {
-            height: 350px;
+            height: 400px;
             width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #dcdfe6;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        /* 修改Ace编辑器行号区域背景颜色和宽度 */
+        ::v-deep .ace_gutter {
+            background-color: #f5f7fa;
+        }
+        
+        /* 调整行号单元格的内边距，进一步减小行号区域的视觉宽度 */
+        ::v-deep .ace_gutter-cell {
+            padding-left: 4px;
+            padding-right: 4px;
         }
 
         .submit-area-foot {
@@ -410,7 +426,7 @@ const handleCurrentChange = (page: number) => {
             }
 
             .submit-btn-area {
-                width: 50%;
+                flex: 1;
                 display: flex;
                 justify-content: flex-end;
             }

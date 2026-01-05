@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"oj-server/global"
 	"oj-server/pkg/proto/pb"
 	"oj-server/pkg/registry"
@@ -39,9 +38,8 @@ func HandleCreateComment(ctx *gin.Context) {
 		ReplyId:        form.ReplyId,
 		ReplyCommentId: form.ReplyCommentId,
 		ReplyUserName:  form.ReplyUserName,
+		Address:        ctx.ClientIP(),
 	}
-
-	ctx.Set("address", ctx.ClientIP())
 	_, err = client.CreateComment(ctx, request)
 	if err != nil {
 		logrus.Errorf("创建评论失败:%s", err.Error())
@@ -129,7 +127,7 @@ func HandleGetChildCommentList(ctx *gin.Context) {
 		result.List = append(result.List, comment)
 	}
 
-	ResponseOK(ctx, http.StatusOK)
+	ResponseOK(ctx, result)
 }
 func HandleLikeComment(ctx *gin.Context) {
 	form, ok := validateWithForm(ctx, model.CommentLikeForm{})

@@ -108,12 +108,6 @@ const record_list_with_computed = computed(() =>
 </template>
 
 <style lang="less" scoped>
-// 增加左右两边边距
-.status-list-container {
-    padding-left: 50px;
-    padding-right: 50px;
-}
-
 // 深度选择器，将链接颜色改为黑色
 :deep(.el-link--primary) {
     color: #000 !important;

@@ -63,25 +63,27 @@ func (cs *CommentService) CreateComment(ctx context.Context, in *pb.CreateCommen
 		comment.ReplyId = 0
 		comment.ReplyCommentId = 0
 	}
-	// ip归属地
-	ip := ctx.Value("address")
-	info, err := utils.QueryIpGeolocation(ip.(string))
-	if err != nil {
-		logrus.Errorf("查询ip归属地失败,ip:%s,err:%s", ip, err.Error())
-	}
-	comment.PubRegion = info.RegionName
+	// todo 查询ip归属地会影响响应时间，改为异步
+	go func() {
+		// ip归属地
+		info, err := utils.QueryIpGeolocation(in.Address)
+		if err != nil {
+			logrus.Errorf("查询ip归属地失败,ip:%s,err:%s", in.Address, err.Error())
+		}
+		comment.PubRegion = info.RegionName
 
-	// 2.校验评论区
-	if !cs.uc.AssertObj(in.ObjId) {
-		logrus.Errorf("obj[%d] assert failed", in.ObjId)
-		return nil, status.Errorf(codes.NotFound, "obj[%d] assert failed", in.ObjId)
-	}
-	// 3.保存评论
-	if comment.IsRoot > 0 {
-		cs.uc.SaveRootComment(comment) // 第一层
-	} else {
-		cs.uc.SaveChildComment(comment) // 第二层
-	}
+		// 2.校验评论区
+		if !cs.uc.AssertObj(in.ObjId) {
+			logrus.Errorf("obj[%d] assert failed", in.ObjId)
+			return
+		}
+		// 3.保存评论
+		if comment.IsRoot > 0 {
+			cs.uc.SaveRootComment(comment) // 第一层
+		} else {
+			cs.uc.SaveChildComment(comment) // 第二层
+		}
+	}()
 
 	return nil, nil
 }
@@ -108,6 +110,7 @@ func (cs *CommentService) QueryRootComment(ctx context.Context, in *pb.QueryRoot
 			UserName:       comment.UserName,
 			UserAvatarUrl:  comment.UserAvatarUrl,
 			Content:        comment.Content,
+			ChildCount:     int32(comment.ChildCount),
 			ReplyCount:     int32(comment.ReplyCount),
 			LikeCount:      int32(comment.LikeCount),
 			PubStamp:       comment.PubStamp,

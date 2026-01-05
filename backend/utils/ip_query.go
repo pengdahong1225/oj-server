@@ -36,7 +36,6 @@ func QueryIpGeolocation(ip string) (*IPInfoResp, error) {
 
 	// 构建请求URL
 	url := fmt.Sprintf("%s/%s?fileds=%s&lang=%s", baseUrl, ip, fields, lang)
-	fmt.Println(url)
 
 	// 发送GET请求
 	resp, err := client.Get(url)

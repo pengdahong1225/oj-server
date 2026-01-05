@@ -47,9 +47,9 @@ export async function addCommentService(form: API.AddCommentForm) {
 export async function likeCommentService(form: API.CommentLikeForm) {
     return request('/comment/like', {
         method: 'POST',
+        data: form,
         headers: {
-            'Content-Type': 'application/json',
-        },
-        data: form
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
     })
 }

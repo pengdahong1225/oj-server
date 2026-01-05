@@ -1,12 +1,12 @@
 mysql:
-  host: 192.168.2.122
+  host: 192.168.2.145
   port: 3306
   db: oj_online_server
   user: root
   password: 1225@PDH
 
 redis:
-  host: 192.168.2.122
+  host: 192.168.2.145
   port: 6379
 
 registry:
@@ -14,10 +14,10 @@ registry:
   port: 8500
 
 rabbitmq:
-  host: 192.168.2.122
+  host: 192.168.2.145
   port: 5672
-  user: pengdahong
-  password: 1225@pdh
+  user: guest
+  password: guest
   vhost: '/oj'
 
 jwt:
@@ -32,8 +32,8 @@ sms:
 
 sandbox:
   - type: c
-    host: 192.168.2.122
+    host: 192.168.2.145
     port: 5050
   - type: cpp
-    host: 192.168.2.122
+    host: 192.168.2.145
     port: 5050

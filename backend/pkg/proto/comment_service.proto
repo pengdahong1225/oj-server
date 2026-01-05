@@ -25,6 +25,7 @@ message CreateCommentRequest{
   int64 reply_id = 9;
   int64 reply_comment_id = 10;
   string reply_user_name = 11;
+  string address = 12;
 }
 
 message QueryRootCommentRequest{

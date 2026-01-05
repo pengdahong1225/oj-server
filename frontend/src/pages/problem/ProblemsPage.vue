@@ -136,12 +136,6 @@ const onTagClick = (tag: string) => {
 </template>
 
 <style lang="less" scoped>
-.container {
-    display: flex;
-    width: 100%;
-    align-items: flex-start;
-}
-
 .form {
     margin-left: 10px;
 

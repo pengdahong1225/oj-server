@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, defineProps, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { formatTime } from '@/utils/format'
 import { useUserStore } from '@/stores'
 import { likeCommentService } from '@/api/commentController'
@@ -32,8 +32,8 @@ const onClickLike = async () => {
         obj_id: props.obj_id,
         comment_id: props.comment_data.id,
     }
-    const res = await likeCommentService(form)
-    if (res.data.message === 'OK') {
+    const resp = await likeCommentService(form)
+    if (resp.data.message === 'success') {
         props.comment_data.like_count++
         is_already_like.value = true
     }
@@ -101,9 +101,8 @@ const onSubmitComment = async () => {
 
 // 子评论回复
 const child_comment_reply_action = async (form: API.AddCommentForm) => {
-    console.log("form=",form)
     const res = await addCommentService(form)
-    if (res.data.message === 'OK') {
+    if (res.data.message === 'success') {
         // 立刻渲染一条评论到第一条
         const new_comment = <API.Comment>{
             id: 0,
@@ -158,12 +157,12 @@ const getChildCommentList = async () => {
         root_comment_id: props.comment_data.id,
         cursor: child_list_cursor.value
     }
-    const res = await getChildCommentListService(params)
-    child_total.value = res.data.data.total
-    child_list_cursor.value = res.data.data.cursor
-    // 插入数组的条件：data不为nil，展示的数据量小于total
-    if (res.data.data.data && show_count.value < child_total.value) {
-        res.data.data.data.forEach((item: API.Comment) => {
+    const resp = await getChildCommentListService(params)
+    child_total.value = resp.data.data.total
+    child_list_cursor.value = resp.data.data.cursor
+    // 插入数组的条件：list不为nil，展示的数据量小于total
+    if (resp.data.data.list && show_count.value < child_total.value) {
+        resp.data.data.list.forEach((item: API.Comment) => {
             child_list.value.push(item)
             show_count.value++
         })

@@ -10,15 +10,15 @@ networks:
 
 services:
   sandbox:
-    image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-service:v1.0.0
-    container_name: sandbox
+    image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-sandbox:c_cpp
+    container_name: sandbox-c_cpp
     privileged: true
     restart: always
     ports:
       - "5050:5050"
       - "5051:5051"
     networks:
-      - net
+      - oj
 
   gateway-service:
     container_name: gateway-service
@@ -31,7 +31,7 @@ services:
     ports:
       - "9000:9000"
     networks:
-      - net
+      - oj
 
   user-service:
     container_name: user-service
@@ -44,7 +44,7 @@ services:
     ports:
       - "9010:9010"
     networks:
-      - net
+      - oj
 
   judge-service:
     container_name: judge-service
@@ -57,7 +57,7 @@ services:
     ports:
       - "9020:9020"
     networks:
-      - net
+      - oj
     depends_on: # 本地服务的依赖，控制启动先后顺序
       - sandbox
 
@@ -72,4 +72,4 @@ services:
     ports:
       - "9030:9030"
     networks:
-      - net
+      - oj

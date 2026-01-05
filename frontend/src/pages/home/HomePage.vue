@@ -18,7 +18,7 @@ const params = ref(<API.QueryNoticeListParams>{
 })
 const handleCurrentChange = (page: number) => {
     params.value.page = page
-    console.log(params.value)
+    queryNoticeList() // 分页切换时重新加载数据
 }
 const handleSearch = () => {
     params.value.page = 1
@@ -32,13 +32,21 @@ const handleReset = () => {
 
 const queryNoticeList = async () => {
     loading.value = true
-    const res = await queryNoticeListService(params.value)
-    console.log(res)
+    try {
+        const res = await queryNoticeListService(params.value)
+        console.log(res)
 
-    notice_list.value = res.data.data.noticeList
-    total.value = res.data.data.total
-    
-    loading.value = false
+        if (res.data && res.data.data) {
+            notice_list.value = res.data.data.noticeList || []
+            total.value = res.data.data.total || 0
+        }
+    } catch (error) {
+        console.error('Failed to query notice list:', error)
+        notice_list.value = []
+        total.value = 0
+    } finally {
+        loading.value = false
+    }
 }
 
 const dialogRef = ref()
@@ -118,7 +126,7 @@ const bannerList = [
 <style lang="less" scoped>
 .container {
     display: block;
-    width: 70%;
+    width: 90%;
     margin: auto;
 
     .banner {
