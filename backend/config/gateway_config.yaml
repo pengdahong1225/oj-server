@@ -1,4 +1,0 @@
-name: gateway
-node_id: 1
-port: 9000
-scheme: http

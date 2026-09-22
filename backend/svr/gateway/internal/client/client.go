@@ -1,0 +1,35 @@
+package client
+
+import (
+	"context"
+	"fmt"
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/registry"
+)
+
+type Clients struct {
+	User    pb.UserServiceClient
+	Problem pb.ProblemServiceClient
+	Record  pb.RecordServiceClient
+	Comment pb.CommentServiceClient
+}
+
+func NewClients(reg registry.Registry) (*Clients, error) {
+	ctx := context.Background()
+
+	userConn, err := reg.Dial(ctx, consts.UserService)
+	if err != nil {
+		return nil, fmt.Errorf("dial %s: %w", consts.UserService, err)
+	}
+
+	problemConn, err := reg.Dial(ctx, consts.ProblemService)
+	if err != nil {
+		return nil, fmt.Errorf("dial %s: %w", consts.ProblemService, err)
+	}
+
+	return &Clients{
+		User:    pb.NewUserServiceClient(userConn),
+		Problem: pb.NewProblemServiceClient(problemConn),
+	}, nil
+}

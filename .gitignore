@@ -1,6 +1,10 @@
 .idea/
+bin/
+.vscode/
+
 *.exe
 *.exe~
 *.log
 *.log.*
-.vscode
+
+

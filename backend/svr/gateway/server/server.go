@@ -1,16 +1,23 @@
 package server
 
 import (
+	"context"
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"oj-server/global"
+	"oj-server/common/consts"
 	"oj-server/pkg/logger"
 	"oj-server/pkg/registry"
-	"oj-server/svr/gateway/internal/configs"
-	"oj-server/svr/gateway/internal/router"
+	"oj-server/svr/gateway/internal/api"
+	"oj-server/svr/gateway/internal/client"
+	"oj-server/svr/gateway/internal/config"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
+	reg        *registry.ConsulRegistry
+	deregister func() error
+
+	clients *client.Clients
 }
 
 func NewServer() *Server {
@@ -18,59 +25,57 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	// 初始化日志
-	server_cfg := configs.ServerConf
-	err := logger.Init(global.LogPath, server_cfg.Name, logrus.DebugLevel)
+	configPath := fmt.Sprintf("%s/%s", consts.ConfigPath, "gateway_config.yaml")
+	err := config.MyConfig.ReadConfigFile(configPath)
+	if err != nil {
+		return err
+	}
+	err = logger.Init(consts.LogPath, config.MyConfig.Service.Name, logrus.DebugLevel)
 	if err != nil {
 		return err
 	}
 
-	// 初始化注册中心
-	registry_cfg := configs.AppConf.RegistryCfg
-	dsn := fmt.Sprintf("%s:%d", registry_cfg.Host, registry_cfg.Port)
-	registrar, err := registry.NewRegistrar(dsn)
+	dsn := fmt.Sprintf("%s:%d", config.MyConfig.RegistryCfg.Host, config.MyConfig.RegistryCfg.Port)
+	s.reg, err = registry.NewConsulRegistry(dsn)
 	if err != nil {
 		logrus.Errorf("初始化注册中心失败: %v", err)
 		return err
 	}
-	registry.MyRegistrar = registrar
 
 	return nil
 }
 
-func (s *Server) Run() {
-	server_cfg := configs.ServerConf
+func (s *Server) Run() error {
+	serviceCfg := config.MyConfig.Service
 	logrus.Infof("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------",
-		server_cfg.Name, server_cfg.NodeId, server_cfg.Address, server_cfg.Port, server_cfg.Scheme)
+		serviceCfg.Name, serviceCfg.NodeId, serviceCfg.Address, serviceCfg.Port, serviceCfg.Scheme)
 
-	// 注册服务
-	err := registry.MyRegistrar.RegisterService(&registry.ServiceInfo{
-		Name:    server_cfg.Name,
-		NodeId:  server_cfg.NodeId,
-		Address: server_cfg.Address,
-		Port:    server_cfg.Port,
-		Scheme:  server_cfg.Scheme,
+	deregister, err := s.reg.Register(context.Background(), registry.ServiceInfo{
+		Name:    serviceCfg.Name,
+		NodeId:  serviceCfg.NodeId,
+		Address: serviceCfg.Address,
+		Port:    serviceCfg.Port,
+		Scheme:  serviceCfg.Scheme,
 	})
 	if err != nil {
-		logrus.Fatalf("注册服务失败: %v", err)
-		return
+		logrus.Errorf("注册服务失败: %v", err)
+		return err
+	}
+	s.deregister = deregister
+
+	s.clients, err = client.NewClients(s.reg)
+	if err != nil {
+		return fmt.Errorf("初始化客户端失败: %v", err)
 	}
 
-	// 启动HTTP服务
-	engine := router.Router()
-	if err = engine.Run(fmt.Sprintf("%s:%d", server_cfg.Address, server_cfg.Port)); err != nil {
-		logrus.Fatalf("启动HTTP服务失败: %v", err)
-	}
+	engine := api.Router(s.clients)
+	addr := fmt.Sprintf(":%d", serviceCfg.Port)
+	return engine.Run(addr)
 }
 
 func (s *Server) Stop() {
-	server_cfg := configs.ServerConf
-	_ = registry.MyRegistrar.UnRegister(&registry.ServiceInfo{
-		Name:    server_cfg.Name,
-		NodeId:  server_cfg.NodeId,
-		Address: server_cfg.Address,
-		Port:    server_cfg.Port,
-		Scheme:  server_cfg.Scheme,
-	})
+	if s.deregister != nil {
+		_ = s.deregister()
+	}
 	logrus.Warnf("======================= gateway stop =======================")
 }
