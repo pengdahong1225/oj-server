@@ -1,6 +1,6 @@
 package model
 
-import "oj-server/pkg/proto/pb"
+import "oj-server/common/proto/pb"
 
 // binding的逗号之间不能有空格
 

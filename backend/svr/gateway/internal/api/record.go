@@ -4,7 +4,6 @@ import (
 	"context"
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
-	"oj-server/pkg/registry"
 	"oj-server/svr/gateway/internal/client"
 	"oj-server/svr/gateway/internal/model"
 	"strconv"
@@ -31,59 +30,38 @@ func (rh *RecordHandler) HandleGetSubmitResult(ctx *gin.Context) {
 		ResponseBadRequest(ctx, "task_id 不能为空")
 		return
 	}
-	// 调用题目服务
-	conn, err := registry.MyRegistrar.GetGrpcConnection(consts.ProblemService)
-	if err != nil {
-		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		ResponseInternalServerError(ctx, "服务繁忙")
-		return
-	}
-	client := pb.NewRecordServiceClient(conn)
-	request := &pb.QueryJudgeResultRequest{
-		TaskId: taskId,
-	}
-	resp, err := client.QueryJudgeResult(ctx, request)
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	resp, err := rh.clients.Record.QueryJudgeResult(c, &pb.QueryJudgeResultRequest{})
 	if err != nil {
 		logrus.Errorf("获取判题结果失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
-
 	result := &model.JudgeResultAbstract{
 		Accepted: resp.Accepted,
 		Message:  resp.Message,
 	}
-
 	ResponseOK(ctx, result)
 }
 
 // 处理获取用户历史提交记录
 // 偏移量分页
 func (rh *RecordHandler) HandleGetUserRecordList(ctx *gin.Context) {
-	// 获取元数据
 	uid := ctx.GetInt64("uid")
-
-	// 查询参数校验
 	var params model.QueryUserRecordListParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		ResponseBadRequest(ctx, "参数验证失败")
 		return
 	}
 
-	// 调用题目服务
-	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
-	if err != nil {
-		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		ResponseInternalServerError(ctx, "服务繁忙")
-		return
-	}
-	client := pb.NewRecordServiceClient(conn)
-	request := &pb.GetSubmitRecordListRequest{
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	resp, err := rh.clients.Record.GetSubmitRecordList(c, &pb.GetSubmitRecordListRequest{
 		Uid:      uid,
 		Page:     params.Page,
 		PageSize: params.PageSize,
-	}
-	resp, err := client.GetSubmitRecordList(context.Background(), request)
+	})
 	if err != nil {
 		logrus.Errorf("获取提交记录失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
@@ -108,17 +86,10 @@ func (rh *RecordHandler) HandleGetUserRecord(ctx *gin.Context) {
 		ResponseBadRequest(ctx, "record_id 不能为空")
 		return
 	}
-	// 调用题目服务
-	conn, err := registry.MyRegistrar.GetGrpcConnection(global.ProblemService)
-	if err != nil {
-		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		ResponseInternalServerError(ctx, "服务繁忙")
-		return
-	}
-	client := pb.NewRecordServiceClient(conn)
-	resp, err := client.GetSubmitRecordData(ctx, &pb.GetSubmitRecordRequest{
-		Id: recordId,
-	})
+
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	resp, err := rh.clients.Record.GetSubmitRecordData(c, &pb.GetSubmitRecordRequest{Id: recordId})
 	if err != nil {
 		logrus.Errorf("查询提交记录失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)

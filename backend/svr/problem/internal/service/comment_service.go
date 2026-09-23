@@ -2,32 +2,38 @@ package service
 
 import (
 	"context"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/utils"
+	"oj-server/svr/problem/internal/biz"
+	"oj-server/svr/problem/internal/client"
+	"oj-server/svr/problem/internal/data"
+	"oj-server/svr/problem/internal/model"
+
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"oj-server/pkg/proto/pb"
-	"oj-server/svr/problem/internal/biz"
-	"oj-server/svr/problem/internal/data"
-	"oj-server/svr/problem/internal/model"
-	"oj-server/utils"
 )
 
 // comment服务
 type CommentService struct {
 	pb.UnimplementedCommentServiceServer
 	uc *biz.CommentUseCase
+
+	clients *client.Clients
 }
 
-func NewCommentService() *CommentService {
+func NewCommentService(clients *client.Clients) (*CommentService, error) {
 	repo, err := data.NewCommentRepo()
 	if err != nil {
-		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
+		logrus.Errorf("NewProblemService failed, err:%s", err.Error())
+		return nil, err
 	}
 
 	return &CommentService{
-		uc: biz.NewCommentUseCase(repo), // 注入实现
-	}
+		uc:      biz.NewCommentUseCase(repo),
+		clients: clients,
+	}, nil
 }
 
 func (cs *CommentService) CreateComment(ctx context.Context, in *pb.CreateCommentRequest) (*emptypb.Empty, error) {

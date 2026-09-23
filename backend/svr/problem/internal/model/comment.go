@@ -1,7 +1,7 @@
 package model
 
 import (
-	"oj-server/pkg/proto/pb"
+	"oj-server/common/proto/pb"
 	"time"
 )
 

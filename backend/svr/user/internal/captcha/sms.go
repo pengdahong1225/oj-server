@@ -3,13 +3,14 @@ package captcha
 import (
 	"encoding/json"
 	"errors"
+	"oj-server/pkg/utils"
+	"oj-server/svr/user/internal/config"
+	"os"
+
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	dysmsapi "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/sirupsen/logrus"
-	"oj-server/svr/user/internal/configs"
-	"oj-server/utils"
-	"os"
 )
 
 func SendSmsCode(mobile string) (string, error) {
@@ -33,7 +34,7 @@ func SendSmsCode(mobile string) (string, error) {
 }
 
 func send(param []byte, phone string) error {
-	sms_cfg := configs.AppConf.SmsCfg
+	sms_cfg := config.MyConfig.Sms
 
 	config := &openapi.Config{
 		// 您的AccessKey ID

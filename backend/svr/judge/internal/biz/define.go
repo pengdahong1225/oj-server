@@ -1,6 +1,6 @@
 package biz
 
-import "oj-server/pkg/proto/pb"
+import "oj-server/common/proto/pb"
 
 // 判题任务上下文参数
 type Param struct {

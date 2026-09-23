@@ -31,5 +31,7 @@ func NewClients(reg registry.Registry) (*Clients, error) {
 	return &Clients{
 		User:    pb.NewUserServiceClient(userConn),
 		Problem: pb.NewProblemServiceClient(problemConn),
+		Record:  pb.NewRecordServiceClient(problemConn),
+		Comment: pb.NewCommentServiceClient(problemConn),
 	}, nil
 }

@@ -1,10 +1,19 @@
-package configs
+package config
 
-type AppConfig struct {
-	MysqlCfg    *Mysql    `yaml:"mysql"`
-	RedisCfg    *Redis    `yaml:"redis"`
-	RegistryCfg *Registry `yaml:"registry"`
-	MQCfg       *MQ       `yaml:"rabbitmq"`
+type Config struct {
+	Service  *Service  `yaml:"service"`
+	Mysql    *Mysql    `yaml:"mysql"`
+	Redis    *Redis    `yaml:"redis"`
+	Registry *Registry `yaml:"registry"`
+	MQ       *MQ       `yaml:"rabbitmq"`
+}
+
+type Service struct {
+	Name    string `yaml:"name"`
+	NodeId  int    `yaml:"node_id"`
+	Address string `yaml:"address"`
+	Port    int    `yaml:"port"`
+	Scheme  string `yaml:"scheme"` // http/grpc
 }
 
 type Mysql struct {

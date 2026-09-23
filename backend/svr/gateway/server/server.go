@@ -16,8 +16,7 @@ import (
 type Server struct {
 	reg        *registry.ConsulRegistry
 	deregister func() error
-
-	clients *client.Clients
+	clients    *client.Clients
 }
 
 func NewServer() *Server {
@@ -35,7 +34,7 @@ func (s *Server) Init() error {
 		return err
 	}
 
-	dsn := fmt.Sprintf("%s:%d", config.MyConfig.RegistryCfg.Host, config.MyConfig.RegistryCfg.Port)
+	dsn := fmt.Sprintf("%s:%d", config.MyConfig.Registry.Host, config.MyConfig.Registry.Port)
 	s.reg, err = registry.NewConsulRegistry(dsn)
 	if err != nil {
 		logrus.Errorf("初始化注册中心失败: %v", err)

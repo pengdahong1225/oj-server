@@ -5,6 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
+	"oj-server/svr/problem/internal/biz"
+	"oj-server/svr/problem/internal/config"
+	"oj-server/svr/problem/internal/model"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -13,16 +24,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"io"
-	"log"
-	"oj-server/global"
-	"oj-server/pkg/proto/pb"
-	"oj-server/svr/problem/internal/biz"
-	"oj-server/svr/problem/internal/configs"
-	"oj-server/svr/problem/internal/model"
-	"os"
-	"strconv"
-	"time"
 )
 
 type RecordRepo struct {
@@ -32,11 +33,11 @@ type RecordRepo struct {
 
 func NewRecordRepo() (*RecordRepo, error) {
 	// mysql
-	mysql_cfg := configs.AppConf.MysqlCfg
+	mysql_cfg := config.MyConfig.Mysql
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
 	timer := time.Now().Format("2006_01_02")
-	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	filePath := fmt.Sprintf("%s/orm.%s.log", consts.LogPath, timer)
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func NewRecordRepo() (*RecordRepo, error) {
 	})
 
 	// redis
-	redis_cfg := configs.AppConf.RedisCfg
+	redis_cfg := config.MyConfig.Redis
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
 	rdb_ := redis.NewClient(&redis.Options{
 		Addr:    dsn,
@@ -126,7 +127,7 @@ func (rr *RecordRepo) QuerySubmitRecord(id int64) (*model.SubmitRecord, error) {
 
 // 查询查询排行榜更新时间
 func (rr *RecordRepo) QueryLeaderboardLastUpdate() (int64, error) {
-	result := rr.rdb_.Get(context.Background(), global.LeaderboardLastUpdateKey)
+	result := rr.rdb_.Get(context.Background(), consts.LeaderboardLastUpdateKey)
 	if result.Err() != nil {
 		return 0, result.Err()
 	}
@@ -135,7 +136,7 @@ func (rr *RecordRepo) QueryLeaderboardLastUpdate() (int64, error) {
 
 // 更新排行榜更新时间
 func (rr *RecordRepo) UpdateLeaderboardLastUpdate(time int64) error {
-	result := rr.rdb_.Set(context.Background(), global.LeaderboardLastUpdateKey, time, redis.KeepTTL)
+	result := rr.rdb_.Set(context.Background(), consts.LeaderboardLastUpdateKey, time, redis.KeepTTL)
 	if result.Err() != nil {
 		return result.Err()
 	}
@@ -277,7 +278,7 @@ func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, 
 
 	// 删除旧榜
 	pipe.Del(ctx, leaderboardKey)
-	pipe.Del(ctx, global.LeaderboardUserInfoKey)
+	pipe.Del(ctx, consts.LeaderboardUserInfoKey)
 
 	// 批量添加新数据
 	for _, item := range lb_list {
@@ -290,7 +291,7 @@ func (rr *RecordRepo) SynchronizeLeaderboard(lb_list []*pb.LeaderboardUserInfo, 
 			logrus.Errorf("failed to marshal user info: %v", err)
 			return err
 		}
-		pipe.HSet(ctx, global.LeaderboardUserInfoKey, strconv.FormatInt(item.Uid, 10), userInfo)
+		pipe.HSet(ctx, consts.LeaderboardUserInfoKey, strconv.FormatInt(item.Uid, 10), userInfo)
 	}
 	pipe.Expire(ctx, leaderboardKey, leaderboardKeyTTL)
 
@@ -372,7 +373,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 	}
 
 	// 更新result到redis
-	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
+	key := fmt.Sprintf("%s:%s", consts.TaskResultPrefix, taskId)
 	value := biz.JudgeResultAbstract{
 		Accepted: record.Accepted,
 		Message:  record.Message,
@@ -382,7 +383,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 		logrus.Errorf("failed to marshal result: %v", err)
 		return err
 	}
-	rr.rdb_.Set(context.Background(), key, jsonValue, global.TaskResultExpired)
+	rr.rdb_.Set(context.Background(), key, jsonValue, consts.TaskResultExpired)
 
 	return nil
 }
@@ -395,7 +396,7 @@ func (rr *RecordRepo) UnLock(key string) error {
 }
 
 func (rr *RecordRepo) QueryJudgeResult(taskId string) (*biz.JudgeResultAbstract, error) {
-	key := fmt.Sprintf("%s:%s", global.TaskResultPrefix, taskId)
+	key := fmt.Sprintf("%s:%s", consts.TaskResultPrefix, taskId)
 	value, err := rr.rdb_.Get(context.Background(), key).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {

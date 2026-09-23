@@ -4,24 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/mq"
+	"oj-server/svr/problem/internal/biz"
+	"oj-server/svr/problem/internal/client"
+	"oj-server/svr/problem/internal/config"
+	"oj-server/svr/problem/internal/data"
+	"oj-server/svr/problem/internal/model"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"io"
-	"oj-server/global"
-	"oj-server/pkg/mq"
-	"oj-server/pkg/proto/pb"
-	"oj-server/pkg/registry"
-	"oj-server/svr/problem/internal/biz"
-	"oj-server/svr/problem/internal/configs"
-	"oj-server/svr/problem/internal/data"
-	"oj-server/svr/problem/internal/model"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 // 题目服务
@@ -29,37 +30,39 @@ type ProblemService struct {
 	pb.UnimplementedProblemServiceServer
 	uc *biz.ProblemUseCase
 
-	problem_producer *mq.Producer // 判题任务生产者
+	judgeProducer *mq.Producer
+	clients       *client.Clients
 }
 
-func NewProblemService() *ProblemService {
+func NewProblemService(clients *client.Clients) (*ProblemService, error) {
 	repo, err := data.NewProblemRepo()
 	if err != nil {
-		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
+		logrus.Errorf("NewProblemService failed, err:%s", err.Error())
+		return nil, err
 	}
-
-	mqCfg := configs.AppConf.MQCfg
+	cfg := config.MyConfig.MQ
 	amqpClient := mq.NewClient(
 		&mq.Options{
-			Host:     mqCfg.Host,
-			Port:     mqCfg.Port,
-			User:     mqCfg.User,
-			PassWord: mqCfg.PassWord,
-			VHost:    mqCfg.VHost,
+			Host:     cfg.Host,
+			Port:     cfg.Port,
+			User:     cfg.User,
+			PassWord: cfg.PassWord,
+			VHost:    cfg.VHost,
 		},
 	)
 
 	return &ProblemService{
 		uc: biz.NewProblemUseCase(repo), // 注入实现
-		problem_producer: &mq.Producer{
+		judgeProducer: &mq.Producer{
 			AmqpClient: amqpClient, // 注入client
-			ExKind:     global.RabbitMqExchangeKind,
-			ExName:     global.RabbitMqExchangeName,
+			ExKind:     consts.RabbitMqExchangeKind,
+			ExName:     consts.RabbitMqExchangeName,
 
-			QueName:    global.RabbitMqJudgeSubmitQueue,
-			RoutingKey: global.RabbitMqJudgeSubmitKey,
+			QueName:    consts.RabbitMqJudgeSubmitQueue,
+			RoutingKey: consts.RabbitMqJudgeSubmitKey,
 		},
-	}
+		clients: clients,
+	}, nil
 }
 
 func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProblemRequest) (*pb.CreateProblemResponse, error) {
@@ -110,7 +113,7 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 	}
 
 	// 创建目录
-	filePath = fmt.Sprintf("%s/%d.json", global.ProblemConfigPath, problemId)
+	filePath = fmt.Sprintf("%s/%d.json", consts.ProblemConfigPath, problemId)
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 		logrus.Errorf("create dir failed: %v", err)
 		return status.Error(codes.Internal, "create dir failed")
@@ -290,8 +293,8 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	}
 
 	// 获取分布式锁
-	key := fmt.Sprintf("%s:%d", global.UserLockPrefix, uid)
-	_, err = ps.uc.Lock(key, global.UserLockTTL)
+	key := fmt.Sprintf("%s:%d", consts.UserLockPrefix, uid)
+	_, err = ps.uc.Lock(key, consts.UserLockTTL)
 	if err != nil {
 		logrus.Errorf("lock user failed:%s", err.Error())
 		return nil, fmt.Errorf("判题中")
@@ -316,7 +319,7 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 		return nil, status.Errorf(codes.Internal, "marshal failed")
 	}
 	// 提交到mq
-	if err = ps.problem_producer.Publish(task_data); err != nil {
+	if err = ps.judgeProducer.Publish(task_data); err != nil {
 		logrus.Errorf("publish to mq failed: %v", err)
 		_ = ps.uc.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "服务器错误")
@@ -328,16 +331,9 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 }
 
 func (ps *ProblemService) queryUserName(uid int64) (string, error) {
-	// 调用用户服务
-	conn, err := registry.MyRegistrar.GetGrpcConnection(global.UserService)
-	if err != nil {
-		logrus.Errorf("用户服务连接失败:%s", err.Error())
-		return "", err
-	}
-	client := pb.NewUserServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), global.GrpcTimeout)
+	c, cancel := context.WithTimeout(context.Background(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := client.GetUserInfoByUid(ctx, &pb.GetUserInfoRequest{
+	resp, err := ps.clients.User.GetUserInfoByUid(c, &pb.GetUserInfoRequest{
 		Uid: uid,
 	})
 	if err != nil {

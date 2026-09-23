@@ -2,7 +2,7 @@ package model
 
 import (
 	"fmt"
-	"oj-server/pkg/proto/pb"
+	"oj-server/common/proto/pb"
 	"time"
 )
 

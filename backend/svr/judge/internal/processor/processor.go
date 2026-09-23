@@ -2,13 +2,14 @@ package processor
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"oj-server/pkg/gPool"
-	"oj-server/pkg/proto/pb"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/go_pool"
 	"oj-server/svr/judge/internal/biz"
-	"oj-server/svr/judge/internal/configs"
+	"oj-server/svr/judge/internal/config"
 	"strings"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 // 定义判题任务的处理模板
@@ -25,7 +26,7 @@ func NewProcessor(language string) (*BasicProcessor, error) {
 	}
 	// 查询sandbox地址
 	var addr string
-	for _, item := range configs.AppConf.SandBoxCfg {
+	for _, item := range config.MyConfig.SandBox {
 		if item.Type == language {
 			addr = fmt.Sprintf("http://%s:%d", item.Host, item.Port)
 			break
@@ -105,13 +106,13 @@ func (b *BasicProcessor) HandleJudgeTask(task *pb.JudgeSubmission, param *biz.Pa
 	// 判题
 	wgRun := new(sync.WaitGroup)
 	wgRun.Add(1)
-	_ = gPool.Instance().Submit(func() {
+	_ = go_pool.Submit(func() {
 		defer wgRun.Done()
 		b.impl.Run(param)
 	})
 	wgJudge := new(sync.WaitGroup)
 	wgJudge.Add(1)
-	_ = gPool.Instance().Submit(func() {
+	_ = go_pool.Submit(func() {
 		defer wgJudge.Done()
 		judgeResults := b.impl.Judge()
 		results = append(results, judgeResults...)

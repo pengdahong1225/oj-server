@@ -1,9 +1,9 @@
 package config
 
 type Config struct {
-	Service     *Service  `yaml:"service"`
-	RegistryCfg *Registry `yaml:"registry"`
-	JwtCfg      *Jwt      `yaml:"jwt"`
+	Service  *Service  `yaml:"service"`
+	Registry *Registry `yaml:"registry"`
+	Jwt      *Jwt      `yaml:"jwt"`
 }
 
 type Service struct {

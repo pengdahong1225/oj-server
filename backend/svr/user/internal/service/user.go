@@ -4,32 +4,38 @@ import (
 	"context"
 	"strconv"
 
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/utils"
 	"oj-server/svr/user/internal/biz"
+	"oj-server/svr/user/internal/client"
 	"oj-server/svr/user/internal/data"
-	"oj-server/utils"
+
+	"oj-server/svr/user/internal/model"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"oj-server/pkg/proto/pb"
-	"oj-server/svr/user/internal/model"
 )
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
 	uc *biz.UserUseCase
+
+	clients *client.Clients
 }
 
-func NewUserService() *UserService {
-	var err error
-	s := &UserService{}
-	up, err := data.NewUserRepo()
+func NewUserService(clients *client.Clients) (*UserService, error) {
+	repo, err := data.NewUserRepo()
 	if err != nil {
-		logrus.Fatalf("NewUserService failed, err:%s", err.Error())
+		logrus.Errorf("NewUserService failed, err:%s", err.Error())
+		return nil, err
 	}
-	s.uc = biz.NewUserUseCase(up) // 注入实现
-	return s
+
+	return &UserService{
+		uc:      biz.NewUserUseCase(repo),
+		clients: clients,
+	}, nil
 }
 
 // 注册

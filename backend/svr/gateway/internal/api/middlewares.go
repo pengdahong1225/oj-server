@@ -116,7 +116,7 @@ func AuthLogin() gin.HandlerFunc {
 
 		// 解析token包含的信息
 		jwt_builder := jwt_utils.JWTBuilder{
-			SigningKey: []byte(config.MyConfig.JwtCfg.SigningKey), // 密钥
+			SigningKey: []byte(config.MyConfig.Jwt.SigningKey), // 密钥
 		}
 		claims := new(model.UserClaims)
 

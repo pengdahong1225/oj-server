@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-	"oj-server/pkg/gPool"
-	"oj-server/pkg/proto/pb"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/go_pool"
 	"oj-server/svr/judge/internal/biz"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 type GoProcessor struct {
@@ -90,7 +91,7 @@ func (cp *GoProcessor) Run(param *biz.Param) {
 
 	for _, test := range param.ProblemConfig.TestCases {
 		wg.Add(1)
-		_ = gPool.Instance().Submit(func() {
+		_ = go_pool.Submit(func() {
 			defer wg.Done()
 
 			form := biz.SandBoxApiForm{

@@ -1,6 +1,6 @@
 package model
 
-import "oj-server/pkg/proto/pb"
+import "oj-server/common/proto/pb"
 
 type Record struct {
 	Id          int64  `json:"id"`

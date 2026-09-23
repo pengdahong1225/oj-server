@@ -4,6 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"oj-server/common/consts"
+	"oj-server/svr/problem/internal/config"
+	"oj-server/svr/problem/internal/model"
+	"os"
+	"time"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -11,13 +19,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"io"
-	"log"
-	"oj-server/global"
-	"oj-server/svr/problem/internal/configs"
-	"oj-server/svr/problem/internal/model"
-	"os"
-	"time"
 )
 
 type ProblemRepo struct {
@@ -27,11 +28,11 @@ type ProblemRepo struct {
 
 func NewProblemRepo() (*ProblemRepo, error) {
 	// mysql
-	mysql_cfg := configs.AppConf.MysqlCfg
+	mysql_cfg := config.MyConfig.Mysql
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
 	timer := time.Now().Format("2006_01_02")
-	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	filePath := fmt.Sprintf("%s/orm.%s.log", consts.LogPath, timer)
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
@@ -56,7 +57,7 @@ func NewProblemRepo() (*ProblemRepo, error) {
 	}
 
 	// redis
-	redis_cfg := configs.AppConf.RedisCfg
+	redis_cfg := config.MyConfig.Redis
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
 	rdb_ := redis.NewClient(&redis.Options{
 		Addr:    dsn,
@@ -204,7 +205,7 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 	ctx := context.Background()
 
 	// 1. 先尝试从缓存读取
-	tagList, err := pr.rdb_.SMembers(ctx, global.TagListKey).Result()
+	tagList, err := pr.rdb_.SMembers(ctx, consts.TagListKey).Result()
 	if err == nil && len(tagList) > 0 {
 		return tagList, nil
 	}
@@ -246,7 +247,7 @@ func (pr *ProblemRepo) QueryTagList() ([]string, error) {
 		for _, t := range tagList {
 			members = append(members, t)
 		}
-		pr.rdb_.SAdd(ctx, global.TagListKey, members...)
+		pr.rdb_.SAdd(ctx, consts.TagListKey, members...)
 	}
 
 	return tagList, nil

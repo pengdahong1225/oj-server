@@ -2,13 +2,14 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
-	"oj-server/pkg/proto/pb"
+	"oj-server/common/proto/pb"
 	"oj-server/svr/judge/internal/biz"
 	"oj-server/svr/judge/internal/processor"
 	"os"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 func (s *JudgeService) Handle(task *pb.JudgeSubmission) {
@@ -103,5 +104,5 @@ func (s *JudgeService) sendJudgeResult2MQ(result *pb.JudgeResult) error {
 	if err != nil {
 		return err
 	}
-	return s.result_producer.Publish(data)
+	return s.resultProducer.Publish(data)
 }

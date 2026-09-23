@@ -4,17 +4,19 @@ import (
 	"context"
 
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
-	"oj-server/global"
-	"oj-server/pkg/gPool"
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/go_pool"
 	"oj-server/pkg/mq"
-	"oj-server/pkg/proto/pb"
 	"oj-server/svr/problem/internal/biz"
-	"oj-server/svr/problem/internal/configs"
+	"oj-server/svr/problem/internal/client"
+	"oj-server/svr/problem/internal/config"
 	"oj-server/svr/problem/internal/data"
 	"oj-server/svr/problem/internal/model"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 // record服务
@@ -22,46 +24,49 @@ type RecordService struct {
 	pb.UnimplementedRecordServiceServer
 	uc *biz.RecordUseCase
 
-	result_consumer *mq.Consumer // 判题结果消费者
+	resultConsumer *mq.Consumer
+	clients        *client.Clients
 }
 
-func NewRecordService() *RecordService {
+func NewRecordService(clients *client.Clients) (*RecordService, error) {
 	repo, err := data.NewRecordRepo()
 	if err != nil {
-		logrus.Fatalf("NewProblemService failed, err:%s", err.Error())
+		logrus.Errorf("NewProblemService failed, err:%s", err.Error())
+		return nil, err
 	}
 
-	mqCfg := configs.AppConf.MQCfg
+	cfg := config.MyConfig.MQ
 	amqpClient := mq.NewClient(
 		&mq.Options{
-			Host:     mqCfg.Host,
-			Port:     mqCfg.Port,
-			User:     mqCfg.User,
-			PassWord: mqCfg.PassWord,
-			VHost:    mqCfg.VHost,
+			Host:     cfg.Host,
+			Port:     cfg.Port,
+			User:     cfg.User,
+			PassWord: cfg.PassWord,
+			VHost:    cfg.VHost,
 		},
 	)
 
 	return &RecordService{
 		uc: biz.NewRecordUseCase(repo),
-		result_consumer: &mq.Consumer{
+		resultConsumer: &mq.Consumer{
 			AmqpClient: amqpClient, // 注入client
-			ExKind:     global.RabbitMqExchangeKind,
-			ExName:     global.RabbitMqExchangeName,
-			QueName:    global.RabbitMqJudgeResultQueue,
-			RoutingKey: global.RabbitMqJudgeResultKey,
+			ExKind:     consts.RabbitMqExchangeKind,
+			ExName:     consts.RabbitMqExchangeName,
+			QueName:    consts.RabbitMqJudgeResultQueue,
+			RoutingKey: consts.RabbitMqJudgeResultKey,
 			CTag:       "", // 消费者标签，用于区别不同的消费者
 		},
-	}
+		clients: clients,
+	}, nil
 }
 
 func (ps *RecordService) ConsumeJudgeResult() {
-	deliveries := ps.result_consumer.Consume()
+	deliveries := ps.resultConsumer.Consume()
 	if deliveries == nil {
 		logrus.Errorf("获取deliveries失败")
 		return
 	}
-	defer ps.result_consumer.Close()
+	defer ps.resultConsumer.Close()
 
 	for d := range deliveries {
 		// 处理任务
@@ -73,7 +78,7 @@ func (ps *RecordService) ConsumeJudgeResult() {
 				return false
 			}
 			// 异步处理
-			_ = gPool.Instance().Submit(func() {
+			_ = go_pool.Submit(func() {
 				ps.handleJudgeResult(result)
 			})
 			return true
@@ -90,7 +95,7 @@ func (ps *RecordService) ConsumeJudgeResult() {
 
 func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
 	// 释放锁
-	key := fmt.Sprintf("%s:%d", global.UserLockPrefix, result.Uid)
+	key := fmt.Sprintf("%s:%d", consts.UserLockPrefix, result.Uid)
 	err := ps.uc.UnLock(key)
 	if err != nil {
 		logrus.Errorf("释放锁失败, err:%s", err.Error())
@@ -150,7 +155,7 @@ func (ps *RecordService) syncMonthLeaderboard() error {
 	}
 	logrus.Debugf("获取月榜数据:%+v", lb_list)
 	// 写入redis
-	return ps.uc.SynchronizeLeaderboard(lb_list, global.GetMonthLeaderboardKey(), global.MonthLeaderboardTTL)
+	return ps.uc.SynchronizeLeaderboard(lb_list, consts.GetMonthLeaderboardKey(), consts.MonthLeaderboardTTL)
 }
 func (ps *RecordService) syncDailyLeaderboard() error {
 	// 从数据库中获取数据
@@ -161,7 +166,7 @@ func (ps *RecordService) syncDailyLeaderboard() error {
 	}
 	logrus.Debugf("获取日榜数据:%+v", lb_list)
 	// 写入redis
-	return ps.uc.SynchronizeLeaderboard(lb_list, global.GetDailyLeaderboardKey(), global.DailyLeaderboardTTL)
+	return ps.uc.SynchronizeLeaderboard(lb_list, consts.GetDailyLeaderboardKey(), consts.DailyLeaderboardTTL)
 }
 
 // 分页查询用户的提交记录

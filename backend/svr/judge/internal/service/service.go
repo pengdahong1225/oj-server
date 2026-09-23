@@ -1,58 +1,62 @@
 package service
 
 import (
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/go_pool"
+	"oj-server/pkg/mq"
+	"oj-server/svr/judge/internal/client"
+	"oj-server/svr/judge/internal/config"
+
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
-	"oj-server/global"
-	"oj-server/pkg/gPool"
-	"oj-server/pkg/mq"
-	"oj-server/pkg/proto/pb"
-	"oj-server/svr/judge/internal/configs"
 )
 
 type JudgeService struct {
-	problem_consumer *mq.Consumer // 判题任务消费者
-	result_producer  *mq.Producer // 判题结果生产者
+	clients        *client.Clients
+	jugeConsumer   *mq.Consumer // 判题任务消费者
+	resultProducer *mq.Producer // 判题结果生产者
 }
 
-func NewJudgeService() *JudgeService {
-	mqCfg := configs.AppConf.MQCfg
+func NewJudgeService(clients *client.Clients) (*JudgeService, error) {
+	cfg := config.MyConfig.MQ
 	amqpClient := mq.NewClient(
 		&mq.Options{
-			Host:     mqCfg.Host,
-			Port:     mqCfg.Port,
-			User:     mqCfg.User,
-			PassWord: mqCfg.PassWord,
-			VHost:    mqCfg.VHost,
+			Host:     cfg.Host,
+			Port:     cfg.Port,
+			User:     cfg.User,
+			PassWord: cfg.PassWord,
+			VHost:    cfg.VHost,
 		},
 	)
 
 	return &JudgeService{
-		problem_consumer: &mq.Consumer{
+		jugeConsumer: &mq.Consumer{
 			AmqpClient: amqpClient, // 注入client
-			ExKind:     global.RabbitMqExchangeKind,
-			ExName:     global.RabbitMqExchangeName,
-			RoutingKey: global.RabbitMqJudgeSubmitKey,
-			QueName:    global.RabbitMqJudgeSubmitQueue,
+			ExKind:     consts.RabbitMqExchangeKind,
+			ExName:     consts.RabbitMqExchangeName,
+			RoutingKey: consts.RabbitMqJudgeSubmitKey,
+			QueName:    consts.RabbitMqJudgeSubmitQueue,
 			CTag:       "", // 消费者标签，用于区别不同的消费者
 		},
-		result_producer: &mq.Producer{
+		resultProducer: &mq.Producer{
 			AmqpClient: amqpClient, // 注入client
-			ExKind:     global.RabbitMqExchangeKind,
-			ExName:     global.RabbitMqExchangeName,
-			QueName:    global.RabbitMqJudgeResultQueue,
-			RoutingKey: global.RabbitMqJudgeResultKey,
+			ExKind:     consts.RabbitMqExchangeKind,
+			ExName:     consts.RabbitMqExchangeName,
+			QueName:    consts.RabbitMqJudgeResultQueue,
+			RoutingKey: consts.RabbitMqJudgeResultKey,
 		},
-	}
+		clients: clients,
+	}, nil
 }
 
 func (s *JudgeService) ConsumeJudgeTask() {
-	deliveries := s.problem_consumer.Consume()
+	deliveries := s.jugeConsumer.Consume()
 	if deliveries == nil {
 		logrus.Errorf("获取deliveries失败")
 		return
 	}
-	defer s.problem_consumer.Close()
+	defer s.jugeConsumer.Close()
 
 	for d := range deliveries {
 		// 处理任务
@@ -64,7 +68,7 @@ func (s *JudgeService) ConsumeJudgeTask() {
 				return false
 			}
 			// 异步处理
-			_ = gPool.Instance().Submit(func() {
+			_ = go_pool.Submit(func() {
 				s.Handle(task)
 			})
 			return true

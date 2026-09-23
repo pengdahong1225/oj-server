@@ -1,24 +1,31 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
 	"oj-server/pkg/registry"
+	"oj-server/svr/user/internal/client"
+	"oj-server/svr/user/internal/config"
 	"oj-server/svr/user/internal/service"
+
+	"oj-server/pkg/logger"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"oj-server/global"
-	"oj-server/pkg/logger"
-	"oj-server/pkg/proto/pb"
-	"oj-server/svr/user/internal/configs"
 )
 
 type Server struct {
-	listener net.Listener
-	userSrv  *service.UserService
+	reg        *registry.ConsulRegistry
+	deregister func() error
+	clients    *client.Clients
+
+	listener    net.Listener
+	userService *service.UserService
 }
 
 func NewServer() *Server {
@@ -26,71 +33,73 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	// 初始化日志
-	server_cfg := configs.ServerConf
-	err := logger.Init(global.LogPath, server_cfg.Name, logrus.DebugLevel)
+	configPath := fmt.Sprintf("%s/%s", consts.ConfigPath, "user_config.yaml")
+	err := config.MyConfig.ReadConfigFile(configPath)
+	if err != nil {
+		return err
+	}
+	err = logger.Init(consts.LogPath, config.MyConfig.Service.Name, logrus.DebugLevel)
 	if err != nil {
 		return err
 	}
 
-	// 初始化注册中心
-	registry_cfg := configs.AppConf.RegistryCfg
-	dsn := fmt.Sprintf("%s:%d", registry_cfg.Host, registry_cfg.Port)
-	registrar, err := registry.NewRegistrar(dsn)
+	dsn := fmt.Sprintf("%s:%d", config.MyConfig.Registry.Host, config.MyConfig.Registry.Port)
+	s.reg, err = registry.NewConsulRegistry(dsn)
 	if err != nil {
 		logrus.Errorf("初始化注册中心失败: %v", err)
 		return err
 	}
-	registry.MyRegistrar = registrar
 
-	s.userSrv = service.NewUserService()
+	s.userService, err = service.NewUserService(s.clients)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (s *Server) Run() {
-	server_cfg := configs.ServerConf
+func (s *Server) Run() error {
+	serviceCfg := config.MyConfig.Service
 	logrus.Infof("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------",
-		server_cfg.Name, server_cfg.NodeId, server_cfg.Address, server_cfg.Port, server_cfg.Scheme)
+		serviceCfg.Name, serviceCfg.NodeId, serviceCfg.Address, serviceCfg.Port, serviceCfg.Scheme)
 
-	// 注册服务
-	err := registry.MyRegistrar.RegisterService(&registry.ServiceInfo{
-		Name:    server_cfg.Name,
-		NodeId:  server_cfg.NodeId,
-		Address: server_cfg.Address,
-		Port:    server_cfg.Port,
-		Scheme:  server_cfg.Scheme,
+	deregister, err := s.reg.Register(context.Background(), registry.ServiceInfo{
+		Name:    serviceCfg.Name,
+		NodeId:  serviceCfg.NodeId,
+		Address: serviceCfg.Address,
+		Port:    serviceCfg.Port,
+		Scheme:  serviceCfg.Scheme,
 	})
 	if err != nil {
-		logrus.Fatalf("注册服务失败: %v", err)
-		return
+		logrus.Errorf("注册服务失败: %v", err)
+		return err
+	}
+	s.deregister = deregister
+
+	s.clients, err = client.NewClients(s.reg)
+	if err != nil {
+		return fmt.Errorf("初始化客户端失败: %v", err)
 	}
 
 	// 监听
-	netAddr := fmt.Sprintf("%s:%d", server_cfg.Address, server_cfg.Port)
+	netAddr := fmt.Sprintf("%s:%d", config.MyConfig.Service.Address, config.MyConfig.Service.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
-		logrus.Fatalf("listen err: %v", err)
-		return
+		logrus.Errorf("listen err: %v", err)
+		return err
 	}
 	s.listener = listener
 
 	// 启动GRPC服务
 	grpcServer := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, health.NewServer())
-	pb.RegisterUserServiceServer(grpcServer, s.userSrv)
-	_ = grpcServer.Serve(listener)
+	pb.RegisterUserServiceServer(grpcServer, s.userService)
+	return grpcServer.Serve(listener)
 }
 
 func (s *Server) Stop() {
-	server_cfg := configs.ServerConf
-	_ = registry.MyRegistrar.UnRegister(&registry.ServiceInfo{
-		Name:    server_cfg.Name,
-		NodeId:  server_cfg.NodeId,
-		Address: server_cfg.Address,
-		Port:    server_cfg.Port,
-		Scheme:  server_cfg.Scheme,
-	})
-	_ = s.listener.Close()
+	if s.deregister != nil {
+		_ = s.deregister()
+	}
 	logrus.Warnf("======================= user stop =======================")
 }

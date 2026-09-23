@@ -3,6 +3,14 @@ package data
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"oj-server/common/consts"
+	"oj-server/svr/user/internal/config"
+	"oj-server/svr/user/internal/model"
+	"os"
+	"time"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -10,13 +18,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"io"
-	"log"
-	"oj-server/global"
-	"oj-server/svr/user/internal/configs"
-	"oj-server/svr/user/internal/model"
-	"os"
-	"time"
 )
 
 type UserRepo struct {
@@ -26,11 +27,11 @@ type UserRepo struct {
 
 func NewUserRepo() (*UserRepo, error) {
 	// mysql
-	mysql_cfg := configs.AppConf.MysqlCfg
+	mysql_cfg := config.MyConfig.Mysql
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_cfg.User,
 		mysql_cfg.Pwd, mysql_cfg.Host, mysql_cfg.Port, mysql_cfg.Db)
 	timer := time.Now().Format("2006_01_02")
-	filePath := fmt.Sprintf("%s/orm.%s.log", global.LogPath, timer)
+	filePath := fmt.Sprintf("%s/orm.%s.log", consts.LogPath, timer)
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func NewUserRepo() (*UserRepo, error) {
 	}
 
 	// redis
-	redis_cfg := configs.AppConf.RedisCfg
+	redis_cfg := config.MyConfig.Redis
 	dsn = fmt.Sprintf("%s:%d", redis_cfg.Host, redis_cfg.Port)
 	rdb_ := redis.NewClient(&redis.Options{
 		Addr:    dsn,

@@ -1,21 +1,29 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"net"
+	"oj-server/common/consts"
+	"oj-server/common/proto/pb"
+	"oj-server/pkg/go_pool"
+	"oj-server/pkg/logger"
+	"oj-server/pkg/registry"
+	"oj-server/svr/problem/internal/client"
+	"oj-server/svr/problem/internal/config"
+	"oj-server/svr/problem/internal/service"
+
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"net"
-	"oj-server/global"
-	"oj-server/pkg/logger"
-	"oj-server/pkg/proto/pb"
-	"oj-server/pkg/registry"
-	"oj-server/svr/problem/internal/configs"
-	"oj-server/svr/problem/internal/service"
 )
 
 type Server struct {
+	reg        *registry.ConsulRegistry
+	deregister func() error
+	clients    *client.Clients
+
 	listener       net.Listener
 	problemService *service.ProblemService
 	recordService  *service.RecordService
@@ -27,61 +35,77 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
-	// 初始化日志
-	server_cfg := configs.ServerConf
-	err := logger.Init(global.LogPath, server_cfg.Name, logrus.DebugLevel)
+	configPath := fmt.Sprintf("%s/%s", consts.ConfigPath, "problem_config.yaml")
+	err := config.MyConfig.ReadConfigFile(configPath)
+	if err != nil {
+		return err
+	}
+	err = logger.Init(consts.LogPath, config.MyConfig.Service.Name, logrus.DebugLevel)
 	if err != nil {
 		return err
 	}
 
-	// 初始化注册中心
-	registry_cfg := configs.AppConf.RegistryCfg
-	dsn := fmt.Sprintf("%s:%d", registry_cfg.Host, registry_cfg.Port)
-	registrar, err := registry.NewRegistrar(dsn)
+	dsn := fmt.Sprintf("%s:%d", config.MyConfig.Registry.Host, config.MyConfig.Registry.Port)
+	s.reg, err = registry.NewConsulRegistry(dsn)
 	if err != nil {
 		logrus.Errorf("初始化注册中心失败: %v", err)
 		return err
 	}
-	registry.MyRegistrar = registrar
 
-	s.problemService = service.NewProblemService()
-	s.recordService = service.NewRecordService()
-	s.commentService = service.NewCommentService()
+	s.problemService, err = service.NewProblemService(s.clients)
+	if err != nil {
+		return err
+	}
+	s.recordService, err = service.NewRecordService(s.clients)
+	if err != nil {
+		return err
+	}
+	s.commentService, err = service.NewCommentService(s.clients)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (s *Server) Run() {
-	server_cfg := configs.ServerConf
+func (s *Server) Run() error {
+	serviceCfg := config.MyConfig.Service
 	logrus.Infof("--------------- node_type:%v, node_id:%v, host:%v, port:%v, scheme:%v ---------------",
-		server_cfg.Name, server_cfg.NodeId, server_cfg.Address, server_cfg.Port, server_cfg.Scheme)
+		serviceCfg.Name, serviceCfg.NodeId, serviceCfg.Address, serviceCfg.Port, serviceCfg.Scheme)
 
-	// 注册服务
-	err := registry.MyRegistrar.RegisterService(&registry.ServiceInfo{
-		Name:    server_cfg.Name,
-		NodeId:  server_cfg.NodeId,
-		Address: server_cfg.Address,
-		Port:    server_cfg.Port,
-		Scheme:  server_cfg.Scheme,
+	deregister, err := s.reg.Register(context.Background(), registry.ServiceInfo{
+		Name:    serviceCfg.Name,
+		NodeId:  serviceCfg.NodeId,
+		Address: serviceCfg.Address,
+		Port:    serviceCfg.Port,
+		Scheme:  serviceCfg.Scheme,
 	})
 	if err != nil {
-		logrus.Fatalf("注册服务失败: %v", err)
-		return
+		logrus.Errorf("注册服务失败: %v", err)
+		return err
+	}
+	s.deregister = deregister
+
+	s.clients, err = client.NewClients(s.reg)
+	if err != nil {
+		return fmt.Errorf("初始化客户端失败: %v", err)
 	}
 
 	// 建立排行榜
-	go s.recordService.SyncLeaderboardByScheduled()
-
+	go_pool.Submit(func() {
+		s.recordService.SyncLeaderboardByScheduled()
+	})
 	// 消费judge-result队列
-	go s.recordService.ConsumeJudgeResult()
+	go_pool.Submit(func() {
+		s.recordService.ConsumeJudgeResult()
+	})
 
 	// 监听
-	cfg := configs.ServerConf
-	netAddr := fmt.Sprintf("%s:%d", cfg.Address, cfg.Port)
+	netAddr := fmt.Sprintf("%s:%d", config.MyConfig.Service.Address, config.MyConfig.Service.Port)
 	listener, err := net.Listen("tcp", netAddr)
 	if err != nil {
-		logrus.Fatalf("listen err: %v", err)
-		return
+		logrus.Errorf("listen err: %v", err)
+		return err
 	}
 	s.listener = listener
 
@@ -91,18 +115,12 @@ func (s *Server) Run() {
 	pb.RegisterProblemServiceServer(grpcServer, s.problemService)
 	pb.RegisterRecordServiceServer(grpcServer, s.recordService)
 	pb.RegisterCommentServiceServer(grpcServer, s.commentService)
-	_ = grpcServer.Serve(listener)
+	return grpcServer.Serve(listener)
 }
 
 func (s *Server) Stop() {
-	server_cfg := configs.ServerConf
-	_ = registry.MyRegistrar.UnRegister(&registry.ServiceInfo{
-		Name:    server_cfg.Name,
-		NodeId:  server_cfg.NodeId,
-		Address: server_cfg.Address,
-		Port:    server_cfg.Port,
-		Scheme:  server_cfg.Scheme,
-	})
-	_ = s.listener.Close()
+	if s.deregister != nil {
+		_ = s.deregister()
+	}
 	logrus.Warnf("======================= problem stop =======================")
 }

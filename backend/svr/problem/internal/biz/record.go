@@ -1,7 +1,7 @@
 package biz
 
 import (
-	"oj-server/pkg/proto/pb"
+	"oj-server/common/proto/pb"
 	"oj-server/svr/problem/internal/model"
 	"time"
 )

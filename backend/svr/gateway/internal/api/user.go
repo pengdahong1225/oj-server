@@ -131,7 +131,7 @@ func (u *UserHandler) HandleReFreshAccessToken(ctx *gin.Context) {
 	}
 	// 解析refresh_token
 	jwt_builder := jwt_utils.JWTBuilder{
-		SigningKey: []byte(config.MyConfig.JwtCfg.SigningKey),
+		SigningKey: []byte(config.MyConfig.Jwt.SigningKey),
 	}
 	claims := new(model.UserClaims)
 	if err = jwt_builder.ParseToken(refreshToken, claims); err != nil {
@@ -268,7 +268,7 @@ func (u *UserHandler) HandleGetUserList(ctx *gin.Context) {
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
 	jwt_builder := jwt_utils.JWTBuilder{
-		SigningKey: []byte(config.MyConfig.JwtCfg.SigningKey),
+		SigningKey: []byte(config.MyConfig.Jwt.SigningKey),
 	}
 	claims := &model.UserClaims{
 		Uid:       uid,
@@ -285,7 +285,7 @@ func createRefreshAccessToken(uid int64, mobile string, role int32) (string, err
 }
 func createAccessToken(uid int64, mobile string, role int32) (string, error) {
 	jwt_builder := jwt_utils.JWTBuilder{
-		SigningKey: []byte(config.MyConfig.JwtCfg.SigningKey),
+		SigningKey: []byte(config.MyConfig.Jwt.SigningKey),
 	}
 	claims := &model.UserClaims{
 		Uid:       uid,
