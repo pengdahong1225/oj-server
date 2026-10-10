@@ -2,15 +2,12 @@ package service
 
 import (
 	"context"
-	"strconv"
-
+	"crypto/sha256"
+	"encoding/hex"
 	"oj-server/common/proto/pb"
-	"oj-server/pkg/utils"
-	"oj-server/svr/user/internal/biz"
 	"oj-server/svr/user/internal/client"
 	"oj-server/svr/user/internal/data"
-
-	"oj-server/svr/user/internal/model"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -20,20 +17,18 @@ import (
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
-	uc *biz.UserUseCase
-
+	repo    *data.Repo
 	clients *client.Clients
 }
 
 func NewUserService(clients *client.Clients) (*UserService, error) {
-	repo, err := data.NewUserRepo()
+	repo, err := data.NewRepo()
 	if err != nil {
-		logrus.Errorf("NewUserService failed, err:%s", err.Error())
 		return nil, err
 	}
 
 	return &UserService{
-		uc:      biz.NewUserUseCase(repo),
+		repo:    repo,
 		clients: clients,
 	}, nil
 }
@@ -43,13 +38,13 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	resp := &pb.UserRegisterResponse{}
 
 	// 不可逆加密
-	hash_pwd := utils.HashPassword(in.Password)
+	hash_pwd := hashPassword(in.Password)
 	mobile, err := strconv.ParseInt(in.Mobile, 10, 64)
 	if err != nil {
 		logrus.Errorf("parse mobile failed: %s", err.Error())
 		return resp, err
 	}
-	newUser := model.UserInfo{
+	newUser := data.UserInfo{
 		Mobile:    mobile,
 		PassWord:  hash_pwd,
 		NickName:  in.Nickname,
@@ -60,7 +55,7 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	}
 
 	var id int64
-	id, err = us.uc.CreateNewUser(&newUser)
+	id, err = us.repo.CreateNewUser(&newUser)
 	if err != nil {
 		logrus.Infof("创建新用户失败, err: %s", err.Error())
 		return resp, err
@@ -69,16 +64,25 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	return resp, nil
 }
 
+func hashPassword(from string) string {
+	hash := sha256.Sum256([]byte(from))
+	return hex.EncodeToString(hash[:])
+}
+
 // 账号密码登录
 func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (*pb.UserLoginResponse, error) {
-	// 拉取用户信息
-	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
+	mobile, err := strconv.ParseInt(in.Mobile, 10, 64)
 	if err != nil {
+		logrus.Errorf("parse mobile failed: %s", err.Error())
 		return nil, err
 	}
-	// 校验密码
-	if utils.HashPassword(in.Password) != userInfo.PassWord {
+
+	userInfo, err := us.repo.GetUserInfoByMobile(mobile)
+	if err != nil {
+		logrus.Errorf("get user by mobile err: %s", err.Error())
+		return nil, err
+	}
+	if hashPassword(in.Password) != userInfo.PassWord {
 		return nil, status.Errorf(codes.Unauthenticated, "密码错误")
 	}
 
@@ -98,7 +102,7 @@ func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (
 func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginBySmsCodeRequest) (*pb.UserLoginResponse, error) {
 	// 拉取用户信息
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	userInfo, err := us.uc.GetUserInfoByMobile(mobile)
+	userInfo, err := us.repo.GetUserInfoByMobile(mobile)
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +121,9 @@ func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginB
 
 // 重置密码
 func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPasswordRequest) (*emptypb.Empty, error) {
-	hash := utils.HashPassword(in.Password)
+	hash := hashPassword(in.Password)
 	mobile, _ := strconv.ParseInt(in.Mobile, 10, 64)
-	err := us.uc.ResetUserPassword(mobile, hash)
+	err := us.repo.ResetUserPassword(mobile, hash)
 	if err != nil {
 		logrus.Errorf("重置密码失败, err: %s", err.Error())
 		return nil, err
@@ -130,7 +134,7 @@ func (us *UserService) ResetUserPassword(ctx context.Context, in *pb.ResetUserPa
 // 获取用户信息
 func (us *UserService) GetUserInfoByUid(ctx context.Context, in *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
 	// 拉取用户信息
-	userInfo, err := us.uc.GetUserInfoByUid(in.Uid)
+	userInfo, err := us.repo.GetUserInfoByUid(in.Uid)
 	if err != nil {
 		logrus.Errorf("获取用户信息失败, err: %s", err.Error())
 		return nil, err
@@ -154,7 +158,7 @@ func (us *UserService) GetUserInfoByUid(ctx context.Context, in *pb.GetUserInfoR
 
 func (us *UserService) GetUserList(ctx context.Context, in *pb.GetUserListRequest) (*pb.GetUserListResponse, error) {
 	resp := &pb.GetUserListResponse{}
-	total, users, err := us.uc.QueryUserList(int(in.Page), int(in.PageSize), in.Keyword)
+	total, users, err := us.repo.QueryUserList(int(in.Page), int(in.PageSize), in.Keyword)
 	if err != nil {
 		return nil, err
 	}

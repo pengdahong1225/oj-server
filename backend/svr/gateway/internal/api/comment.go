@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type CommentHandler struct {
@@ -24,139 +23,125 @@ func NewCommentHandler(clients *client.Clients) *CommentHandler {
 
 // 创建评论
 func (ch *CommentHandler) HandleCreateComment(ctx *gin.Context) {
-	form, ok := validateWithJson(ctx, model.CreateCommentForm{})
-	if !ok {
+	req := &model.CreateCommentRequest{}
+	err := ctx.ShouldBindBodyWithJSON(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
 
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	_, err := ch.clients.Comment.CreateComment(c, &pb.CreateCommentRequest{
-		ObjId:          form.ObjId,
-		UserId:         form.UserId,
-		UserName:       form.UserName,
-		UserAvatarUrl:  form.UserAvatarUrl,
-		Content:        form.Content,
+	_, err = ch.clients.Comment.CreateComment(c, &pb.CreateCommentRequest{
+		ObjId:          req.ObjId,
+		UserId:         req.UserId,
+		UserName:       req.UserName,
+		UserAvatarUrl:  req.UserAvatarUrl,
+		Content:        req.Content,
 		Stamp:          time.Now().Unix(),
-		RootId:         form.RootId,
-		RootCommentId:  form.RootCommentId,
-		ReplyId:        form.ReplyId,
-		ReplyCommentId: form.ReplyCommentId,
-		ReplyUserName:  form.ReplyUserName,
+		RootId:         req.RootId,
+		RootCommentId:  req.RootCommentId,
+		ReplyId:        req.ReplyId,
+		ReplyCommentId: req.ReplyCommentId,
+		ReplyUserName:  req.ReplyUserName,
 		Address:        ctx.ClientIP(),
 	})
 	if err != nil {
-		logrus.Errorf("创建评论失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
+
 	ResponseOK(ctx, nil)
 }
 
 // 获取根评论列表
 func (ch *CommentHandler) HandleGetRootCommentList(ctx *gin.Context) {
-	var params model.QueryRootCommentListParams
-	if err := ctx.ShouldBindQuery(&params); err != nil {
-		ResponseBadRequest(ctx, "参数校验失败")
+	req := &model.QueryRootCommentListRequest{}
+	if err := ctx.ShouldBindQuery(req); err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
 
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := ch.clients.Comment.QueryRootComment(c, &pb.QueryRootCommentRequest{
-		ObjId:    params.ObjId,
-		Page:     params.Page,
-		PageSize: params.PageSize,
+	gr, err := ch.clients.Comment.QueryRootComment(c, &pb.QueryRootCommentRequest{
+		ObjId:    req.ObjId,
+		Page:     req.Page,
+		PageSize: req.PageSize,
 	})
 	if err != nil {
-		logrus.Errorf("获取root评论列表失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	result := &model.QueryRootCommentListResult{
-		Total: int64(resp.Total),
-	}
-	result.List = make([]*model.Comment, 0, len(resp.Data))
-	for _, pbComment := range resp.Data {
-		comment := &model.Comment{}
-		comment.FromPbComment(pbComment)
-		result.List = append(result.List, comment)
-	}
-	ResponseOK(ctx, result)
+
+	ResponseOK(ctx, gr)
 }
 
 // 获取子评论列表
 func (ch *CommentHandler) HandleGetChildCommentList(ctx *gin.Context) {
-	var params model.QueryChildCommentListParams
-	if err := ctx.ShouldBindQuery(&params); err != nil {
-		ResponseBadRequest(ctx, "参数校验失败")
+	req := &model.QueryChildCommentListRequest{}
+	if err := ctx.ShouldBindQuery(req); err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
 
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := ch.clients.Comment.QueryChildComment(c, &pb.QueryChildCommentRequest{
-		ObjId:          params.ObjId,
-		RootId:         params.RootId,
-		RootCommentId:  params.RootCommentId,
-		ReplyId:        params.ReplyId,
-		ReplyCommentId: params.ReplyCommentId,
-		Cursor:         params.Cursor,
+	gr, err := ch.clients.Comment.QueryChildComment(c, &pb.QueryChildCommentRequest{
+		ObjId:          req.ObjId,
+		RootId:         req.RootId,
+		RootCommentId:  req.RootCommentId,
+		ReplyId:        req.ReplyId,
+		ReplyCommentId: req.ReplyCommentId,
+		Cursor:         req.Cursor,
 	})
 	if err != nil {
-		logrus.Errorf("获取child评论列表失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	result := model.QueryChildCommentListResult{
-		Total:  int64(resp.Total),
-		Cursor: resp.Cursor,
-	}
-	result.List = make([]*model.Comment, 0, len(resp.Data))
-	for _, pbComment := range resp.Data {
-		comment := &model.Comment{}
-		comment.FromPbComment(pbComment)
-		result.List = append(result.List, comment)
-	}
 
-	ResponseOK(ctx, result)
+	ResponseOK(ctx, gr)
 }
 
 // 点赞评论
 func (ch *CommentHandler) HandleLikeComment(ctx *gin.Context) {
-	form, ok := validateWithForm(ctx, model.CommentLikeForm{})
-	if !ok {
+	req := &model.CommentLikeRequest{}
+	err := ctx.ShouldBind(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
+
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	_, err := ch.clients.Comment.CommentLike(c, &pb.CommentLikeRequest{
-		ObjId:     form.ObjId,
-		CommentId: form.CommentId,
+	_, err = ch.clients.Comment.CommentLike(c, &pb.CommentLikeRequest{
+		ObjId:     req.ObjId,
+		CommentId: req.CommentId,
 	})
 	if err != nil {
-		logrus.Errorf("评论点赞: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
+
 	ResponseOK(ctx, nil)
 }
 
 // 删除评论
 func (ch *CommentHandler) HandleDeleteComment(ctx *gin.Context) {
-	form, ok := validateWithForm[model.DeleteCommentForm](ctx, model.DeleteCommentForm{})
-	if !ok {
+	req := &model.DeleteCommentRequest{}
+	err := ctx.ShouldBind(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
-	// 调用comment服务
+
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	_, err := ch.clients.Comment.DeleteComment(c, &pb.DeleteCommentRequest{
-		ObjId:     form.ObjId,
-		CommentId: form.CommentId,
+	_, err = ch.clients.Comment.DeleteComment(c, &pb.DeleteCommentRequest{
+		ObjId:     req.ObjId,
+		CommentId: req.CommentId,
 	})
 	if err != nil {
-		logrus.Errorf("删除评论失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}

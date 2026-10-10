@@ -30,30 +30,26 @@ func NewProblemHandler(clients *client.Clients) *ProblemHandler {
 func (p *ProblemHandler) HandleGetProblemTagList(ctx *gin.Context) {
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := p.clients.Problem.GetTagList(c, nil)
+	gr, err := p.clients.Problem.GetTagList(c, nil)
 	if err != nil {
-		logrus.Errorf("获取题目标签列表失败: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
-	ResponseOK(ctx, resp.Data)
+	ResponseOK(ctx, gr)
 }
 
 // 获取题目列表
 func (p *ProblemHandler) HandleGetProblemList(ctx *gin.Context) {
-	// 查询参数校验
-	var params model.QueryProblemListParams
-	err := ctx.ShouldBindQuery(&params)
+	req := &model.QueryProblemListRequest{}
+	err := ctx.ShouldBindQuery(req)
 	if err != nil {
-		logrus.Errorf("参数校验失败: %s", err.Error())
-		ResponseBadRequest(ctx, "参数验证失败")
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
-
 	role, exist := ctx.Get("role")
 	if !exist {
-		ResponseInternalServerError(ctx, "服务繁忙")
+		ResponseUnauthorized(ctx, "invalid role")
 		return
 	}
 
@@ -61,98 +57,66 @@ func (p *ProblemHandler) HandleGetProblemList(ctx *gin.Context) {
 	md := metadata.Pairs("role", fmt.Sprintf("%d", role.(int32)))
 	c, cancel := context.WithTimeout(metadata.NewOutgoingContext(ctx.Request.Context(), md), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := p.clients.Problem.GetProblemList(c, &pb.GetProblemListRequest{
-		Page:     params.Page,
-		PageSize: params.PageSize,
-		Keyword:  params.Keyword,
-		Tag:      params.Tag,
+	gr, err := p.clients.Problem.GetProblemList(c, &pb.GetProblemListRequest{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		Keyword:  req.Keyword,
+		Tag:      req.Tag,
 	})
 	if err != nil {
-		logrus.Errorf("problem服务获取题目列表失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
-	result := &model.QueryProblemListResult{
-		Total: resp.Total,
-	}
-	result.List = make([]*model.Problem, len(resp.Data))
-	for i, v := range resp.Data {
-		result.List[i] = &model.Problem{
-			ID:          v.Id,
-			Title:       v.Title,
-			Description: v.Description,
-			Level:       v.Level,
-			Tags:        v.Tags,
-			Status:      v.Status,
-			CreateAt:    v.CreateAt,
-			UpdateAt:    v.UpdateAt,
-		}
-	}
-
-	ResponseOK(ctx, result)
+	ResponseOK(ctx, gr)
 }
 
 // 获取题目详情
 func (p *ProblemHandler) HandleGetProblemDetail(ctx *gin.Context) {
-	// 查询参数
 	problem_id, err := strconv.ParseInt(ctx.Query("problem_id"), 10, 64)
 	if err != nil {
-		logrus.Errorf("problem_id validate err: %s", err.Error())
 		ResponseBadRequest(ctx, "problem_id validate err")
 		return
 	}
 	// 调用problem服务
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := p.clients.Problem.GetProblemDetail(c, &pb.GetProblemRequest{
+	gr, err := p.clients.Problem.GetProblemDetail(c, &pb.GetProblemRequest{
 		Id: problem_id,
 	})
 	if err != nil {
-		logrus.Errorf("%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	problem := &model.Problem{
-		ID:          resp.Problem.Id,
-		Title:       resp.Problem.Title,
-		Description: resp.Problem.Description,
-		Level:       resp.Problem.Level,
-		Tags:        resp.Problem.Tags,
-		Status:      resp.Problem.Status,
-		CreateAt:    resp.Problem.CreateAt,
-	}
-	ResponseOK(ctx, problem)
+	ResponseOK(ctx, gr)
 }
 
 // 创建题目信息
 func (p *ProblemHandler) HandleCreateProblem(ctx *gin.Context) {
-	form, ret := validateWithJson(ctx, model.CreateProblemForm{})
-	if !ret {
+	req := &model.CreateProblemRequest{}
+	err := ctx.ShouldBindBodyWithJSON(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
 	// 调用problem服务
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := p.clients.Problem.CreateProblem(c, &pb.CreateProblemRequest{
-		Title:       form.Title,
-		Description: form.Description,
-		Level:       form.Level,
-		Tags:        form.Tags,
+	gr, err := p.clients.Problem.CreateProblem(c, &pb.CreateProblemRequest{
+		Title:       req.Title,
+		Description: req.Description,
+		Level:       req.Level,
+		Tags:        req.Tags,
 	})
 	if err != nil {
-		logrus.Errorf("创建题目失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	ResponseOK(ctx, gin.H{
-		"problem_id": resp.Id,
-	})
+	ResponseOK(ctx, gr)
 }
 
 // 处理题目配置文件上传
 func (p *ProblemHandler) HandleUploadConfig(ctx *gin.Context) {
-	// 获取元数据
 	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil || problemId <= 0 {
 		ResponseBadRequest(ctx, "无效的 problem_id")
@@ -175,7 +139,6 @@ func (p *ProblemHandler) HandleUploadConfig(ctx *gin.Context) {
 		ResponseBadRequest(ctx, "文件过大")
 		return
 	}
-
 	// 打开文件流
 	file, err := fileHeader.Open()
 	if err != nil {
@@ -235,7 +198,6 @@ func (p *ProblemHandler) HandleUploadConfig(ctx *gin.Context) {
 
 // 下载题目配置文件
 func (p *ProblemHandler) HandleDownloadConfig(ctx *gin.Context) {
-	// 获取元数据
 	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil || problemId <= 0 {
 		ResponseBadRequest(ctx, "无效的 problem_id")
@@ -245,7 +207,6 @@ func (p *ProblemHandler) HandleDownloadConfig(ctx *gin.Context) {
 
 // 处理发布题目
 func (p *ProblemHandler) HandlePublishProblem(ctx *gin.Context) {
-	// 获取元数据
 	problem_id, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil {
 		ResponseBadRequest(ctx, "无效的 problem_id")
@@ -267,7 +228,6 @@ func (p *ProblemHandler) HandlePublishProblem(ctx *gin.Context) {
 
 // 处理隐藏题目
 func (p *ProblemHandler) HandleHideProblem(ctx *gin.Context) {
-	// 获取元数据
 	problem_id, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
 	if err != nil {
 		ResponseBadRequest(ctx, "无效的 problem_id")
@@ -287,34 +247,8 @@ func (p *ProblemHandler) HandleHideProblem(ctx *gin.Context) {
 	ResponseOK(ctx, nil)
 }
 
-// 处理更新题目信息
-func (p *ProblemHandler) HandleUpdateProblem(ctx *gin.Context) {
-	form, ret := validateWithJson(ctx, model.UpdateProblemForm{})
-	if !ret {
-		return
-	}
-	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
-	defer cancel()
-	_, err := p.clients.Problem.UpdateProblem(c, &pb.UpdateProblemRequest{
-		Data: &pb.Problem{
-			Id:          form.ProblemID,
-			Title:       form.Title,
-			Description: form.Desc,
-			Level:       form.Level,
-			Tags:        form.Tags,
-		},
-	})
-	if err != nil {
-		logrus.Errorf("更新题目失败:%s", err.Error())
-		ResponseWithGrpcError(ctx, err)
-		return
-	}
-	ResponseOK(ctx, nil)
-}
-
 // 处理删除题目
 func (p *ProblemHandler) HandleDeleteProblem(ctx *gin.Context) {
-	// 获取元数据
 	problem_id, err := strconv.ParseInt(ctx.Query("problem_id"), 10, 64)
 	if err != nil {
 		ResponseBadRequest(ctx, "无效的 problem_id")
@@ -334,11 +268,39 @@ func (p *ProblemHandler) HandleDeleteProblem(ctx *gin.Context) {
 	ResponseOK(ctx, nil)
 }
 
+// 处理更新题目信息
+func (p *ProblemHandler) HandleUpdateProblem(ctx *gin.Context) {
+	req := &model.UpdateProblemRequest{}
+	err := ctx.ShouldBindBodyWithJSON(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
+		return
+	}
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	_, err = p.clients.Problem.UpdateProblem(c, &pb.UpdateProblemRequest{
+		Data: &pb.Problem{
+			Id:          req.ProblemID,
+			Title:       req.Title,
+			Description: req.Desc,
+			Level:       req.Level,
+			Tags:        req.Tags,
+		},
+	})
+	if err != nil {
+		logrus.Errorf("更新题目失败:%s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+	ResponseOK(ctx, nil)
+}
+
 // 提交代码
 func (p *ProblemHandler) HandleSubmitProblem(ctx *gin.Context) {
-	// 表单验证
-	form, ok := validateWithJson(ctx, model.SubmitForm{})
-	if !ok {
+	req := &model.SubmitRequest{}
+	err := ctx.ShouldBindBodyWithJSON(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
 
@@ -346,20 +308,39 @@ func (p *ProblemHandler) HandleSubmitProblem(ctx *gin.Context) {
 	md := metadata.Pairs("uid", fmt.Sprintf("%d", uid))
 	c, cancel := context.WithTimeout(metadata.NewOutgoingContext(ctx.Request.Context(), md), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := p.clients.Problem.SubmitProblem(c, &pb.SubmitProblemRequest{
-		ProblemId: form.ProblemID,
-		Title:     form.Title,
-		Lang:      form.Lang,
-		Code:      form.Code,
+	gr, err := p.clients.Problem.SubmitProblem(c, &pb.SubmitProblemRequest{
+		ProblemId: req.ProblemID,
+		Title:     req.Title,
+		Lang:      req.Lang,
+		Code:      req.Code,
 	})
 	if err != nil {
-		logrus.Errorf("problem服务提交代码失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
 
-	result := &model.SubmitResult{
-		TaskId: resp.TaskId,
-	}
-	ResponseOK(ctx, result)
+	ResponseOK(ctx, gr)
 }
+
+// 获取判题任务结果
+func (p *ProblemHandler) HandleGetSubmitResult(ctx *gin.Context) {
+	taskId, exists := ctx.GetQuery("task_id")
+	if !exists || taskId == "" {
+		ResponseBadRequest(ctx, "task_id invalid")
+		return
+	}
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	gr, err := p.clients.Record.QueryJudgeResult(c, &pb.QueryJudgeResultRequest{
+		TaskId: taskId,
+	})
+	if err != nil {
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+
+	ResponseOK(ctx, gr)
+}
+
+// 处理获取用户的AC题目列表
+func (p *ProblemHandler) HandleGetUserSolvedList(ctx *gin.Context) {}

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.0
-// source: comment_service.proto
+// source: comment.proto
 
 package pb
 
@@ -274,5 +274,5 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "comment_service.proto",
+	Metadata: "comment.proto",
 }

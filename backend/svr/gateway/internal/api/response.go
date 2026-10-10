@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"oj-server/common/proto/pb"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // 统一返回格式
@@ -19,10 +22,24 @@ type APIResponse struct {
 
 // --- 通用成功 ---
 func ResponseOK(ctx *gin.Context, data interface{}) {
+	var payload interface{}
+	if msg, ok := data.(proto.Message); ok {
+		b, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(msg)
+		if err != nil {
+			ResponseBadRequest(ctx, err.Error())
+			return
+		}
+		payload = json.RawMessage(b)
+	} else {
+		payload = data
+	}
+
 	ctx.JSON(http.StatusOK, APIResponse{
 		Code:    pb.Error_EN_Success,
 		Message: "success",
-		Data:    data,
+		Data:    payload,
 	})
 }
 

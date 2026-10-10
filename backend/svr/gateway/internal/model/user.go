@@ -5,18 +5,18 @@ import "oj-server/common/proto/pb"
 // binding的逗号之间不能有空格
 
 // ============================ 注册 ============================
-type RegisterForm struct {
+type RegisterRequest struct {
 	Mobile     string `form:"mobile" binding:"required"`
 	PassWord   string `form:"password" binding:"required"`
 	RePassWord string `form:"repassword"  binding:"required"`
 }
 
 // ============================ 登录 ============================
-type LoginFrom struct {
+type LoginRequest struct {
 	Mobile   string `form:"mobile" binding:"required"`
 	PassWord string `form:"password" binding:"required"`
 }
-type LoginWithSmsForm struct {
+type LoginWithSmsRequest struct {
 	Mobile     string `form:"mobile" binding:"required"`
 	CaptchaVal string `form:"captchaVal" binding:"required"`
 }
@@ -26,30 +26,22 @@ type LoginResponse struct {
 }
 
 // ============================ 重置密码 ============================
-type ResetPasswordForm struct {
+type ResetPasswordRequest struct {
 	Mobile     string `form:"mobile" binding:"required"`
 	CaptchaVal string `form:"captchaVal" binding:"required"`
 	PassWord   string `form:"password" binding:"required"`
 }
 
-type UserInfo struct {
-	Uid       int64  `json:"uid"`
-	CreateAt  int64  `json:"create_at"`
-	Mobile    int64  `json:"mobile"`
-	Nickname  string `json:"nickname"`
-	Email     string `json:"email"`
-	Gender    int32  `json:"gender"`
-	Role      int32  `json:"role"`
-	AvatarUrl string `json:"avatar_url"`
-}
-
 // 用户列表分页查询参数
-type QueryUserListParams struct {
+type QueryUserListRequest struct {
 	Page     int32  `form:"page" binding:"required"`
 	PageSize int32  `form:"page_size" binding:"required"`
 	Keyword  string `form:"keyword"`
 }
-type QueryUserListResult struct {
-	Total int64       `json:"total"`
-	List  []*UserInfo `json:"list"`
+
+// 发送短信验证码
+type SendSmsCodeRequest struct {
+	CaptchaID   string `form:"captchaID" binding:"required"`
+	CaptchaCode string `form:"captchaCode" binding:"required"`
+	Mobile      string `form:"mobile" binding:"required"`
 }

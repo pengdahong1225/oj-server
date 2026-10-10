@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.0
-// source: problem_service.proto
+// source: problem.proto
 
 package pb
 
@@ -39,27 +39,16 @@ const (
 //
 // 题目服务接口
 type ProblemServiceClient interface {
-	// 新增题目
 	CreateProblem(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error)
-	// 上传配置文件
 	UploadConfig(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadConfigFileChunk, UploadConfigResponse], error)
-	// 发布题目
 	PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 隐藏题目
 	HideProblem(ctx context.Context, in *HideProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 更新题目信息
 	UpdateProblem(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 删除题目
 	DeleteProblem(ctx context.Context, in *DeleteProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 获取tag列表
 	GetTagList(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTagListResponse, error)
-	// 获取题目列表
 	GetProblemList(ctx context.Context, in *GetProblemListRequest, opts ...grpc.CallOption) (*GetProblemListResponse, error)
-	// 查询题目详情
 	GetProblemDetail(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
-	// 获取题目配置
 	GetProblemConfig(ctx context.Context, in *GetProblemConfigRequest, opts ...grpc.CallOption) (*GetProblemConfigResponse, error)
-	// 提交
 	SubmitProblem(ctx context.Context, in *SubmitProblemRequest, opts ...grpc.CallOption) (*SubmitProblemResponse, error)
 }
 
@@ -190,27 +179,16 @@ func (c *problemServiceClient) SubmitProblem(ctx context.Context, in *SubmitProb
 //
 // 题目服务接口
 type ProblemServiceServer interface {
-	// 新增题目
 	CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error)
-	// 上传配置文件
 	UploadConfig(grpc.ClientStreamingServer[UploadConfigFileChunk, UploadConfigResponse]) error
-	// 发布题目
 	PublishProblem(context.Context, *PublishProblemRequest) (*emptypb.Empty, error)
-	// 隐藏题目
 	HideProblem(context.Context, *HideProblemRequest) (*emptypb.Empty, error)
-	// 更新题目信息
 	UpdateProblem(context.Context, *UpdateProblemRequest) (*emptypb.Empty, error)
-	// 删除题目
 	DeleteProblem(context.Context, *DeleteProblemRequest) (*emptypb.Empty, error)
-	// 获取tag列表
 	GetTagList(context.Context, *emptypb.Empty) (*GetTagListResponse, error)
-	// 获取题目列表
 	GetProblemList(context.Context, *GetProblemListRequest) (*GetProblemListResponse, error)
-	// 查询题目详情
 	GetProblemDetail(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
-	// 获取题目配置
 	GetProblemConfig(context.Context, *GetProblemConfigRequest) (*GetProblemConfigResponse, error)
-	// 提交
 	SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error)
 	mustEmbedUnimplementedProblemServiceServer()
 }
@@ -518,5 +496,5 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "problem_service.proto",
+	Metadata: "problem.proto",
 }

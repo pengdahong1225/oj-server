@@ -40,6 +40,8 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 		user.POST("/reset_password", uh.HandleUserResetPassword)
 		user.GET("/profile", AuthLogin(), uh.HandleGetUserProfile)
 		user.GET("/list", AuthLogin(), Admin(), uh.HandleGetUserList)
+		user.GET("/captcha/image", RateLimitMiddleware(2*time.Second, 50), uh.HandleGetImageCapatcha)
+		user.POST("/captcha/sms", RateLimitMiddleware(2*time.Second, 50), uh.HandleSendSmsCapatcha)
 	}
 
 	// 题目
@@ -47,6 +49,9 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 	problem := rg.Group("/problem")
 	problem.Use(AuthLogin())
 	{
+		problem.GET("/tag_list", ph.HandleGetProblemTagList)
+		problem.GET("/list", ph.HandleGetProblemList)
+		problem.GET("/detail", ph.HandleGetProblemDetail)
 		problem.POST("/add", Admin(), ph.HandleCreateProblem)
 		problem.POST("/upload_config", Admin(), ph.HandleUploadConfig)
 		problem.GET("/download_config", Admin(), ph.HandleDownloadConfig)
@@ -54,10 +59,9 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 		problem.POST("/hide", Admin(), ph.HandleHideProblem)
 		problem.DELETE("", Admin(), ph.HandleDeleteProblem)
 		problem.POST("/update", Admin(), ph.HandleUpdateProblem)
-		problem.GET("/tag_list", ph.HandleGetProblemTagList)
-		problem.GET("/list", ph.HandleGetProblemList)
-		problem.GET("/detail", ph.HandleGetProblemDetail)
 		problem.POST("/submit", ph.HandleSubmitProblem)
+		problem.GET("/result", ph.HandleGetSubmitResult)
+		problem.GET("/solved_list", ph.HandleGetUserSolvedList)
 	}
 
 	// 评论
@@ -77,18 +81,8 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 	record := rg.Group("/record")
 	record.Use(AuthLogin())
 	{
-		record.GET("/rank", rh.HandleGetLeaderboard)           // 排行榜
-		record.GET("/result", rh.HandleGetSubmitResult)        // 本次提交的结果
-		record.GET("/record_list", rh.HandleGetUserRecordList) // 历史提交记录
+		record.GET("/record_list", rh.HandleGetUserRecordList) // 历史提交记录列表
 		record.GET("/record", rh.HandleGetUserRecord)          // 提交记录详情
-		record.GET("/solved_list", rh.HandleGetUserSolvedList) // 已解决题目
-	}
-
-	// 验证码
-	captcha := rg.Group("/captcha")
-	captcha.Use(RateLimitMiddleware(2*time.Second, 50))
-	{
-		captcha.GET("/image", HandleGetImageCode)
-		captcha.POST("/sms", HandleGetSmsCode)
+		record.GET("/rank", rh.HandleGetLeaderboard)           // 排行榜
 	}
 }

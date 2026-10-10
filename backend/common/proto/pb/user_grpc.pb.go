@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.0
-// source: user_service.proto
+// source: user.proto
 
 package pb
 
@@ -26,6 +26,8 @@ const (
 	UserService_ResetUserPassword_FullMethodName  = "/UserService/ResetUserPassword"
 	UserService_GetUserInfoByUid_FullMethodName   = "/UserService/GetUserInfoByUid"
 	UserService_GetUserList_FullMethodName        = "/UserService/GetUserList"
+	UserService_GetImageCapcha_FullMethodName     = "/UserService/GetImageCapcha"
+	UserService_SendSmsCode_FullMethodName        = "/UserService/SendSmsCode"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -34,18 +36,14 @@ const (
 //
 // 用户服务接口
 type UserServiceClient interface {
-	// 注册
 	UserRegister(ctx context.Context, in *UserRegisterRequest, opts ...grpc.CallOption) (*UserRegisterResponse, error)
-	// 登录-账号密码
 	UserLogin(ctx context.Context, in *UserLoginRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
-	// 登录-验证码
 	UserLoginBySmsCode(ctx context.Context, in *UserLoginBySmsCodeRequest, opts ...grpc.CallOption) (*UserLoginResponse, error)
-	// 重置密码
 	ResetUserPassword(ctx context.Context, in *ResetUserPasswordRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 查询用户信息
 	GetUserInfoByUid(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
-	// 查询用户列表
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
+	GetImageCapcha(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetImageCaptchaResponse, error)
+	SendSmsCode(ctx context.Context, in *SendSmsCodeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type userServiceClient struct {
@@ -116,24 +114,40 @@ func (c *userServiceClient) GetUserList(ctx context.Context, in *GetUserListRequ
 	return out, nil
 }
 
+func (c *userServiceClient) GetImageCapcha(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetImageCaptchaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetImageCaptchaResponse)
+	err := c.cc.Invoke(ctx, UserService_GetImageCapcha_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) SendSmsCode(ctx context.Context, in *SendSmsCodeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, UserService_SendSmsCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 //
 // 用户服务接口
 type UserServiceServer interface {
-	// 注册
 	UserRegister(context.Context, *UserRegisterRequest) (*UserRegisterResponse, error)
-	// 登录-账号密码
 	UserLogin(context.Context, *UserLoginRequest) (*UserLoginResponse, error)
-	// 登录-验证码
 	UserLoginBySmsCode(context.Context, *UserLoginBySmsCodeRequest) (*UserLoginResponse, error)
-	// 重置密码
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*emptypb.Empty, error)
-	// 查询用户信息
 	GetUserInfoByUid(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
-	// 查询用户列表
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
+	GetImageCapcha(context.Context, *emptypb.Empty) (*GetImageCaptchaResponse, error)
+	SendSmsCode(context.Context, *SendSmsCodeRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -161,6 +175,12 @@ func (UnimplementedUserServiceServer) GetUserInfoByUid(context.Context, *GetUser
 }
 func (UnimplementedUserServiceServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
+}
+func (UnimplementedUserServiceServer) GetImageCapcha(context.Context, *emptypb.Empty) (*GetImageCaptchaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetImageCapcha not implemented")
+}
+func (UnimplementedUserServiceServer) SendSmsCode(context.Context, *SendSmsCodeRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendSmsCode not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -291,6 +311,42 @@ func _UserService_GetUserList_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetImageCapcha_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetImageCapcha(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetImageCapcha_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetImageCapcha(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_SendSmsCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendSmsCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).SendSmsCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_SendSmsCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).SendSmsCode(ctx, req.(*SendSmsCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -322,7 +378,15 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetUserList",
 			Handler:    _UserService_GetUserList_Handler,
 		},
+		{
+			MethodName: "GetImageCapcha",
+			Handler:    _UserService_GetImageCapcha_Handler,
+		},
+		{
+			MethodName: "SendSmsCode",
+			Handler:    _UserService_SendSmsCode_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "user_service.proto",
+	Metadata: "user.proto",
 }

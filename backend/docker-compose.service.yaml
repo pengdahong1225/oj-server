@@ -9,7 +9,7 @@ networks:
           gateway: 172.20.0.1
 
 services:
-  sandbox:
+  sandbox-c_cpp:
     image: registry.cn-chengdu.aliyuncs.com/aliyun_pdh_space/judge-sandbox:c_cpp
     container_name: sandbox-c_cpp
     privileged: true
@@ -24,7 +24,7 @@ services:
     container_name: gateway-service
     privileged: true
     build:
-      context: ./ # 路径
+      context: ./svr/gateway
       dockerfile: gateway.dockerfile
     volumes:
       - /data/oj/log:/app/log
@@ -37,7 +37,7 @@ services:
     container_name: user-service
     privileged: true
     build:
-      context: ./ # 路径
+      context: ./svr/user
       dockerfile: user.dockerfile
     volumes:
       - /data/oj/log:/app/log
@@ -50,7 +50,7 @@ services:
     container_name: judge-service
     privileged: true
     build:
-      context: ./ # 路径
+      context: ./svr/judge
       dockerfile: judge.dockerfile
     volumes:
       - /data/oj/log:/app/log
@@ -65,7 +65,7 @@ services:
     container_name: problem-service
     privileged: true
     build:
-      context: ./ # 路径
+      context: ./svr/problem
       dockerfile: problem.dockerfile
     volumes:
       - /data/oj/log:/app/log

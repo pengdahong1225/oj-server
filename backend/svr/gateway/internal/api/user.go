@@ -28,11 +28,17 @@ func NewUserHandler(clients *client.Clients) *UserHandler {
 }
 
 func (u *UserHandler) HandleUserLogin(ctx *gin.Context) {
-	form, ok := validateWithForm(ctx, model.LoginFrom{})
-	if !ok {
+	req := &model.LoginRequest{}
+	err := ctx.ShouldBind(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
-	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, err := regexp.MatchString(`^1[3-9]\d{9}$`, req.Mobile)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
+		return
+	}
 	if !ok {
 		ResponseBadRequest(ctx, "手机号格式错误")
 		return
@@ -42,11 +48,11 @@ func (u *UserHandler) HandleUserLogin(ctx *gin.Context) {
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
 	resp, err := u.clients.User.UserLogin(c, &pb.UserLoginRequest{
-		Mobile:   form.Mobile,
-		Password: form.PassWord,
+		Mobile:   req.Mobile,
+		Password: req.PassWord,
 	})
 	if err != nil {
-		logrus.Errorf("UserLogin Failed: %s", err.Error())
+		logrus.Errorf("user login failed: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
@@ -64,7 +70,6 @@ func (u *UserHandler) HandleUserLogin(ctx *gin.Context) {
 		ResponseError(ctx, pb.Error_EN_Failed, "生成token失败")
 		return
 	}
-
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
 
 	ResponseOK(ctx, &model.LoginResponse{
@@ -73,14 +78,17 @@ func (u *UserHandler) HandleUserLogin(ctx *gin.Context) {
 	})
 }
 func (u *UserHandler) HandleUserLoginBySms(ctx *gin.Context) {
-	// 表单验证
-	form, ok := validateWithForm(ctx, model.LoginWithSmsForm{})
-	if !ok {
+	req := &model.LoginWithSmsRequest{}
+	err := ctx.ShouldBind(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
-
-	// 手机号校验
-	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
+	ok, err := regexp.MatchString(`^1[3-9]\d{9}$`, req.Mobile)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
+		return
+	}
 	if !ok {
 		ResponseBadRequest(ctx, "手机号格式错误")
 		return
@@ -90,11 +98,11 @@ func (u *UserHandler) HandleUserLoginBySms(ctx *gin.Context) {
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
 	resp, err := u.clients.User.UserLoginBySmsCode(c, &pb.UserLoginBySmsCodeRequest{
-		Mobile: form.Mobile,
-		Code:   form.CaptchaVal,
+		Mobile: req.Mobile,
+		Code:   req.CaptchaVal,
 	})
 	if err != nil {
-		logrus.Info("login failed: %s", err.Error())
+		logrus.Errorf("user login failed: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
@@ -112,7 +120,6 @@ func (u *UserHandler) HandleUserLoginBySms(ctx *gin.Context) {
 		ResponseError(ctx, pb.Error_EN_Failed, "生成token失败")
 		return
 	}
-
 	ctx.SetCookie("refresh_token", refreshToken, 0, "/", "", true, true)
 
 	ResponseOK(ctx, &model.LoginResponse{
@@ -159,41 +166,17 @@ func (u *UserHandler) HandleReFreshAccessToken(ctx *gin.Context) {
 }
 
 func (u *UserHandler) HandleUserRegister(ctx *gin.Context) {
-	form, ok := validateWithForm(ctx, model.RegisterForm{})
-	if !ok {
-		return
-	}
-	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
-	if !ok {
-		ResponseBadRequest(ctx, "手机号格式错误")
-		return
-	}
-	if form.PassWord != form.RePassWord {
-		ResponseBadRequest(ctx, "两次密码输入不匹配")
-		return
-	}
-
-	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
-	defer cancel()
-	resp, err := u.clients.User.UserRegister(c, &pb.UserRegisterRequest{
-		Mobile:   form.Mobile,
-		Password: form.PassWord,
-	})
+	req := &model.RegisterRequest{}
+	err := ctx.ShouldBind(req)
 	if err != nil {
-		logrus.Errorf("register failed: %s", err.Error())
-		ResponseWithGrpcError(ctx, err)
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
-	ResponseOK(ctx, gin.H{
-		"uid": resp.Uid,
-	})
-}
-func (u *UserHandler) HandleUserResetPassword(ctx *gin.Context) {
-	form, ok := validateWithForm(ctx, model.ResetPasswordForm{})
-	if !ok {
+	ok, err := regexp.MatchString(`^1[3-9]\d{9}$`, req.Mobile)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
-	ok, _ = regexp.MatchString(`^1[3-9]\d{9}$`, form.Mobile)
 	if !ok {
 		ResponseBadRequest(ctx, "手机号格式错误")
 		return
@@ -202,16 +185,50 @@ func (u *UserHandler) HandleUserResetPassword(ctx *gin.Context) {
 	// 调用用户服务
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	_, err := u.clients.User.ResetUserPassword(c, &pb.ResetUserPasswordRequest{
-		Mobile:   form.Mobile,
-		Password: form.PassWord,
-		Code:     form.CaptchaVal,
+	gr, err := u.clients.User.UserRegister(c, &pb.UserRegisterRequest{
+		Mobile:     req.Mobile,
+		Password:   req.PassWord,
+		RePassword: req.RePassWord,
 	})
 	if err != nil {
-		logrus.Info("ResetUserPassword Failed: %s", err.Error())
+		logrus.Errorf("register failed: %s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
+
+	ResponseOK(ctx, gr)
+}
+func (u *UserHandler) HandleUserResetPassword(ctx *gin.Context) {
+	req := &model.ResetPasswordRequest{}
+	err := ctx.ShouldBind(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
+		return
+	}
+	ok, err := regexp.MatchString(`^1[3-9]\d{9}$`, req.Mobile)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
+		return
+	}
+	if !ok {
+		ResponseBadRequest(ctx, "手机号格式错误")
+		return
+	}
+
+	// 调用用户服务
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	_, err = u.clients.User.ResetUserPassword(c, &pb.ResetUserPasswordRequest{
+		Mobile:   req.Mobile,
+		Password: req.PassWord,
+		Code:     req.CaptchaVal,
+	})
+	if err != nil {
+		logrus.Info("reset password failed: %s", err.Error())
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+
 	ResponseOK(ctx, nil)
 }
 
@@ -221,7 +238,6 @@ func (u *UserHandler) HandleGetUserProfile(ctx *gin.Context) {
 	defer cancel()
 	resp, err := u.clients.User.GetUserInfoByUid(c, &pb.GetUserInfoRequest{Uid: uid})
 	if err != nil {
-		logrus.Errorf("用户服务获取用户信息失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
@@ -229,42 +245,28 @@ func (u *UserHandler) HandleGetUserProfile(ctx *gin.Context) {
 }
 
 func (u *UserHandler) HandleGetUserList(ctx *gin.Context) {
-	var params model.QueryUserListParams
-	err := ctx.ShouldBindQuery(&params)
+	req := &model.QueryUserListRequest{}
+	err := ctx.ShouldBindQuery(req)
 	if err != nil {
-		logrus.Errorf("参数校验失败: %s", err.Error())
-		ResponseBadRequest(ctx, "参数验证失败")
+		ResponseBadRequest(ctx, err.Error())
 		return
 	}
+
 	// 调用用户服务
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	resp, err := u.clients.User.GetUserList(c, &pb.GetUserListRequest{
-		Page:     params.Page,
-		PageSize: params.PageSize,
-		Keyword:  params.Keyword,
+	gr, err := u.clients.User.GetUserList(c, &pb.GetUserListRequest{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		Keyword:  req.Keyword,
 	})
 	if err != nil {
 		logrus.Errorf("用户服务获取用户列表失败:%s", err.Error())
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
-	result := &model.QueryUserListResult{
-		Total: resp.Total,
-	}
-	for _, v := range resp.Data {
-		result.List = append(result.List, &model.UserInfo{
-			Uid:      v.Uid,
-			Mobile:   v.Mobile,
-			Nickname: v.Nickname,
-			Email:    v.Email,
-			Gender:   v.Gender,
-			CreateAt: v.CreateAt,
-			Role:     v.Role,
-		})
-	}
 
-	ResponseOK(ctx, result)
+	ResponseOK(ctx, gr)
 }
 func createRefreshAccessToken(uid int64, mobile string, role int32) (string, error) {
 	jwt_builder := jwt_utils.JWTBuilder{
@@ -299,4 +301,38 @@ func createAccessToken(uid int64, mobile string, role int32) (string, error) {
 		},
 	}
 	return jwt_builder.CreateToken(claims)
+}
+
+func (u *UserHandler) HandleGetImageCapatcha(ctx *gin.Context) {
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	gr, err := u.clients.User.GetImageCapcha(c, nil)
+	if err != nil {
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+
+	ResponseOK(ctx, gr)
+}
+func (u *UserHandler) HandleSendSmsCapatcha(ctx *gin.Context) {
+	req := &model.SendSmsCodeRequest{}
+	err := ctx.ShouldBind(req)
+	if err != nil {
+		ResponseBadRequest(ctx, err.Error())
+		return
+	}
+
+	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
+	defer cancel()
+	gr, err := u.clients.User.SendSmsCode(c, &pb.SendSmsCodeRequest{
+		Mobile:      req.Mobile,
+		CaptchaId:   req.CaptchaID,
+		CaptchaCode: req.CaptchaCode,
+	})
+	if err != nil {
+		ResponseWithGrpcError(ctx, err)
+		return
+	}
+
+	ResponseOK(ctx, gr)
 }

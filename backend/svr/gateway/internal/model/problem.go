@@ -11,8 +11,6 @@ type Problem struct {
 	Tags        []string `json:"tags"`
 	Status      int32    `json:"status"`
 }
-
-// 题目配置文件模型
 type ProblemConfig struct {
 	TestCases    []TestCase `json:"test_cases"`
 	CompileLimit Limit      `json:"compile_limit"`
@@ -30,27 +28,24 @@ type Limit struct {
 	ProcLimit   int64 `json:"proc_limit"`
 }
 
+// 题目列表分页查询参数
+type QueryProblemListRequest struct {
+	Page     int32  `form:"page" binding:"required"`
+	PageSize int32  `form:"page_size" binding:"required"`
+	Keyword  string `form:"keyword"`
+	Tag      string `form:"tag"`
+}
+
 // 创建题目表单
-type CreateProblemForm struct {
+type CreateProblemRequest struct {
 	Title       string   `json:"problem_title" binding:"required"`
 	Level       int32    `json:"level" binding:"required"`
 	Tags        []string `json:"tags" binding:"required"`
 	Description string   `json:"description" binding:"required"`
 }
 
-// 代码提交表单
-type SubmitForm struct {
-	ProblemID int64  `json:"problem_id" binding:"required"`
-	Title     string `json:"title" binding:"required"`
-	Lang      string `json:"lang" binding:"required"`
-	Code      string `json:"code" binding:"required"`
-}
-type SubmitResult struct {
-	TaskId string `json:"task_id"`
-}
-
 // 修改题目表单
-type UpdateProblemForm struct {
+type UpdateProblemRequest struct {
 	ProblemID int64    `json:"problem_id" binding:"required"`
 	Title     string   `json:"problem_title"  binding:"required"`
 	Level     int32    `json:"level" binding:"required"`
@@ -58,16 +53,12 @@ type UpdateProblemForm struct {
 	Desc      string   `json:"description" binding:"required"`
 }
 
-// 题目列表分页查询参数
-type QueryProblemListParams struct {
-	Page     int32  `form:"page" binding:"required"`
-	PageSize int32  `form:"page_size" binding:"required"`
-	Keyword  string `form:"keyword"`
-	Tag      string `form:"tag"`
-}
-type QueryProblemListResult struct {
-	Total int64      `json:"total"`
-	List  []*Problem `json:"list"`
+// 代码提交表单
+type SubmitRequest struct {
+	ProblemID int64  `json:"problem_id" binding:"required"`
+	Title     string `json:"title" binding:"required"`
+	Lang      string `json:"lang" binding:"required"`
+	Code      string `json:"code" binding:"required"`
 }
 
 // 查询题目集中哪些题目被用户 AC 了
