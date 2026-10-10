@@ -1,4 +1,27 @@
-name: user-service
-node_id: 1
-port: 9030
-scheme: grpc
+service:
+  name: user
+  node_id: 1
+  port: 9010
+  scheme: grpc
+
+mysql:
+  host: 192.168.2.145
+  port: 3306
+  db: oj_online_server
+  user: root
+  password: 1225@PDH
+
+redis:
+  host: 192.168.2.145
+  port: 6379
+
+registry:
+  host: localhost
+  port: 8500
+
+sms:
+  accessKeyId: ''
+  accessKeySecret: ''
+  endpoint: ''
+  signName: ''
+  templateCode: ''

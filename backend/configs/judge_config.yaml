@@ -1,4 +1,24 @@
-name: judge-service
-node_id: 1
-port: 9020
-scheme: http
+service:
+  name: judge
+  node_id: 1
+  port: 9020
+  scheme: grpc
+
+registry:
+  host: localhost
+  port: 8500
+
+rabbitmq:
+  host: 192.168.2.145
+  port: 5672
+  user: guest
+  password: guest
+  vhost: '/oj'
+
+sandbox:
+  - type: c
+    host: 192.168.2.145
+    port: 5050
+  - type: cpp
+    host: 192.168.2.145
+    port: 5050

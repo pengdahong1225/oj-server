@@ -7,10 +7,9 @@ ENV LOG_MODE=debug \
 WORKDIR /app
 
 RUN if [ ! -d "/app/log" ]; then mkdir -p /app/log; fi
-RUN if [ ! -d "/app/config" ]; then mkdir -p /app/config; fi
+RUN if [ ! -d "/app/configs" ]; then mkdir -p /app/configs; fi
 
-COPY bin/gateway_linux /app
-COPY config/gateway_config.yaml /app/config/gateway_config.yaml
-COPY config/app_config.yaml /app/config/app_config.yaml
+COPY bin/gateway /app
+COPY configs/gateway_config.yaml /app/configs/gateway_config.yaml
 
 ENTRYPOINT ["/app/gateway_linux"]
