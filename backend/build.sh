@@ -7,11 +7,11 @@ build() {
   path=$2
   os=$3
   arch=$4
-  out=./bin
+  out=${path}/bin
 
-  mkdir -p $out
+  mkdir -p "$out"
 
-  GOOS=$os GOARCH=$arch go build -trimpath -o $out/${name} $path
+  GOOS=$os GOARCH=$arch go build -trimpath -o "$out/${name}" "$path"
 
   echo "✔ build $name success for $os/$arch"
 }
