@@ -12,4 +12,6 @@ RUN if [ ! -d "/app/configs" ]; then mkdir -p /app/configs; fi
 COPY bin/gateway /app
 COPY configs/gateway_config.yaml /app/configs/gateway_config.yaml
 
-ENTRYPOINT ["/app/gateway_linux"]
+RUN chmod +x /app/gateway
+
+ENTRYPOINT ["/app/gateway"]

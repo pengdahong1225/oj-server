@@ -1,12 +1,8 @@
 version: '3'
 
 networks:
-  net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-          gateway: 172.20.0.1
+  oj:
+    external: true
 
 services:
   sandbox-c_cpp:
@@ -58,8 +54,8 @@ services:
       - "9020:9020"
     networks:
       - oj
-    depends_on: # 本地服务的依赖，控制启动先后顺序
-      - sandbox
+    depends_on:
+      - sandbox-c_cpp
 
   problem-service:
     container_name: problem-service
@@ -73,3 +69,19 @@ services:
       - "9030:9030"
     networks:
       - oj
+
+  nginx:
+    image: nginx:1.27
+    container_name: nginx
+    restart: always
+    depends_on:
+      - gateway-service
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /etc/nginx/modules-enabled /etc/nginx/sites-enabled && exec nginx -g 'daemon off;'"]
+    volumes:
+      - ./oj.nginx.conf:/etc/nginx/nginx.conf:ro
+      - /data/oj/log/nginx:/var/log/nginx
+      - /data/oj/html/dist:/usr/share/nginx/html/dist 
+    networks:
+      - oj
+    ports:
+      - "80:80"

@@ -9,7 +9,9 @@ WORKDIR /app
 RUN if [ ! -d "/app/log" ]; then mkdir -p /app/log; fi
 RUN if [ ! -d "/app/configs" ]; then mkdir -p /app/configs; fi
 
-COPY bin/user_linux /app
+COPY bin/user /app
 COPY configs/user_config.yaml /app/configs/user_config.yaml
 
-ENTRYPOINT ["/app/user_linux"]
+RUN chmod +x /app/user
+
+ENTRYPOINT ["/app/user"]
