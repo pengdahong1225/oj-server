@@ -81,8 +81,8 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 	record := rg.Group("/record")
 	record.Use(AuthLogin())
 	{
-		record.GET("/record_list", rh.HandleGetUserRecordList) // 历史提交记录列表
-		record.GET("/record", rh.HandleGetUserRecord)          // 提交记录详情
-		record.GET("/rank", rh.HandleGetLeaderboard)           // 排行榜
+		record.GET("/list", rh.HandleGetUserRecordList) // 历史提交记录列表
+		record.GET("/detail", rh.HandleGetUserRecord)   // 提交记录详情
+		record.GET("/rank", rh.HandleGetLeaderboard)    // 排行榜
 	}
 }

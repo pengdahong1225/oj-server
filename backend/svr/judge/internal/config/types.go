@@ -3,7 +3,7 @@ package config
 type Config struct {
 	Service  *Service   `yaml:"service"`
 	Registry *Registry  `yaml:"registry"`
-	MQ       *MQ        `yaml:"mq"`
+	MQ       *MQ        `yaml:"rabbitmq"`
 	SandBox  []*SandBox `yaml:"sandbox"`
 }
 

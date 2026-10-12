@@ -1,0 +1,1107 @@
+{
+  "info": {
+    "_postman_id": "dae07d06-6440-4199-9116-e2fbe1c43a8f",
+    "name": "oj",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "28995959"
+  },
+  "item": [
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "密码登录",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "mobile",
+                  "value": "13800000000",
+                  "type": "text",
+                  "uuid": "8f5bf02c-71d2-4a88-8be8-951188777907"
+                },
+                {
+                  "key": "password",
+                  "value": "1225",
+                  "type": "text",
+                  "uuid": "0d4f2a0e-a571-45d7-a388-e8f6b1b50641"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "验证码登录",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "mobile",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "e33ef683-285d-4aed-8b34-ed08022a68ae"
+                },
+                {
+                  "key": "captchaVal",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "12380d33-85d7-486f-82e9-23def37f69f1"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/login_sms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "login_sms"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "刷新token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "refresh_token",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOjEsIk1vYmlsZSI6MTgwNDgxNTUwMDgsIkF1dGhvcml0eSI6MSwiZXhwIjoxNzMxNDAxMjUxLCJpc3MiOiJNZXNzaSIsIm5iZiI6MTczMDc5NjQ1MX0.2mten-klEkfukKTNZ4u8nyzDATDfgqHlOSrZ0fBxCao",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/refresh_token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "refresh_token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "注册",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "mobile",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "cc28bf20-6592-45fd-83d5-1e25823b8b37"
+                },
+                {
+                  "key": "password",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "19b13d7e-947d-4c0b-8a16-ec538d8698ce"
+                },
+                {
+                  "key": "repassword",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "276cb9d8-337a-4858-bb7f-f21b2f82ecd1"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "重置密码",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "mobile",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "cc28bf20-6592-45fd-83d5-1e25823b8b37"
+                },
+                {
+                  "key": "password",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "19b13d7e-947d-4c0b-8a16-ec538d8698ce"
+                },
+                {
+                  "key": "repassword",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "276cb9d8-337a-4858-bb7f-f21b2f82ecd1"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/reset_password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "reset_password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取用户信息",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3OTE4NzY2ODMsImlzcyI6Ik1lc3NpIiwibmJmIjoxNzkxNzkwMjgzLCJVaWQiOjEsIk1vYmlsZSI6IjEzODAwMDAwMDAwIiwiQXV0aG9yaXR5IjoxLCJUeXBlIjoiYWNjZXNzIn0.l89iMvQ_WakTjsiXdN6CmOCDuiKDAN0oOYG2Laf39Sg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/profile?uid=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "profile"
+              ],
+              "query": [
+                {
+                  "key": "uid",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取用户列表",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3OTE4NzY2ODMsImlzcyI6Ik1lc3NpIiwibmJmIjoxNzkxNzkwMjgzLCJVaWQiOjEsIk1vYmlsZSI6IjEzODAwMDAwMDAwIiwiQXV0aG9yaXR5IjoxLCJUeXBlIjoiYWNjZXNzIn0.l89iMvQ_WakTjsiXdN6CmOCDuiKDAN0oOYG2Laf39Sg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/list?page=1&page_size=10&keyword",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                },
+                {
+                  "key": "keyword",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取图片验证码",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/captcha/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "captcha",
+                "image"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "发送短信验证码",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "captchaID",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "9eba8154-e502-4996-945a-519c4604b377"
+                },
+                {
+                  "key": "captchaCode",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "6a57a871-15dc-48f2-8e52-b986e26cf81f"
+                },
+                {
+                  "key": "mobile",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "4e982cd3-be78-42cf-8b58-18bd119ca545"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/user/captcha/sms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "captcha",
+                "sms"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "problem",
+      "item": [
+        {
+          "name": "获取标签列表",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3OTE4NzY2ODMsImlzcyI6Ik1lc3NpIiwibmJmIjoxNzkxNzkwMjgzLCJVaWQiOjEsIk1vYmlsZSI6IjEzODAwMDAwMDAwIiwiQXV0aG9yaXR5IjoxLCJUeXBlIjoiYWNjZXNzIn0.l89iMvQ_WakTjsiXdN6CmOCDuiKDAN0oOYG2Laf39Sg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/tag_list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "tag_list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取题目列表",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3OTE4NzY2ODMsImlzcyI6Ik1lc3NpIiwibmJmIjoxNzkxNzkwMjgzLCJVaWQiOjEsIk1vYmlsZSI6IjEzODAwMDAwMDAwIiwiQXV0aG9yaXR5IjoxLCJUeXBlIjoiYWNjZXNzIn0.l89iMvQ_WakTjsiXdN6CmOCDuiKDAN0oOYG2Laf39Sg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/list?page=1&page_size=10&keyword&tag",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                },
+                {
+                  "key": "keyword",
+                  "value": null
+                },
+                {
+                  "key": "tag",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取题目信息",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/detail?problem_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "detail"
+              ],
+              "query": [
+                {
+                  "key": "problem_id",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "新增题目",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"problem_title\": \"A+B\",\r\n    \"level\": 1,\r\n    \"tags\": [\r\n        \"入门\",\r\n        \"数学\"\r\n    ],\r\n    \"description\": \"A+B\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "上传题目配置",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "problem_id",
+                  "value": "1",
+                  "type": "text",
+                  "uuid": "2cfb30e5-a31d-496b-994e-e1531b7df8a7"
+                },
+                {
+                  "key": "config_file",
+                  "type": "file",
+                  "uuid": "a676fe3a-035b-4860-aa9c-c5d548706173",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/upload_config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "upload_config"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "下载题目配置",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"problem_title\": \"A+B\",\r\n    \"level\": 1,\r\n    \"tags\": [\r\n        \"入门\",\r\n        \"数学\"\r\n    ],\r\n    \"description\": \"A+B\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/download_config?problem_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "download_config"
+              ],
+              "query": [
+                {
+                  "key": "problem_id",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "发布题目",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "problem_id",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "e3176068-5ed5-4e21-9386-82f942002782"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "publish"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "隐藏题目",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "problem_id",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "e3176068-5ed5-4e21-9386-82f942002782"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/hide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "hide"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "删除题目",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/hide?problem_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "hide"
+              ],
+              "query": [
+                {
+                  "key": "problem_id",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "更新题目信息",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"problem_id\": 1,\r\n    \"problem_title\": \"A+B\",\r\n    \"level\": 1,\r\n    \"tags\": [\r\n        \"入门\",\r\n        \"数学\"\r\n    ],\r\n    \"description\": \"A+B\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "提交代码",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"problem_id\": 1,\r\n    \"title\": \"A+B\",\r\n    \"lang\": \"c++\",\r\n    \"description\": \"#include...\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取判题结果",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/result?task_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "result"
+              ],
+              "query": [
+                {
+                  "key": "task_id",
+                  "value": null,
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取ac列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/problem/solved_list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "problem",
+                "solved_list"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "comment",
+      "item": [
+        {
+          "name": "新增评论",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"obj_id\": 1001,\r\n    \"user_id\": 20001,\r\n    \"user_name\": \"张三\",\r\n    \"user_avatar_url\": \"https://cdn.example.com/avatar/20001.png\",\r\n    \"content\": \"写得很好，学到了！\",\r\n    \"stamp\": 1718000000000,\r\n    \"root_id\": 0,\r\n    \"root_comment_id\": 0,\r\n    \"reply_id\": 0,\r\n    \"reply_comment_id\": 0,\r\n    \"reply_user_name\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comment/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comment",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取顶层评论列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comment/root_list?obj_id&page&page_size",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comment",
+                "root_list"
+              ],
+              "query": [
+                {
+                  "key": "obj_id",
+                  "value": null
+                },
+                {
+                  "key": "page",
+                  "value": null
+                },
+                {
+                  "key": "page_size",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取子评论列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comment/root_list?obj_id&root_id&root_comment_id&reply_id&reply_comment_id&cursor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comment",
+                "root_list"
+              ],
+              "query": [
+                {
+                  "key": "obj_id",
+                  "value": null
+                },
+                {
+                  "key": "root_id",
+                  "value": null
+                },
+                {
+                  "key": "root_comment_id",
+                  "value": null
+                },
+                {
+                  "key": "reply_id",
+                  "value": null
+                },
+                {
+                  "key": "reply_comment_id",
+                  "value": null
+                },
+                {
+                  "key": "cursor",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "点赞评论",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "obj_id",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "06b53f4e-bbeb-4db2-a6a4-89f2675ed4a8"
+                },
+                {
+                  "key": "comment_id",
+                  "value": "",
+                  "type": "text",
+                  "uuid": "3215c17e-26d9-4a99-a2e3-b1f63b5fb283"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comment/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comment",
+                "like"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "删除评论",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/comment?obj_id&comment_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "comment"
+              ],
+              "query": [
+                {
+                  "key": "obj_id",
+                  "value": null
+                },
+                {
+                  "key": "comment_id",
+                  "value": null,
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "record",
+      "item": [
+        {
+          "name": "获取历史提交记录列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/record/list?page&page_size",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "record",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": null
+                },
+                {
+                  "key": "page_size",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取历史提交记录",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/record/detail?record_id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "record",
+                "detail"
+              ],
+              "query": [
+                {
+                  "key": "record_id",
+                  "value": null,
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "获取排行榜",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/record/rank",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "record",
+                "rank"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "沙箱测试-编译",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"cmd\": [\r\n        {\r\n            \"cpuLimit\": 10000000000,\r\n            \"clockLimit\": 2000000000,\r\n            \"memoryLimit\": 104857600,\r\n            \"stackLimit\": 8388608,\r\n            \"procLimit\": 50,\r\n            \"cpuRateLimit\": 0,\r\n            \"cpuSetLimit\": \"\",\r\n            \"strictMemoryLimit\": false,\r\n            \"dataSegmentLimit\": false,\r\n            \"addressSpaceLimit\": false,\r\n            \"args\": [\r\n                \"/usr/bin/gcc\",\r\n                \"main.c\",\r\n                \"-o\",\r\n                \"main\"\r\n            ],\r\n            \"env\": [\r\n                \"PATH=/usr/bin:/bin\"\r\n            ],\r\n            \"files\": [\r\n                {\r\n                    \"content\": \"\"\r\n                },\r\n                {\r\n                    \"max\": 10240,\r\n                    \"name\": \"stdout\"\r\n                },\r\n                {\r\n                    \"max\": 10240,\r\n                    \"name\": \"stderr\"\r\n                }\r\n            ],\r\n            \"tty\": false,\r\n            \"copyIn\": {\r\n                \"main.c\": {\r\n                    \"content\": \"#include \\u003cstdio.h\\u003e\\r\\n\\r\\nint main()\\r\\n{\\r\\n    int a,b;\\r\\n    scanf(\\\"%d%d\\\",\\u0026a,\\u0026b);\\r\\n    printf(\\\"%d\\\\n\\\", a+b);\\r\\n    return 0;\\r\\n}\\r\\n\"\r\n                }\r\n            },\r\n            \"copyOut\": [\r\n                \"stdout\",\r\n                \"stderr\"\r\n            ],\r\n            \"copyOutCached\": [\r\n                \"main\"\r\n            ],\r\n            \"copyOutMax\": 0\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.2.135:5050/run",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "2",
+            "135"
+          ],
+          "port": "5050",
+          "path": [
+            "run"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "沙箱测试-运行",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"cmd\": [{\r\n        \"args\": [\"a\"],\r\n        \"env\": [\"PATH=/usr/bin:/bin\"],\r\n        \"files\": [{\r\n            \"content\": \"1 1\"\r\n        }, {\r\n            \"name\": \"stdout\",\r\n            \"max\": 10240\r\n        }, {\r\n            \"name\": \"stderr\",\r\n            \"max\": 10240\r\n        }],\r\n        \"cpuLimit\": 10000000000,\r\n        \"memoryLimit\": 104857600,\r\n        \"procLimit\": 50,\r\n        \"copyIn\": {\r\n            \"a\": {\r\n                \"fileId\": \"RY2TMQRT\"  //这个缓存文件的 ID 来自上一个请求返回的 fileIds\r\n            }\r\n        }\r\n    }]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.2.135:5050/run",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "2",
+            "135"
+          ],
+          "port": "5050",
+          "path": [
+            "run"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}

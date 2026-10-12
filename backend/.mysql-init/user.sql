@@ -1,6 +1,5 @@
 use oj_online_server;
 
--- 用户信息表
 create table if not exists user_info
 (
     id BIGINT AUTO_INCREMENT,
@@ -18,3 +17,6 @@ create table if not exists user_info
     PRIMARY KEY(id),
     UNIQUE INDEX idx_mobile(mobile)
 )engine = InnoDB charset = utf8mb4;
+
+INSERT IGNORE INTO user_info (mobile, password, nickname, email, gender, role, avatar_url)
+VALUES (13800000000, 'admin123', 'admin', 'admin@example.com', 1, 1, '');
