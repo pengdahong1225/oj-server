@@ -139,11 +139,11 @@ const update_form = ref<API.UpdateProblemForm>({
 const getProblemDetail = async (id: number) => {
     const resp = await queryProblemDetailService(id)
     console.log(resp)
-    update_form.value.problem_id = resp.data.data.problem_id
-    update_form.value.problem_title = resp.data.data.problem_title
-    update_form.value.description = resp.data.data.description
-    update_form.value.level = resp.data.data.level
-    update_form.value.tags = resp.data.data.tags
+    update_form.value.problem_id = Number(resp.data.data.problem.id)
+    update_form.value.problem_title = resp.data.data.problem.title
+    update_form.value.description = resp.data.data.problem.description
+    update_form.value.level = resp.data.data.problem.level
+    update_form.value.tags = resp.data.data.problem.tags
 }
 
 </script>

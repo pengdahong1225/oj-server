@@ -16,9 +16,11 @@ const router = createRouter({
                 { path: '/home', component: () => import('@/pages/home/HomePage.vue') },
                 { path: '/problems', component: () => import('@/pages/problem/ProblemsPage.vue') },
                 { path: '/problem/:id', component: () => import('@/pages/problem/ProblemPage.vue') },
+                { path: '/training', component: () => import('@/pages/training/TrainingPage.vue') },
                 { path: '/contest', component: () => import('@/pages/contest/ContestPage.vue') },
-                { path: '/status', component: () => import('@/pages/status/StatusListPage.vue') },
-                { path: '/status/:id', component: () => import('@/pages/status/StatusPage.vue') },
+                { path: '/judge', component: () => import('@/pages/judge/JudgePage.vue') },
+                { path: '/rank', component: () => import('@/pages/rank/RankPage.vue') },
+                { path: '/discussion', component: () => import('@/pages/discussion/DiscussionPage.vue') },
                 { path: '/user/profile', component: () => import('@/pages/user/UserProfilePage.vue') },
                 { path: '/user/password', component: () => import('@/pages/user/UserPasswordPage.vue') }
             ]

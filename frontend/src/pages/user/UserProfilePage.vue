@@ -40,7 +40,7 @@ const onUpdateAvator = () => {
                         <el-input v-model="userStore.userInfo.uid" disabled />
                     </el-form-item>
                     <el-form-item label="NickName" prop="nickname" style="width: 500px;">
-                        <el-input v-model="userStore.userInfo.nick_name" />
+                        <el-input v-model="userStore.userInfo.nickname" />
                     </el-form-item>
                     <el-form-item label="Mobile" prop="mobile" style="width: 500px;">
                         <el-input v-model="userStore.userInfo.mobile" />
@@ -73,7 +73,7 @@ const onUpdateAvator = () => {
                 <template #header>
                     <div style="text-align: left;"><strong>Avatar</strong></div>
                 </template>
-                <el-avatar shape="circle" :size="90" :src="userStore.userInfo.avatar_url || avatar"
+                <el-avatar shape="circle" :size="90" :src="userStore.userInfo.avatarUrl || avatar"
                     style="margin: 10px;" /><br>
                 <el-button type="primary" @click="onUpdateAvator">
                     update

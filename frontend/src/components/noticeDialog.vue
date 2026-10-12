@@ -1,17 +1,16 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import type { Notice } from '@/types/notice'
 
 const dialogVisible = ref(false)
-const notice = ref<Notice>({
+const notice = ref<API.Notice>({
     content: '',
-    create_at: '',
-    create_by: 0,
+    createAt: '',
+    createBy: 0,
     id: 0,
     status: 0,
     title: ''
 })
-const open = (data: Notice) => {
+const open = (data: API.Notice) => {
     dialogVisible.value = true
     notice.value = data
 }

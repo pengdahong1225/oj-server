@@ -25,14 +25,15 @@ const getProblemList = async () => {
     }
     loading.value = true
     const res = await queryProblemListService(params.value)
-    total.value = res.data.data.total
-    problemList.value = res.data.data.list
+    total.value = Number(res.data.data.total)
+    problemList.value = res.data.data.data
     loading.value = false
 }
 const getProblemTagList = async () => {
     const res = await getProblemTagListService()
-    if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-        tag_list.value = res.data.data
+    const data = res.data.data.data
+    if (Array.isArray(data) && data.length > 0) {
+        tag_list.value = data
     }
 }
 const handleCurrentChange = (page: number) => {
@@ -61,7 +62,7 @@ const onTagClick = (tag: string) => {
         <!-- 表单区域 -->
         <el-form inline class="form">
             <el-form-item style="margin-right: 15px;">
-                <el-input v-model="params.keyword" style="width: 240px" placeholder="problem name"
+                <el-input v-model="params.keyword" style="width: 240px" placeholder="题目名称"
                     :suffix-icon="Search" />
             </el-form-item>
             <el-form-item>
@@ -84,8 +85,8 @@ const onTagClick = (tag: string) => {
             <!-- ID：固定 -->
             <el-table-column label="#" width="100">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="$router.push(`/problem/${row.problem_id}`)">
-                        {{ row.problem_id }}
+                    <el-link type="primary" :underline="false" @click="$router.push(`/problem/${row.id}`)">
+                        {{ row.id }}
                     </el-link>
                 </template>
             </el-table-column>
@@ -93,8 +94,8 @@ const onTagClick = (tag: string) => {
             <!-- Title：自适应 -->
             <el-table-column label="Title">
                 <template #default="{ row }">
-                    <el-link type="primary" :underline="false" @click="$router.push(`/problem/${row.problem_id}`)">
-                        {{ row.problem_title }}
+                    <el-link type="primary" :underline="false" @click="$router.push(`/problem/${row.id}`)">
+                        {{ row.title }}
                     </el-link>
                 </template>
             </el-table-column>

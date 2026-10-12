@@ -40,10 +40,10 @@ export async function getUserInfoService(uid: number) {
 
 /**
  * 查询用户提交记录列表
- * GET /user/record_list
+ * GET /record/list
  */
 export async function queryRecordListService(params: API.QueryRecordListParams) {
-    return request('/record/record_list', {
+    return request('/record/list', {
         method: 'GET',
         params: {
             ...params
@@ -51,13 +51,13 @@ export async function queryRecordListService(params: API.QueryRecordListParams) 
     })
 }
 /**
- * 查询用户提交记录
- * GET /user/record
+ * 查询用户提交记录详情
+ * GET /record/detail
  */
 export async function queryRecordService(id: number) {
-    return request('/record/record', {
+    return request('/record/detail', {
         method: 'GET',
-        params: { id }
+        params: { record_id: id }
     })
 }
 

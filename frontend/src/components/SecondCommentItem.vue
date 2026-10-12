@@ -13,7 +13,7 @@ const emit = defineEmits(['child_comment_reply'])
 
 // 跳转链接
 const user_href = computed(() => {
-    return `/user/${props.comment_data.user_id}`
+    return `/user/${props.comment_data.userId}`
 })
 // 默认头像
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
@@ -21,11 +21,11 @@ const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
 // 内容显示
 const show_content = computed(() => {
     // 如果是回复楼主，不用显示@
-    if (props.comment_data.reply_comment_id === props.comment_data.root_comment_id) {
+    if (props.comment_data.replyCommentId === props.comment_data.rootCommentId) {
         return props.comment_data.content
     }
     else {
-        return '@' + props.comment_data.reply_user_name + ' ' + props.comment_data.content
+        return '@' + props.comment_data.replyUserName + ' ' + props.comment_data.content
     }
 })
 
@@ -38,15 +38,15 @@ const onClickLike = async () => {
     }
 
     const form = <API.CommentLikeForm>{
-        obj_id: props.comment_data.obj_id,
+        obj_id: props.comment_data.objId,
         comment_id: props.comment_data.id,
     }
     const res = await likeCommentService(form)
-    if (res.data.message === 'OK') {
-        if (!props.comment_data.like_count) {
-            props.comment_data.like_count = 0
+    if (res.data.code === 0) {
+        if (!props.comment_data.likeCount) {
+            props.comment_data.likeCount = 0
         }
-        props.comment_data.like_count++
+        props.comment_data.likeCount++
         is_already_like.value = true
     }
 }
@@ -71,19 +71,19 @@ const onCancelReplay = () => {
 const onSubmitComment = async () => {
     // 回复的是root评论，所以root_id和reply_id一样
     const form = <API.AddCommentForm>{
-        obj_id: props.comment_data.obj_id,
+        obj_id: props.comment_data.objId,
         user_id: userStore.userInfo.uid,
         user_name: userStore.userInfo.nickname,
-        user_avatar_url: userStore.userInfo.avatar_url,
+        user_avatar_url: userStore.userInfo.avatarUrl,
         content: reply_comment_input.value,
         // 楼主id跟随回复的子评论
         is_root: false,
-        root_id: props.comment_data.root_id,
-        root_comment_id: props.comment_data.root_comment_id,
+        root_id: props.comment_data.rootId,
+        root_comment_id: props.comment_data.rootCommentId,
         // 回复id
-        reply_id: props.comment_data.user_id,
+        reply_id: props.comment_data.userId,
         reply_comment_id: props.comment_data.id,
-        reply_user_name: props.comment_data.user_name
+        reply_user_name: props.comment_data.userName
     }
 
     emit('child_comment_reply', form)
@@ -99,13 +99,13 @@ const onSubmitComment = async () => {
         <div class="header-area">
             <!-- 头像 -->
             <a class="avatar-link" :href="user_href" target="_blank">
-                <img :src="comment_data.user_avatar_url || defaultAvatar" class="avatar-image" />
+                <img :src="comment_data.userAvatarUrl || defaultAvatar" class="avatar-image" />
             </a>
             <!-- 用户名及发布情况 -->
             <div class="user-pub">
-                <div class="user-name">{{ comment_data.user_name }}</div>
-                <div class="public-info">发布于 {{ comment_data.pub_region || '未知地区' }} {{
-                    formatTime(comment_data.pub_stamp) }}</div>
+                <div class="user-name">{{ comment_data.userName }}</div>
+                <div class="public-info">发布于 {{ comment_data.pubRegion || '未知地区' }} {{
+                    formatTime(comment_data.pubStamp) }}</div>
             </div>
         </div>
         <!-- 内容区域 -->
@@ -130,7 +130,7 @@ const onSubmitComment = async () => {
                             d="M7.04 9.11l3.297-7.419a1 1 0 01.914-.594 3.67 3.67 0 013.67 3.671V7.33h4.028a2.78 2.78 0 012.78 3.2l-1.228 8.01a2.778 2.778 0 01-2.769 2.363H5.019a2.78 2.78 0 01-2.78-2.78V11.89a2.78 2.78 0 012.78-2.78H7.04zm-2.02 2a.78.78 0 00-.781.78v6.232c0 .431.35.78.78.78H6.69V11.11H5.02z"
                             clip-rule="evenodd"></path>
                     </svg>
-                    <span style="margin-left: 3px;"> {{ comment_data.like_count }} </span>
+                    <span style="margin-left: 3px;"> {{ comment_data.likeCount }} </span>
                 </template>
             </el-button>
             <el-button plain @click="onClickReply()">

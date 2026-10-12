@@ -14,7 +14,7 @@ const props = defineProps<{
 
 // 跳转链接
 const user_href = computed(() => {
-    return `/user/${props.comment_data.user_id}`
+    return `/user/${props.comment_data.userId}`
 })
 
 // 默认头像
@@ -33,8 +33,8 @@ const onClickLike = async () => {
         comment_id: props.comment_data.id,
     }
     const resp = await likeCommentService(form)
-    if (resp.data.message === 'success') {
-        props.comment_data.like_count++
+    if (resp.data.code === 0) {
+        props.comment_data.likeCount++
         is_already_like.value = true
     }
 }
@@ -62,37 +62,37 @@ const onSubmitComment = async () => {
         obj_id: props.obj_id,
         user_id: userStore.userInfo.uid,
         user_name: userStore.userInfo.nickname,
-        user_avatar_url: userStore.userInfo.avatar_url,
+        user_avatar_url: userStore.userInfo.avatarUrl,
         content: reply_comment_input.value,
         is_root: false,
-        root_id: props.comment_data.user_id,
+        root_id: props.comment_data.userId,
         root_comment_id: props.comment_data.id,
-        reply_id: props.comment_data.user_id,
+        reply_id: props.comment_data.userId,
         reply_comment_id: props.comment_data.id,
-        reply_user_name: props.comment_data.user_name,
+        reply_user_name: props.comment_data.userName,
     }
     const res = await addCommentService(form)
-    if (res.data.message === 'OK') {
+    if (res.data.code === 0) {
         show_replay_area.value = false
         // 立刻渲染一条评论到第一条
         const new_comment = <API.Comment>{
             id: 0,
-            obj_id: props.obj_id,
-            user_id: userStore.userInfo.uid,
-            user_name: userStore.userInfo.nickname,
-            user_avatar_url: userStore.userInfo.avatar_url,
+            objId: props.obj_id,
+            userId: userStore.userInfo.uid,
+            userName: userStore.userInfo.nickname,
+            userAvatarUrl: userStore.userInfo.avatarUrl,
             content: reply_comment_input.value,
             status: 1,
-            reply_count: 0,
-            like_count: 0,
-            child_count: 0,
-            pub_stamp: Date.now(),
-            pub_region: ' ',
-            is_root: false,
-            root_id: props.comment_data.user_id,
-            root_comment_id: props.comment_data.id,
-            reply_id: props.comment_data.user_id,
-            reply_comment_id: props.comment_data.id,
+            replyCount: 0,
+            likeCount: 0,
+            childCount: 0,
+            pubStamp: Date.now(),
+            pubRegion: ' ',
+            isRoot: false,
+            rootId: props.comment_data.userId,
+            rootCommentId: props.comment_data.id,
+            replyId: props.comment_data.userId,
+            replyCommentId: props.comment_data.id,
         }
         child_list.value.unshift(new_comment)
         reply_comment_input.value = ''
@@ -102,27 +102,27 @@ const onSubmitComment = async () => {
 // 子评论回复
 const child_comment_reply_action = async (form: API.AddCommentForm) => {
     const res = await addCommentService(form)
-    if (res.data.message === 'success') {
+    if (res.data.code === 0) {
         // 立刻渲染一条评论到第一条
         const new_comment = <API.Comment>{
             id: 0,
-            obj_id: form.obj_id,
-            user_id: form.user_id,
-            user_name: form.user_name,
-            user_avatar_url: form.user_avatar_url,
+            objId: form.obj_id,
+            userId: form.user_id,
+            userName: form.user_name,
+            userAvatarUrl: form.user_avatar_url,
             content: form.content,
             status: 1,
-            reply_count: 0,
-            like_count: 0,
-            child_count: 0,
-            pub_stamp: Date.now(),
-            pub_region: ' ',
-            is_root: false,
-            root_id: form.root_id,
-            root_comment_id: form.root_comment_id,
-            reply_id: form.reply_id,
-            reply_comment_id: form.reply_comment_id,
-            reply_user_name: form.reply_user_name
+            replyCount: 0,
+            likeCount: 0,
+            childCount: 0,
+            pubStamp: Date.now(),
+            pubRegion: ' ',
+            isRoot: false,
+            rootId: form.root_id,
+            rootCommentId: form.root_comment_id,
+            replyId: form.reply_id,
+            replyCommentId: form.reply_comment_id,
+            replyUserName: form.reply_user_name
         }
         child_list.value.unshift(new_comment)
     }
@@ -153,16 +153,16 @@ const child_total = ref(0)
 const getChildCommentList = async () => {
     const params = <API.QueryChildCommentListParams>{
         obj_id: props.obj_id,
-        root_id: props.comment_data.user_id,
+        root_id: props.comment_data.userId,
         root_comment_id: props.comment_data.id,
         cursor: child_list_cursor.value
     }
     const resp = await getChildCommentListService(params)
-    child_total.value = resp.data.data.total
-    child_list_cursor.value = resp.data.data.cursor
-    // 插入数组的条件：list不为nil，展示的数据量小于total
-    if (resp.data.data.list && show_count.value < child_total.value) {
-        resp.data.data.list.forEach((item: API.Comment) => {
+    child_total.value = Number(resp.data.data.total)
+    child_list_cursor.value = Number(resp.data.data.cursor)
+    // 插入数组的条件：data不为nil，展示的数据量小于total
+    if (resp.data.data.data && show_count.value < child_total.value) {
+        resp.data.data.data.forEach((item: API.Comment) => {
             child_list.value.push(item)
             show_count.value++
         })
@@ -190,13 +190,13 @@ const onClickHide = () => {
             <div class="header-area">
                 <!-- 头像 -->
                 <a class="avatar-link" :href="user_href" target="_blank">
-                    <img :src="comment_data.user_avatar_url || defaultAvatar" class="avatar-image" />
+                    <img :src="comment_data.userAvatarUrl || defaultAvatar" class="avatar-image" />
                 </a>
                 <!-- 用户名及发布情况 -->
                 <div class="user-pub">
-                    <div class="user-name">{{ comment_data.user_name }}</div>
-                    <div class="public-info">发布于 {{ comment_data.pub_region || '未知地区' }} {{
-                        formatTime(comment_data.pub_stamp) }}</div>
+                    <div class="user-name">{{ comment_data.userName }}</div>
+                    <div class="public-info">发布于 {{ comment_data.pubRegion || '未知地区' }} {{
+                        formatTime(comment_data.pubStamp) }}</div>
                 </div>
             </div>
             <!-- 内容区域 -->
@@ -221,10 +221,10 @@ const onClickHide = () => {
                                 d="M7.04 9.11l3.297-7.419a1 1 0 01.914-.594 3.67 3.67 0 013.67 3.671V7.33h4.028a2.78 2.78 0 012.78 3.2l-1.228 8.01a2.778 2.778 0 01-2.769 2.363H5.019a2.78 2.78 0 01-2.78-2.78V11.89a2.78 2.78 0 012.78-2.78H7.04zm-2.02 2a.78.78 0 00-.781.78v6.232c0 .431.35.78.78.78H6.69V11.11H5.02z"
                                 clip-rule="evenodd"></path>
                         </svg>
-                        <span style="margin-left: 3px;"> {{ comment_data.like_count }} </span>
+                        <span style="margin-left: 3px;"> {{ comment_data.likeCount }} </span>
                     </template>
                 </el-button>
-                <el-button plain @click="onClickExpand()" v-if="comment_data.reply_count > 0">
+                <el-button plain @click="onClickExpand()" v-if="comment_data.replyCount > 0">
                     <template #default>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1.2em" height="1.2em"
                             fill="currentColor"
@@ -233,7 +233,7 @@ const onClickHide = () => {
                                 d="M11.997 21.5a9.5 9.5 0 01-8.49-5.251A9.38 9.38 0 012.5 11.997V11.5c.267-4.88 4.12-8.733 8.945-8.999L12 2.5a9.378 9.378 0 014.25 1.007A9.498 9.498 0 0121.5 12a9.378 9.378 0 01-.856 3.937l.838 4.376a1 1 0 01-1.17 1.17l-4.376-.838a9.381 9.381 0 01-3.939.856zm3.99-2.882l3.254.623-.623-3.253a1 1 0 01.09-.64 7.381 7.381 0 00.792-3.346 7.5 7.5 0 00-4.147-6.708 7.385 7.385 0 00-3.35-.794H11.5c-3.752.208-6.792 3.248-7.002 7.055L4.5 12a7.387 7.387 0 00.794 3.353A7.5 7.5 0 0012 19.5a7.384 7.384 0 003.349-.793 1 1 0 01.639-.09z"
                                 clip-rule="evenodd"></path>
                         </svg>
-                        <span style="margin-left: 3px;">{{ expand_msg }} {{ comment_data.child_count }}条回复 </span>
+                        <span style="margin-left: 3px;">{{ expand_msg }} {{ comment_data.childCount }}条回复 </span>
                     </template>
                 </el-button>
                 <el-button plain @click="onClickReply()">

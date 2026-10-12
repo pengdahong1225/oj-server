@@ -2,5 +2,16 @@
 </script>
 
 <template>
-    <div>contest</div>
+    <div class="container">
+        <el-empty description="比赛 · 开发中" />
+    </div>
 </template>
+
+<style lang="less" scoped>
+.container {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>

@@ -41,8 +41,8 @@ onMounted(() => {
 })
 const route = useRoute()
 const problem = ref<API.Problem>({
-    problem_id: 0,
-    problem_title: '',
+    id: 0,
+    title: '',
     description: '',
     level: 0,
     tags: [],
@@ -50,18 +50,18 @@ const problem = ref<API.Problem>({
 })
 const getProblemDetail = async () => {
     const res = await queryProblemDetailService(Number(route.params.id))
-    problem.value.problem_id = res.data.data.problem_id
-    problem.value.problem_title = res.data.data.problem_title
-    problem.value.description = res.data.data.description
-    problem.value.level = res.data.data.level
-    problem.value.tags = res.data.data.tags
-    problem.value.status = res.data.data.status
+    problem.value.id = Number(res.data.data.problem.id)
+    problem.value.title = res.data.data.problem.title
+    problem.value.description = res.data.data.problem.description
+    problem.value.level = res.data.data.problem.level
+    problem.value.tags = res.data.data.problem.tags
+    problem.value.status = res.data.data.problem.status
 
     // 获取评论列表
     getCommentList()
 }
 const btitle = computed(() => {
-    return problem.value.problem_id + '. ' + problem.value.problem_title
+    return problem.value.id + '. ' + problem.value.title
 })
 const bdescription = computed(() => {
     return marked.parse(problem.value.description)
@@ -80,8 +80,8 @@ const onReset = () => {
 }
 const onSubmit = async () => {
     loading.value = true
-    form.value.problem_id = problem.value.problem_id
-    form.value.title = problem.value.problem_title
+    form.value.problem_id = problem.value.id
+    form.value.title = problem.value.title
     form.value.lang = langMap[form.value.lang]
     const resp = await submitProblemService(form.value)
     loading.value = false
@@ -89,7 +89,7 @@ const onSubmit = async () => {
     // 轮训判题结果
     running.value = true
     timer = setInterval(() => {
-        checkResult(resp.data.data.task_id)
+        checkResult(resp.data.data.taskId)
     }, 1000)
 }
 const langMap: Record<string, string> = {
@@ -105,7 +105,7 @@ let timer = 0
 const MAX_RETRY = 20
 let retryCount = 0
 const running = ref(false)
-const checkResult = async (task_id: number) => {
+const checkResult = async (task_id: string) => {
     retryCount++
 
     const resp = await queryResultService(task_id)
@@ -131,7 +131,7 @@ const checkResult = async (task_id: number) => {
 }
 const result_abstract = ref<API.JudgeResultAbstract>()
 const btype = computed(() => {
-    if (result_abstract.value?.acceptd) {
+    if (result_abstract.value?.accepted) {
         return 'success'
     } else {
         return 'danger'
@@ -180,29 +180,29 @@ const place = computed(() => {
 const new_comment_text = ref('')
 const onSubmitComment = async () => {
     const form = <API.AddCommentForm>{
-        obj_id: problem.value.problem_id,
+        obj_id: problem.value.id,
         user_id: userStore.userInfo.uid,
         user_name: userStore.userInfo.nickname,
-        user_avatar_url: userStore.userInfo.avatar_url,
+        user_avatar_url: userStore.userInfo.avatarUrl,
         content: new_comment_text.value
     }
     const res = await addCommentService(form)
-    if (res.data.message === 'OK') {
+    if (res.data.code === 0) {
         // 立刻渲染一条评论到第一条
         const new_comment = <API.Comment>({
             id: 0,
-            obj_id: problem.value.problem_id,
-            user_id: userStore.userInfo.uid,
-            user_name: userStore.userInfo.nickname,
-            user_avatar_url: userStore.userInfo.avatar_url,
+            objId: problem.value.id,
+            userId: userStore.userInfo.uid,
+            userName: userStore.userInfo.nickname,
+            userAvatarUrl: userStore.userInfo.avatarUrl,
             content: new_comment_text.value,
             status: 1,
-            reply_count: 0,
-            like_count: 0,
-            child_count: 0,
-            pub_stamp: Date.now(),
-            pub_region: ' ',
-            is_root: true
+            replyCount: 0,
+            likeCount: 0,
+            childCount: 0,
+            pubStamp: Date.now(),
+            pubRegion: ' ',
+            isRoot: true
         })
         root_comment_list.value.unshift(new_comment)
         new_comment_text.value = ''
@@ -216,13 +216,13 @@ const root_comment_query_params = ref(<API.QueryRootCommentListParams>{
 const root_comment_list = ref<API.Comment[]>([])
 const root_comment_count = ref(0)
 const getCommentList = async () => {
-    root_comment_query_params.value.obj_id = problem.value.problem_id
+    root_comment_query_params.value.obj_id = problem.value.id
 
     const resp = await getRootCommentListService(root_comment_query_params.value)
-    if (resp.data.data.list) {
-        root_comment_list.value = resp.data.data.list
+    if (resp.data.data.data) {
+        root_comment_list.value = resp.data.data.data
     }
-    root_comment_count.value = resp.data.data.total
+    root_comment_count.value = Number(resp.data.data.total)
 }
 const handleCurrentChange = (page: number) => {
     root_comment_query_params.value.page = page
@@ -333,7 +333,7 @@ const handleCurrentChange = (page: number) => {
                 <div class="comment-list">
                     <!-- 顶层评论 -->
                     <div class="comment-item" v-for="item in root_comment_list" :key="item.id">
-                        <RootCommentItem :comment_data="item" :obj_id="problem.problem_id"></RootCommentItem>
+                        <RootCommentItem :comment_data="item" :obj_id="problem.id"></RootCommentItem>
                     </div>
                     <!-- 分页 -->
                     <el-pagination v-model:current-page="root_comment_query_params.page"

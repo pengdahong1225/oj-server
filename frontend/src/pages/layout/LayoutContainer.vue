@@ -5,9 +5,17 @@ import {
   Position,
   EditPen,
   SwitchButton,
-  CaretBottom
+  CaretBottom,
+  HomeFilled,
+  Grid,
+  Tickets,
+  Trophy,
+  Promotion,
+  DataAnalysis,
+  Comment
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
+import logo from '@/assets/logo.a0924d7d.png'
 import { useUserStore } from '@/stores'
 
 const router = useRouter()
@@ -48,17 +56,41 @@ const handleCommand = (command: string) => {
     <!-- 头部菜单栏 -->
     <el-header class="top">
       <!-- logo -->
-      <span class="logo">PGOJ</span>
+      <img class="logo" :src="logo" alt="OpenOJ" />
 
       <!-- 菜单栏 -->
       <el-menu 
         mode="horizontal" 
         :default-active="$route.path" 
         router>
-        <el-menu-item index="/home">Home</el-menu-item>
-        <el-menu-item index="/problems">Problems</el-menu-item>
-        <el-menu-item index="/contest">Contests</el-menu-item>
-        <el-menu-item index="/status">Status</el-menu-item>
+        <el-menu-item index="/home">
+          <el-icon><HomeFilled /></el-icon>
+          <span>首页</span>
+        </el-menu-item>
+        <el-menu-item index="/problems">
+          <el-icon><Grid /></el-icon>
+          <span>题目</span>
+        </el-menu-item>
+        <el-menu-item index="/training">
+          <el-icon><Tickets /></el-icon>
+          <span>训练</span>
+        </el-menu-item>
+        <el-menu-item index="/contest">
+          <el-icon><Trophy /></el-icon>
+          <span>比赛</span>
+        </el-menu-item>
+        <el-menu-item index="/judge">
+          <el-icon><Promotion /></el-icon>
+          <span>测评</span>
+        </el-menu-item>
+        <el-menu-item index="/rank">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>排名</span>
+        </el-menu-item>
+        <el-menu-item index="/discussion">
+          <el-icon><Comment /></el-icon>
+          <span>讨论</span>
+        </el-menu-item>
       </el-menu>
 
       <!-- 下拉 -->
@@ -86,7 +118,7 @@ const handleCommand = (command: string) => {
       <router-view></router-view>
     </el-main>
 
-    <el-footer>PGOJ ©2024 Created by Peter</el-footer>
+    <el-footer>OpenOJ ©2024 Created by Peter</el-footer>
   </el-container>
 </template>
 
@@ -97,7 +129,7 @@ const handleCommand = (command: string) => {
 
   .top {
     display: flex;
-    background-color: #e8e8e8;
+    background-color: #fff;
     position: relative;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 1;
@@ -110,19 +142,14 @@ const handleCommand = (command: string) => {
       left: 0;
       right: 0;
       height: 10px;
-      background: linear-gradient(to bottom, rgba(232, 232, 232, 0.8), rgba(245, 245, 245, 0));
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), rgba(245, 245, 245, 0));
       pointer-events: none;
     }
 
     .logo {
-      font-size: 24px;
-      font-weight: bold;
-      padding: 0 24px;
-      line-height: 60px;
-      background: linear-gradient(135deg, #000 0%, #ffd700 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      height: 40px;
+      margin: 0 24px;
+      align-self: center;
     }
 
     .el-menu {
@@ -162,7 +189,6 @@ const handleCommand = (command: string) => {
   }
 }
 
-// 深度选择器，覆盖Element Plus菜单的选中状态颜色为黑色
 :deep(.el-menu--horizontal) {
   .el-menu-item {
     &.is-active {

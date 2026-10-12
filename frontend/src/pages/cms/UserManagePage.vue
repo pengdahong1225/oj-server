@@ -22,8 +22,8 @@ const params = ref(<API.QueryUserListParams>{
 const getUserList = async () => {
     loading.value = true
     const resp = await queryUserListService(params.value)
-    total.value = resp.data.data.total
-    userList.value = resp.data.data.list
+    total.value = Number(resp.data.data.total)
+    userList.value = resp.data.data.data
     loading.value = false
 }
 const handleCurrentChange = (page: number) => {
@@ -87,7 +87,7 @@ const onDelete = async (id: number) => {
             </el-table-column>
             <el-table-column label="注册时间">
                 <template #default="{ row }">
-                    {{ formatTime(row.create_at) }}
+                    {{ formatTime(row.createAt) }}
                 </template>
             </el-table-column>
             <el-table-column label="角色">

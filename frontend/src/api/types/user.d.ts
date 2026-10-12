@@ -1,27 +1,28 @@
 namespace API {
-    // 用户信息
+    // 用户信息（响应 protojson camelCase；uid/mobile 为 int64，读取处注意）
     type UserInfo = {
         uid: number;
-        create_at: number;
-        mobile: number;
+        createAt?: number;
+        deleteAt?: number;
+        mobile: string;
         nickname: string;
         email?: string;
         gender?: number;
         role?: number;
-        avatar_url?: string;
+        avatarUrl?: string;
     }
-    // 登录表单
+    // 登录表单（请求体）
     type LoginForm = {
-        mobile: string; // 用户名
-        password: string; // 密码
+        mobile: string;
+        password: string;
     }
-    // 注册表单
+    // 注册表单（请求体）
     type RegisterForm = {
-        mobile: string; // 用户名
-        password: string; // 密码
-        repassword: string; // 确认密码
+        mobile: string;
+        password: string;
+        repassword: string;
     }
-    // 查询用户列表参数
+    // 查询用户列表参数（请求 query）
     type QueryUserListParams = {
         page: number;
         page_size: number;

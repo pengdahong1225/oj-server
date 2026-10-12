@@ -90,13 +90,14 @@ const login = async () => {
   console.log(resp)
   ElMessage.success('登录成功')
   const info = resp.data.data.user_info
-  const user_info = <API.UserProfile>{
+  // 登录接口 user_info 仍是 snake_case（model.LoginResponse + encoding/json）
+  const user_info = <API.UserInfo>{
     uid: info.uid,
     mobile: info.mobile,
-    nick_name: info.nick_name,
+    nickname: info.nick_name,
     gender: info.gender,
     email: info.email,
-    avatar_url: info.avatar_url,
+    avatarUrl: info.avatar_url,
     role: info.role
   }
   userStore.setUserInfo(user_info)

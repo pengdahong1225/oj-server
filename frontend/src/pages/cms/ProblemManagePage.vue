@@ -27,8 +27,8 @@ const params = ref(<API.QueryProblemListParams>{
 const getProblemList = async () => {
     loading.value = true
     const resp = await queryProblemListService(params.value)
-    total.value = resp.data.data.total
-    problemList.value = resp.data.data.list
+    total.value = Number(resp.data.data.total)
+    problemList.value = resp.data.data.data
     loading.value = false
 }
 const handleCurrentChange = (page: number) => {
@@ -51,7 +51,7 @@ const onAddProblem = () => {
     problemEditRef.value.open("create", {})
 }
 const onEdit = (row: API.Problem) => {
-    problemEditRef.value.open("update", row.problem_id)
+    problemEditRef.value.open("update", row.id)
 }
 const onPublish = async (id: number) => {
     const resp = await publishProblemService(id)
@@ -88,7 +88,7 @@ const uploadHeaders = {
 // 上传回调
 const onUploadSuccess = (response: any, row: API.Problem) => {
     if (response.code === 0) {
-        ElMessage.success(`题目 ${row.problem_id} 配置上传成功`)
+        ElMessage.success(`题目 ${row.id} 配置上传成功`)
     } else {
         ElMessage.error(response.message || '上传失败')
     }
@@ -129,13 +129,13 @@ const onSuccess = (mode: string) => {
         <el-table v-loading="loading" :data="problemList">
             <el-table-column label="#" prop="id" width="60">
                 <template #default="{ row }">
-                    {{ row.problem_id }}
+                    {{ row.id }}
                 </template>
             </el-table-column>
 
             <el-table-column label="Title" prop="title" width="150">
                 <template #default="{ row }">
-                    {{ row.problem_title }}
+                    {{ row.title }}
                 </template>
             </el-table-column>
             <el-table-column label="Level" prop="level" width="100">
@@ -153,12 +153,12 @@ const onSuccess = (mode: string) => {
             </el-table-column>
             <el-table-column label="Created At" with="100">
                 <template #default="{ row }">
-                    {{ formatTime(row.create_at) }}
+                    {{ formatTime(row.createAt) }}
                 </template>
             </el-table-column>
             <el-table-column label="Updated At" with="100">
                 <template #default="{ row }">
-                    {{ formatTime(row.update_at) }}
+                    {{ formatTime(row.updateAt) }}
                 </template>
             </el-table-column>
             <el-table-column label="操作">
@@ -167,17 +167,17 @@ const onSuccess = (mode: string) => {
                     <el-button circle plain type="primary" :icon="Edit" @click="onEdit(row)"></el-button>
                     <!-- 发布 -->
                     <el-button v-if="row.status === 1" circle plain type="success" :icon="Open"
-                        @click="onHide(row.problem_id)"></el-button>
+                        @click="onHide(row.id)"></el-button>
                     <!-- 隐藏 -->
                     <el-button v-else circle plain type="info" :icon="TurnOff"
-                        @click="onPublish(row.problem_id)"></el-button>
+                        @click="onPublish(row.id)"></el-button>
                     <!-- 删除 -->
-                    <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.problem_id)"></el-button>
+                    <el-button circle plain type="danger" :icon="Delete" @click="onDelete(row.id)"></el-button>
                     <!-- 上传配置 -->
                     <el-upload :action="uploadUrl" :headers="uploadHeaders"
-                        :data="{problem_id: row.problem_id}"
+                        :data="{problem_id: row.id}"
                         :name="'config_file'"
-                        :show-file-list="false" :on-success="(resp) => onUploadSuccess(resp, row)"
+                        :show-file-list="false" :on-success="(resp: any) => onUploadSuccess(resp, row)"
                         accept=".json">
                         <el-button circle plain type="warning" :icon="Upload">
                         </el-button>

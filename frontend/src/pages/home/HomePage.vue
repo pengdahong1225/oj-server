@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { DataBoard, Refresh, DataAnalysis } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
 import { queryNoticeListService } from '@/api/noticeController'
 
@@ -20,15 +20,9 @@ const handleCurrentChange = (page: number) => {
     params.value.page = page
     queryNoticeList() // 分页切换时重新加载数据
 }
-const handleSearch = () => {
-    params.value.page = 1
-    queryNoticeList()
-}
-const handleReset = () => {
-    params.value.keyword = ''
-    params.value.page = 1
-    queryNoticeList()
-}
+
+// 最近一周过题榜单（后端 leaderboard 尚未实现，暂空）
+const rank_list = ref<Array<{ user_name: string; ac_total: number }>>([])
 
 const queryNoticeList = async () => {
     loading.value = true
@@ -65,19 +59,28 @@ const bannerList = [
 <template>
     <div class="container">
         <!-- 轮播图区域 -->
-        <div class="banner">
+        <el-card class="banner" shadow="hover">
+            <template #header>
+                <div class="banner-title">欢迎使用 OpenOJ</div>
+            </template>
             <el-carousel height="600px">
                 <el-carousel-item v-for="item in bannerList" :key="item">
                     <img :src="item" alt="" height="600px" width="100%" />
                 </el-carousel-item>
             </el-carousel>
-        </div>
+        </el-card>
 
         <!-- 公告区域 -->
         <div class="notice">
             <el-card class="announcements" shadow="hover">
                 <template #header>
-                    <strong>Announcements</strong>
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <el-icon><DataBoard /></el-icon>
+                            <span>公告</span>
+                        </div>
+                        <el-button type="primary" :icon="Refresh" @click="queryNoticeList">刷新</el-button>
+                    </div>
                 </template>
 
                 <el-table v-loading="loading" :data="notice_list">
@@ -93,7 +96,7 @@ const bannerList = [
                     </el-table-column>
                     <el-table-column label="Time" prop="create_at">
                         <template #default="{ row }">
-                            {{ formatTime(row.create_at) }}
+                            {{ formatTime(row.createAt) }}
                         </template>
                     </el-table-column>
 
@@ -107,15 +110,23 @@ const bannerList = [
                     style="margin-top: 20px; justify-content: flex-end;" />
             </el-card>
 
-            <el-card class="search" shadow="hover">
+            <el-card class="rank" shadow="hover">
                 <template #header>
-                    <strong>Search</strong>
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <el-icon><DataAnalysis /></el-icon>
+                            <span>最近一周过题榜单</span>
+                        </div>
+                    </div>
                 </template>
-                <div class="search-input">
-                    <el-input v-model="params.keyword" placeholder="key word" :prefix-icon="Search" />
-                    <el-button type="primary" style="margin-left: 10px;" @click="handleSearch">搜索</el-button>
-                    <el-button style="margin-left: 5px;" @click="handleReset">重置</el-button>
-                </div>
+                <el-table :data="rank_list" stripe>
+                    <el-table-column label="#" type="index" width="60" align="center" />
+                    <el-table-column label="用户名" prop="user_name" align="center" />
+                    <el-table-column label="通过" prop="ac_total" align="center" />
+                    <template #empty>
+                        <el-empty description="暂无数据"></el-empty>
+                    </template>
+                </el-table>
             </el-card>
         </div>
 
@@ -126,13 +137,17 @@ const bannerList = [
 <style lang="less" scoped>
 .container {
     display: block;
-    width: 90%;
+    width: 80%;
     margin: auto;
 
     .banner {
-        border: 1px solid #ffffff;
         margin-bottom: 20px;
-        border-radius: 8px;
+
+        .banner-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
+        }
     }
 
     .notice {
@@ -141,19 +156,28 @@ const bannerList = [
         align-items: flex-start;
         /* 确保卡片顶部对齐，而不会拉伸高度 */
 
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .card-header-left {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 18px;
+                line-height: 1.5;
+            }
+        }
+
         .announcements {
-            width: 70%;
+            width: 65%;
             margin-right: 6px;
         }
 
-        .search {
-            width: 30%;
+        .rank {
+            width: 35%;
             margin-left: 6px;
-
-            .search-input {
-                width: 100%;
-                display: flex;
-            }
         }
     }
 }

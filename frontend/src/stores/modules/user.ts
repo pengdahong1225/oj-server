@@ -10,12 +10,12 @@ export const useUserStore = defineStore('user', () => {
     const userInfo = ref<API.UserInfo>({
         uid: 0,
         nickname: '',
-        avatar_url: '',
-        mobile: 0,
+        avatarUrl: '',
+        mobile: '',
         email: '',
         role: 0,
         gender: 0,
-        create_at: 0,
+        createAt: 0,
     })
     const setUserInfo = (value: API.UserInfo) => {
         userInfo.value = value
@@ -29,12 +29,12 @@ export const useUserStore = defineStore('user', () => {
     const clearUserInfo = () => {
         userInfo.value.uid = 0
         userInfo.value.nickname = ''
-        userInfo.value.avatar_url = ''
-        userInfo.value.mobile = 0
+        userInfo.value.avatarUrl = ''
+        userInfo.value.mobile = ''
         userInfo.value.email = ''
         userInfo.value.role = 0
         userInfo.value.gender = 0
-        userInfo.value.create_at = 0
+        userInfo.value.createAt = 0
         token.value = ''
     }
 
