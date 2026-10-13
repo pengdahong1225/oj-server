@@ -7,6 +7,7 @@ import (
 	"oj-server/common/proto/pb"
 	"oj-server/svr/user/internal/client"
 	"oj-server/svr/user/internal/data"
+	"oj-server/svr/user/internal/model"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -17,12 +18,12 @@ import (
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
-	repo    *data.Repo
+	repo    *data.UserRepo
 	clients *client.Clients
 }
 
 func NewUserService(clients *client.Clients) (*UserService, error) {
-	repo, err := data.NewRepo()
+	repo, err := data.NewUserRepo()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 		logrus.Errorf("parse mobile failed: %s", err.Error())
 		return resp, err
 	}
-	newUser := data.UserInfo{
+	newUser := model.UserInfo{
 		Mobile:    mobile,
 		PassWord:  hash_pwd,
 		NickName:  in.Nickname,

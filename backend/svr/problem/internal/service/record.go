@@ -8,7 +8,6 @@ import (
 	"oj-server/common/proto/pb"
 	"oj-server/pkg/go_pool"
 	"oj-server/pkg/mq"
-	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/client"
 	"oj-server/svr/problem/internal/config"
 	"oj-server/svr/problem/internal/data"
@@ -22,8 +21,7 @@ import (
 // record服务
 type RecordService struct {
 	pb.UnimplementedRecordServiceServer
-	uc *biz.RecordUseCase
-
+	repo           *data.RecordRepo
 	resultConsumer *mq.Consumer
 	clients        *client.Clients
 }
@@ -47,7 +45,7 @@ func NewRecordService(clients *client.Clients) (*RecordService, error) {
 	)
 
 	return &RecordService{
-		uc: biz.NewRecordUseCase(repo),
+		repo: repo,
 		resultConsumer: &mq.Consumer{
 			AmqpClient: amqpClient, // 注入client
 			ExKind:     consts.RabbitMqExchangeKind,
@@ -96,7 +94,7 @@ func (ps *RecordService) ConsumeJudgeResult() {
 func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
 	// 释放锁
 	key := fmt.Sprintf("%s:%d", consts.UserLockPrefix, result.Uid)
-	err := ps.uc.UnLock(key)
+	err := ps.repo.UnLock(key)
 	if err != nil {
 		logrus.Errorf("释放锁失败, err:%s", err.Error())
 	}
@@ -120,7 +118,7 @@ func (ps *RecordService) handleJudgeResult(result *pb.JudgeResult) {
 		logrus.Errorf("proto marshal err：%s", err.Error())
 		return
 	}
-	if err = ps.uc.UpdateSubmitRecord(result.TaskId, record, result.Level); err != nil {
+	if err = ps.repo.UpdateSubmitRecord(result.TaskId, record, result.Level); err != nil {
 		logrus.Errorf("更新record失败, err:%s", err.Error())
 	}
 }
@@ -148,30 +146,30 @@ func (ps *RecordService) SyncLeaderboardByScheduled() {
 // 默认只维护200条数据
 func (ps *RecordService) syncMonthLeaderboard() error {
 	// 从数据库中获取数据
-	lb_list, err := ps.uc.QueryMonthAccomplishLeaderboard(200, time.Now().Format("2006-01"))
+	lb_list, err := ps.repo.QueryMonthAccomplishLeaderboard(200, time.Now().Format("2006-01"))
 	if err != nil {
 		logrus.Errorf("查询排行榜数据失败, err:%s", err.Error())
 		return err
 	}
 	logrus.Debugf("获取月榜数据:%+v", lb_list)
 	// 写入redis
-	return ps.uc.SynchronizeLeaderboard(lb_list, consts.GetMonthLeaderboardKey(), consts.MonthLeaderboardTTL)
+	return ps.repo.SynchronizeLeaderboard(lb_list, consts.GetMonthLeaderboardKey(), consts.MonthLeaderboardTTL)
 }
 func (ps *RecordService) syncDailyLeaderboard() error {
 	// 从数据库中获取数据
-	lb_list, err := ps.uc.QueryDailyAccomplishLeaderboard(200)
+	lb_list, err := ps.repo.QueryDailyAccomplishLeaderboard(200)
 	if err != nil {
 		logrus.Errorf("查询排行榜数据失败, err:%s", err.Error())
 		return err
 	}
 	logrus.Debugf("获取日榜数据:%+v", lb_list)
 	// 写入redis
-	return ps.uc.SynchronizeLeaderboard(lb_list, consts.GetDailyLeaderboardKey(), consts.DailyLeaderboardTTL)
+	return ps.repo.SynchronizeLeaderboard(lb_list, consts.GetDailyLeaderboardKey(), consts.DailyLeaderboardTTL)
 }
 
 // 分页查询用户的提交记录
 func (ps *RecordService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubmitRecordListRequest) (*pb.GetSubmitRecordListResponse, error) {
-	count, records, err := ps.uc.QuerySubmitRecordList(in.Uid, int(in.Page), int(in.PageSize))
+	count, records, err := ps.repo.QuerySubmitRecordList(in.Uid, int(in.Page), int(in.PageSize))
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
@@ -200,7 +198,7 @@ func (ps *RecordService) GetSubmitRecordList(ctx context.Context, in *pb.GetSubm
 
 // 获取提交记录数据
 func (ps *RecordService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubmitRecordRequest) (*pb.GetSubmitRecordResponse, error) {
-	record, err := ps.uc.QuerySubmitRecord(in.Id)
+	record, err := ps.repo.QuerySubmitRecord(in.Id)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err
@@ -213,7 +211,7 @@ func (ps *RecordService) GetSubmitRecordData(ctx context.Context, in *pb.GetSubm
 }
 
 func (ps *RecordService) QueryJudgeResult(ctx context.Context, in *pb.QueryJudgeResultRequest) (*pb.QueryJudgeResultResponse, error) {
-	result, err := ps.uc.QueryJudgeResult(in.TaskId)
+	result, err := ps.repo.QueryJudgeResult(in.TaskId)
 	if err != nil {
 		logrus.Errorln(err.Error())
 		return nil, err

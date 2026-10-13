@@ -28,6 +28,7 @@ type Server struct {
 	problemService *service.ProblemService
 	recordService  *service.RecordService
 	commentService *service.CommentService
+	noticeService  *service.NoticeService
 }
 
 func NewServer() *Server {
@@ -61,6 +62,10 @@ func (s *Server) Init() error {
 		return err
 	}
 	s.commentService, err = service.NewCommentService(s.clients)
+	if err != nil {
+		return err
+	}
+	s.noticeService, err = service.NewNoticeService(s.clients)
 	if err != nil {
 		return err
 	}
@@ -115,6 +120,7 @@ func (s *Server) Run() error {
 	pb.RegisterProblemServiceServer(grpcServer, s.problemService)
 	pb.RegisterRecordServiceServer(grpcServer, s.recordService)
 	pb.RegisterCommentServiceServer(grpcServer, s.commentService)
+	pb.RegisterNoticeServiceServer(grpcServer, s.noticeService)
 	return grpcServer.Serve(listener)
 }
 

@@ -9,29 +9,37 @@ defineProps({
 </script>
 
 <template>
-    <el-card class="page-container">
-        <template #header>
-            <div class="header">
-                <span><strong>{{ title }}</strong></span>
-                <div class="extra">
-                    <slot name="extra"></slot>
-                </div>
+    <div class="page-container">
+        <div class="header">
+            <span><strong>{{ title }}</strong></span>
+            <div class="extra">
+                <slot name="extra"></slot>
             </div>
-        </template>
-
-        <slot></slot>
-    </el-card>
+        </div>
+        <div class="body">
+            <slot></slot>
+        </div>
+    </div>
 </template>
 
 <style lang="less" scoped>
 .page-container {
-    min-height: 100%;
-    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding-bottom: 16px;
+        flex-shrink: 0;
+    }
+
+    .body {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
     }
 }
 </style>

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores'
-import router from '@/router'
+import { showLoginDialog } from '@/utils/loginDialog'
 
 const baseURL = 'http://localhost:9000/api/v1'
 
@@ -34,10 +34,8 @@ const refreshToken = async () => {
     }
     return null;
   } catch (err) {
-    // 刷新失败，跳转到登录页
-    ElMessage.error('登录已过期，请重新登录');
-    router.push('/login');
-    throw err;
+    // 刷新失败，静默处理（由外层统一弹「请先登录」）
+    return null;
   }
 };
 
@@ -82,7 +80,7 @@ instance.interceptors.response.use(
     const originalRequest = err.config
 
     // ---------------------------
-    // 处理 401 Token 过期
+    // 处理 401：未登录 / token 过期
     // ---------------------------
     if (err.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
@@ -104,26 +102,34 @@ instance.interceptors.response.use(
         const newToken = await refreshToken()
         isRefreshing = false
 
-        // 设置新token
-        userStore.setToken(newToken)
+        if (newToken) {
+          // 刷新成功 → 设置新token → 重试
+          userStore.setToken(newToken)
+          originalRequest.headers.Authorization = `Bearer ${newToken}`
+          pendingRequests.forEach((cb) => cb())
+          pendingRequests = []
+          return instance(originalRequest)
+        }
 
-        // 更新 header
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
-
-        // 先执行挂起请求
-        pendingRequests.forEach((cb) => cb())
+        // 刷新失败 → 需要登录
         pendingRequests = []
-
-        // 重试当前请求
-        return instance(originalRequest)
+        userStore.clearToken()
+        ElMessage.warning('请先登录!')
+        showLoginDialog()
+        return Promise.reject(err)
       } catch (refreshErr) {
         isRefreshing = false
         pendingRequests = []
-
-        // 刷新失败 → 清空 token → 跳登录
         userStore.clearToken()
+        ElMessage.warning('请先登录!')
+        showLoginDialog()
         return Promise.reject(refreshErr)
       }
+    }
+
+    // refresh_token 请求自身的错误，静默处理（不弹提示）
+    if (originalRequest?.url?.includes('/user/refresh_token')) {
+      return Promise.reject(err)
     }
 
     // ---------------------------

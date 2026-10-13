@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import { DataBoard, Refresh, DataAnalysis } from '@element-plus/icons-vue'
+import { DataBoard, Refresh, DataAnalysis, Edit, User, Back } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
 import { queryNoticeListService } from '@/api/noticeController'
 
@@ -14,7 +14,6 @@ const total = ref(0)
 const params = ref(<API.QueryNoticeListParams>{
     page: 1,
     page_size: 10, // page_size默认为10
-    keyword: '',
 })
 const handleCurrentChange = (page: number) => {
     params.value.page = page
@@ -28,14 +27,12 @@ const queryNoticeList = async () => {
     loading.value = true
     try {
         const res = await queryNoticeListService(params.value)
-        console.log(res)
-
         if (res.data && res.data.data) {
-            notice_list.value = res.data.data.noticeList || []
             total.value = res.data.data.total || 0
+            notice_list.value = res.data.data.list || []
         }
     } catch (error) {
-        console.error('Failed to query notice list:', error)
+        console.error('failed to query notice list:', error)
         notice_list.value = []
         total.value = 0
     } finally {
@@ -43,10 +40,18 @@ const queryNoticeList = async () => {
     }
 }
 
-const dialogRef = ref()
-const onClick = (index: number) => {
-    console.log(index)
-    dialogRef.value.open(notice_list.value[index])
+// 当前查看的公告（null 表示列表态）
+const current_notice = ref<API.Notice | null>(null)
+const openNotice = (item: API.Notice) => {
+    current_notice.value = item
+}
+// 头部按钮：详情态返回列表 / 列表态刷新
+const onHeaderButtonClick = () => {
+    if (current_notice.value) {
+        current_notice.value = null
+    } else {
+        queryNoticeList()
+    }
 }
 
 // banner
@@ -77,37 +82,42 @@ const bannerList = [
                     <div class="card-header">
                         <div class="card-header-left">
                             <el-icon><DataBoard /></el-icon>
-                            <span>公告</span>
+                            <span>{{ current_notice ? current_notice.title : '公告' }}</span>
                         </div>
-                        <el-button type="primary" :icon="Refresh" @click="queryNoticeList">刷新</el-button>
+                        <el-button type="primary" :icon="current_notice ? Back : Refresh" @click="onHeaderButtonClick">
+                            {{ current_notice ? '返回' : '刷新' }}
+                        </el-button>
                     </div>
                 </template>
 
-                <el-table v-loading="loading" :data="notice_list">
-                    <el-table-column label="#" prop="id" width="80">
-                        <template #default="{ $index, row }">
-                            <el-link type="primary" :underline="false" @click="onClick($index)">{{ row.id }}</el-link>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="Title" prop="title">
-                        <template #default="{ $index, row }">
-                            <el-link type="primary" :underline="false" @click="onClick($index)">{{ row.title }}</el-link>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="Time" prop="create_at">
-                        <template #default="{ row }">
-                            {{ formatTime(row.createAt) }}
-                        </template>
-                    </el-table-column>
+                <!-- 公告详情 -->
+                <div v-if="current_notice" class="notice-detail">
+                    {{ current_notice.content }}
+                </div>
 
-                    <template #empty>
-                        <el-empty description="没有数据"></el-empty>
-                    </template>
-                </el-table>
-                <!-- 分页 -->
-                <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size" :total="total"
-                    :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
-                    style="margin-top: 20px; justify-content: flex-end;" />
+                <!-- 公告列表 -->
+                <div v-else v-loading="loading">
+                    <div class="notice-list">
+                        <div v-for="item in notice_list" :key="item.id" class="notice-item" @click="openNotice(item)">
+                            <div class="notice-item-title">{{ item.title }}</div>
+                            <div class="notice-item-meta">
+                                <span class="meta-item">
+                                    <el-icon><Edit /></el-icon>
+                                    {{ formatTime(item.createAt) }}
+                                </span>
+                                <span class="meta-item">
+                                    <el-icon><User /></el-icon>
+                                    {{ item.createByName || item.createBy }}
+                                </span>
+                            </div>
+                        </div>
+                        <el-empty v-if="notice_list.length === 0" description="没有数据"></el-empty>
+                    </div>
+                    <!-- 分页 -->
+                    <el-pagination v-model:current-page="params.page" v-model:page-size="params.page_size" :total="total"
+                        :background="true" layout="prev, pager, next, jumper" @current-change="handleCurrentChange"
+                        style="margin-top: 20px; justify-content: flex-end;" />
+                </div>
             </el-card>
 
             <el-card class="rank" shadow="hover">
@@ -130,7 +140,6 @@ const bannerList = [
             </el-card>
         </div>
 
-        <notice-dialog ref="dialogRef"></notice-dialog>
     </div>
 </template>
 
@@ -173,6 +182,55 @@ const bannerList = [
         .announcements {
             width: 65%;
             margin-right: 6px;
+
+            .notice-detail {
+                min-height: 200px;
+                padding: 12px 4px;
+                white-space: pre-wrap;
+                word-break: break-word;
+                color: #303133;
+                line-height: 1.7;
+            }
+
+            .notice-list {
+                .notice-item {
+                    border-left: 3px solid var(--el-color-primary);
+                    padding: 8px 16px;
+                    margin-bottom: 12px;
+                    cursor: pointer;
+                    background-color: #f8f9fb;
+                    border-radius: 0 4px 4px 0;
+                    transition: background-color 0.2s;
+
+                    &:hover {
+                        background-color: #eef1f6;
+                    }
+
+                    .notice-item-title {
+                        font-size: 15px;
+                        color: var(--el-color-primary);
+                        margin-bottom: 6px;
+
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
+
+                    .notice-item-meta {
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        font-size: 13px;
+                        color: #909399;
+
+                        .meta-item {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 4px;
+                        }
+                    }
+                }
+            }
         }
 
         .rank {

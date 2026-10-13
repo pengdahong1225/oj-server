@@ -13,6 +13,7 @@ type Clients struct {
 	Problem pb.ProblemServiceClient
 	Record  pb.RecordServiceClient
 	Comment pb.CommentServiceClient
+	Notice  pb.NoticeServiceClient
 }
 
 func NewClients(reg registry.Registry) (*Clients, error) {
@@ -33,5 +34,6 @@ func NewClients(reg registry.Registry) (*Clients, error) {
 		Problem: pb.NewProblemServiceClient(problemConn),
 		Record:  pb.NewRecordServiceClient(problemConn),
 		Comment: pb.NewCommentServiceClient(problemConn),
+		Notice:  pb.NewNoticeServiceClient(problemConn),
 	}, nil
 }

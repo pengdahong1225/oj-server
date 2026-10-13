@@ -36,6 +36,7 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 		user.POST("/login", uh.HandleUserLogin)
 		user.POST("/login_sms", uh.HandleUserLoginBySms)
 		user.POST("/refresh_token", uh.HandleReFreshAccessToken)
+		user.POST("/logout", uh.HandleUserLogout)
 		user.POST("/register", uh.HandleUserRegister)
 		user.POST("/reset_password", uh.HandleUserResetPassword)
 		user.GET("/profile", AuthLogin(), uh.HandleGetUserProfile)
@@ -76,13 +77,25 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 		comment.DELETE("", ch.HandleDeleteComment)
 	}
 
-	// record
+	// record（排行榜公开，提交记录需登录）
 	rh := NewRecordHandler(clients)
 	record := rg.Group("/record")
-	record.Use(AuthLogin())
 	{
-		record.GET("/list", rh.HandleGetUserRecordList) // 历史提交记录列表
-		record.GET("/detail", rh.HandleGetUserRecord)   // 提交记录详情
-		record.GET("/rank", rh.HandleGetLeaderboard)    // 排行榜
+		record.GET("/rank", rh.HandleGetLeaderboard)                          // 排行榜（公开）
+		record.GET("/list", AuthLogin(), rh.HandleGetUserRecordList)          // 历史提交记录列表
+		record.GET("/detail", AuthLogin(), rh.HandleGetUserRecord)            // 提交记录详情
+	}
+
+	// notice（公告 list/detail 公开，增删改/发布/隐藏 需管理员）
+	nh := NewNoticeHandler(clients)
+	notice := rg.Group("/notice")
+	{
+		notice.GET("/list", nh.HandleGetNoticeList)     // 公告列表（公开）
+		notice.GET("/detail", nh.HandleGetNoticeDetail) // 公告详情（公开）
+		notice.POST("/add", AuthLogin(), Admin(), nh.HandleAddNotice)
+		notice.DELETE("/delete", AuthLogin(), Admin(), nh.HandleDeleteNotice)
+		notice.POST("/update", AuthLogin(), Admin(), nh.HandleUpdateNotice)
+		notice.POST("/publish", AuthLogin(), Admin(), nh.HandlePublishNotice)
+		notice.POST("/hide", AuthLogin(), Admin(), nh.HandleHideNotice)
 	}
 }

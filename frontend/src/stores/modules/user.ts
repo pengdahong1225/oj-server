@@ -36,6 +36,8 @@ export const useUserStore = defineStore('user', () => {
         userInfo.value.gender = 0
         userInfo.value.createAt = 0
         token.value = ''
+        // 清除本地持久化的登录态，避免刷新后恢复
+        localStorage.removeItem('user')
     }
 
     return {

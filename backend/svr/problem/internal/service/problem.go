@@ -8,7 +8,6 @@ import (
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
 	"oj-server/pkg/mq"
-	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/client"
 	"oj-server/svr/problem/internal/config"
 	"oj-server/svr/problem/internal/data"
@@ -28,8 +27,7 @@ import (
 // 题目服务
 type ProblemService struct {
 	pb.UnimplementedProblemServiceServer
-	uc *biz.ProblemUseCase
-
+	repo          *data.ProblemRepo
 	judgeProducer *mq.Producer
 	clients       *client.Clients
 }
@@ -52,7 +50,7 @@ func NewProblemService(clients *client.Clients) (*ProblemService, error) {
 	)
 
 	return &ProblemService{
-		uc: biz.NewProblemUseCase(repo), // 注入实现
+		repo: repo, // 注入实现
 		judgeProducer: &mq.Producer{
 			AmqpClient: amqpClient, // 注入client
 			ExKind:     consts.RabbitMqExchangeKind,
@@ -80,7 +78,7 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 		return nil, err
 	}
 
-	id, err := ps.uc.CreateProblem(problem)
+	id, err := ps.repo.CreateProblem(problem)
 	if err != nil {
 		logrus.Errorf("CreateProblem failed, err:%s", err.Error())
 		return nil, err
@@ -106,7 +104,7 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 	problemId, _ := strconv.Atoi(mds[0]) // 转回 int
 
 	// 查询题目是否存在
-	problem, err := ps.uc.QueryProblemData(int64(problemId))
+	problem, err := ps.repo.QueryProblemData(int64(problemId))
 	if err != nil {
 		logrus.Errorf("%s", err.Error())
 		return err
@@ -148,7 +146,7 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 	}
 
 	// 更新数据库
-	if err = ps.uc.UpdateProblemConfig(problem.ID, filePath); err != nil {
+	if err = ps.repo.UpdateProblemConfig(problem.ID, filePath); err != nil {
 		logrus.Errorf("UpdateProblem failed, err:%s", err.Error())
 		return status.Error(codes.Internal, "update problem failed")
 	}
@@ -160,13 +158,13 @@ func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServ
 	})
 }
 func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProblemRequest) (*emptypb.Empty, error) {
-	if err := ps.uc.UpdateProblemStatus(in.Id, 1); err != nil {
+	if err := ps.repo.UpdateProblemStatus(in.Id, 1); err != nil {
 		return nil, err
 	}
 	return nil, nil
 }
 func (ps *ProblemService) HideProblem(ctx context.Context, in *pb.HideProblemRequest) (*emptypb.Empty, error) {
-	if err := ps.uc.UpdateProblemStatus(in.Id, 0); err != nil {
+	if err := ps.repo.UpdateProblemStatus(in.Id, 0); err != nil {
 		return nil, err
 	}
 	return nil, nil
@@ -188,7 +186,7 @@ func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProble
 		return nil, err
 	}
 
-	if err = ps.uc.UpdateProblem(problem); err != nil {
+	if err = ps.repo.UpdateProblem(problem); err != nil {
 		logrus.Errorf("UpdateProblem failed, err:%s", err.Error())
 		return nil, err
 	}
@@ -196,7 +194,7 @@ func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProble
 }
 
 func (ps *ProblemService) DeleteProblem(ctx context.Context, in *pb.DeleteProblemRequest) (*emptypb.Empty, error) {
-	return nil, ps.uc.DeleteProblem(in.Id)
+	return nil, ps.repo.DeleteProblem(in.Id)
 }
 
 func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemListRequest) (*pb.GetProblemListResponse, error) {
@@ -213,7 +211,7 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 	}
 	role, _ := strconv.Atoi(roles[0]) // 转回 int
 
-	total, problems, err := ps.uc.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag, int32(role))
+	total, problems, err := ps.repo.QueryProblemList(int(in.Page), int(in.PageSize), in.Keyword, in.Tag, int32(role))
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +238,7 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 func (ps *ProblemService) GetProblemDetail(ctx context.Context, in *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	resp := &pb.GetProblemResponse{}
 
-	problem, err := ps.uc.QueryProblemData(in.Id)
+	problem, err := ps.repo.QueryProblemData(in.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +284,7 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	}
 
 	// 查询题目信息
-	problem, err := ps.uc.QueryProblemData(in.ProblemId)
+	problem, err := ps.repo.QueryProblemData(in.ProblemId)
 	if err != nil {
 		logrus.Errorf("query problem config url failed:%s", err.Error())
 		return nil, err
@@ -294,7 +292,7 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 
 	// 获取分布式锁
 	key := fmt.Sprintf("%s:%d", consts.UserLockPrefix, uid)
-	_, err = ps.uc.Lock(key, consts.UserLockTTL)
+	_, err = ps.repo.Lock(key, consts.UserLockTTL)
 	if err != nil {
 		logrus.Errorf("lock user failed:%s", err.Error())
 		return nil, fmt.Errorf("判题中")
@@ -315,13 +313,13 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	task_data, err := proto.Marshal(task)
 	if err != nil {
 		logrus.Errorf("marshal failed:%s", err.Error())
-		_ = ps.uc.UnLock(key) // 释放锁
+		_ = ps.repo.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "marshal failed")
 	}
 	// 提交到mq
 	if err = ps.judgeProducer.Publish(task_data); err != nil {
 		logrus.Errorf("publish to mq failed: %v", err)
-		_ = ps.uc.UnLock(key) // 释放锁
+		_ = ps.repo.UnLock(key) // 释放锁
 		return nil, status.Errorf(codes.Internal, "服务器错误")
 	}
 
@@ -346,7 +344,7 @@ func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) 
 	resp := &pb.GetTagListResponse{}
 
 	// 查询所有的标签
-	tagList, err := ps.uc.QueryTagList()
+	tagList, err := ps.repo.QueryTagList()
 	if err != nil {
 		return nil, err
 	}

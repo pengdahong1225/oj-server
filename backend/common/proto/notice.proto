@@ -1,6 +1,18 @@
 syntax = "proto3";
 option go_package = "./;pb";
 
+import "google/protobuf/empty.proto";
+
+service NoticeService{
+  rpc CreateNotice(CreateNoticeRequest) returns(google.protobuf.Empty);
+  rpc DeleteNotice(DeleteNoticeRequest) returns(google.protobuf.Empty);
+  rpc UpdateNotice(UpdateNoticeRequest) returns(google.protobuf.Empty);
+  rpc PublishNotice(PublishNoticeRequest) returns(google.protobuf.Empty);
+  rpc HideNotice(HideNoticeRequest) returns(google.protobuf.Empty);
+  rpc GetNoticeList(GetNoticeListRequest) returns(GetNoticeListResponse);
+  rpc GetNotice(GetNoticeRequest) returns(GetNoticeResponse);
+}
+
 message Notice{
   int64 id = 1;
   string title = 2;
@@ -8,4 +20,40 @@ message Notice{
   string content = 4;
   int32 status = 5;
   int64 create_by = 6;
+}
+
+message CreateNoticeRequest{
+  Notice notice = 1;
+}
+
+message DeleteNoticeRequest{
+  int64 id = 1;
+}
+
+message UpdateNoticeRequest{
+  Notice notice = 1;
+}
+
+message PublishNoticeRequest{
+  int64 id = 1;
+}
+
+message HideNoticeRequest{
+  int64 id = 1;
+}
+
+message GetNoticeListRequest{
+  int32 page = 1;
+  int32 page_size = 2;
+}
+message GetNoticeListResponse{
+  int64 total = 1;
+  repeated Notice list = 2;
+}
+
+message GetNoticeRequest{
+  int64 id = 1;
+}
+message GetNoticeResponse{
+  Notice notice = 1;
 }

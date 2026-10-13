@@ -165,6 +165,12 @@ func (u *UserHandler) HandleReFreshAccessToken(ctx *gin.Context) {
 	})
 }
 
+// 退出登录：清除 refresh_token cookie
+func (u *UserHandler) HandleUserLogout(ctx *gin.Context) {
+	ctx.SetCookie("refresh_token", "", -1, "/", "", true, true)
+	ResponseOK(ctx, nil)
+}
+
 func (u *UserHandler) HandleUserRegister(ctx *gin.Context) {
 	req := &model.RegisterRequest{}
 	err := ctx.ShouldBind(req)

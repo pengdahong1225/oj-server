@@ -28,6 +28,16 @@ export async function userLoginService(form: API.LoginForm) {
     })
 }
 /**
+ * 退出登录
+ * POST /user/logout
+ */
+export async function userLogoutService() {
+    return request('/user/logout', {
+        method: 'POST',
+    })
+}
+
+/**
  * 获取用户信息
  * GET /user/profile
  */

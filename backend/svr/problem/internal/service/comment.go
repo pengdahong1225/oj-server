@@ -4,7 +4,6 @@ import (
 	"context"
 	"oj-server/common/proto/pb"
 	"oj-server/pkg/utils"
-	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/client"
 	"oj-server/svr/problem/internal/data"
 	"oj-server/svr/problem/internal/model"
@@ -18,8 +17,7 @@ import (
 // comment服务
 type CommentService struct {
 	pb.UnimplementedCommentServiceServer
-	uc *biz.CommentUseCase
-
+	repo    *data.CommentRepo
 	clients *client.Clients
 }
 
@@ -31,7 +29,7 @@ func NewCommentService(clients *client.Clients) (*CommentService, error) {
 	}
 
 	return &CommentService{
-		uc:      biz.NewCommentUseCase(repo),
+		repo:    repo,
 		clients: clients,
 	}, nil
 }
@@ -79,15 +77,15 @@ func (cs *CommentService) CreateComment(ctx context.Context, in *pb.CreateCommen
 		comment.PubRegion = info.RegionName
 
 		// 2.校验评论区
-		if !cs.uc.AssertObj(in.ObjId) {
+		if !cs.repo.AssertObj(in.ObjId) {
 			logrus.Errorf("obj[%d] assert failed", in.ObjId)
 			return
 		}
 		// 3.保存评论
 		if comment.IsRoot > 0 {
-			cs.uc.SaveRootComment(comment) // 第一层
+			cs.repo.SaveRootComment(comment) // 第一层
 		} else {
-			cs.uc.SaveChildComment(comment) // 第二层
+			cs.repo.SaveChildComment(comment) // 第二层
 		}
 	}()
 
@@ -96,12 +94,12 @@ func (cs *CommentService) CreateComment(ctx context.Context, in *pb.CreateCommen
 
 func (cs *CommentService) QueryRootComment(ctx context.Context, in *pb.QueryRootCommentRequest) (*pb.QueryRootCommentResponse, error) {
 	// 校验
-	if !cs.uc.AssertObj(in.ObjId) {
+	if !cs.repo.AssertObj(in.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", in.ObjId)
 		return nil, status.Errorf(codes.NotFound, "obj[%d] assert failed", in.ObjId)
 	}
 
-	total, comments, err := cs.uc.QueryRootComment(in.ObjId, int(in.Page), int(in.PageSize))
+	total, comments, err := cs.repo.QueryRootComment(in.ObjId, int(in.Page), int(in.PageSize))
 	if err != nil {
 		logrus.Errorf("query root comment failed, err:%s", err.Error())
 		return nil, status.Errorf(codes.Internal, "query root comment failed")
@@ -137,12 +135,12 @@ func (cs *CommentService) QueryRootComment(ctx context.Context, in *pb.QueryRoot
 }
 func (cs *CommentService) QueryChildComment(ctx context.Context, in *pb.QueryChildCommentRequest) (*pb.QueryChildCommentResponse, error) {
 	// 校验
-	if !cs.uc.AssertObj(in.ObjId) {
+	if !cs.repo.AssertObj(in.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", in.ObjId)
 		return nil, status.Errorf(codes.NotFound, "obj[%d] assert failed", in.ObjId)
 	}
 
-	total, comments, err := cs.uc.QueryChildComment(in.ObjId, in.RootId, in.RootCommentId, in.Cursor)
+	total, comments, err := cs.repo.QueryChildComment(in.ObjId, in.RootId, in.RootCommentId, in.Cursor)
 	if err != nil {
 		logrus.Errorf("query child comment failed, err:%s", err.Error())
 		return nil, status.Errorf(codes.Internal, "query child comment failed")
@@ -179,11 +177,11 @@ func (cs *CommentService) DeleteComment(ctx context.Context, in *pb.DeleteCommen
 }
 func (cs *CommentService) CommentLike(ctx context.Context, in *pb.CommentLikeRequest) (*emptypb.Empty, error) {
 	// 校验
-	if !cs.uc.AssertObj(in.ObjId) {
+	if !cs.repo.AssertObj(in.ObjId) {
 		logrus.Errorf("obj[%d] assert failed", in.ObjId)
 		return nil, status.Errorf(codes.NotFound, "obj[%d] assert failed", in.ObjId)
 	}
 
-	cs.uc.CommentLike(in.ObjId, in.CommentId)
+	cs.repo.CommentLike(in.ObjId, in.CommentId)
 	return &emptypb.Empty{}, nil
 }

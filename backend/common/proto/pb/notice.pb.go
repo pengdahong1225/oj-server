@@ -9,6 +9,7 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -105,18 +106,459 @@ func (x *Notice) GetCreateBy() int64 {
 	return 0
 }
 
+type CreateNoticeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Notice        *Notice                `protobuf:"bytes,1,opt,name=notice,proto3" json:"notice,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateNoticeRequest) Reset() {
+	*x = CreateNoticeRequest{}
+	mi := &file_notice_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateNoticeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateNoticeRequest) ProtoMessage() {}
+
+func (x *CreateNoticeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateNoticeRequest.ProtoReflect.Descriptor instead.
+func (*CreateNoticeRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateNoticeRequest) GetNotice() *Notice {
+	if x != nil {
+		return x.Notice
+	}
+	return nil
+}
+
+type DeleteNoticeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteNoticeRequest) Reset() {
+	*x = DeleteNoticeRequest{}
+	mi := &file_notice_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteNoticeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteNoticeRequest) ProtoMessage() {}
+
+func (x *DeleteNoticeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteNoticeRequest.ProtoReflect.Descriptor instead.
+func (*DeleteNoticeRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DeleteNoticeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type UpdateNoticeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Notice        *Notice                `protobuf:"bytes,1,opt,name=notice,proto3" json:"notice,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateNoticeRequest) Reset() {
+	*x = UpdateNoticeRequest{}
+	mi := &file_notice_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateNoticeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateNoticeRequest) ProtoMessage() {}
+
+func (x *UpdateNoticeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateNoticeRequest.ProtoReflect.Descriptor instead.
+func (*UpdateNoticeRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateNoticeRequest) GetNotice() *Notice {
+	if x != nil {
+		return x.Notice
+	}
+	return nil
+}
+
+type PublishNoticeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishNoticeRequest) Reset() {
+	*x = PublishNoticeRequest{}
+	mi := &file_notice_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishNoticeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishNoticeRequest) ProtoMessage() {}
+
+func (x *PublishNoticeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishNoticeRequest.ProtoReflect.Descriptor instead.
+func (*PublishNoticeRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *PublishNoticeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type HideNoticeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HideNoticeRequest) Reset() {
+	*x = HideNoticeRequest{}
+	mi := &file_notice_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HideNoticeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HideNoticeRequest) ProtoMessage() {}
+
+func (x *HideNoticeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HideNoticeRequest.ProtoReflect.Descriptor instead.
+func (*HideNoticeRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *HideNoticeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetNoticeListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetNoticeListRequest) Reset() {
+	*x = GetNoticeListRequest{}
+	mi := &file_notice_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNoticeListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNoticeListRequest) ProtoMessage() {}
+
+func (x *GetNoticeListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNoticeListRequest.ProtoReflect.Descriptor instead.
+func (*GetNoticeListRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetNoticeListRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetNoticeListRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetNoticeListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	List          []*Notice              `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetNoticeListResponse) Reset() {
+	*x = GetNoticeListResponse{}
+	mi := &file_notice_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNoticeListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNoticeListResponse) ProtoMessage() {}
+
+func (x *GetNoticeListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNoticeListResponse.ProtoReflect.Descriptor instead.
+func (*GetNoticeListResponse) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetNoticeListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetNoticeListResponse) GetList() []*Notice {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+type GetNoticeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetNoticeRequest) Reset() {
+	*x = GetNoticeRequest{}
+	mi := &file_notice_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNoticeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNoticeRequest) ProtoMessage() {}
+
+func (x *GetNoticeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNoticeRequest.ProtoReflect.Descriptor instead.
+func (*GetNoticeRequest) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetNoticeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetNoticeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Notice        *Notice                `protobuf:"bytes,1,opt,name=notice,proto3" json:"notice,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetNoticeResponse) Reset() {
+	*x = GetNoticeResponse{}
+	mi := &file_notice_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNoticeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNoticeResponse) ProtoMessage() {}
+
+func (x *GetNoticeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notice_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNoticeResponse.ProtoReflect.Descriptor instead.
+func (*GetNoticeResponse) Descriptor() ([]byte, []int) {
+	return file_notice_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetNoticeResponse) GetNotice() *Notice {
+	if x != nil {
+		return x.Notice
+	}
+	return nil
+}
+
 var File_notice_proto protoreflect.FileDescriptor
 
 const file_notice_proto_rawDesc = "" +
 	"\n" +
-	"\fnotice.proto\"\x9a\x01\n" +
+	"\fnotice.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x9a\x01\n" +
 	"\x06Notice\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
 	"\tcreate_at\x18\x03 \x01(\tR\bcreateAt\x12\x18\n" +
 	"\acontent\x18\x04 \x01(\tR\acontent\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\x05R\x06status\x12\x1b\n" +
-	"\tcreate_by\x18\x06 \x01(\x03R\bcreateByB\aZ\x05./;pbb\x06proto3"
+	"\tcreate_by\x18\x06 \x01(\x03R\bcreateBy\"6\n" +
+	"\x13CreateNoticeRequest\x12\x1f\n" +
+	"\x06notice\x18\x01 \x01(\v2\a.NoticeR\x06notice\"%\n" +
+	"\x13DeleteNoticeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"6\n" +
+	"\x13UpdateNoticeRequest\x12\x1f\n" +
+	"\x06notice\x18\x01 \x01(\v2\a.NoticeR\x06notice\"&\n" +
+	"\x14PublishNoticeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"#\n" +
+	"\x11HideNoticeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"G\n" +
+	"\x14GetNoticeListRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"J\n" +
+	"\x15GetNoticeListResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x03R\x05total\x12\x1b\n" +
+	"\x04list\x18\x02 \x03(\v2\a.NoticeR\x04list\"\"\n" +
+	"\x10GetNoticeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"4\n" +
+	"\x11GetNoticeResponse\x12\x1f\n" +
+	"\x06notice\x18\x01 \x01(\v2\a.NoticeR\x06notice2\xb7\x03\n" +
+	"\rNoticeService\x12<\n" +
+	"\fCreateNotice\x12\x14.CreateNoticeRequest\x1a\x16.google.protobuf.Empty\x12<\n" +
+	"\fDeleteNotice\x12\x14.DeleteNoticeRequest\x1a\x16.google.protobuf.Empty\x12<\n" +
+	"\fUpdateNotice\x12\x14.UpdateNoticeRequest\x1a\x16.google.protobuf.Empty\x12>\n" +
+	"\rPublishNotice\x12\x15.PublishNoticeRequest\x1a\x16.google.protobuf.Empty\x128\n" +
+	"\n" +
+	"HideNotice\x12\x12.HideNoticeRequest\x1a\x16.google.protobuf.Empty\x12>\n" +
+	"\rGetNoticeList\x12\x15.GetNoticeListRequest\x1a\x16.GetNoticeListResponse\x122\n" +
+	"\tGetNotice\x12\x11.GetNoticeRequest\x1a\x12.GetNoticeResponseB\aZ\x05./;pbb\x06proto3"
 
 var (
 	file_notice_proto_rawDescOnce sync.Once
@@ -130,16 +572,44 @@ func file_notice_proto_rawDescGZIP() []byte {
 	return file_notice_proto_rawDescData
 }
 
-var file_notice_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_notice_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_notice_proto_goTypes = []any{
-	(*Notice)(nil), // 0: Notice
+	(*Notice)(nil),                // 0: Notice
+	(*CreateNoticeRequest)(nil),   // 1: CreateNoticeRequest
+	(*DeleteNoticeRequest)(nil),   // 2: DeleteNoticeRequest
+	(*UpdateNoticeRequest)(nil),   // 3: UpdateNoticeRequest
+	(*PublishNoticeRequest)(nil),  // 4: PublishNoticeRequest
+	(*HideNoticeRequest)(nil),     // 5: HideNoticeRequest
+	(*GetNoticeListRequest)(nil),  // 6: GetNoticeListRequest
+	(*GetNoticeListResponse)(nil), // 7: GetNoticeListResponse
+	(*GetNoticeRequest)(nil),      // 8: GetNoticeRequest
+	(*GetNoticeResponse)(nil),     // 9: GetNoticeResponse
+	(*emptypb.Empty)(nil),         // 10: google.protobuf.Empty
 }
 var file_notice_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: CreateNoticeRequest.notice:type_name -> Notice
+	0,  // 1: UpdateNoticeRequest.notice:type_name -> Notice
+	0,  // 2: GetNoticeListResponse.list:type_name -> Notice
+	0,  // 3: GetNoticeResponse.notice:type_name -> Notice
+	1,  // 4: NoticeService.CreateNotice:input_type -> CreateNoticeRequest
+	2,  // 5: NoticeService.DeleteNotice:input_type -> DeleteNoticeRequest
+	3,  // 6: NoticeService.UpdateNotice:input_type -> UpdateNoticeRequest
+	4,  // 7: NoticeService.PublishNotice:input_type -> PublishNoticeRequest
+	5,  // 8: NoticeService.HideNotice:input_type -> HideNoticeRequest
+	6,  // 9: NoticeService.GetNoticeList:input_type -> GetNoticeListRequest
+	8,  // 10: NoticeService.GetNotice:input_type -> GetNoticeRequest
+	10, // 11: NoticeService.CreateNotice:output_type -> google.protobuf.Empty
+	10, // 12: NoticeService.DeleteNotice:output_type -> google.protobuf.Empty
+	10, // 13: NoticeService.UpdateNotice:output_type -> google.protobuf.Empty
+	10, // 14: NoticeService.PublishNotice:output_type -> google.protobuf.Empty
+	10, // 15: NoticeService.HideNotice:output_type -> google.protobuf.Empty
+	7,  // 16: NoticeService.GetNoticeList:output_type -> GetNoticeListResponse
+	9,  // 17: NoticeService.GetNotice:output_type -> GetNoticeResponse
+	11, // [11:18] is the sub-list for method output_type
+	4,  // [4:11] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_notice_proto_init() }
@@ -153,9 +623,9 @@ func file_notice_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notice_proto_rawDesc), len(file_notice_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   10,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_notice_proto_goTypes,
 		DependencyIndexes: file_notice_proto_depIdxs,

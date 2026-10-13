@@ -9,7 +9,6 @@ import (
 	"log"
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
-	"oj-server/svr/problem/internal/biz"
 	"oj-server/svr/problem/internal/config"
 	"oj-server/svr/problem/internal/model"
 	"os"
@@ -74,6 +73,11 @@ func NewRecordRepo() (*RecordRepo, error) {
 		db_:  db_,
 		rdb_: rdb_,
 	}, nil
+}
+
+type JudgeResultAbstract struct {
+	Accepted bool   `json:"accepted"`
+	Message  string `json:"message"`
 }
 
 // 查询用户的历史提交记录
@@ -374,7 +378,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 
 	// 更新result到redis
 	key := fmt.Sprintf("%s:%s", consts.TaskResultPrefix, taskId)
-	value := biz.JudgeResultAbstract{
+	value := JudgeResultAbstract{
 		Accepted: record.Accepted,
 		Message:  record.Message,
 	}
@@ -395,7 +399,7 @@ func (rr *RecordRepo) UnLock(key string) error {
 	return rr.rdb_.Del(context.Background(), key).Err()
 }
 
-func (rr *RecordRepo) QueryJudgeResult(taskId string) (*biz.JudgeResultAbstract, error) {
+func (rr *RecordRepo) QueryJudgeResult(taskId string) (*JudgeResultAbstract, error) {
 	key := fmt.Sprintf("%s:%s", consts.TaskResultPrefix, taskId)
 	value, err := rr.rdb_.Get(context.Background(), key).Result()
 	if err != nil {
@@ -404,7 +408,7 @@ func (rr *RecordRepo) QueryJudgeResult(taskId string) (*biz.JudgeResultAbstract,
 		}
 		return nil, err
 	}
-	var result biz.JudgeResultAbstract
+	var result JudgeResultAbstract
 
 	if err = json.Unmarshal([]byte(value), &result); err != nil {
 		logrus.Errorf("failed to unmarshal result: %v", err)

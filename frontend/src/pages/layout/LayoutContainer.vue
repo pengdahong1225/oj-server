@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   User,
-  Position,
   EditPen,
   SwitchButton,
   CaretBottom,
@@ -12,14 +12,23 @@ import {
   Trophy,
   Promotion,
   DataAnalysis,
-  Comment
+  Comment,
+  Management,
+  Lock
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
 import logo from '@/assets/logo.a0924d7d.png'
 import { useUserStore } from '@/stores'
+import { userLoginService, userLogoutService } from '@/api/userController'
+import { loginDialogVisible } from '@/utils/loginDialog'
 
 const router = useRouter()
 const userStore = useUserStore()
+// 当前高亮菜单：/admin/* 统一高亮到「管理」
+const activeMenu = computed(() => {
+  const path = router.currentRoute.value.path
+  return path.startsWith('/admin') ? '/admin' : path
+})
 const handleCommand = (command: string) => {
   switch (command) {
     case 'profile':
@@ -38,15 +47,58 @@ const handleCommand = (command: string) => {
           confirmButtonText: 'OK',
           cancelButtonText: 'Cancel',
         }
-      ).then(() => {
+      ).then(async () => {
+        try {
+          await userLogoutService()
+        } catch (e) {
+          // 后端清除 cookie 失败也继续退出
+        }
         userStore.clearUserInfo()
-        router.push('/login')
+        ElMessage.success('已退出登录')
       }).catch(() => { })
       break
-    case 'admin':
-      router.push('/admin')
-      break
   }
+}
+
+// 登录对话框
+const loginLoading = ref(false)
+const loginForm = ref<API.LoginForm>({
+  mobile: '',
+  password: ''
+})
+
+const handleLogin = async () => {
+  if (!loginForm.value.mobile || !loginForm.value.password) {
+    ElMessage.warning('请输入用户名和密码')
+    return
+  }
+  loginLoading.value = true
+  try {
+    const resp = await userLoginService(loginForm.value)
+    ElMessage.success('登录成功')
+    const info = resp.data.data.user_info
+    const user_info = <API.UserInfo>{
+      uid: info.uid,
+      mobile: info.mobile,
+      nickname: info.nick_name,
+      gender: info.gender,
+      email: info.email,
+      avatarUrl: info.avatar_url,
+      role: info.role
+    }
+    userStore.setUserInfo(user_info)
+    userStore.setToken(resp.data.data.access_token)
+    loginDialogVisible.value = false
+    loginForm.value.password = ''
+  } catch (e) {
+    // 错误提示已在 request 拦截器里处理
+  } finally {
+    loginLoading.value = false
+  }
+}
+
+const handleForgotPassword = () => {
+  ElMessage.info('忘记密码功能暂未实现')
 }
 
 </script>
@@ -59,9 +111,9 @@ const handleCommand = (command: string) => {
       <img class="logo" :src="logo" alt="OpenOJ" />
 
       <!-- 菜单栏 -->
-      <el-menu 
-        mode="horizontal" 
-        :default-active="$route.path" 
+      <el-menu
+        mode="horizontal"
+        :default-active="activeMenu"
         router>
         <el-menu-item index="/home">
           <el-icon><HomeFilled /></el-icon>
@@ -91,10 +143,17 @@ const handleCommand = (command: string) => {
           <el-icon><Comment /></el-icon>
           <span>讨论</span>
         </el-menu-item>
+        <el-menu-item v-if="userStore.userInfo.role === 1" index="/admin">
+          <el-icon><Management /></el-icon>
+          <span>管理</span>
+        </el-menu-item>
       </el-menu>
 
-      <!-- 下拉 -->
-      <el-dropdown placement="bottom-end" @command="handleCommand">
+      <!-- 未登录：登录按钮 -->
+      <el-button v-if="!userStore.token" class="login-btn" type="primary" @click="loginDialogVisible = true">登录</el-button>
+
+      <!-- 已登录：下拉菜单 -->
+      <el-dropdown v-else placement="bottom-end" @command="handleCommand">
         <span class="el-dropdown__box">
           <el-avatar :src="avatar" />
           <el-icon>
@@ -107,7 +166,6 @@ const handleCommand = (command: string) => {
             <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
             <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
             <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
-            <el-dropdown-item v-if="userStore.userInfo.role === 1" command="admin" :icon="Position">To CMS</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -120,6 +178,20 @@ const handleCommand = (command: string) => {
 
     <el-footer>OpenOJ ©2024 Created by Peter</el-footer>
   </el-container>
+
+  <!-- 登录对话框 -->
+  <el-dialog v-model="loginDialogVisible" width="400px" :close-on-click-modal="false" class="login-dialog">
+    <template #header>
+      <div class="dialog-title">登录 - OpenOJ</div>
+    </template>
+    <div class="login-body">
+      <el-input v-model="loginForm.mobile" placeholder="用户名" :prefix-icon="User" size="large" clearable />
+      <el-input v-model="loginForm.password" type="password" placeholder="密码" :prefix-icon="Lock" size="large" show-password
+        clearable @keyup.enter="handleLogin" />
+      <el-button type="primary" :loading="loginLoading" size="large" class="login-submit" @click="handleLogin">登录</el-button>
+      <el-button link type="primary" class="forgot-btn" @click="handleForgotPassword">忘记密码</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <style lang="less" scoped>
@@ -150,6 +222,11 @@ const handleCommand = (command: string) => {
       height: 40px;
       margin: 0 24px;
       align-self: center;
+    }
+
+    .login-btn {
+      align-self: center;
+      margin-right: 24px;
     }
 
     .el-menu {
@@ -192,9 +269,41 @@ const handleCommand = (command: string) => {
 :deep(.el-menu--horizontal) {
   .el-menu-item {
     &.is-active {
-      color: #000 !important;
-      border-bottom-color: #000 !important;
+      color: var(--el-color-primary) !important;
+      border-bottom-color: var(--el-color-primary) !important;
     }
   }
+}
+
+.dialog-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.login-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+
+  // 输入框边框颜色
+  --el-input-border-color: rgb(14 116 144);
+  --el-input-hover-border-color: rgb(14 116 144);
+  --el-input-focus-border-color: rgb(14 116 144);
+}
+
+.login-submit {
+  width: 100%;
+}
+
+.forgot-btn {
+  align-self: flex-end;
+}
+</style>
+
+<style lang="less">
+.login-dialog {
+  border-radius: 12px !important;
 }
 </style>

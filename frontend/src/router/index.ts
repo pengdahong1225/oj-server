@@ -7,7 +7,6 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     // 路由规则
     routes: [
-        { path: '/login', component: () => import('@/pages/login/LoginPage.vue') },
         {
             path: '/',
             component: () => import('@/pages/layout/LayoutContainer.vue'), // 一级页面
@@ -22,34 +21,31 @@ const router = createRouter({
                 { path: '/rank', component: () => import('@/pages/rank/RankPage.vue') },
                 { path: '/discussion', component: () => import('@/pages/discussion/DiscussionPage.vue') },
                 { path: '/user/profile', component: () => import('@/pages/user/UserProfilePage.vue') },
-                { path: '/user/password', component: () => import('@/pages/user/UserPasswordPage.vue') }
-            ]
-        },
-        {
-            path: '/admin',
-            component: () => import('@/pages/cms/CmsContainer.vue'), // 一级页面
-            redirect: '/admin/user',
-            children: [
-                { path: '/admin/user', component: () => import('@/pages/cms/UserManagePage.vue') },
-                { path: '/admin/problem', component: () => import('@/pages/cms/ProblemManagePage.vue') },
-                { path: '/admin/contest', component: () => import('@/pages/cms/ContestManagePage.vue') },
-                { path: '/admin/template', component: () => import('@/pages/cms/TemplateManagePage.vue') },
-                { path: '/admin/notice', component: () => import('@/pages/cms/NoticeManagePage.vue') },
+                { path: '/user/password', component: () => import('@/pages/user/UserPasswordPage.vue') },
+                {
+                    path: '/admin',
+                    component: () => import('@/pages/cms/CmsContainer.vue'), // 后台管理（嵌套在主布局中）
+                    redirect: '/admin/user',
+                    children: [
+                        { path: '/admin/user', component: () => import('@/pages/cms/UserManagePage.vue') },
+                        { path: '/admin/problem', component: () => import('@/pages/cms/ProblemManagePage.vue') },
+                        { path: '/admin/contest', component: () => import('@/pages/cms/ContestManagePage.vue') },
+                        { path: '/admin/template', component: () => import('@/pages/cms/TemplateManagePage.vue') },
+                        { path: '/admin/notice', component: () => import('@/pages/cms/NoticeManagePage.vue') },
+                    ]
+                }
             ]
         },
     ]
 })
 
 /**
- * 登录访问拦截
  * 全局权限校验，每次切换页面时都会执行
+ * 访问系统直接进入首页，仅管理员路由需要登录态校验
  */
 router.beforeEach((to) => {
     const userStore = useUserStore()
-    if (!userStore.token && to.path !== '/login') {
-        return '/login'
-    }
-    if (to.path === '/admin' && userStore.userInfo.role !== 1) {
+    if (to.path.startsWith('/admin') && userStore.userInfo.role !== 1) {
         ElMessage.error('权限不足')
         return '/'
     }
