@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
 	"oj-server/pkg/mq"
@@ -22,6 +21,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"gorm.io/gorm"
 )
 
 // 题目服务
@@ -67,9 +67,9 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 	resp := &pb.CreateProblemResponse{}
 
 	problem := &model.Problem{
-		Title:       in.Title,
-		Level:       int8(in.Level),
-		Description: in.Description,
+		Title:  in.Title,
+		Level:  int8(in.Level),
+		Status: model.ProblemStatusPending,
 	}
 	var err error
 	problem.Tags, err = json.Marshal(in.Tags)
@@ -78,85 +78,30 @@ func (ps *ProblemService) CreateProblem(ctx context.Context, in *pb.CreateProble
 		return nil, err
 	}
 
-	id, err := ps.repo.CreateProblem(problem)
+	err = ps.repo.Transaction(func(tx *gorm.DB) error {
+		// 1. 入库拿 id
+		if err := tx.Create(problem).Error; err != nil {
+			return err
+		}
+
+		// 2. 创建题目目录
+		dir := filepath.Join(consts.PackageBaseDir, problem.Title)
+		if err := os.MkdirAll(filepath.Join(dir, "testdata"), 0755); err != nil {
+			return err
+		}
+
+		// 3. 回填 package_dir
+		return tx.Model(&model.Problem{}).Where("id=?", problem.ID).Update("package_dir", dir).Error
+	})
 	if err != nil {
 		logrus.Errorf("CreateProblem failed, err:%s", err.Error())
 		return nil, err
 	}
-	resp.Id = id
+	resp.Id = problem.ID
+
 	return resp, nil
 }
-func (ps *ProblemService) UploadConfig(stream pb.ProblemService_UploadConfigServer) error {
-	var (
-		saveSize int64
-		filePath string
-		writer   io.Writer
-	)
-	// 获取元数据
-	md, ok := metadata.FromIncomingContext(stream.Context())
-	if !ok {
-		return status.Error(codes.Unauthenticated, "no metadata found")
-	}
-	mds := md.Get("problem_id")
-	if len(mds) == 0 {
-		return status.Error(codes.Unauthenticated, "problem_id missing")
-	}
-	problemId, _ := strconv.Atoi(mds[0]) // 转回 int
 
-	// 查询题目是否存在
-	problem, err := ps.repo.QueryProblemData(int64(problemId))
-	if err != nil {
-		logrus.Errorf("%s", err.Error())
-		return err
-	}
-
-	// 创建目录
-	filePath = fmt.Sprintf("%s/%d.json", consts.ProblemConfigPath, problemId)
-	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
-		logrus.Errorf("create dir failed: %v", err)
-		return status.Error(codes.Internal, "create dir failed")
-	}
-	// 创建文件
-	f, err := os.Create(filePath)
-	if err != nil {
-		logrus.Errorf("create file failed: %v", err)
-		return status.Error(codes.Internal, "create file failed")
-	}
-	defer f.Close()
-	writer = f
-
-	// 创建目标文件
-	for {
-		chunk, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			logrus.Errorf("receive chunk failed: %v", err)
-			return status.Error(codes.Internal, "receive chunk failed")
-		}
-
-		// 写入分片
-		if n, err := writer.Write(chunk.Content); err != nil {
-			logrus.Errorf("write chunk failed: %v", err)
-			return status.Error(codes.Internal, "write chunk failed")
-		} else {
-			saveSize += int64(n)
-		}
-	}
-
-	// 更新数据库
-	if err = ps.repo.UpdateProblemConfig(problem.ID, filePath); err != nil {
-		logrus.Errorf("UpdateProblem failed, err:%s", err.Error())
-		return status.Error(codes.Internal, "update problem failed")
-	}
-
-	// 返回成功响应
-	return stream.SendAndClose(&pb.UploadConfigResponse{
-		FilePath: filePath,
-		Size:     saveSize,
-	})
-}
 func (ps *ProblemService) PublishProblem(ctx context.Context, in *pb.PublishProblemRequest) (*emptypb.Empty, error) {
 	if err := ps.repo.UpdateProblemStatus(in.Id, 1); err != nil {
 		return nil, err
@@ -171,13 +116,11 @@ func (ps *ProblemService) HideProblem(ctx context.Context, in *pb.HideProblemReq
 }
 
 // 更新题目基础信息
-// 标题、等级、标签、描述、创建者、状态
 func (ps *ProblemService) UpdateProblem(ctx context.Context, in *pb.UpdateProblemRequest) (*emptypb.Empty, error) {
 	problem := &model.Problem{
-		ID:          in.Data.Id,
-		Title:       in.Data.Title,
-		Level:       int8(in.Data.Level),
-		Description: in.Data.Description,
+		ID:    in.Data.Id,
+		Title: in.Data.Title,
+		Level: int8(in.Data.Level),
 	}
 	var err error
 	problem.Tags, err = json.Marshal(in.Data.Tags)
@@ -218,13 +161,12 @@ func (ps *ProblemService) GetProblemList(ctx context.Context, in *pb.GetProblemL
 	resp.Total = total
 	for _, problem := range problems {
 		pbProblem := &pb.Problem{
-			Id:          problem.ID,
-			CreateAt:    problem.CreateAt.Unix(),
-			UpdateAt:    problem.UpdateAt.Unix(),
-			Title:       problem.Title,
-			Description: problem.Description,
-			Level:       int32(problem.Level),
-			Status:      int32(problem.Status),
+			Id:       problem.ID,
+			CreateAt: problem.CreateAt.Unix(),
+			UpdateAt: problem.UpdateAt.Unix(),
+			Title:    problem.Title,
+			Level:    int32(problem.Level),
+			Status:   int32(problem.Status),
 		}
 		if err = json.Unmarshal(problem.Tags, &pbProblem.Tags); err != nil {
 			logrus.Errorf("json unmarshal failed:%s", err.Error())
@@ -243,13 +185,12 @@ func (ps *ProblemService) GetProblemDetail(ctx context.Context, in *pb.GetProble
 		return nil, err
 	}
 	resp.Problem = &pb.Problem{
-		Id:          problem.ID,
-		CreateAt:    problem.CreateAt.Unix(),
-		UpdateAt:    problem.UpdateAt.Unix(),
-		Title:       problem.Title,
-		Description: problem.Description,
-		Level:       int32(problem.Level),
-		Status:      int32(problem.Status),
+		Id:       problem.ID,
+		CreateAt: problem.CreateAt.Unix(),
+		UpdateAt: problem.UpdateAt.Unix(),
+		Title:    problem.Title,
+		Level:    int32(problem.Level),
+		Status:   int32(problem.Status),
 	}
 	if err = json.Unmarshal(problem.Tags, &resp.Problem.Tags); err != nil {
 		logrus.Errorf("json unmarshal failed:%s", err.Error())
@@ -337,7 +278,7 @@ func (ps *ProblemService) queryUserName(uid int64) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return resp.Data.Nickname, nil
+	return resp.Data.Username, nil
 }
 
 func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) (*pb.GetTagListResponse, error) {
@@ -350,4 +291,8 @@ func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) 
 	}
 	resp.Data = tagList
 	return resp, nil
+}
+
+func (ps *ProblemService) ValidateProblems(ctx context.Context, in *pb.ValidateProblemsRequest) (*emptypb.Empty, error) {
+
 }

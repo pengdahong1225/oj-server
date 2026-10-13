@@ -37,9 +37,9 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 		user.POST("/login_sms", uh.HandleUserLoginBySms)
 		user.POST("/refresh_token", uh.HandleReFreshAccessToken)
 		user.POST("/logout", uh.HandleUserLogout)
-		user.POST("/register", uh.HandleUserRegister)
 		user.POST("/reset_password", uh.HandleUserResetPassword)
 		user.GET("/profile", AuthLogin(), uh.HandleGetUserProfile)
+		user.POST("/add", AuthLogin(), Admin(), uh.HandleCreateUser)
 		user.GET("/list", AuthLogin(), Admin(), uh.HandleGetUserList)
 		user.GET("/captcha/image", RateLimitMiddleware(2*time.Second, 50), uh.HandleGetImageCapatcha)
 		user.POST("/captcha/sms", RateLimitMiddleware(2*time.Second, 50), uh.HandleSendSmsCapatcha)
@@ -54,8 +54,6 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 		problem.GET("/list", ph.HandleGetProblemList)
 		problem.GET("/detail", ph.HandleGetProblemDetail)
 		problem.POST("/add", Admin(), ph.HandleCreateProblem)
-		problem.POST("/upload_config", Admin(), ph.HandleUploadConfig)
-		problem.GET("/download_config", Admin(), ph.HandleDownloadConfig)
 		problem.POST("/publish", Admin(), ph.HandlePublishProblem)
 		problem.POST("/hide", Admin(), ph.HandleHideProblem)
 		problem.DELETE("", Admin(), ph.HandleDeleteProblem)
@@ -81,9 +79,9 @@ func initRouters(rg *gin.RouterGroup, clients *client.Clients) {
 	rh := NewRecordHandler(clients)
 	record := rg.Group("/record")
 	{
-		record.GET("/rank", rh.HandleGetLeaderboard)                          // 排行榜（公开）
-		record.GET("/list", AuthLogin(), rh.HandleGetUserRecordList)          // 历史提交记录列表
-		record.GET("/detail", AuthLogin(), rh.HandleGetUserRecord)            // 提交记录详情
+		record.GET("/rank", rh.HandleGetLeaderboard)                 // 排行榜（公开）
+		record.GET("/list", AuthLogin(), rh.HandleGetUserRecordList) // 历史提交记录列表
+		record.GET("/detail", AuthLogin(), rh.HandleGetUserRecord)   // 提交记录详情
 	}
 
 	// notice（公告 list/detail 公开，增删改/发布/隐藏 需管理员）

@@ -1,18 +1,23 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type UserInfo struct {
-	ID        int64     `gorm:"<-:false;primary_key;autoIncrement;column:id"`
-	CreateAt  time.Time `gorm:"<-:false;column:create_at"`
-	DeletedAt time.Time `gorm:"<-:false;column:delete_at"`
-	Mobile    int64     `gorm:"column:mobile;unique"`
-	PassWord  string    `gorm:"column:password"`
-	NickName  string    `gorm:"column:nickname"`
-	Email     string    `gorm:"column:email"`
-	Gender    int32     `gorm:"column:gender"`
-	Role      int32     `gorm:"column:role"`
-	AvatarUrl string    `gorm:"column:avatar_url"`
+	ID        int64          `gorm:"column:id;primaryKey;autoIncrement"`
+	CreateAt  time.Time      `gorm:"column:create_at;autoCreateTime"`
+	UpdateAt  time.Time      `gorm:"column:update_at;autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"column:delete_at;index"`
+
+	Mobile    int64  `gorm:"column:mobile;uniqueIndex;not null"`
+	Password  string `gorm:"column:password;not null"`
+	Username  string `gorm:"column:username;default:新用户"`
+	Email     string `gorm:"column:email;default:''"`
+	Role      int32  `gorm:"column:role;default:0"`
+	AvatarURL string `gorm:"column:avatar_url;default:''"`
 }
 
 func (UserInfo) TableName() string {

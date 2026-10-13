@@ -21,7 +21,6 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ProblemService_CreateProblem_FullMethodName    = "/ProblemService/CreateProblem"
-	ProblemService_UploadConfig_FullMethodName     = "/ProblemService/UploadConfig"
 	ProblemService_PublishProblem_FullMethodName   = "/ProblemService/PublishProblem"
 	ProblemService_HideProblem_FullMethodName      = "/ProblemService/HideProblem"
 	ProblemService_UpdateProblem_FullMethodName    = "/ProblemService/UpdateProblem"
@@ -31,6 +30,7 @@ const (
 	ProblemService_GetProblemDetail_FullMethodName = "/ProblemService/GetProblemDetail"
 	ProblemService_GetProblemConfig_FullMethodName = "/ProblemService/GetProblemConfig"
 	ProblemService_SubmitProblem_FullMethodName    = "/ProblemService/SubmitProblem"
+	ProblemService_ValidateProblems_FullMethodName = "/ProblemService/ValidateProblems"
 )
 
 // ProblemServiceClient is the client API for ProblemService service.
@@ -40,7 +40,6 @@ const (
 // 题目服务接口
 type ProblemServiceClient interface {
 	CreateProblem(ctx context.Context, in *CreateProblemRequest, opts ...grpc.CallOption) (*CreateProblemResponse, error)
-	UploadConfig(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadConfigFileChunk, UploadConfigResponse], error)
 	PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	HideProblem(ctx context.Context, in *HideProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateProblem(ctx context.Context, in *UpdateProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -50,6 +49,7 @@ type ProblemServiceClient interface {
 	GetProblemDetail(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
 	GetProblemConfig(ctx context.Context, in *GetProblemConfigRequest, opts ...grpc.CallOption) (*GetProblemConfigResponse, error)
 	SubmitProblem(ctx context.Context, in *SubmitProblemRequest, opts ...grpc.CallOption) (*SubmitProblemResponse, error)
+	ValidateProblems(ctx context.Context, in *ValidateProblemsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type problemServiceClient struct {
@@ -69,19 +69,6 @@ func (c *problemServiceClient) CreateProblem(ctx context.Context, in *CreateProb
 	}
 	return out, nil
 }
-
-func (c *problemServiceClient) UploadConfig(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadConfigFileChunk, UploadConfigResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ProblemService_ServiceDesc.Streams[0], ProblemService_UploadConfig_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[UploadConfigFileChunk, UploadConfigResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ProblemService_UploadConfigClient = grpc.ClientStreamingClient[UploadConfigFileChunk, UploadConfigResponse]
 
 func (c *problemServiceClient) PublishProblem(ctx context.Context, in *PublishProblemRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -173,6 +160,16 @@ func (c *problemServiceClient) SubmitProblem(ctx context.Context, in *SubmitProb
 	return out, nil
 }
 
+func (c *problemServiceClient) ValidateProblems(ctx context.Context, in *ValidateProblemsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ProblemService_ValidateProblems_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProblemServiceServer is the server API for ProblemService service.
 // All implementations must embed UnimplementedProblemServiceServer
 // for forward compatibility.
@@ -180,7 +177,6 @@ func (c *problemServiceClient) SubmitProblem(ctx context.Context, in *SubmitProb
 // 题目服务接口
 type ProblemServiceServer interface {
 	CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error)
-	UploadConfig(grpc.ClientStreamingServer[UploadConfigFileChunk, UploadConfigResponse]) error
 	PublishProblem(context.Context, *PublishProblemRequest) (*emptypb.Empty, error)
 	HideProblem(context.Context, *HideProblemRequest) (*emptypb.Empty, error)
 	UpdateProblem(context.Context, *UpdateProblemRequest) (*emptypb.Empty, error)
@@ -190,6 +186,7 @@ type ProblemServiceServer interface {
 	GetProblemDetail(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
 	GetProblemConfig(context.Context, *GetProblemConfigRequest) (*GetProblemConfigResponse, error)
 	SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error)
+	ValidateProblems(context.Context, *ValidateProblemsRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedProblemServiceServer()
 }
 
@@ -202,9 +199,6 @@ type UnimplementedProblemServiceServer struct{}
 
 func (UnimplementedProblemServiceServer) CreateProblem(context.Context, *CreateProblemRequest) (*CreateProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProblem not implemented")
-}
-func (UnimplementedProblemServiceServer) UploadConfig(grpc.ClientStreamingServer[UploadConfigFileChunk, UploadConfigResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method UploadConfig not implemented")
 }
 func (UnimplementedProblemServiceServer) PublishProblem(context.Context, *PublishProblemRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishProblem not implemented")
@@ -232,6 +226,9 @@ func (UnimplementedProblemServiceServer) GetProblemConfig(context.Context, *GetP
 }
 func (UnimplementedProblemServiceServer) SubmitProblem(context.Context, *SubmitProblemRequest) (*SubmitProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitProblem not implemented")
+}
+func (UnimplementedProblemServiceServer) ValidateProblems(context.Context, *ValidateProblemsRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateProblems not implemented")
 }
 func (UnimplementedProblemServiceServer) mustEmbedUnimplementedProblemServiceServer() {}
 func (UnimplementedProblemServiceServer) testEmbeddedByValue()                        {}
@@ -271,13 +268,6 @@ func _ProblemService_CreateProblem_Handler(srv interface{}, ctx context.Context,
 	}
 	return interceptor(ctx, in, info, handler)
 }
-
-func _ProblemService_UploadConfig_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ProblemServiceServer).UploadConfig(&grpc.GenericServerStream[UploadConfigFileChunk, UploadConfigResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ProblemService_UploadConfigServer = grpc.ClientStreamingServer[UploadConfigFileChunk, UploadConfigResponse]
 
 func _ProblemService_PublishProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PublishProblemRequest)
@@ -441,6 +431,24 @@ func _ProblemService_SubmitProblem_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProblemService_ValidateProblems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateProblemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProblemServiceServer).ValidateProblems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProblemService_ValidateProblems_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProblemServiceServer).ValidateProblems(ctx, req.(*ValidateProblemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProblemService_ServiceDesc is the grpc.ServiceDesc for ProblemService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -488,13 +496,11 @@ var ProblemService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SubmitProblem",
 			Handler:    _ProblemService_SubmitProblem_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "UploadConfig",
-			Handler:       _ProblemService_UploadConfig_Handler,
-			ClientStreams: true,
+			MethodName: "ValidateProblems",
+			Handler:    _ProblemService_ValidateProblems_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "problem.proto",
 }

@@ -29,12 +29,10 @@ type UserInfo struct {
 	CreateAt      int64                  `protobuf:"varint,2,opt,name=create_at,json=createAt,proto3" json:"create_at,omitempty"`
 	DeleteAt      int64                  `protobuf:"varint,3,opt,name=delete_at,json=deleteAt,proto3" json:"delete_at,omitempty"`
 	Mobile        int64                  `protobuf:"varint,4,opt,name=mobile,proto3" json:"mobile,omitempty"`
-	Nickname      string                 `protobuf:"bytes,5,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Username      string                 `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty"`
 	Email         string                 `protobuf:"bytes,6,opt,name=email,proto3" json:"email,omitempty"`
-	Gender        int32                  `protobuf:"varint,7,opt,name=gender,proto3" json:"gender,omitempty"`
-	Role          int32                  `protobuf:"varint,8,opt,name=role,proto3" json:"role,omitempty"`
-	AvatarUrl     string                 `protobuf:"bytes,9,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
-	Password      string                 `protobuf:"bytes,10,opt,name=password,proto3" json:"password,omitempty"` // hash
+	Role          int32                  `protobuf:"varint,7,opt,name=role,proto3" json:"role,omitempty"`
+	AvatarUrl     string                 `protobuf:"bytes,8,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -97,9 +95,9 @@ func (x *UserInfo) GetMobile() int64 {
 	return 0
 }
 
-func (x *UserInfo) GetNickname() string {
+func (x *UserInfo) GetUsername() string {
 	if x != nil {
-		return x.Nickname
+		return x.Username
 	}
 	return ""
 }
@@ -109,13 +107,6 @@ func (x *UserInfo) GetEmail() string {
 		return x.Email
 	}
 	return ""
-}
-
-func (x *UserInfo) GetGender() int32 {
-	if x != nil {
-		return x.Gender
-	}
-	return 0
 }
 
 func (x *UserInfo) GetRole() int32 {
@@ -132,41 +123,32 @@ func (x *UserInfo) GetAvatarUrl() string {
 	return ""
 }
 
-func (x *UserInfo) GetPassword() string {
-	if x != nil {
-		return x.Password
-	}
-	return ""
-}
-
 // 注册
-type UserRegisterRequest struct {
+type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Mobile        string                 `protobuf:"bytes,1,opt,name=mobile,proto3" json:"mobile,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	RePassword    string                 `protobuf:"bytes,3,opt,name=re_password,json=rePassword,proto3" json:"re_password,omitempty"`
-	Nickname      string                 `protobuf:"bytes,4,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Username      string                 `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
 	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
-	Gender        int32                  `protobuf:"varint,6,opt,name=gender,proto3" json:"gender,omitempty"`
-	Role          int32                  `protobuf:"varint,7,opt,name=role,proto3" json:"role,omitempty"`
+	Role          int32                  `protobuf:"varint,6,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UserRegisterRequest) Reset() {
-	*x = UserRegisterRequest{}
+func (x *CreateUserRequest) Reset() {
+	*x = CreateUserRequest{}
 	mi := &file_user_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UserRegisterRequest) String() string {
+func (x *CreateUserRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UserRegisterRequest) ProtoMessage() {}
+func (*CreateUserRequest) ProtoMessage() {}
 
-func (x *UserRegisterRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -178,81 +160,67 @@ func (x *UserRegisterRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UserRegisterRequest.ProtoReflect.Descriptor instead.
-func (*UserRegisterRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateUserRequest.ProtoReflect.Descriptor instead.
+func (*CreateUserRequest) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *UserRegisterRequest) GetMobile() string {
+func (x *CreateUserRequest) GetMobile() string {
 	if x != nil {
 		return x.Mobile
 	}
 	return ""
 }
 
-func (x *UserRegisterRequest) GetPassword() string {
+func (x *CreateUserRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-func (x *UserRegisterRequest) GetRePassword() string {
+func (x *CreateUserRequest) GetUsername() string {
 	if x != nil {
-		return x.RePassword
+		return x.Username
 	}
 	return ""
 }
 
-func (x *UserRegisterRequest) GetNickname() string {
-	if x != nil {
-		return x.Nickname
-	}
-	return ""
-}
-
-func (x *UserRegisterRequest) GetEmail() string {
+func (x *CreateUserRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *UserRegisterRequest) GetGender() int32 {
-	if x != nil {
-		return x.Gender
-	}
-	return 0
-}
-
-func (x *UserRegisterRequest) GetRole() int32 {
+func (x *CreateUserRequest) GetRole() int32 {
 	if x != nil {
 		return x.Role
 	}
 	return 0
 }
 
-type UserRegisterResponse struct {
+type CreateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UserRegisterResponse) Reset() {
-	*x = UserRegisterResponse{}
+func (x *CreateUserResponse) Reset() {
+	*x = CreateUserResponse{}
 	mi := &file_user_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UserRegisterResponse) String() string {
+func (x *CreateUserResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UserRegisterResponse) ProtoMessage() {}
+func (*CreateUserResponse) ProtoMessage() {}
 
-func (x *UserRegisterResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_user_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -264,12 +232,12 @@ func (x *UserRegisterResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UserRegisterResponse.ProtoReflect.Descriptor instead.
-func (*UserRegisterResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateUserResponse.ProtoReflect.Descriptor instead.
+func (*CreateUserResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *UserRegisterResponse) GetUid() int64 {
+func (x *CreateUserResponse) GetUid() int64 {
 	if x != nil {
 		return x.Uid
 	}
@@ -386,11 +354,10 @@ type UserLoginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Mobile        string                 `protobuf:"bytes,2,opt,name=mobile,proto3" json:"mobile,omitempty"`
-	NickName      string                 `protobuf:"bytes,3,opt,name=nick_name,json=nickName,proto3" json:"nick_name,omitempty"`
+	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Gender        int32                  `protobuf:"varint,6,opt,name=gender,proto3" json:"gender,omitempty"`
-	Role          int32                  `protobuf:"varint,7,opt,name=role,proto3" json:"role,omitempty"`
-	AvatarUrl     string                 `protobuf:"bytes,8,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
+	Role          int32                  `protobuf:"varint,5,opt,name=role,proto3" json:"role,omitempty"`
+	AvatarUrl     string                 `protobuf:"bytes,6,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -439,9 +406,9 @@ func (x *UserLoginResponse) GetMobile() string {
 	return ""
 }
 
-func (x *UserLoginResponse) GetNickName() string {
+func (x *UserLoginResponse) GetUsername() string {
 	if x != nil {
-		return x.NickName
+		return x.Username
 	}
 	return ""
 }
@@ -451,13 +418,6 @@ func (x *UserLoginResponse) GetEmail() string {
 		return x.Email
 	}
 	return ""
-}
-
-func (x *UserLoginResponse) GetGender() int32 {
-	if x != nil {
-		return x.Gender
-	}
-	return 0
 }
 
 func (x *UserLoginResponse) GetRole() int32 {
@@ -947,46 +907,39 @@ var File_user_proto protoreflect.FileDescriptor
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x87\x02\n" +
+	"user.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xd3\x01\n" +
 	"\bUserInfo\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x1b\n" +
 	"\tcreate_at\x18\x02 \x01(\x03R\bcreateAt\x12\x1b\n" +
 	"\tdelete_at\x18\x03 \x01(\x03R\bdeleteAt\x12\x16\n" +
 	"\x06mobile\x18\x04 \x01(\x03R\x06mobile\x12\x1a\n" +
-	"\bnickname\x18\x05 \x01(\tR\bnickname\x12\x14\n" +
-	"\x05email\x18\x06 \x01(\tR\x05email\x12\x16\n" +
-	"\x06gender\x18\a \x01(\x05R\x06gender\x12\x12\n" +
-	"\x04role\x18\b \x01(\x05R\x04role\x12\x1d\n" +
+	"\busername\x18\x05 \x01(\tR\busername\x12\x14\n" +
+	"\x05email\x18\x06 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\a \x01(\x05R\x04role\x12\x1d\n" +
 	"\n" +
-	"avatar_url\x18\t \x01(\tR\tavatarUrl\x12\x1a\n" +
-	"\bpassword\x18\n" +
-	" \x01(\tR\bpassword\"\xc8\x01\n" +
-	"\x13UserRegisterRequest\x12\x16\n" +
+	"avatar_url\x18\b \x01(\tR\tavatarUrl\"\x8d\x01\n" +
+	"\x11CreateUserRequest\x12\x16\n" +
 	"\x06mobile\x18\x01 \x01(\tR\x06mobile\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1f\n" +
-	"\vre_password\x18\x03 \x01(\tR\n" +
-	"rePassword\x12\x1a\n" +
-	"\bnickname\x18\x04 \x01(\tR\bnickname\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\x12\x16\n" +
-	"\x06gender\x18\x06 \x01(\x05R\x06gender\x12\x12\n" +
-	"\x04role\x18\a \x01(\x05R\x04role\"(\n" +
-	"\x14UserRegisterResponse\x12\x10\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1a\n" +
+	"\busername\x18\x04 \x01(\tR\busername\x12\x14\n" +
+	"\x05email\x18\x05 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\x05R\x04role\"&\n" +
+	"\x12CreateUserResponse\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\"F\n" +
 	"\x10UserLoginRequest\x12\x16\n" +
 	"\x06mobile\x18\x01 \x01(\tR\x06mobile\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"G\n" +
 	"\x19UserLoginBySmsCodeRequest\x12\x16\n" +
 	"\x06mobile\x18\x01 \x01(\tR\x06mobile\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code\"\xbb\x01\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\"\xa2\x01\n" +
 	"\x11UserLoginResponse\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12\x16\n" +
-	"\x06mobile\x18\x02 \x01(\tR\x06mobile\x12\x1b\n" +
-	"\tnick_name\x18\x03 \x01(\tR\bnickName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x16\n" +
-	"\x06gender\x18\x06 \x01(\x05R\x06gender\x12\x12\n" +
-	"\x04role\x18\a \x01(\x05R\x04role\x12\x1d\n" +
+	"\x06mobile\x18\x02 \x01(\tR\x06mobile\x12\x1a\n" +
+	"\busername\x18\x03 \x01(\tR\busername\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x05 \x01(\x05R\x04role\x12\x1d\n" +
 	"\n" +
-	"avatar_url\x18\b \x01(\tR\tavatarUrl\"\x85\x02\n" +
+	"avatar_url\x18\x06 \x01(\tR\tavatarUrl\"\x85\x02\n" +
 	"\x15UserProblemStatistics\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12!\n" +
 	"\fsubmit_count\x18\x02 \x01(\x03R\vsubmitCount\x12)\n" +
@@ -1018,11 +971,12 @@ const file_user_proto_rawDesc = "" +
 	"\n" +
 	"captcha_id\x18\x01 \x01(\tR\tcaptchaId\x12!\n" +
 	"\fcaptcha_code\x18\x02 \x01(\tR\vcaptchaCode\x12\x16\n" +
-	"\x06mobile\x18\x03 \x01(\tR\x06mobile2\x85\x04\n" +
-	"\vUserService\x12;\n" +
-	"\fUserRegister\x12\x14.UserRegisterRequest\x1a\x15.UserRegisterResponse\x122\n" +
+	"\x06mobile\x18\x03 \x01(\tR\x06mobile2\xff\x03\n" +
+	"\vUserService\x122\n" +
 	"\tUserLogin\x12\x11.UserLoginRequest\x1a\x12.UserLoginResponse\x12D\n" +
-	"\x12UserLoginBySmsCode\x12\x1a.UserLoginBySmsCodeRequest\x1a\x12.UserLoginResponse\x12F\n" +
+	"\x12UserLoginBySmsCode\x12\x1a.UserLoginBySmsCodeRequest\x1a\x12.UserLoginResponse\x125\n" +
+	"\n" +
+	"CreateUser\x12\x12.CreateUserRequest\x1a\x13.CreateUserResponse\x12F\n" +
 	"\x11ResetUserPassword\x12\x19.ResetUserPasswordRequest\x1a\x16.google.protobuf.Empty\x12=\n" +
 	"\x10GetUserInfoByUid\x12\x13.GetUserInfoRequest\x1a\x14.GetUserInfoResponse\x128\n" +
 	"\vGetUserList\x12\x13.GetUserListRequest\x1a\x14.GetUserListResponse\x12B\n" +
@@ -1044,8 +998,8 @@ func file_user_proto_rawDescGZIP() []byte {
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_user_proto_goTypes = []any{
 	(*UserInfo)(nil),                  // 0: UserInfo
-	(*UserRegisterRequest)(nil),       // 1: UserRegisterRequest
-	(*UserRegisterResponse)(nil),      // 2: UserRegisterResponse
+	(*CreateUserRequest)(nil),         // 1: CreateUserRequest
+	(*CreateUserResponse)(nil),        // 2: CreateUserResponse
 	(*UserLoginRequest)(nil),          // 3: UserLoginRequest
 	(*UserLoginBySmsCodeRequest)(nil), // 4: UserLoginBySmsCodeRequest
 	(*UserLoginResponse)(nil),         // 5: UserLoginResponse
@@ -1062,17 +1016,17 @@ var file_user_proto_goTypes = []any{
 var file_user_proto_depIdxs = []int32{
 	0,  // 0: GetUserInfoResponse.data:type_name -> UserInfo
 	0,  // 1: GetUserListResponse.data:type_name -> UserInfo
-	1,  // 2: UserService.UserRegister:input_type -> UserRegisterRequest
-	3,  // 3: UserService.UserLogin:input_type -> UserLoginRequest
-	4,  // 4: UserService.UserLoginBySmsCode:input_type -> UserLoginBySmsCodeRequest
+	3,  // 2: UserService.UserLogin:input_type -> UserLoginRequest
+	4,  // 3: UserService.UserLoginBySmsCode:input_type -> UserLoginBySmsCodeRequest
+	1,  // 4: UserService.CreateUser:input_type -> CreateUserRequest
 	7,  // 5: UserService.ResetUserPassword:input_type -> ResetUserPasswordRequest
 	8,  // 6: UserService.GetUserInfoByUid:input_type -> GetUserInfoRequest
 	10, // 7: UserService.GetUserList:input_type -> GetUserListRequest
 	14, // 8: UserService.GetImageCapcha:input_type -> google.protobuf.Empty
 	13, // 9: UserService.SendSmsCode:input_type -> SendSmsCodeRequest
-	2,  // 10: UserService.UserRegister:output_type -> UserRegisterResponse
-	5,  // 11: UserService.UserLogin:output_type -> UserLoginResponse
-	5,  // 12: UserService.UserLoginBySmsCode:output_type -> UserLoginResponse
+	5,  // 10: UserService.UserLogin:output_type -> UserLoginResponse
+	5,  // 11: UserService.UserLoginBySmsCode:output_type -> UserLoginResponse
+	2,  // 12: UserService.CreateUser:output_type -> CreateUserResponse
 	14, // 13: UserService.ResetUserPassword:output_type -> google.protobuf.Empty
 	9,  // 14: UserService.GetUserInfoByUid:output_type -> GetUserInfoResponse
 	11, // 15: UserService.GetUserList:output_type -> GetUserListResponse

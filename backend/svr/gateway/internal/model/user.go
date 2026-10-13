@@ -5,10 +5,12 @@ import "oj-server/common/proto/pb"
 // binding的逗号之间不能有空格
 
 // ============================ 注册 ============================
-type RegisterRequest struct {
-	Mobile     string `form:"mobile" binding:"required"`
-	PassWord   string `form:"password" binding:"required"`
-	RePassWord string `form:"repassword"  binding:"required"`
+type CreateUserRequest struct {
+	Mobile   string `form:"mobile" binding:"required"`
+	PassWord string `form:"password" binding:"required"`
+	Username string `form:"username" binding:"required"`
+	Email    string `form:"email"`
+	Role     int32  `form:"role"` // 0:user 1:admin
 }
 
 // ============================ 登录 ============================

@@ -7,7 +7,7 @@ service:
 mysql:
   host: 192.168.2.145
   port: 3306
-  db: oj_online_server
+  db: open_oj
   user: root
   password: 1225@PDH
 

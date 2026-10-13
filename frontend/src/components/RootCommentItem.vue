@@ -61,7 +61,7 @@ const onSubmitComment = async () => {
     const form = <API.AddCommentForm>{
         obj_id: props.obj_id,
         user_id: userStore.userInfo.uid,
-        user_name: userStore.userInfo.nickname,
+        user_name: userStore.userInfo.username,
         user_avatar_url: userStore.userInfo.avatarUrl,
         content: reply_comment_input.value,
         is_root: false,
@@ -79,7 +79,7 @@ const onSubmitComment = async () => {
             id: 0,
             objId: props.obj_id,
             userId: userStore.userInfo.uid,
-            userName: userStore.userInfo.nickname,
+            userName: userStore.userInfo.username,
             userAvatarUrl: userStore.userInfo.avatarUrl,
             content: reply_comment_input.value,
             status: 1,

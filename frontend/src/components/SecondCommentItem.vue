@@ -73,7 +73,7 @@ const onSubmitComment = async () => {
     const form = <API.AddCommentForm>{
         obj_id: props.comment_data.objId,
         user_id: userStore.userInfo.uid,
-        user_name: userStore.userInfo.nickname,
+        user_name: userStore.userInfo.username,
         user_avatar_url: userStore.userInfo.avatarUrl,
         content: reply_comment_input.value,
         // 楼主id跟随回复的子评论

@@ -6,7 +6,6 @@ import "google/protobuf/empty.proto";
 // 题目服务接口
 service ProblemService {
   rpc CreateProblem(CreateProblemRequest) returns (CreateProblemResponse);
-  rpc UploadConfig(stream UploadConfigFileChunk) returns (UploadConfigResponse);
   rpc PublishProblem(PublishProblemRequest) returns (google.protobuf.Empty);
   rpc HideProblem(HideProblemRequest) returns (google.protobuf.Empty);
   rpc UpdateProblem(UpdateProblemRequest) returns (google.protobuf.Empty);
@@ -16,6 +15,7 @@ service ProblemService {
   rpc GetProblemDetail(GetProblemRequest) returns (GetProblemResponse);
   rpc GetProblemConfig(GetProblemConfigRequest) returns (GetProblemConfigResponse);
   rpc SubmitProblem(SubmitProblemRequest) returns (SubmitProblemResponse);
+  rpc ValidateProblems(ValidateProblemsRequest) returns (google.protobuf.Empty);
 }
 
 // 题目基础信息
@@ -26,10 +26,9 @@ message Problem{
   string delete_at = 4;
 
   string title = 5;
-  string description = 6;
-  int32 level = 7;
-  repeated string tags = 8;
-  int32 status = 9;
+  int32 level = 6;
+  repeated string tags = 7;
+  int32 status = 8;
 }
 // 题目配置信息
 message ProblemConfig{
@@ -107,22 +106,11 @@ message JudgeResultStore {
 // 新增题目
 message CreateProblemRequest {
   string title = 1;
-  string description = 2;
-  int32 level = 3;
-  repeated string tags = 4;
+  int32 level = 2;
+  repeated string tags = 3;
 }
 message CreateProblemResponse {
   int64 id = 1;
-}
-
-// 上传配置文件
-message UploadConfigFileChunk {
-  int64 problem_id = 1;
-  bytes content = 2; // 文件分片内容
-}
-message UploadConfigResponse {
-  string file_path = 1;    // 服务端最终存储路径
-  int64 size = 2;          // 文件大小(字节)
 }
 
 // 发布题目
@@ -188,4 +176,9 @@ message SubmitProblemRequest {
 }
 message SubmitProblemResponse {
   string task_id = 1;
+}
+
+// 校验题目
+message ValidateProblemsRequest {
+  repeated int64 problem_ids = 1;
 }

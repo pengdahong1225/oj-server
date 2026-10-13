@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { DataBoard, Refresh, DataAnalysis, Edit, User, Back } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/format'
-import { queryNoticeListService } from '@/api/noticeController'
+import { queryNoticeListService, queryNoticeDetailService } from '@/api/noticeController'
 
 onMounted(() => {
     queryNoticeList()
@@ -42,8 +42,25 @@ const queryNoticeList = async () => {
 
 // 当前查看的公告（null 表示列表态）
 const current_notice = ref<API.Notice | null>(null)
-const openNotice = (item: API.Notice) => {
+const detail_loading = ref(false)
+const openNotice = async (item: API.Notice) => {
+    // 先切换到详情态，立即展示标题
     current_notice.value = item
+    detail_loading.value = true
+    try {
+        // 列表接口不含 content，需调详情接口拉取完整内容
+        const resp = await queryNoticeDetailService(Number(item.id))
+        if (resp.data.code === 0) {
+            current_notice.value = resp.data.data.notice
+        } else {
+            ElMessage.error(resp.data.message || '加载公告失败')
+            current_notice.value = null
+        }
+    } catch (e) {
+        current_notice.value = null
+    } finally {
+        detail_loading.value = false
+    }
 }
 // 头部按钮：详情态返回列表 / 列表态刷新
 const onHeaderButtonClick = () => {
@@ -91,7 +108,7 @@ const bannerList = [
                 </template>
 
                 <!-- 公告详情 -->
-                <div v-if="current_notice" class="notice-detail">
+                <div v-if="current_notice" v-loading="detail_loading" class="notice-detail">
                     {{ current_notice.content }}
                 </div>
 

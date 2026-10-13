@@ -164,7 +164,7 @@ type leaderboardData struct {
 	AccomplishCount int32 `gorm:"column:accomplish_count"`
 
 	Mobile   int64  `gorm:"column:mobile"`
-	Username string `gorm:"column:nickname"`
+	Username string `gorm:"column:username"`
 	Avatar   string `gorm:"column:avatar_url"`
 }
 
@@ -184,7 +184,7 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 	/*
 		SELECT
 		    s.uid, s.accomplish_count,
-		    u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile
+		    u.username AS username, u.avatar_url AS avatar, u.mobile AS mobile
 		FROM
 		    statistics_YYYY s
 		JOIN
@@ -198,7 +198,7 @@ func (rr *RecordRepo) QueryMonthAccomplishLeaderboard(limit int, period string) 
 	result := rr.db_.Model(&model.Statistics{}).
 		Select(`
             uid, accomplish_count,
-            u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
+            u.username AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
 		Joins("JOIN user_info u ON uid = u.id").
 		Where("period = ?", period).
 		Order("accomplish_count DESC").
@@ -231,7 +231,7 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 	/*
 		SELECT
 		    us.uid, COUNT(DISTINCT us.problem_id) AS today_accomplish_count,
-		    u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile
+		    u.username AS username, u.avatar_url AS avatar, u.mobile AS mobile
 		FROM
 		    user_solution us
 		JOIN
@@ -239,7 +239,7 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 		WHERE
 		    DATE(us.create_at) = CURRENT_DATE() // 只统计今天的
 		GROUP BY
-		    us.uid, u.nickname, u.avatar_url, u.mobile
+		    us.uid, u.username, u.avatar_url, u.mobile
 		ORDER BY
 		    today_accomplish_count DESC
 		LIMIT 200;
@@ -247,10 +247,10 @@ func (rr *RecordRepo) QueryDailyAccomplishLeaderboard(limit int) ([]*pb.Leaderbo
 	result := rr.db_.Table("user_solution us").
 		Select(`
             us.uid, COUNT(DISTINCT us.problem_id) AS today_accomplish_count,
-            u.nickname AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
+            u.username AS username, u.avatar_url AS avatar, u.mobile AS mobile`).
 		Joins("JOIN user_info u ON us.uid = u.id").
 		Where("DATE(us.create_at) = CURRENT_DATE()").
-		Group("us.uid, u.nickname, u.avatar_url, u.mobile").
+		Group("us.uid, u.username, u.avatar_url, u.mobile").
 		Order("today_accomplish_count DESC").
 		Limit(limit).
 		Scan(&lb_datas)
@@ -328,7 +328,7 @@ func (rr *RecordRepo) UpdateSubmitRecord(taskId string, record *model.SubmitReco
 		if record.Accepted && count == 0 {
 			// 插入用户解题表
 			rs := &model.UserSolution{
-				Uid:       record.UID,
+				UID:       record.UID,
 				ProblemID: record.ProblemID,
 			}
 			result = tx.Create(rs)

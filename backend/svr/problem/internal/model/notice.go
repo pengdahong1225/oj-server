@@ -4,13 +4,15 @@ import (
 	"time"
 
 	"oj-server/common/proto/pb"
+
+	"gorm.io/gorm"
 )
 
 type Notice struct {
-	ID       int64      `gorm:"column:id;primaryKey;autoIncrement"`
-	CreateAt time.Time  `gorm:"column:create_at;autoCreateTime"`
-	UpdateAt time.Time  `gorm:"column:update_at;autoUpdateTime"`
-	DeleteAt *time.Time `gorm:"column:delete_at"`
+	ID        int64          `gorm:"column:id;primaryKey;autoIncrement"`
+	CreateAt  time.Time      `gorm:"column:create_at;autoCreateTime"`
+	UpdateAt  time.Time      `gorm:"column:update_at;autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"column:delete_at;index"`
 
 	Title    string `gorm:"column:title;type:varchar(64);not null"`
 	Content  string `gorm:"column:content;type:text;not null"`

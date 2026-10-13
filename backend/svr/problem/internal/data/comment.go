@@ -70,17 +70,17 @@ func NewCommentRepo() (*CommentRepo, error) {
 	}, nil
 }
 
-func (cr *CommentRepo) AssertObj(id int64) bool {
+func (cr *CommentRepo) AssertObj(ID int64) bool {
 	var (
 		p model.Problem
 	)
-	result := cr.db_.Where("id = ?", id).Find(&p)
+	result := cr.db_.Where("ID = ?", ID).Find(&p)
 	if result.Error != nil {
 		logrus.Errorf("query problem failed: %s", result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment obj[%d] not found", id)
+		logrus.Errorf("comment obj[%d] not found", ID)
 		return false
 	}
 	return true
@@ -95,7 +95,7 @@ func (cr *CommentRepo) SaveRootComment(comment *model.Comment) {
 		}
 
 		// 更新obj的总评论数
-		if !updateObjCommentCount(tx, comment.ObjId, 1) {
+		if !updateObjCommentCount(tx, comment.ObjID, 1) {
 			return fmt.Errorf("update obj comment count failed")
 		}
 
@@ -107,10 +107,10 @@ func (cr *CommentRepo) SaveRootComment(comment *model.Comment) {
 }
 func (cr *CommentRepo) SaveChildComment(comment *model.Comment) {
 	err := cr.db_.Transaction(func(tx *gorm.DB) error {
-		if !assertRoot(tx, comment.RootCommentId, comment.RootId) {
+		if !assertRoot(tx, comment.RootCommentID, comment.RootID) {
 			return fmt.Errorf("assert root comment failed")
 		}
-		if comment.ReplyCommentId > 0 && comment.ReplyId > 0 && !assertReply(tx, comment.ReplyCommentId, comment.ReplyId) {
+		if comment.ReplyCommentID > 0 && comment.ReplyID > 0 && !assertReply(tx, comment.ReplyCommentID, comment.ReplyID) {
 			return fmt.Errorf("assert reply comment failed")
 		}
 
@@ -121,15 +121,15 @@ func (cr *CommentRepo) SaveChildComment(comment *model.Comment) {
 		}
 
 		// 更新obj的评论数
-		if !updateObjCommentCount(tx, comment.ObjId, 1) {
+		if !updateObjCommentCount(tx, comment.ObjID, 1) {
 			return fmt.Errorf("update obj comment count failed")
 		}
 		// 更新root的子评论数
-		if !updateRootCommentChildCount(tx, comment.RootCommentId, 1) {
+		if !updateRootCommentChildCount(tx, comment.RootCommentID, 1) {
 			return fmt.Errorf("update root comment child count failed")
 		}
 		// 更新reply的回复数
-		if !updateReplyCommentReplyCount(tx, comment.ReplyCommentId, 1) {
+		if !updateReplyCommentReplyCount(tx, comment.ReplyCommentID, 1) {
 			return fmt.Errorf("update reply comment reply count failed")
 		}
 
@@ -139,16 +139,16 @@ func (cr *CommentRepo) SaveChildComment(comment *model.Comment) {
 		logrus.Errorf("save child comment failed: %s", err.Error())
 	}
 }
-func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64, []model.Comment, error) {
+func (cr *CommentRepo) QueryRootComment(objID int64, page, pageSize int) (int64, []model.Comment, error) {
 	/*
 		select * from comment
-		where obj_id = ? and is_root = 1
+		where obj_ID = ? and is_root = 1
 		order by like_count desc
 		offset off_set
 		limit pageSize;
 	*/
 	var count int64
-	result := cr.db_.Model(&model.Comment{}).Where("obj_id = ?", objId).Where("is_root = ?", 1).Count(&count)
+	result := cr.db_.Model(&model.Comment{}).Where("obj_ID = ?", objID).Where("is_root = ?", 1).Count(&count)
 	if result.Error != nil {
 		logrus.Errorf("query comment count failed: %s", result.Error.Error())
 		return 0, nil, status.Errorf(codes.Internal, "query comment count failed")
@@ -159,7 +159,7 @@ func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64,
 
 	offSet := (page - 1) * pageSize
 	var comments []model.Comment
-	result = cr.db_.Where("obj_id = ?", objId).Where("is_root = ?", 1).
+	result = cr.db_.Where("obj_ID = ?", objID).Where("is_root = ?", 1).
 		Order("like_count desc").
 		Offset(offSet).
 		Limit(pageSize).
@@ -172,13 +172,13 @@ func (cr *CommentRepo) QueryRootComment(objId int64, page, pageSize int) (int64,
 	return count, comments, nil
 }
 
-func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cursor int32) (int64, []model.Comment, error) {
+func (cr *CommentRepo) QueryChildComment(objID, rootID, rootCommentID int64, cursor int32) (int64, []model.Comment, error) {
 	var count int64
 	result := cr.db_.Model(&model.Comment{}).
-		Where("obj_id = ?", objId).
+		Where("obj_ID = ?", objID).
 		Where("is_root = ?", 0).
-		Where("root_id = ?", rootId).
-		Where("root_comment_id = ?", rootCommentId).
+		Where("root_ID = ?", rootID).
+		Where("root_comment_ID = ?", rootCommentID).
 		Count(&count)
 	if result.Error != nil {
 		logrus.Errorf("query comment count failed: %s", result.Error.Error())
@@ -189,12 +189,12 @@ func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cur
 	}
 
 	var comments []model.Comment
-	result = cr.db_.Where("obj_id = ?", objId).
+	result = cr.db_.Where("obj_ID = ?", objID).
 		Where("is_root = ?", 0).
-		Where("root_id = ?", rootId).
-		Where("root_comment_id = ?", rootCommentId).
-		Order("id asc").
-		Where("id > ?", cursor).
+		Where("root_ID = ?", rootID).
+		Where("root_comment_ID = ?", rootCommentID).
+		Order("ID asc").
+		Where("ID > ?", cursor).
 		Limit(5).
 		Find(&comments)
 	if result.Error != nil {
@@ -205,153 +205,153 @@ func (cr *CommentRepo) QueryChildComment(objId, rootId, rootCommentId int64, cur
 	return count, comments, nil
 }
 
-// 根评论是否存在，校验root_id和root_comment_id
-func assertRoot(tx *gorm.DB, rootCommentId int64, rootId int64) bool {
+// 根评论是否存在，校验root_ID和root_comment_ID
+func assertRoot(tx *gorm.DB, rootCommentID int64, rootID int64) bool {
 	var (
 		c model.Comment
 	)
-	result := tx.Where("id = ?", rootCommentId).Where("user_id = ?", rootId).Find(&c)
+	result := tx.Where("ID = ?", rootCommentID).Where("user_ID = ?", rootID).Find(&c)
 	if result.Error != nil {
 		logrus.Errorln(result.Error)
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("root comment[%d] not found", rootCommentId)
+		logrus.Errorf("root comment[%d] not found", rootCommentID)
 		return false
 	}
 	return true
 }
-func (cr *CommentRepo) CommentLike(objId, commentId int64) {
+func (cr *CommentRepo) CommentLike(objID, commentID int64) {
 	result := cr.db_.Model(&model.Comment{}).
-		Where("obj_id = ?", objId).
-		Where("id = ?", commentId).
+		Where("obj_ID = ?", objID).
+		Where("ID = ?", commentID).
 		Update("like_count", gorm.Expr("like_count + ?", 1))
 	if result.Error != nil {
 		logrus.Errorf("update comment like count failed: %s", result.Error.Error())
 		return
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment[%d] like update failed", commentId)
+		logrus.Errorf("comment[%d] like update failed", commentID)
 		return
 	}
 }
 
-// 回复评论是否存在，校验reply_id和reply_comment_id
-func assertReply(tx *gorm.DB, replyCommentId int64, replyId int64) bool {
+// 回复评论是否存在，校验reply_ID和reply_comment_ID
+func assertReply(tx *gorm.DB, replyCommentID int64, replyID int64) bool {
 	var (
 		c model.Comment
 	)
-	result := tx.Where("id = ?", replyCommentId).Where("user_id = ?", replyId).Find(&c)
+	result := tx.Where("ID = ?", replyCommentID).Where("user_ID = ?", replyID).Find(&c)
 	if result.Error != nil {
 		logrus.Errorln(result.Error)
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("reply comment[%d] not found", replyCommentId)
+		logrus.Errorf("reply comment[%d] not found", replyCommentID)
 		return false
 	}
 	return true
 }
 
 // 更新obj的评论数
-func updateObjCommentCount(tx *gorm.DB, id int64, diff int64) bool {
+func updateObjCommentCount(tx *gorm.DB, ID int64, diff int64) bool {
 	/*
 		select comment_count from problem
-		where id = ?;
+		where ID = ?;
 	*/
 	obj := model.Problem{}
-	result := tx.Select("comment_count").Where("id = ?", id).Find(&obj)
+	result := tx.Select("comment_count").Where("ID = ?", ID).Find(&obj)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("obj[%d] not found", id)
+		logrus.Errorf("obj[%d] not found", ID)
 		return false
 	}
 	/*
 		update problem set comment_count = comment_count + diff
-		where id = ?;
+		where ID = ?;
 	*/
 	count := obj.CommentCount + diff
 	if count < 0 {
 		count = 0
 	}
-	result = tx.Model(&obj).Where("id = ?", id).Update("comment_count", count)
+	result = tx.Model(&obj).Where("ID = ?", ID).Update("comment_count", count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("obj[%d] comment update failed", id)
+		logrus.Errorf("obj[%d] comment update failed", ID)
 		return false
 	}
 	return true
 }
-func updateRootCommentChildCount(tx *gorm.DB, id int64, diff int) bool {
+func updateRootCommentChildCount(tx *gorm.DB, ID int64, diff int) bool {
 	/*
 		select child_count from comment
-		where id = ?;
+		where ID = ?;
 	*/
 	comment := model.Comment{}
-	result := tx.Select("child_count").Where("id = ?", id).Find(&comment)
+	result := tx.Select("child_count").Where("ID = ?", ID).Find(&comment)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment[%d] not found", id)
+		logrus.Errorf("comment[%d] not found", ID)
 		return false
 	}
 	/*
 		update comment set child_count = child_count + diff
-		where id = ?;
+		where ID = ?;
 	*/
-	count := comment.ChildCount + diff
+	count := comment.ChildCount + int32(diff)
 	if count < 0 {
 		count = 0
 	}
-	result = tx.Model(&comment).Where("id = ?", id).Update("child_count", count)
+	result = tx.Model(&comment).Where("ID = ?", ID).Update("child_count", count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment[%d] child_count update failed", id)
+		logrus.Errorf("comment[%d] child_count update failed", ID)
 		return false
 	}
 	return true
 }
-func updateReplyCommentReplyCount(tx *gorm.DB, id int64, diff int) bool {
+func updateReplyCommentReplyCount(tx *gorm.DB, ID int64, diff int) bool {
 	/*
 		select reply_count from comment
-		where id = ?;
+		where ID = ?;
 	*/
 	comment := model.Comment{}
-	result := tx.Select("reply_count").Where("id = ?", id).Find(&comment)
+	result := tx.Select("reply_count").Where("ID = ?", ID).Find(&comment)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment[%d] not found", id)
+		logrus.Errorf("comment[%d] not found", ID)
 		return false
 	}
 	/*
 		update comment set reply_count = reply_count + diff
-		where id = ?;
+		where ID = ?;
 	*/
-	count := comment.ReplyCount + diff
+	count := comment.ReplyCount + int32(diff)
 	if count < 0 {
 		count = 0
 	}
-	result = tx.Model(&comment).Where("id=?", id).Update("reply_count", count)
+	result = tx.Model(&comment).Where("ID=?", ID).Update("reply_count", count)
 	if result.Error != nil {
 		logrus.Errorln(result.Error.Error())
 		return false
 	}
 	if result.RowsAffected == 0 {
-		logrus.Errorf("comment[%d] reply_count update failed", id)
+		logrus.Errorf("comment[%d] reply_count update failed", ID)
 		return false
 	}
 	return true

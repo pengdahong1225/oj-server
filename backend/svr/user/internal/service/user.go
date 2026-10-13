@@ -35,10 +35,9 @@ func NewUserService(clients *client.Clients) (*UserService, error) {
 }
 
 // 注册
-func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequest) (*pb.UserRegisterResponse, error) {
-	resp := &pb.UserRegisterResponse{}
+func (us *UserService) CreateUser(ctx context.Context, in *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	resp := &pb.CreateUserResponse{}
 
-	// 不可逆加密
 	hash_pwd := hashPassword(in.Password)
 	mobile, err := strconv.ParseInt(in.Mobile, 10, 64)
 	if err != nil {
@@ -47,12 +46,11 @@ func (us *UserService) UserRegister(ctx context.Context, in *pb.UserRegisterRequ
 	}
 	newUser := model.UserInfo{
 		Mobile:    mobile,
-		PassWord:  hash_pwd,
-		NickName:  in.Nickname,
+		Password:  hash_pwd,
+		Username:  in.Username,
 		Email:     in.Email,
-		Gender:    in.Gender,
 		Role:      in.Role,
-		AvatarUrl: "",
+		AvatarURL: "",
 	}
 
 	var id int64
@@ -83,18 +81,17 @@ func (us *UserService) UserLogin(ctx context.Context, in *pb.UserLoginRequest) (
 		logrus.Errorf("get user by mobile err: %s", err.Error())
 		return nil, err
 	}
-	if hashPassword(in.Password) != userInfo.PassWord {
+	if hashPassword(in.Password) != userInfo.Password {
 		return nil, status.Errorf(codes.Unauthenticated, "密码错误")
 	}
 
 	resp := &pb.UserLoginResponse{
 		Uid:       userInfo.ID,
 		Mobile:    strconv.FormatInt(userInfo.Mobile, 10),
-		NickName:  userInfo.NickName,
+		Username:  userInfo.Username,
 		Email:     userInfo.Email,
-		Gender:    userInfo.Gender,
 		Role:      userInfo.Role,
-		AvatarUrl: userInfo.AvatarUrl,
+		AvatarUrl: userInfo.AvatarURL,
 	}
 	return resp, nil
 }
@@ -111,11 +108,10 @@ func (us *UserService) UserLoginBySmsCode(ctx context.Context, in *pb.UserLoginB
 	resp := &pb.UserLoginResponse{
 		Uid:       userInfo.ID,
 		Mobile:    strconv.FormatInt(userInfo.Mobile, 10),
-		NickName:  userInfo.NickName,
+		Username:  userInfo.Username,
 		Email:     userInfo.Email,
-		Gender:    userInfo.Gender,
 		Role:      userInfo.Role,
-		AvatarUrl: userInfo.AvatarUrl,
+		AvatarUrl: userInfo.AvatarURL,
 	}
 	return resp, nil
 }
@@ -144,11 +140,10 @@ func (us *UserService) GetUserInfoByUid(ctx context.Context, in *pb.GetUserInfoR
 		Uid:       userInfo.ID,
 		CreateAt:  userInfo.CreateAt.Unix(),
 		Mobile:    userInfo.Mobile,
-		Nickname:  userInfo.NickName,
+		Username:  userInfo.Username,
 		Email:     userInfo.Email,
-		Gender:    userInfo.Gender,
 		Role:      userInfo.Role,
-		AvatarUrl: userInfo.AvatarUrl,
+		AvatarUrl: userInfo.AvatarURL,
 	}
 	resp := &pb.GetUserInfoResponse{
 		Data: &u,
@@ -170,7 +165,7 @@ func (us *UserService) GetUserList(ctx context.Context, in *pb.GetUserListReques
 			Uid:      user.ID,
 			CreateAt: user.CreateAt.Unix(),
 			Mobile:   user.Mobile,
-			Nickname: user.NickName,
+			Username: user.Username,
 			Email:    user.Email,
 			Role:     user.Role,
 		}

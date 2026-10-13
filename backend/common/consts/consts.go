@@ -18,7 +18,7 @@ const (
 	RefreshTokenTimeOut int64 = 60 * 60 * 24 * 7 // 7天
 	AccessTokenTimeOut  int64 = 60 * 60 * 24     // 24小时
 	Issuer                    = "Messi"
-	ProblemConfigPath         = "/data/oj/problem_configs"
+	PackageBaseDir            = "/data/oj/problems"
 	GrpcTimeout               = time.Second * 3
 	GrpcStreamTimeout         = time.Second * 30
 )

@@ -149,76 +149,100 @@ const getProblemDetail = async (id: number) => {
 </script>
 
 <template>
-    <el-drawer v-model="drawerVisible" size="45%">
-        <template #header>
-            <strong v-if="edit_mode == 'create'"> 新增题目 </strong>
-            <strong v-else> 编辑题目 </strong>
-        </template>
+    <el-drawer v-model="drawerVisible" size="520px" :with-header="false">
+        <div class="drawer-header">
+            <strong v-if="edit_mode == 'create'">新增题目</strong>
+            <strong v-else>编辑题目</strong>
+            <span class="sub">{{ edit_mode == 'create' ? '创建一个新的题目' : '修改题目信息' }}</span>
+        </div>
 
-        <template #default>
-            <el-form v-if="edit_mode == 'create'" class="form" ref="formRef" :model="create_form" label-width="150px" size="large">
-                <el-form-item label="标题" prop="title">
-                    <el-input v-model="create_form.problem_title" placeholder="请输入题目标题" style="width: 50%"></el-input>
-                </el-form-item>
-                <el-form-item label="Level" prop="level">
-                    <el-select size="large" v-model="create_form.level" placeholder="Select" style="width: 240px">
-                        <el-option v-for="item in level_list" :key="item.value" :label="item.label"
-                            :value="item.value" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="标签" prop="tags">
-                    <el-select v-model="create_form.tags" multiple filterable allow-create default-first-option
-                        placeholder="Select" style="width: 240px">
-                        <el-option v-for="item in tag_list" :key="item" :label="item" :value="item" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="题目详情" prop="description">
-                    <el-input type="textarea" :rows="10" resize="none" v-model="create_form.description"
-                        placeholder="请描述题目详情" style="width: 100%"></el-input>
-                </el-form-item>
-                <el-form-item style="">
-                    <el-button @click="drawerVisible = false">取消</el-button>
-                    <el-button type="primary" @click="onSubmit"> 确认 </el-button>
-                </el-form-item>
-            </el-form>
-            <el-form v-else class="form" ref="formRef" :model="update_form" label-width="150px" size="large">
-                <el-form-item label="标题" prop="title">
-                    <el-input v-model="update_form.problem_title" placeholder="请输入题目标题" style="width: 50%"></el-input>
-                </el-form-item>
-                <el-form-item label="Level" prop="level">
-                    <el-select size="large" v-model="update_form.level" placeholder="Select" style="width: 240px">
-                        <el-option v-for="item in level_list" :key="item.value" :label="item.label"
-                            :value="item.value" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="标签" prop="tags">
-                    <el-select v-model="update_form.tags" multiple filterable allow-create default-first-option
-                        placeholder="Select" style="width: 240px">
-                        <el-option v-for="item in tag_list" :key="item" :label="item" :value="item" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="题目详情" prop="description">
-                    <el-input type="textarea" :rows="10" resize="none" v-model="update_form.description"
-                        placeholder="请描述题目详情" style="width: 100%"></el-input>
-                </el-form-item>
-                <el-form-item style="">
-                    <el-button @click="drawerVisible = false">取消</el-button>
-                    <el-button type="primary" @click="onSubmit"> 确认 </el-button>
-                </el-form-item>
-            </el-form>
+        <el-form v-if="edit_mode == 'create'" class="form" ref="formRef" :model="create_form" label-position="top" size="large">
+            <el-form-item label="标题" prop="problem_title">
+                <el-input v-model="create_form.problem_title" placeholder="请输入题目标题"></el-input>
+            </el-form-item>
+            <el-form-item label="难度" prop="level">
+                <el-select v-model="create_form.level" placeholder="请选择难度" style="width: 100%">
+                    <el-option v-for="item in level_list" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="标签" prop="tags">
+                <el-select v-model="create_form.tags" multiple filterable allow-create default-first-option
+                    placeholder="请选择标签" style="width: 100%">
+                    <el-option v-for="item in tag_list" :key="item" :label="item" :value="item" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="题目详情" prop="description">
+                <el-input type="textarea" :rows="10" resize="none" v-model="create_form.description"
+                    placeholder="请描述题目详情"></el-input>
+            </el-form-item>
+        </el-form>
 
-        </template>
+        <el-form v-else class="form" ref="formRef" :model="update_form" label-position="top" size="large">
+            <el-form-item label="标题" prop="problem_title">
+                <el-input v-model="update_form.problem_title" placeholder="请输入题目标题"></el-input>
+            </el-form-item>
+            <el-form-item label="难度" prop="level">
+                <el-select v-model="update_form.level" placeholder="请选择难度" style="width: 100%">
+                    <el-option v-for="item in level_list" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="标签" prop="tags">
+                <el-select v-model="update_form.tags" multiple filterable allow-create default-first-option
+                    placeholder="请选择标签" style="width: 100%">
+                    <el-option v-for="item in tag_list" :key="item" :label="item" :value="item" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="题目详情" prop="description">
+                <el-input type="textarea" :rows="10" resize="none" v-model="update_form.description"
+                    placeholder="请描述题目详情"></el-input>
+            </el-form-item>
+        </el-form>
+
+        <div class="drawer-footer">
+            <el-button size="large" @click="drawerVisible = false">取消</el-button>
+            <el-button size="large" type="primary" @click="onSubmit">确认</el-button>
+        </div>
     </el-drawer>
 </template>
 
 <style lang="less" scoped>
-.form {
-    width: 100%;
+.drawer-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
 
-    // 表单中的元素居中，占78%宽度
-    .el-form-item {
-        width: 80%;
-        margin: 10px 0px 10px 0px;
+    strong {
+        font-size: 20px;
+        color: #303133;
+    }
+
+    .sub {
+        font-size: 13px;
+        color: #909399;
+    }
+}
+
+.form {
+    padding-top: 24px;
+
+    :deep(.el-form-item__label) {
+        font-weight: 500;
+        color: #303133;
+    }
+}
+
+.drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+
+    .el-button {
+        min-width: 96px;
     }
 }
 </style>

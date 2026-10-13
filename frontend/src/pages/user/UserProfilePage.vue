@@ -39,8 +39,8 @@ const onUpdateAvator = () => {
                     <el-form-item label="ID"  prop="uid" style="width: 500px;">
                         <el-input v-model="userStore.userInfo.uid" disabled />
                     </el-form-item>
-                    <el-form-item label="NickName" prop="nickname" style="width: 500px;">
-                        <el-input v-model="userStore.userInfo.nickname" />
+                    <el-form-item label="Username" prop="username" style="width: 500px;">
+                        <el-input v-model="userStore.userInfo.username" />
                     </el-form-item>
                     <el-form-item label="Mobile" prop="mobile" style="width: 500px;">
                         <el-input v-model="userStore.userInfo.mobile" />
@@ -54,12 +54,6 @@ const onUpdateAvator = () => {
                             <el-tag v-else-if="userStore.userInfo.role === 1" type="warning">admin</el-tag>
                             <el-tag v-else type="danger">nil</el-tag>
                         </template>
-                    </el-form-item>
-                    <el-form-item label="Gender" prop="gender" style="width: 500px;">
-                        <el-radio-group v-model="userStore.userInfo.gender">
-                            <el-radio :value ="1">male</el-radio>
-                            <el-radio :value ="0">female</el-radio>
-                        </el-radio-group>
                     </el-form-item>
                     <el-button type="primary" @click="onUpdateProfile">
                         update

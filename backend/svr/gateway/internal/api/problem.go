@@ -3,12 +3,10 @@ package api
 import (
 	"context"
 	"fmt"
-	"io"
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
 	"oj-server/svr/gateway/internal/client"
 	"oj-server/svr/gateway/internal/model"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -103,106 +101,15 @@ func (p *ProblemHandler) HandleCreateProblem(ctx *gin.Context) {
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
 	gr, err := p.clients.Problem.CreateProblem(c, &pb.CreateProblemRequest{
-		Title:       req.Title,
-		Description: req.Description,
-		Level:       req.Level,
-		Tags:        req.Tags,
+		Title: req.Title,
+		Level: req.Level,
+		Tags:  req.Tags,
 	})
 	if err != nil {
 		ResponseWithGrpcError(ctx, err)
 		return
 	}
 	ResponseOK(ctx, gr)
-}
-
-// 处理题目配置文件上传
-func (p *ProblemHandler) HandleUploadConfig(ctx *gin.Context) {
-	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
-	if err != nil || problemId <= 0 {
-		ResponseBadRequest(ctx, "无效的 problem_id")
-		return
-	}
-
-	// 获取文件
-	fileHeader, err := ctx.FormFile("config_file")
-	if err != nil {
-		ResponseBadRequest(ctx, "需要config_file字段")
-		return
-	}
-	if filepath.Ext(fileHeader.Filename) != ".json" {
-		ResponseBadRequest(ctx, "文件格式错误")
-		return
-	}
-	// 限制文件大小（默认 8MB，可调整）
-	maxSize := int64(8 << 20) // 8MB
-	if fileHeader.Size > maxSize {
-		ResponseBadRequest(ctx, "文件过大")
-		return
-	}
-	// 打开文件流
-	file, err := fileHeader.Open()
-	if err != nil {
-		ResponseError(ctx, pb.Error_EN_Failed, "文件打开失败")
-		return
-	}
-
-	// 创建gRPC流
-	md := metadata.Pairs("problem_id", fmt.Sprintf("%d", problemId))
-	c, cancel := context.WithTimeout(metadata.NewOutgoingContext(ctx.Request.Context(), md), consts.GrpcStreamTimeout)
-	defer cancel()
-	stream, err := p.clients.Problem.UploadConfig(c)
-	if err != nil {
-		logrus.Errorf("文件上传失败:%s", err.Error())
-		ResponseWithGrpcError(ctx, err)
-		return
-	}
-	// 分片读取并流式传输
-	buffer := make([]byte, 1<<20) // 1MB分片
-	for {
-		n, err := file.Read(buffer)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			logrus.Errorf("file read error:%s", err.Error())
-			_ = stream.CloseSend()
-			ResponseError(ctx, pb.Error_EN_Failed, "file read failed")
-			return
-		}
-		// 发送分片到Problem服务
-		if err = stream.Send(&pb.UploadConfigFileChunk{
-			Content:   buffer[:n],
-			ProblemId: problemId,
-		}); err != nil {
-			logrus.Errorf("file send error:%s", err.Error())
-			_ = stream.CloseSend()
-			ResponseWithGrpcError(ctx, err)
-			return
-		}
-	}
-	// 获取Problem服务响应
-	resp, err := stream.CloseAndRecv()
-	if err != nil {
-		logrus.Errorf("file save error:%s", err.Error())
-		ResponseWithGrpcError(ctx, err)
-		return
-	}
-	if resp.Size != fileHeader.Size {
-		logrus.Errorf("file save error, file size[%d] != save size[%d]", fileHeader.Size, resp.Size)
-		ResponseError(ctx, pb.Error_EN_Failed, "file save failed")
-		return
-	}
-
-	ResponseOK(ctx, nil)
-}
-
-// 下载题目配置文件
-func (p *ProblemHandler) HandleDownloadConfig(ctx *gin.Context) {
-	problemId, err := strconv.ParseInt(ctx.PostForm("problem_id"), 10, 64)
-	if err != nil || problemId <= 0 {
-		ResponseBadRequest(ctx, "无效的 problem_id")
-		return
-	}
 }
 
 // 处理发布题目
@@ -280,11 +187,10 @@ func (p *ProblemHandler) HandleUpdateProblem(ctx *gin.Context) {
 	defer cancel()
 	_, err = p.clients.Problem.UpdateProblem(c, &pb.UpdateProblemRequest{
 		Data: &pb.Problem{
-			Id:          req.ProblemID,
-			Title:       req.Title,
-			Description: req.Desc,
-			Level:       req.Level,
-			Tags:        req.Tags,
+			Id:    req.ProblemID,
+			Title: req.Title,
+			Level: req.Level,
+			Tags:  req.Tags,
 		},
 	})
 	if err != nil {

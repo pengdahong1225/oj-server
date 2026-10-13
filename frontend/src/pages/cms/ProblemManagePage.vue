@@ -81,6 +81,7 @@ const onDelete = async (id: number) => {
     }
 }
 
+// todo: 暂时写死
 const uploadUrl = 'http://localhost:9000/api/v1/problem/upload_config'
 const uploadHeaders = {
     Authorization: 'Bearer ' + useUserStore().token
@@ -110,13 +111,13 @@ const onSuccess = (mode: string) => {
 <template>
     <page-container title="题目管理">
         <template #extra>
-            <el-button type="primary" @click="onAddProblem">添加题目</el-button>
+            <el-button type="primary" @click="onAddProblem">创建题目</el-button>
         </template>
 
         <!-- 表单区域 inline属性代表表单元素都在一行显示 -->
         <el-form inline>
             <el-form-item style="margin-right: 15px;">
-                <el-input v-model="params.keyword" style="width: 240px" placeholder="problem name"
+                <el-input v-model="params.keyword" style="width: 240px" placeholder="标题"
                     :suffix-icon="Search" />
             </el-form-item>
             <el-form-item>
@@ -133,19 +134,19 @@ const onSuccess = (mode: string) => {
                 </template>
             </el-table-column>
 
-            <el-table-column label="Title" prop="title" width="150">
+            <el-table-column label="标题" prop="title" width="150">
                 <template #default="{ row }">
                     {{ row.title }}
                 </template>
             </el-table-column>
-            <el-table-column label="Level" prop="level" width="100">
+            <el-table-column label="难度" prop="level" width="100">
                 <template #default="{ row }">
                     <el-tag v-if="row.level === 1" type="primary">简单</el-tag>
                     <el-tag v-else-if="row.level === 2" type="warning">中等</el-tag>
                     <el-tag v-else type="danger">困难</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="Tags" width="500">
+            <el-table-column label="标签" width="500">
                 <template #default="{ row }">
                     <el-tag v-for="tag in row.tags" :key="tag" style="margin-left: 3px;margin-right: 3px;">{{ tag
                     }}</el-tag>

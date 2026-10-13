@@ -5,9 +5,9 @@ import "google/protobuf/empty.proto";
 
 // 用户服务接口
 service UserService {
-  rpc UserRegister(UserRegisterRequest) returns (UserRegisterResponse);
   rpc UserLogin(UserLoginRequest) returns (UserLoginResponse);
   rpc UserLoginBySmsCode(UserLoginBySmsCodeRequest) returns (UserLoginResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc ResetUserPassword(ResetUserPasswordRequest) returns (google.protobuf.Empty);
   rpc GetUserInfoByUid(GetUserInfoRequest) returns (GetUserInfoResponse);
   rpc GetUserList(GetUserListRequest) returns (GetUserListResponse);
@@ -20,29 +20,22 @@ message UserInfo{
   int64 uid = 1;
   int64 create_at = 2;
   int64 delete_at = 3;
-
   int64 mobile = 4;
-  string nickname = 5;
+  string username = 5;
   string email = 6;
-  int32 gender = 7;
-  int32 role = 8;
-  string avatar_url = 9;
-
-  string password = 10; // hash
+  int32 role = 7;
+  string avatar_url = 8;
 }
 
 // 注册
-message UserRegisterRequest {
+message CreateUserRequest {
   string mobile = 1;
   string password = 2;
-  string re_password = 3;
-
-  string nickname = 4;
+  string username = 4;
   string email = 5;
-  int32 gender = 6;
-  int32 role = 7;
+  int32 role = 6;
 }
-message UserRegisterResponse {
+message CreateUserResponse {
   int64 uid = 1;
 }
 // 登录-账号密码
@@ -58,11 +51,10 @@ message UserLoginBySmsCodeRequest {
 message UserLoginResponse {
   int64 uid = 1;
   string mobile = 2;
-  string nick_name = 3;
+  string username = 3;
   string email = 4;
-  int32 gender = 6;
-  int32 role = 7;
-  string avatar_url = 8;
+  int32 role = 5;
+  string avatar_url = 6;
 }
 
 // 用户做题统计信息

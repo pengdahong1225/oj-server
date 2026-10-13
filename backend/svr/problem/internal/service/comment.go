@@ -37,35 +37,35 @@ func NewCommentService(clients *client.Clients) (*CommentService, error) {
 func (cs *CommentService) CreateComment(ctx context.Context, in *pb.CreateCommentRequest) (*emptypb.Empty, error) {
 	// 1.构造评论
 	comment := &model.Comment{
-		ObjId:         in.ObjId,
-		UserId:        in.UserId,
+		ObjID:         in.ObjId,
+		UserID:        in.UserId,
 		UserName:      in.UserName,
-		UserAvatarUrl: in.UserAvatarUrl,
+		UserAvatarURL: in.UserAvatarUrl,
 		Content:       in.Content,
 		PubStamp:      in.Stamp,
 	}
 	// 非楼主评论
 	if in.RootId > 0 && in.RootCommentId > 0 {
 		comment.IsRoot = 0
-		comment.RootId = in.RootId
-		comment.RootCommentId = in.RootCommentId
+		comment.RootID = in.RootId
+		comment.RootCommentID = in.RootCommentId
 		if in.ReplyId > 0 && in.ReplyCommentId > 0 {
-			comment.ReplyId = in.ReplyId
-			comment.ReplyCommentId = in.ReplyCommentId
+			comment.ReplyID = in.ReplyId
+			comment.ReplyCommentID = in.ReplyCommentId
 			comment.ReplyUserName = in.ReplyUserName
 		} else {
 			// 默认回复楼主
-			comment.ReplyId = in.RootId
-			comment.ReplyCommentId = in.RootCommentId
+			comment.ReplyID = in.RootId
+			comment.ReplyCommentID = in.RootCommentId
 			comment.ReplyUserName = in.ReplyUserName
 		}
 	} else {
 		// 默认楼主评论
-		comment.RootId = 0
-		comment.RootCommentId = 0
+		comment.RootID = 0
+		comment.RootCommentID = 0
 		comment.IsRoot = 1
-		comment.ReplyId = 0
-		comment.ReplyCommentId = 0
+		comment.ReplyID = 0
+		comment.ReplyCommentID = 0
 	}
 	// todo 查询ip归属地会影响响应时间，改为异步
 	go func() {
@@ -109,10 +109,10 @@ func (cs *CommentService) QueryRootComment(ctx context.Context, in *pb.QueryRoot
 	for _, comment := range comments {
 		pbComments = append(pbComments, &pb.Comment{
 			Id:             comment.ID,
-			ObjId:          comment.ObjId,
-			UserId:         comment.UserId,
+			ObjId:          comment.ObjID,
+			UserId:         comment.UserID,
 			UserName:       comment.UserName,
-			UserAvatarUrl:  comment.UserAvatarUrl,
+			UserAvatarUrl:  comment.UserAvatarURL,
 			Content:        comment.Content,
 			ChildCount:     int32(comment.ChildCount),
 			ReplyCount:     int32(comment.ReplyCount),
@@ -120,10 +120,10 @@ func (cs *CommentService) QueryRootComment(ctx context.Context, in *pb.QueryRoot
 			PubStamp:       comment.PubStamp,
 			PubRegion:      comment.PubRegion,
 			IsRoot:         int32(comment.IsRoot),
-			RootId:         comment.RootId,
-			RootCommentId:  comment.RootCommentId,
-			ReplyId:        comment.ReplyId,
-			ReplyCommentId: comment.ReplyCommentId,
+			RootId:         comment.RootID,
+			RootCommentId:  comment.RootCommentID,
+			ReplyId:        comment.ReplyID,
+			ReplyCommentId: comment.ReplyCommentID,
 			ReplyUserName:  comment.ReplyUserName,
 		})
 	}
@@ -150,20 +150,20 @@ func (cs *CommentService) QueryChildComment(ctx context.Context, in *pb.QueryChi
 	for _, comment := range comments {
 		pbComments = append(pbComments, &pb.Comment{
 			Id:             comment.ID,
-			ObjId:          comment.ObjId,
-			UserId:         comment.UserId,
+			ObjId:          comment.ObjID,
+			UserId:         comment.UserID,
 			UserName:       comment.UserName,
-			UserAvatarUrl:  comment.UserAvatarUrl,
+			UserAvatarUrl:  comment.UserAvatarURL,
 			Content:        comment.Content,
 			ReplyCount:     int32(comment.ReplyCount),
 			LikeCount:      int32(comment.LikeCount),
 			PubStamp:       comment.PubStamp,
 			PubRegion:      comment.PubRegion,
 			IsRoot:         int32(comment.IsRoot),
-			RootId:         comment.RootId,
-			RootCommentId:  comment.RootCommentId,
-			ReplyId:        comment.ReplyId,
-			ReplyCommentId: comment.ReplyCommentId,
+			RootId:         comment.RootID,
+			RootCommentId:  comment.RootCommentID,
+			ReplyId:        comment.ReplyID,
+			ReplyCommentId: comment.ReplyCommentID,
 			ReplyUserName:  comment.ReplyUserName,
 		})
 	}

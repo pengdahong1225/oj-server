@@ -9,10 +9,6 @@ import {
 </script>
 
 <template>
-    <!--
-        后台管理容器：嵌套在主布局（LayoutContainer）内部，
-        保留顶部导航栏，此处只提供左侧管理菜单 + 内容区
-    -->
     <el-container class="admin-container">
         <el-aside width="200px">
             <el-menu :default-active="$route.path" router class="admin-menu">
@@ -28,6 +24,12 @@ import {
                     </el-icon>
                     <span>题目管理</span>
                 </el-menu-item>
+                <el-menu-item index="/admin/notice">
+                    <el-icon>
+                        <BellFilled />
+                    </el-icon>
+                    <span>公告管理</span>
+                </el-menu-item>
                 <el-menu-item index="/admin/contest">
                     <el-icon>
                         <Flag />
@@ -39,12 +41,6 @@ import {
                         <List />
                     </el-icon>
                     <span>模板管理</span>
-                </el-menu-item>
-                <el-menu-item index="/admin/notice">
-                    <el-icon>
-                        <BellFilled />
-                    </el-icon>
-                    <span>公告管理</span>
                 </el-menu-item>
             </el-menu>
         </el-aside>

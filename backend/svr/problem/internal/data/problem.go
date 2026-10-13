@@ -83,6 +83,11 @@ func (pr *ProblemRepo) CreateProblem(problem *model.Problem) (int64, error) {
 	return problem.ID, nil
 }
 
+// Transaction 在数据库事务中执行 fn；fn 返回 error 时自动回滚
+func (pr *ProblemRepo) Transaction(fn func(tx *gorm.DB) error) error {
+	return pr.db_.Transaction(fn)
+}
+
 // 分页查询题库列表
 // 查询{id，title，level，tags}
 // @page 页码

@@ -5,9 +5,8 @@ namespace API {
         createAt?: number;
         deleteAt?: number;
         mobile: string;
-        nickname: string;
+        username: string;
         email?: string;
-        gender?: number;
         role?: number;
         avatarUrl?: string;
     }
@@ -27,5 +26,13 @@ namespace API {
         page: number;
         page_size: number;
         keyword: string;
+    }
+    // 创建用户表单（请求体）
+    type CreateUserForm = {
+        mobile: string;
+        password: string;
+        username: string;
+        email?: string;
+        role?: number;
     }
 }

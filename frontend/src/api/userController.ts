@@ -15,6 +15,20 @@ export async function userRegisterService(form: API.RegisterForm) {
 }
 
 /**
+ * 创建用户接口（管理员）
+ * POST /user/add
+ */
+export async function createUserService(form: API.CreateUserForm) {
+    return request('/user/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        data: form
+    })
+}
+
+/**
  * 登录接口
  * POST /user/login
  */

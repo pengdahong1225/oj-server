@@ -80,8 +80,7 @@ const handleLogin = async () => {
     const user_info = <API.UserInfo>{
       uid: info.uid,
       mobile: info.mobile,
-      nickname: info.nick_name,
-      gender: info.gender,
+      username: info.username,
       email: info.email,
       avatarUrl: info.avatar_url,
       role: info.role

@@ -171,8 +171,8 @@ func (u *UserHandler) HandleUserLogout(ctx *gin.Context) {
 	ResponseOK(ctx, nil)
 }
 
-func (u *UserHandler) HandleUserRegister(ctx *gin.Context) {
-	req := &model.RegisterRequest{}
+func (u *UserHandler) HandleCreateUser(ctx *gin.Context) {
+	req := &model.CreateUserRequest{}
 	err := ctx.ShouldBind(req)
 	if err != nil {
 		ResponseBadRequest(ctx, err.Error())
@@ -191,10 +191,12 @@ func (u *UserHandler) HandleUserRegister(ctx *gin.Context) {
 	// 调用用户服务
 	c, cancel := context.WithTimeout(ctx.Request.Context(), consts.GrpcTimeout)
 	defer cancel()
-	gr, err := u.clients.User.UserRegister(c, &pb.UserRegisterRequest{
-		Mobile:     req.Mobile,
-		Password:   req.PassWord,
-		RePassword: req.RePassWord,
+	gr, err := u.clients.User.CreateUser(c, &pb.CreateUserRequest{
+		Mobile:   req.Mobile,
+		Password: req.PassWord,
+		Username: req.Username,
+		Email:    req.Email,
+		Role:     req.Role,
 	})
 	if err != nil {
 		logrus.Errorf("register failed: %s", err.Error())

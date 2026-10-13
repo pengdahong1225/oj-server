@@ -38,10 +38,9 @@ type QueryProblemListRequest struct {
 
 // 创建题目表单
 type CreateProblemRequest struct {
-	Title       string   `json:"problem_title" binding:"required"`
-	Level       int32    `json:"level" binding:"required"`
-	Tags        []string `json:"tags" binding:"required"`
-	Description string   `json:"description" binding:"required"`
+	Title string   `json:"problem_title" binding:"required"`
+	Level int32    `json:"level" binding:"required"`
+	Tags  []string `json:"tags" binding:"required"`
 }
 
 // 修改题目表单
@@ -50,7 +49,6 @@ type UpdateProblemRequest struct {
 	Title     string   `json:"problem_title"  binding:"required"`
 	Level     int32    `json:"level" binding:"required"`
 	Tags      []string `json:"tags"  binding:"required"`
-	Desc      string   `json:"description" binding:"required"`
 }
 
 // 代码提交表单
