@@ -36,11 +36,11 @@ import {
                     </el-icon>
                     <span>比赛管理</span>
                 </el-menu-item>
-                <el-menu-item index="/admin/template">
+                <el-menu-item index="/admin/sandbox">
                     <el-icon>
                         <List />
                     </el-icon>
-                    <span>模板管理</span>
+                    <span>沙箱管理</span>
                 </el-menu-item>
             </el-menu>
         </el-aside>

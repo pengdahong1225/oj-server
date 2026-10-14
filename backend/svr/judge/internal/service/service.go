@@ -3,7 +3,6 @@ package service
 import (
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
-	"oj-server/pkg/go_pool"
 	"oj-server/pkg/mq"
 	"oj-server/svr/judge/internal/client"
 	"oj-server/svr/judge/internal/config"
@@ -68,9 +67,9 @@ func (s *JudgeService) ConsumeJudgeTask() {
 				return false
 			}
 			// 异步处理
-			_ = go_pool.Submit(func() {
-				s.Handle(task)
-			})
+			// _ = go_pool.Submit(func() {
+			// 	s.Handle(task)
+			// })
 			return true
 		}(d.Body)
 

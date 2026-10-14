@@ -2,5 +2,5 @@
 </script>
 
 <template>
-    <div>TemplateManage</div>
+    <div>SandboxManage</div>
 </template>

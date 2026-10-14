@@ -30,7 +30,7 @@ const router = createRouter({
                         { path: '/admin/user', component: () => import('@/pages/cms/UserManagePage.vue') },
                         { path: '/admin/problem', component: () => import('@/pages/cms/ProblemManagePage.vue') },
                         { path: '/admin/contest', component: () => import('@/pages/cms/ContestManagePage.vue') },
-                        { path: '/admin/template', component: () => import('@/pages/cms/TemplateManagePage.vue') },
+                        { path: '/admin/sandbox', component: () => import('@/pages/cms/SandboxManagePage.vue') },
                         { path: '/admin/notice', component: () => import('@/pages/cms/NoticeManagePage.vue') },
                     ]
                 }

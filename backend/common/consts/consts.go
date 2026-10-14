@@ -30,12 +30,13 @@ const (
 
 	RabbitMqJudgeSubmitKey   = "judge-submit"
 	RabbitMqJudgeSubmitQueue = "judge-submit-queue"
-
 	RabbitMqJudgeResultKey   = "judge-result"
 	RabbitMqJudgeResultQueue = "judge-result-queue"
+	RabbitMqValidateQueue    = "validate-queue"
+	RabbitMqValidateKey      = "validate"
 
-	RabbitMqCommentKey   = "comment"
-	RabbitMqCommentQueue = "comment-task-queue"
+	// RabbitMqCommentKey   = "comment"
+	// RabbitMqCommentQueue = "comment-task-queue"
 )
 
 // ============================ redis相关 ============================

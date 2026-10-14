@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"oj-server/common/consts"
 	"oj-server/common/proto/pb"
@@ -27,9 +28,11 @@ import (
 // 题目服务
 type ProblemService struct {
 	pb.UnimplementedProblemServiceServer
-	repo          *data.ProblemRepo
-	judgeProducer *mq.Producer
-	clients       *client.Clients
+	repo    *data.ProblemRepo
+	clients *client.Clients
+
+	judgeProducer    *mq.Producer
+	valideteProducer *mq.Producer
 }
 
 func NewProblemService(clients *client.Clients) (*ProblemService, error) {
@@ -50,16 +53,22 @@ func NewProblemService(clients *client.Clients) (*ProblemService, error) {
 	)
 
 	return &ProblemService{
-		repo: repo, // 注入实现
+		repo:    repo,
+		clients: clients,
 		judgeProducer: &mq.Producer{
 			AmqpClient: amqpClient, // 注入client
 			ExKind:     consts.RabbitMqExchangeKind,
 			ExName:     consts.RabbitMqExchangeName,
-
 			QueName:    consts.RabbitMqJudgeSubmitQueue,
 			RoutingKey: consts.RabbitMqJudgeSubmitKey,
 		},
-		clients: clients,
+		valideteProducer: &mq.Producer{
+			AmqpClient: amqpClient, // 注入client
+			ExKind:     consts.RabbitMqExchangeKind,
+			ExName:     consts.RabbitMqExchangeName,
+			QueName:    consts.RabbitMqValidateQueue,
+			RoutingKey: consts.RabbitMqValidateKey,
+		},
 	}, nil
 }
 
@@ -240,12 +249,12 @@ func (ps *ProblemService) SubmitProblem(ctx context.Context, in *pb.SubmitProble
 	}
 
 	task := &pb.JudgeSubmission{
-		Uid:         int64(uid),
-		ProblemId:   in.ProblemId,
-		Title:       in.Title,
-		Lang:        in.Lang,
-		Code:        in.Code,
-		ConfigUrl:   problem.ConfigURL,
+		Uid:       int64(uid),
+		ProblemId: in.ProblemId,
+		Title:     in.Title,
+		Lang:      in.Lang,
+		Code:      in.Code,
+		// ConfigUrl:   problem.ConfigURL,
 		TaskId:      taskId,
 		Level:       int32(problem.Level),
 		ProblemName: problem.Title,
@@ -294,5 +303,5 @@ func (ps *ProblemService) GetTagList(ctx context.Context, empty *emptypb.Empty) 
 }
 
 func (ps *ProblemService) ValidateProblems(ctx context.Context, in *pb.ValidateProblemsRequest) (*emptypb.Empty, error) {
-
+	return nil, errors.New("not implement")
 }
