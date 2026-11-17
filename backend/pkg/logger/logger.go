@@ -6,115 +6,140 @@ import (
 	"path"
 	"runtime"
 	"sync"
-	"time"
 
-	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
 )
 
-type FileHook struct {
-	// mu serializes Fire. logrus fires hooks without holding its own lock, so
-	// the hook has to guard its state by itself.
-	mu       sync.Mutex
-	logFile  *os.File
-	fileDate string
-	filePath string
-	name     string
-}
+var (
+	std  *logrus.Logger
+	once sync.Once
+)
 
-func (hook *FileHook) Levels() []logrus.Level {
-	return logrus.AllLevels
-}
+const (
+	PanicLevel = logrus.PanicLevel
+	FatalLevel = logrus.FatalLevel
+	ErrorLevel = logrus.ErrorLevel
+	WarnLevel  = logrus.WarnLevel
+	InfoLevel  = logrus.InfoLevel
+	DebugLevel = logrus.DebugLevel
+	TraceLevel = logrus.TraceLevel
+)
 
-// Fire writes one entry to the log file of the entry's own day, rotating the
-// file when the day changes.
-func (hook *FileHook) Fire(entry *logrus.Entry) error {
-	hook.mu.Lock()
-	defer hook.mu.Unlock()
-
-	date := entry.Time.Format("2006_01_02")
-	if hook.logFile == nil || hook.fileDate != date {
-		if err := hook.rotate(date); err != nil {
-			return err
-		}
-	}
-
-	return hook.write(entry)
-}
-
-// rotate switches the hook to the log file of date. It opens the new file
-// before closing the previous one, so that a failed rotation keeps the current
-// handle usable instead of leaving the hook without a file.
-func (hook *FileHook) rotate(date string) error {
-	if err := os.MkdirAll(hook.filePath, os.ModePerm); err != nil {
-		return fmt.Errorf("create log folder %s failed: %v", hook.filePath, err)
-	}
-
-	logFile, err := os.OpenFile(
-		fmt.Sprintf("%s/%s.%s.log", hook.filePath, hook.name, date),
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666,
-	)
-	if err != nil {
-		return fmt.Errorf("open log file of %s failed: %v", date, err)
-	}
-
-	if hook.logFile != nil {
-		_ = hook.logFile.Close()
-	}
-	hook.logFile = logFile
-	hook.fileDate = date
-	return nil
-}
-
-func (hook *FileHook) write(entry *logrus.Entry) error {
-	line, err := entry.Bytes()
-	if err != nil {
-		return err
-	}
-
-	if _, err = hook.logFile.Write(line); err != nil {
-		return err
-	}
-	return nil
-}
-
-// Init initializes logger
 func Init(filePath, name string, level logrus.Level) error {
-	timer := time.Now().Format("2006_01_02")
-	err := os.MkdirAll(filePath, os.ModePerm)
-	if err != nil {
-		return err
+	var initErr error
+	once.Do(func() {
+		initErr = doInit(filePath, name, level)
+	})
+	return initErr
+}
+
+func doInit(filePath, name string, level logrus.Level) error {
+	if err := os.MkdirAll(filePath, 0755); err != nil {
+		return fmt.Errorf("create log folder %s failed: %v", filePath, err)
 	}
 
-	// log file
-	// A failure is not fatal here: the hook retries on the next Fire call.
-	logFile, err := os.OpenFile(fmt.Sprintf("%s/%s.%s.log", filePath, name, timer), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "open log file failed: %v\n", err)
-	}
-	hook := &FileHook{
-		logFile:  logFile,
-		fileDate: timer,
-		filePath: filePath,
-		name:     name,
-	}
-	logrus.AddHook(hook)
-	logrus.SetLevel(level)
-
-	format := &nested.Formatter{
+	l := logrus.New()
+	l.SetLevel(level)
+	l.SetReportCaller(false)
+	l.SetOutput(os.Stdout) // 控制台仍然输出一份
+	l.SetFormatter(&Formatter{
 		HideKeys:        true,
 		NoColors:        true,
 		TimestampFormat: "2006-01-02 15:04:05",
 		ShowFullLevel:   true,
 		CallerFirst:     true,
-		CustomCallerFormatter: func(f *runtime.Frame) string {
-			filename := path.Base(f.File)
-			return fmt.Sprintf(" %s:%d", filename, f.Line)
-		},
-	}
+		// CustomCallerFormatter: func(f *runtime.Frame) string {
+		// 	return fmt.Sprintf(" %s:%d", path.Base(f.File), f.Line)
+		// },
+	})
+	l.AddHook(&FileHook{
+		filePath: filePath,
+		name:     name,
+	})
 
-	logrus.SetFormatter(format)
-	logrus.SetOutput(os.Stdout)
-	logrus.SetReportCaller(true)
+	std = l
 	return nil
+}
+
+func SetLevel(level logrus.Level) { ensure().SetLevel(level) }
+
+func Trace(args ...interface{}) { ensure().WithField("caller", caller(2)).Trace(args...) }
+func Debug(args ...interface{}) { ensure().WithField("caller", caller(2)).Debug(args...) }
+func Info(args ...interface{})  { ensure().WithField("caller", caller(2)).Info(args...) }
+func Warn(args ...interface{})  { ensure().WithField("caller", caller(2)).Warn(args...) }
+func Error(args ...interface{}) { ensure().WithField("caller", caller(2)).Error(args...) }
+func Fatal(args ...interface{}) { ensure().WithField("caller", caller(2)).Fatal(args...) }
+func Panic(args ...interface{}) { ensure().WithField("caller", caller(2)).Panic(args...) }
+
+func Traceln(args ...interface{}) { ensure().WithField("caller", caller(2)).Traceln(args...) }
+func Debugln(args ...interface{}) { ensure().WithField("caller", caller(2)).Debugln(args...) }
+func Infoln(args ...interface{})  { ensure().WithField("caller", caller(2)).Infoln(args...) }
+func Warnln(args ...interface{})  { ensure().WithField("caller", caller(2)).Warnln(args...) }
+func Errorln(args ...interface{}) { ensure().WithField("caller", caller(2)).Errorln(args...) }
+func Fatalln(args ...interface{}) { ensure().WithField("caller", caller(2)).Fatalln(args...) }
+func Panicln(args ...interface{}) { ensure().WithField("caller", caller(2)).Panicln(args...) }
+
+func Tracef(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Tracef(format, args...)
+}
+func Debugf(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Debugf(format, args...)
+}
+func Infof(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Infof(format, args...)
+}
+func Warnf(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Warnf(format, args...)
+}
+func Errorf(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Errorf(format, args...)
+}
+func Fatalf(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Fatalf(format, args...)
+}
+func Panicf(format string, args ...interface{}) {
+	ensure().WithField("caller", caller(2)).Panicf(format, args...)
+}
+
+func Close() error {
+	if std == nil {
+		return nil
+	}
+	var firstErr error
+	for _, hs := range std.Hooks {
+		for _, hook := range hs {
+			if fh, ok := hook.(*FileHook); ok {
+				if err := fh.Close(); err != nil && firstErr == nil {
+					firstErr = err
+				}
+			}
+		}
+	}
+	return firstErr
+}
+
+func ensure() *logrus.Logger {
+	if std == nil {
+		// 未初始化时降级到 stderr，保证不丢日志、不 panic。
+		l := logrus.New()
+		l.SetOutput(os.Stderr)
+		l.SetReportCaller(false)
+		l.SetFormatter(&Formatter{
+			HideKeys:        true,
+			NoColors:        true,
+			TimestampFormat: "2006-01-02 15:04:05",
+			ShowFullLevel:   true,
+			CallerFirst:     true,
+		})
+		return l
+	}
+	return std
+}
+
+func caller(skip int) string {
+	_, file, line, ok := runtime.Caller(skip)
+	if !ok {
+		return ""
+	}
+	return fmt.Sprintf("%s:%d", path.Base(file), line)
 }

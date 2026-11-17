@@ -1,18 +1,17 @@
 package logger
 
 import (
-	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestWorker_InitLog(t *testing.T) {
-	appName := "gateway"
+	appName := "test"
 	path := "./"
-	if err := Init(path, appName, logrus.InfoLevel); err != nil {
+	if err := Init(path, appName, DebugLevel); err != nil {
 		t.Error(err.Error())
 		return
 	}
-	logrus.Debugf("测试日志")
-	logrus.Infof("测试日志")
-	logrus.Errorf("测试日志")
+	Debugf("测试日志")
+	Infof("测试日志")
+	Errorf("测试日志")
 }
